@@ -24,13 +24,13 @@ We follow a **GitHub Flow** style branching model:
 ## Commit Message Conventions (Taiga Integration)
 To keep GitHub and Taiga linked, reference Taiga task IDs in your commit messages:  
 
-- `refs #123` ->Links commit to task/story **123**.  
-- `closes #123` -> Closes task/story **123**.  
-- `task #123 ready for test` -> Moves task **123** to *Ready for Test*.  
+- `TG-123` ->Links commit to task/story **123**.  
+- `TG-123` -> Closes task/story **123**.  
+- `TG-123 ready for test` -> Moves task **123** to *Ready for Test*.  
 
 **Examples:**  
 ```bash
-git commit -m "Add login API, refs #45"
-git commit -m "Fix authentication bug, closes #46"
-git commit -m "Update test cases for signup, task #47 ready for test"
+git commit -m "Add login API, TG-45"
+git commit -m "Fix authentication bug, TG-46"
+git commit -m "Update test cases for signup, TG-47"
 
