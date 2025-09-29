@@ -30,7 +30,7 @@ To keep GitHub and Taiga linked, reference Taiga task IDs in your commit message
 
 **Examples:**  
 ```bash
-git commit -m "Add login API, TG-45"
-git commit -m "Fix authentication bug, TG-46"
-git commit -m "Update test cases for signup, TG-47"
+git commit -m "Add login API TG-45"
+git commit -m "Fix authentication bug TG-46"
+git commit -m "Update test cases for signup TG-47"
 
