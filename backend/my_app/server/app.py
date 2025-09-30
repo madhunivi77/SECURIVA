@@ -1,7 +1,9 @@
 from flask import Flask, jsonify
+from flask_cors import CORS
 
 # 1. Create the Flask app instance
 flask_app = Flask(__name__)
+CORS(flask_app, origins=["http://localhost:5173"])
 
 # 2. Define a simple root route
 @flask_app.route("/")
