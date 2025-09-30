@@ -4,16 +4,31 @@ import json
 import httpx
 from dotenv import load_dotenv
 from groq import Groq # Import the Groq client
+from openai import OpenAI
 from mcp import ClientSession
 from mcp.client.streamable_http import streamablehttp_client
+from pathlib import Path
 
 # --- Configuration ---
 load_dotenv()
 MCP_SERVER_URL = "http://localhost:8000/mcp/"
 AUTH_SERVER_URL = "http://localhost:8000/auth/token"
 
-# 1. Initialize the Groq client
-client = Groq(api_key=os.getenv("GROQ_API_KEY"))
+with open(Path(__file__).parent / "config.json", "r") as f:
+    config = json.load(f)
+
+# 1. Initialize the client
+api = config.get("api")
+model = config.get("model")
+match api:
+    case "openai":
+        client = OpenAI(api_key=os.getenv("OPENAI_API_KEY"))
+    case "groq":
+        client = Groq(api_key=os.getenv("GROQ_API_KEY"))
+    case _:
+        print("Invalid model configuration: (Check config.json)")
+        exit(-1)
+
 
 async def get_auth_token() -> str | None:
     """Fetches an authentication token from the authorization server."""
@@ -27,7 +42,7 @@ async def get_auth_token() -> str | None:
         return None
 
 async def main():
-    """The main function to run our AI agent with Groq."""
+    """The main function to run our AI agent with the selected api."""
     print("Attempting to get authentication token...")
     token = await get_auth_token()
     if not token:
@@ -53,7 +68,7 @@ async def main():
 
             # 2. Format the discovered tools for the Groq/OpenAI API
             # This format is a standard for many tool-calling APIs.
-            groq_tools = [
+            agent_tools = [
                 {
                     "type": "function",
                     "function": {
@@ -65,7 +80,7 @@ async def main():
                 for tool in mcp_tools_response.tools
             ]
 
-            print("\n--- AI Agent is Ready (Powered by Groq) ---")
+            print(f"\n--- AI Agent is Ready (Powered by {api}) ---")
             
             # 3. Manage conversation history manually
             messages = [
@@ -85,9 +100,9 @@ async def main():
 
                 # 4. Call the Groq API
                 response = client.chat.completions.create(
-                    model="meta-llama/llama-4-maverick-17b-128e-instruct",
+                    model=model,
                     messages=messages,
-                    tools=groq_tools,
+                    tools=agent_tools,
                     tool_choice="auto"
                 )
 
@@ -103,7 +118,7 @@ async def main():
                         tool_name = tool_call.function.name
                         tool_args = json.loads(tool_call.function.arguments)
                         
-                        print(f"🤖 Groq wants to call tool '{tool_name}' with args {tool_args}")
+                        print(f"🤖 {api} wants to call tool '{tool_name}' with args {tool_args}")
 
                         # Use the MCP session to call the actual tool on your server
                         tool_result = await session.call_tool(tool_name, arguments=tool_args)
@@ -134,10 +149,10 @@ async def main():
                             }
                         )
                     
-                    # 6. Make a second call to Groq with the tool results
+                    # 6. Make a second call to api with the tool results
                     # This allows the model to generate a natural language summary.
                     final_response = client.chat.completions.create(
-                        model="meta-llama/llama-4-maverick-17b-128e-instruct",
+                        model=model,
                         messages=messages
                     )
                     print(f"Agent: {final_response.choices[0].message.content}")
