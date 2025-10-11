@@ -27,3 +27,11 @@ dist-ssr
 *.njsproj
 *.sln
 *.sw?
+
+# ssl certificate/keys
+key.pem
+cert.pem
+cert.csr
+
+# oAuth testing db
+/my_app/server/oauth.json
