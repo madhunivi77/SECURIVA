@@ -8,11 +8,13 @@ from openai import OpenAI
 from mcp import ClientSession
 from mcp.client.streamable_http import streamablehttp_client
 from pathlib import Path
+from typing import Any
 
 # --- Configuration ---
 load_dotenv()
-MCP_SERVER_URL = "http://localhost:8000/mcp/"
-AUTH_SERVER_URL = "http://localhost:8000/auth/token"
+MCP_SERVER_URL = "https://localhost:8000/mcp/"
+AUTH_SERVER_URL = "https://localhost:8000/auth/token"
+RESERVED_TOOL_PARAMS = {"session", "context"}
 
 with open(Path(__file__).parent / "config.json", "r") as f:
     config = json.load(f)
@@ -29,11 +31,38 @@ match api:
         print("Invalid model configuration: (Check config.json)")
         exit(-1)
 
+# Override definition in mcp.shared.httpx_utils
+def create_mcp_https_client(
+    headers: dict[str, str] | None = None,
+    timeout: httpx.Timeout | None = None,
+    auth: httpx.Auth | None = None,
+    ) -> httpx.AsyncClient:
+
+        # Set MCP defaults
+        kwargs: dict[str, Any] = {
+            "follow_redirects": True,
+        }
+
+        # Handle timeout
+        if timeout is None:
+            kwargs["timeout"] = httpx.Timeout(30.0)
+        else:
+            kwargs["timeout"] = timeout
+
+        # Handle headers
+        if headers is not None:
+            kwargs["headers"] = headers
+
+        # Handle authentication
+        if auth is not None:
+            kwargs["auth"] = auth
+
+        return httpx.AsyncClient(verify=False, **kwargs) # Allows us to either disable or implement custom ssl certificate via verify parameter
 
 async def get_auth_token() -> str | None:
     """Fetches an authentication token from the authorization server."""
     try:
-        async with httpx.AsyncClient() as client:
+        async with httpx.AsyncClient(verify=False) as client: # TODO: Change to certificate 
             response = await client.post(AUTH_SERVER_URL)
             response.raise_for_status()
             return response.json()["access_token"]
@@ -54,7 +83,7 @@ async def main():
 
     auth_headers = {"Authorization": f"Bearer {token}"}
 
-    async with streamablehttp_client(MCP_SERVER_URL, headers=auth_headers) as (read, write, _):
+    async with streamablehttp_client(MCP_SERVER_URL, headers=auth_headers, httpx_client_factory=create_mcp_https_client) as (read, write, _):
         async with ClientSession(read, write) as session:
             try:
                 await session.initialize()
@@ -116,12 +145,13 @@ async def main():
                     # Loop through each tool call the model wants to make
                     for tool_call in tool_calls:
                         tool_name = tool_call.function.name
-                        tool_args = json.loads(tool_call.function.arguments)
+                        # filter out reserved parameters for injection by mcp
+                        tool_args = {k: v for k, v in json.loads(tool_call.function.arguments).items() if k not in RESERVED_TOOL_PARAMS}
                         
                         print(f"🤖 {api} wants to call tool '{tool_name}' with args {tool_args}")
 
                         # Use the MCP session to call the actual tool on your server
-                        tool_result = await session.call_tool(tool_name, arguments=tool_args)
+                        tool_result = await session.call_tool(tool_name, arguments=(tool_args if tool_args else {"_": None}))
                         
                         if tool_result.isError:
                             print(f"❌ Tool call failed: {tool_result.content[0].text}")
