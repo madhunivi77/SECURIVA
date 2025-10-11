@@ -6,21 +6,43 @@ function ChatBox() {
     { sender: "bot", text: "Hi! I am a chatbox." }
   ]);
   const [input, setInput] = useState("");
+  const [loading, setLoading] = useState(false);
 
-  const handleSend = () => {
+  const handleSend = async () => {
     if (!input.trim()) return;
 
-    const newMessages = [...messages, { sender: "user", text: input }];
-
-    let botReply = "I can't understand anything other than hello. :(";
-    if (input.toLowerCase() === "hello") {
-      botReply = "Hello!";
-    }
-
-    newMessages.push({ sender: "bot", text: botReply });
-
-    setMessages(newMessages);
+    const userMessage = { sender: "user", text: input };
+    setMessages((prev) => [...prev, userMessage]);
     setInput("");
+    setLoading(true);
+
+    try {
+      const response = await fetch("http://localhost:8000/chat", {
+        method: "POST",
+        headers: { "Content-Type": "application/json" },
+        credentials: "include", 
+        body: JSON.stringify({ message: input }),
+      });
+
+      const data = await response.json();
+
+      if (data.reply) {
+        setMessages((prev) => [...prev, { sender: "bot", text: data.reply }]);
+      } else {
+        setMessages((prev) => [
+          ...prev,
+          { sender: "bot", text: "Error: No reply from server." },
+        ]);
+      }
+    } catch (error) {
+      console.error("Error communicating with backend:", error);
+      setMessages((prev) => [
+        ...prev,
+        { sender: "bot", text: "Server error. Please try again." },
+      ]);
+    } finally {
+      setLoading(false);
+    }
   };
 
   return (
@@ -31,6 +53,7 @@ function ChatBox() {
             <strong>{msg.sender === "user" ? "You" : "Bot"}:</strong> {msg.text}
           </div>
         ))}
+        {loading && <div className="chatbox-message bot">Bot is typing...</div>}
       </div>
       <div className="chatbox-input">
         <input
@@ -40,7 +63,9 @@ function ChatBox() {
           onKeyDown={(e) => e.key === "Enter" && handleSend()}
           placeholder="Type a message..."
         />
-        <button onClick={handleSend}>Send</button>
+        <button onClick={handleSend} disabled={loading}>
+          Send
+        </button>
       </div>
     </div>
   );
