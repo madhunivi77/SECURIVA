@@ -4,34 +4,33 @@ import ChatBox from "./components/ChatBox";
 function App() {
   const [backendStatus, setBackendStatus] = useState("Loading...");
   const [authToken, setAuthToken] = useState(null);
+  const [csrfToken, setCsrfToken] = useState(null);
   const [isAuthenticated, setIsAuthenticated] = useState(false);
 
   useEffect(() => {
-    // Check if we have a token in localStorage
-    const savedToken = localStorage.getItem("auth_token");
-    if (savedToken) {
-      setAuthToken(savedToken);
-      setIsAuthenticated(true);
-    }
-
     // Call backend to get status and new token
+    // Token will be stored in HTTP-only cookie by backend
     fetchStatus();
   }, []);
 
   const fetchStatus = () => {
     setBackendStatus("Connecting...");
-    fetch("http://127.0.0.1:8000/api/status", {
+    fetch("http://localhost:8000/api/status", {
       credentials: "include" // Important: allows cookies to be sent/received
     })
       .then((res) => res.json())
       .then((data) => {
         setBackendStatus(`✅ Connected: ${JSON.stringify(data)}`);
 
-        // Store token if we received one
+        // Token is stored in HTTP-only cookie by backend
+        if (data.authenticated !== undefined) {
+          setIsAuthenticated(data.authenticated);
+        }
         if (data.token) {
           setAuthToken(data.token);
-          setIsAuthenticated(data.authenticated);
-          localStorage.setItem("auth_token", data.token);
+        }
+        if (data.csrf_token) {
+          setCsrfToken(data.csrf_token);
         }
       })
       .catch(() => {
@@ -63,7 +62,7 @@ function App() {
       </button>
 
       <h2>Chatbox Demo:</h2>
-      <ChatBox authToken={authToken} />
+      <ChatBox authToken={authToken} csrfToken={csrfToken} />
     </div>
   );
 }
