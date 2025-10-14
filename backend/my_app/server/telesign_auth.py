@@ -9,7 +9,7 @@ from secure_store import encrypt_text, decrypt_text, save_encrypted_token, load_
 
 TELESIGN_AUTH_URL = os.getenv("TELESIGN_AUTH_URL", "https://us-east-1.di-platform.telesign.com/authenticationmanager/v1/authenticate/api")
 API_KEY = os.getenv("TELESIGN_API_KEY")
-API_SECRET = os.getenv("TELESIGN_API_SECRET")
+API_SECRET = os.getenv("TELESIGN_API_SECRET") #uhhh what is this one
 
 # In-memory cache
 _cached_token = None
