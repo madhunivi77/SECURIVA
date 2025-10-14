@@ -1,7 +1,7 @@
 import { useState, useEffect, useRef } from "react";
 import "./ChatBox.css";
 
-function ChatBox({ authToken }) {
+function ChatBox({ authToken, csrfToken }) {
   // Initialize with system message in OpenAI format
   const [messages, setMessages] = useState(() => {
     const saved = localStorage.getItem("chat_messages");
@@ -47,11 +47,19 @@ function ChatBox({ authToken }) {
     setIsLoading(true);
 
     try {
+      // Log request details
+      console.log("=== CHAT REQUEST DEBUG ===");
+      console.log("CSRF Token:", csrfToken);
+      console.log("Auth Token:", authToken);
+      console.log("Credentials mode:", "include");
+      console.log("All cookies:", document.cookie);
+
       // Call backend API
-      const response = await fetch("http://127.0.0.1:8000/api/chat", {
+      const response = await fetch("http://localhost:8000/api/chat", {
         method: "POST",
         headers: {
           "Content-Type": "application/json",
+          "X-CSRF-Token": csrfToken, // Include CSRF token for protection
         },
         credentials: "include", // Include cookies
         body: JSON.stringify({
@@ -60,6 +68,9 @@ function ChatBox({ authToken }) {
           api: "openai" // Could make this configurable
         }),
       });
+
+      console.log("Response status:", response.status);
+      console.log("Response headers:", Object.fromEntries(response.headers.entries()));
 
       if (!response.ok) {
         throw new Error(`Backend error: ${response.status}`);
