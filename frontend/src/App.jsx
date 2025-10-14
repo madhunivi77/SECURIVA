@@ -49,7 +49,7 @@ function App() {
       <h1>React Frontend</h1>
 
       <h2>Backend Connection Test:</h2>
-      <p>{backendStatus}</p>
+      {/* <p>{backendStatus}</p> */}
       <p>
         Authentication Status: {isAuthenticated ? "✅ Authenticated" : "❌ Not Authenticated"}
       </p>
