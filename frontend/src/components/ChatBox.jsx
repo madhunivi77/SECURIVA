@@ -1,4 +1,4 @@
-import { useState, useEffect } from "react";
+import { useState, useEffect, useRef } from "react";
 import "./ChatBox.css";
 
 function ChatBox({ authToken }) {
@@ -20,10 +20,18 @@ function ChatBox({ authToken }) {
   const [isLoading, setIsLoading] = useState(false);
   const [error, setError] = useState(null);
 
+  // Ref for auto-scrolling to bottom
+  const messagesEndRef = useRef(null);
+
   // Save messages to localStorage whenever they change
   useEffect(() => {
     localStorage.setItem("chat_messages", JSON.stringify(messages));
   }, [messages]);
+
+  // Auto-scroll to bottom when messages change
+  useEffect(() => {
+    messagesEndRef.current?.scrollIntoView({ behavior: "smooth" });
+  }, [messages, isLoading]);
 
   const handleSend = async () => {
     if (!input.trim()) return;
@@ -137,6 +145,8 @@ function ChatBox({ authToken }) {
             <strong>Assistant:</strong> <em>Thinking...</em>
           </div>
         )}
+        {/* Invisible div at the bottom for auto-scroll */}
+        <div ref={messagesEndRef} />
       </div>
 
       <div className="chatbox-input">
