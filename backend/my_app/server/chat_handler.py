@@ -1,11 +1,14 @@
 import os
 import json
 import httpx
+import time
+import uuid
 from groq import Groq
 from openai import OpenAI
 from mcp import ClientSession
 from mcp.client.streamable_http import streamablehttp_client
 from pathlib import Path
+from .tool_logger import get_tool_logger
 
 # --- Configuration ---
 MCP_SERVER_URL = "http://localhost:8000/mcp/"
@@ -62,6 +65,10 @@ async def execute_chat_with_tools(messages: list, model: str = None, api: str = 
         model = DEFAULT_MODEL
     if not api:
         api = DEFAULT_API
+
+    # Initialize logger and generate session ID
+    logger = get_tool_logger()
+    session_id = str(uuid.uuid4())[:8]  # Short session ID for readability
 
     try:
         # Get MCP authentication token
@@ -123,13 +130,42 @@ async def execute_chat_with_tools(messages: list, model: str = None, api: str = 
                             "arguments": tool_args
                         })
 
-                        # Execute tool via MCP
-                        tool_result = await session.call_tool(tool_name, arguments=tool_args)
+                        # Time the tool execution
+                        start_time = time.time()
+                        tool_error = None
+                        result_text = None
 
-                        if tool_result.isError:
-                            result_text = f"Error: {tool_result.content[0].text}"
-                        else:
-                            result_text = tool_result.content[0].text
+                        try:
+                            # Execute tool via MCP
+                            tool_result = await session.call_tool(tool_name, arguments=tool_args)
+
+                            if tool_result.isError:
+                                result_text = f"Error: {tool_result.content[0].text}"
+                                tool_error = result_text
+                            else:
+                                result_text = tool_result.content[0].text
+
+                        except Exception as e:
+                            result_text = f"Exception: {str(e)}"
+                            tool_error = str(e)
+
+                        # Calculate duration
+                        duration_ms = (time.time() - start_time) * 1000
+
+                        # Log the tool call
+                        logger.log_tool_call(
+                            session_id=session_id,
+                            tool_name=tool_name,
+                            arguments=tool_args,
+                            result=result_text if not tool_error else None,
+                            error=tool_error,
+                            duration_ms=duration_ms,
+                            metadata={
+                                "model": model,
+                                "api": api,
+                                "tool_call_id": tool_call.id
+                            }
+                        )
 
                         # Add tool result to messages
                         messages.append({
