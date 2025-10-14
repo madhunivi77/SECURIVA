@@ -1,46 +1,156 @@
-import { useState } from "react";
+import { useState, useEffect } from "react";
 import "./ChatBox.css";
 
-function ChatBox() {
-  const [messages, setMessages] = useState([
-    { sender: "bot", text: "Hi! I am a chatbox." }
-  ]);
-  const [input, setInput] = useState("");
+function ChatBox({ authToken }) {
+  // Initialize with system message in OpenAI format
+  const [messages, setMessages] = useState(() => {
+    const saved = localStorage.getItem("chat_messages");
+    if (saved) {
+      return JSON.parse(saved);
+    }
+    return [
+      {
+        role: "system",
+        content: "You are a helpful assistant. You have access to a set of tools. Only use these tools when the user asks you to perform a specific action that requires them."
+      }
+    ];
+  });
 
-  const handleSend = () => {
+  const [input, setInput] = useState("");
+  const [isLoading, setIsLoading] = useState(false);
+  const [error, setError] = useState(null);
+
+  // Save messages to localStorage whenever they change
+  useEffect(() => {
+    localStorage.setItem("chat_messages", JSON.stringify(messages));
+  }, [messages]);
+
+  const handleSend = async () => {
     if (!input.trim()) return;
 
-    const newMessages = [...messages, { sender: "user", text: input }];
+    // Clear any previous errors
+    setError(null);
 
-    let botReply = "I can't understand anything other than hello. :(";
-    if (input.toLowerCase() === "hello") {
-      botReply = "Hello!";
-    }
-
-    newMessages.push({ sender: "bot", text: botReply });
-
+    // Add user message to context
+    const userMessage = { role: "user", content: input };
+    const newMessages = [...messages, userMessage];
     setMessages(newMessages);
     setInput("");
+    setIsLoading(true);
+
+    try {
+      // Call backend API
+      const response = await fetch("http://127.0.0.1:8000/api/chat", {
+        method: "POST",
+        headers: {
+          "Content-Type": "application/json",
+        },
+        credentials: "include", // Include cookies
+        body: JSON.stringify({
+          messages: newMessages,
+          model: "gpt-3.5-turbo", // Could make this configurable
+          api: "openai" // Could make this configurable
+        }),
+      });
+
+      if (!response.ok) {
+        throw new Error(`Backend error: ${response.status}`);
+      }
+
+      const data = await response.json();
+
+      if (data.error) {
+        throw new Error(data.error);
+      }
+
+      // Add assistant response to context
+      const assistantMessage = {
+        role: "assistant",
+        content: data.response
+      };
+
+      setMessages([...newMessages, assistantMessage]);
+
+      // Log tool calls if any (for debugging)
+      if (data.tool_calls && data.tool_calls.length > 0) {
+        console.log("Tool calls made:", data.tool_calls);
+      }
+
+    } catch (err) {
+      console.error("Chat error:", err);
+      setError(err.message || "Failed to get response from backend");
+
+      // Add error message to chat
+      setMessages([
+        ...newMessages,
+        {
+          role: "assistant",
+          content: `❌ Error: ${err.message || "Failed to get response"}. Please try again.`
+        }
+      ]);
+    } finally {
+      setIsLoading(false);
+    }
+  };
+
+  const handleClearChat = () => {
+    const initialMessages = [
+      {
+        role: "system",
+        content: "You are a helpful assistant. You have access to a set of tools. Only use these tools when the user asks you to perform a specific action that requires them."
+      },
+      {
+        role: "assistant",
+        content: "Chat cleared! How can I help you?"
+      }
+    ];
+    setMessages(initialMessages);
+    setError(null);
   };
 
   return (
     <div className="chatbox">
+      <div className="chatbox-header" style={{ padding: "10px", borderBottom: "1px solid #ccc" }}>
+        <button onClick={handleClearChat} style={{ float: "right" }}>
+          Clear Chat
+        </button>
+        <span>AI Chat (OpenAI + MCP Tools)</span>
+      </div>
+
+      {error && (
+        <div style={{ padding: "10px", backgroundColor: "#fee", color: "#c00" }}>
+          Error: {error}
+        </div>
+      )}
+
       <div className="chatbox-messages">
-        {messages.map((msg, index) => (
-          <div key={index} className={`chatbox-message ${msg.sender}`}>
-            <strong>{msg.sender === "user" ? "You" : "Bot"}:</strong> {msg.text}
+        {messages.filter(msg => msg.role !== "system").map((msg, index) => (
+          <div
+            key={index}
+            className={`chatbox-message ${msg.role === "user" ? "user" : "bot"}`}
+          >
+            <strong>{msg.role === "user" ? "You" : "Assistant"}:</strong> {msg.content}
           </div>
         ))}
+        {isLoading && (
+          <div className="chatbox-message bot">
+            <strong>Assistant:</strong> <em>Thinking...</em>
+          </div>
+        )}
       </div>
+
       <div className="chatbox-input">
         <input
           type="text"
           value={input}
           onChange={(e) => setInput(e.target.value)}
-          onKeyDown={(e) => e.key === "Enter" && handleSend()}
-          placeholder="Type a message..."
+          onKeyDown={(e) => e.key === "Enter" && !isLoading && handleSend()}
+          placeholder={isLoading ? "Waiting for response..." : "Type a message..."}
+          disabled={isLoading}
         />
-        <button onClick={handleSend}>Send</button>
+        <button onClick={handleSend} disabled={isLoading || !input.trim()}>
+          {isLoading ? "..." : "Send"}
+        </button>
       </div>
     </div>
   );
