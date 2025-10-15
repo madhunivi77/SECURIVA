@@ -1,163 +1,139 @@
-apfrom flask import Flask, jsonify, request, session
-from flask_cors import CORS
-from dotenv import load_dotenv
+from starlette.applications import Starlette
+from starlette.routing import Route
+from starlette.responses import HTMLResponse, JSONResponse, Response
+import httpx
 import os
-import json
-from pathlib import Path
-from openai import OpenAI
-from groq import Groq
-from uuid import uuid4
+import secrets
+from .chat_handler import execute_chat_with_tools
 
-from flask import request
-import requests
-from .telesign_auth import get_token  # Adjust import if needed for other functionalities
+# Load environment variables for security configuration
+ENVIRONMENT = os.getenv("ENVIRONMENT", "development")
+COOKIE_SAMESITE = os.getenv("COOKIE_SAMESITE", "lax")
 
-# Load environment variables
-load_dotenv()
-
-# --- Flask setup ---
-flask_app = Flask(__name__)
-flask_app.secret_key = os.getenv("FLASK_SECRET_KEY", "supersecretkey")  # Needed for sessions
-CORS(flask_app, origins=["http://localhost:5173"], supports_credentials=True)
-
-# --- Load config.json ---
-config_path = Path(__file__).parent / "config.json"
-with open(config_path, "r") as f:
-    config = json.load(f)
-
-api = config.get("api")
-model = config.get("model")
-
-# --- Initialize API client ---
-if api == "openai":
-    client = OpenAI(api_key=os.getenv("OPENAI_API_KEY"))
-elif api == "groq":
-    client = Groq(api_key=os.getenv("GROQ_API_KEY"))
+# In development with SameSite=None, we can use Secure=False (Chrome allows this for localhost)
+# In production, SameSite=None REQUIRES Secure=True
+if COOKIE_SAMESITE.lower() == "none":
+    COOKIE_SECURE = ENVIRONMENT == "production"
 else:
-    raise ValueError(f"Invalid API selection in config.json: {api}")
+    COOKIE_SECURE = ENVIRONMENT == "production" or os.getenv("COOKIE_SECURE", "False").lower() == "true"
 
-# --- Global in-memory conversation store ---
-conversations = {}
+# Store CSRF tokens (in production, use Redis or database)
+csrf_tokens = {}
 
-# --- Helper function to get session id ---
-def get_session_id():
-    if "session_id" not in session:
-        session["session_id"] = str(uuid4())
-    return session["session_id"]
+# Define a simple root route
+async def index(request):
+    return HTMLResponse("<h1>Hello from your Starlette App!</h1><p>Visit /api/status to see a JSON response.</p>")
 
-# --- Routes ---
-@flask_app.route("/")
-def index():
-    return "<h1>Hello from your Flask App!</h1><p>Visit /api/status to see a JSON response.</p>"
-
-@flask_app.route("/api/status")
-def api_status():
-    return jsonify({"status": "ok", "source": "Flask", "api": api, "model": model})
-
-@flask_app.route("/chat", methods=["POST"])
-def chat():
-    data = request.get_json()
-    user_message = data.get("message", "").strip()
-
-    if not user_message:
-        return jsonify({"error": "Message cannot be empty"}), 400
-
-    session_id = get_session_id()
-
-    # Initialize chat history if new session
-    if session_id not in conversations:
-        conversations[session_id] = [
-            {"role": "system", "content": "You are a helpful assistant. You can remember past messages in the current conversation."}
-        ]
-
-    # Add user message
-    conversations[session_id].append({"role": "user", "content": user_message})
-
+# Define an API-style route that returns status + JWT token
+async def api_status(request):
+    # Internally fetch JWT token from auth server
+    token = None
     try:
-        # --- Call appropriate API ---
-        if api == "openai":
-            response = client.chat.completions.create(
-                model=model,
-                messages=conversations[session_id],
-            )
-            reply = response.choices[0].message.content
-
-        elif api == "groq":
-            response = client.chat.completions.create(
-                model=model,
-                messages=conversations[session_id],
-            )
-            reply = response.choices[0].message["content"]
-
-        else:
-            reply = "Configuration error: Unsupported API."
-
-        # Add assistant reply to memory
-        conversations[session_id].append({"role": "assistant", "content": reply})
-
-        return jsonify({"reply": reply})
-
+        async with httpx.AsyncClient() as client:
+            response = await client.post("http://localhost:8000/auth/token")
+            response.raise_for_status()
+            token = response.json()["access_token"]
     except Exception as e:
-        print(f"Error during chat request: {e}")
-        return jsonify({"error": "Internal server error"}), 500
+        print(f"Error fetching token: {e}")
 
-@flask_app.route("/reset", methods=["POST"])
-def reset_conversation():
-    """Resets the conversation memory for the user session."""
-    session_id = get_session_id()
-    if session_id in conversations:
-        del conversations[session_id]
-    return jsonify({"status": "reset successful"})
+    # Generate CSRF token
+    csrf_token = secrets.token_urlsafe(32)
+    if token:
+        csrf_tokens[token] = csrf_token
 
-###WhatsaApp
-    @flask_app.route("/send_whatsapp", methods=["POST"])
-def send_whatsapp():
-    """Send WhatsApp message via TeleSign API"""
-    data = request.get_json()
-    phone = data.get("phone")
-    message = data.get("message", "Hello from Telesign!")
-
-    # Validate input
-    if not phone:
-        return jsonify({"error": "Phone number is required"}), 400
-
-    # Get authentication token
-    try:
-        token = get_token()
-    except Exception as e:
-        return jsonify({"error": f"Authentication failed: {str(e)}"}), 500
-
-    # Prepare headers
-    headers = {
-        "Authorization": f"Bearer {token}",
-        "x-API-key": os.getenv("TELESIGN_API_KEY", ""),  # Use env variable for security
-        "Content-Type": "application/json"
+    # Create response with status and token
+    response_data = {
+        "status": "ok",
+        "source": "Starlette",
+        "token": token,
+        "authenticated": token is not None,
+        "csrf_token": csrf_token  # Send CSRF token to frontend
     }
 
-    # Prepare payload
-    payload = {
-        "phone_number": phone,
-        "message": message,
-        "message_type": "ARN"  # Adjust to TeleSign WhatsApp API specs
-    }
+    response = JSONResponse(response_data)
 
-    # Make API request
-    try:
-        res = requests.post(
-            "https://rest-api.telesign.com/v1/messaging",
-            headers=headers,
-            json=payload,
-            timeout=10
+    # Set token as HttpOnly cookie if we got one
+    if token:
+        print(f"DEBUG - Setting cookie with: secure={COOKIE_SECURE}, samesite={COOKIE_SAMESITE}")
+        response.set_cookie(
+            key="auth_token",
+            value=token,
+            httponly=True,
+            secure=COOKIE_SECURE,  # Automatically True in production
+            samesite=COOKIE_SAMESITE,
+            max_age=3600,  # 1 hour (matches JWT expiration)
+            domain=None  # Let browser decide
         )
-        return jsonify(res.json()), res.status_code
-    except requests.exceptions.Timeout:
-        return jsonify({"error": "Request timed out"}), 504
-    except requests.exceptions.RequestException as e:
-        return jsonify({"error": f"Request failed: {str(e)}"}), 500
-    except Exception as e:
-        return jsonify({"error": str(e)}), 500
+        print(f"DEBUG - Cookie set successfully")
 
-@flask_app.route("/health", methods=["GET"])
-def health_check():
-    """Health check endpoint"""
-    return jsonify({"status": "healthy"}), 200
+    return response
+
+# Define chat endpoint that integrates with MCP tools
+async def api_chat(request):
+    try:
+        # Verify CSRF token
+        csrf_token = request.headers.get("X-CSRF-Token")
+        auth_token = request.cookies.get("auth_token")
+
+        # Debug logging
+        print(f"DEBUG - CSRF Token from header: {csrf_token}")
+        print(f"DEBUG - Auth Token from cookie: {auth_token}")
+        print(f"DEBUG - All cookies: {request.cookies}")
+        print(f"DEBUG - All headers: {dict(request.headers)}")
+
+        if not csrf_token or not auth_token:
+            return JSONResponse(
+                {"error": f"Missing authentication or CSRF token. CSRF: {bool(csrf_token)}, Auth: {bool(auth_token)}"},
+                status_code=401
+            )
+
+        # Validate CSRF token
+        expected_csrf = csrf_tokens.get(auth_token)
+        print(f"DEBUG - Expected CSRF: {expected_csrf}, Got: {csrf_token}")
+        if expected_csrf != csrf_token:
+            return JSONResponse(
+                {"error": "Invalid CSRF token"},
+                status_code=403
+            )
+
+        # Parse request body
+        data = await request.json()
+        messages = data.get("messages", [])
+        model = data.get("model")
+        api = data.get("api")
+
+        # Validate messages
+        if not messages or not isinstance(messages, list):
+            return JSONResponse(
+                {"error": "Invalid request: 'messages' array is required"},
+                status_code=400
+            )
+
+        # Execute chat with MCP tools
+        result = await execute_chat_with_tools(messages, model, api)
+
+        # Check for errors
+        if "error" in result:
+            return JSONResponse(
+                {"error": result["error"]},
+                status_code=500
+            )
+
+        # Return successful result
+        return JSONResponse(result)
+
+    except Exception as e:
+        return JSONResponse(
+            {"error": f"Chat request failed: {str(e)}"},
+            status_code=500
+        )
+
+# Create the Starlette app instance with routes
+# Note: CORS is handled at the top level in main.py
+api_app = Starlette(
+    routes=[
+        Route("/", index),
+        Route("/api/status", api_status),
+        Route("/api/chat", api_chat, methods=["POST"]),
+    ]
+)
