@@ -30,3 +30,11 @@ dist-ssr
 *.sw?
 *.vsidx
 *.vspscc
+
+# ssl certificate/keys
+key.pem
+cert.pem
+cert.csr
+
+# oAuth testing db
+backend/my_app/server/oauth.json
