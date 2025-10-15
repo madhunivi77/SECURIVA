@@ -1,6 +1,9 @@
 from starlette.applications import Starlette
 from starlette.routing import Route
-from starlette.responses import HTMLResponse, JSONResponse, Response
+from starlette.responses import HTMLResponse, JSONResponse, Response, RedirectResponse
+from google_auth_oauthlib.flow import Flow
+from pathlib import Path
+import json
 import httpx
 import os
 import secrets
@@ -9,6 +12,30 @@ from .chat_handler import execute_chat_with_tools
 # Load environment variables for security configuration
 ENVIRONMENT = os.getenv("ENVIRONMENT", "development")
 COOKIE_SAMESITE = os.getenv("COOKIE_SAMESITE", "lax")
+GOOGLE_CLIENT_ID = os.getenv("GOOGLE_CLIENT_ID")
+GOOGLE_CLIENT_SECRET = os.getenv("GOOGLE_CLIENT_SECRET")
+
+REDIRECT_URI = "https://localhost:8000/callback" # endpoint for google to refer user to after authentication
+
+# define the scopes granted via access tokens using principle of least priviledge
+SCOPES = [  "openid", 
+            "https://www.googleapis.com/auth/userinfo.email",
+            "https://www.googleapis.com/auth/userinfo.profile",
+            "https://www.googleapis.com/auth/gmail.readonly"]
+
+# define flow object representing the securiva application and the means of authentication
+flow = Flow.from_client_config(
+    {
+        "web": {
+            "client_id": GOOGLE_CLIENT_ID,
+            "client_secret": GOOGLE_CLIENT_SECRET,
+            "auth_uri": "https://accounts.google.com/o/oauth2/auth",
+            "token_uri": "https://oauth2.googleapis.com/token",
+        }
+    },
+    scopes=SCOPES,
+)
+flow.redirect_uri = REDIRECT_URI
 
 # In development with SameSite=None, we can use Secure=False (Chrome allows this for localhost)
 # In production, SameSite=None REQUIRES Secure=True
@@ -67,6 +94,58 @@ async def api_status(request):
         print(f"DEBUG - Cookie set successfully")
 
     return response
+
+# Define a route to initiate oAuth
+async def login(request):
+    # Generate the Google OAuth URL
+    authorization_url, state = flow.authorization_url(
+        access_type="offline",  # get refresh token
+        prompt="consent", # force new refresh token
+        include_granted_scopes="true"
+    )
+    # Redirect the user’s browser to Google
+    return RedirectResponse(authorization_url)
+
+# Define a route to handle the oAuth redirection
+def callback(request):
+    # Exchange authorization code for tokens
+    flow.fetch_token(authorization_response=str(request.url))
+    
+    # extract the tokens and expiry
+    credentials = flow.credentials.to_json()
+
+    info = {
+        "user_id": "test-user",
+        "google_creds": credentials
+    }
+    # read the stored user data
+    with open(Path(__file__).parent / "oauth.json", "r") as f:
+        data = json.load(f)
+
+    # Update/Add the user's entry
+    users = data.get("users", [])
+    for i in range(len(users)):
+        if users[i].get("user_id") == info.get("user_id"):
+            users[i].update(info)
+            break
+    else:
+        users.append(info)
+    
+    data["users"] = users
+
+    # write back to the storage file
+    with open(Path(__file__).parent / "oauth.json", "w") as f:
+        json.dump(data, f)
+    
+    # display success
+    return JSONResponse(
+            {
+                "status": "OK",
+                "message": "Credentials successfully stored!"
+            },
+            status_code=200
+        )
+       
 
 # Define chat endpoint that integrates with MCP tools
 async def api_chat(request):
@@ -135,5 +214,7 @@ api_app = Starlette(
         Route("/", index),
         Route("/api/status", api_status),
         Route("/api/chat", api_chat, methods=["POST"]),
+        Route("/login", login),
+        Route("/callback", callback)
     ]
 )
