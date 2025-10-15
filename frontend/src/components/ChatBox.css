@@ -2,13 +2,22 @@
   border: 1px solid #ccc;
   border-radius: 8px;
   padding: 10px;
-  width: 300px;
+  width: 100%;
+  max-width: 1200px;
+  height: 70vh; /* 70% of viewport height */
+  min-height: 400px;
+  display: flex;
+  flex-direction: column;
   background-color: var(--bg-color);
   color: var(--text-color);
 }
 
+.chatbox-header {
+  flex-shrink: 0; /* Don't shrink the header */
+}
+
 .chatbox-messages {
-  height: 200px;
+  flex: 1; /* Take up all available space */
   overflow-y: auto;
   margin-bottom: 10px;
   padding: 5px;
@@ -23,6 +32,7 @@
 .chatbox-input {
   display: flex;
   gap: 5px;
+  flex-shrink: 0; /* Don't shrink the input */
 }
 
 .chatbox-input input {

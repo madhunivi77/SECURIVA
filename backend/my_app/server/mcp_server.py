@@ -30,7 +30,7 @@ mcp = FastMCP(
 
 # Set the server to mount at the root of the path
 mcp.settings.streamable_http_path = "/"
-    
+
 def getGoogleCreds(ctx) -> Credentials:
     try:
         # extract the jwt from the request to get the subject
@@ -44,7 +44,7 @@ def getGoogleCreds(ctx) -> Credentials:
             users = data.get("users", [])
             for user in users:
                 if user.get("user_id") == subject:
-                    # build credentials from google_creds json
+                    # build credentials object from google_creds json
                     return Credentials.from_authorized_user_info(json.loads(user.get("google_creds")))
             else:
                 return None

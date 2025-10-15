@@ -34,4 +34,4 @@ cert.pem
 cert.csr
 
 # oAuth testing db
-/my_app/server/oauth.json
+backend/my_app/server/oauth.json
