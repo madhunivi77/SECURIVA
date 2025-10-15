@@ -8,6 +8,10 @@ import httpx
 import os
 import secrets
 from .chat_handler import execute_chat_with_tools
+from .salesforce_app import salesforce_bp, flask_app
+from starlette.middleware.wsgi import WSGIMiddleware
+
+flask_app.register_blueprint(salesforce_bp)
 
 # Load environment variables for security configuration
 ENVIRONMENT = os.getenv("ENVIRONMENT", "development")
@@ -215,6 +219,7 @@ api_app = Starlette(
         Route("/api/status", api_status),
         Route("/api/chat", api_chat, methods=["POST"]),
         Route("/login", login),
-        Route("/callback", callback)
+        Route("/callback", callback),
+        Route("/salesforce", app=WSGIMiddleware(flask_app))
     ]
 )

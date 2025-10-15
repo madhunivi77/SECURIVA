@@ -7,6 +7,7 @@ from google.oauth2.credentials import Credentials
 from google_auth_oauthlib.flow import InstalledAppFlow
 from googleapiclient.discovery import build
 from googleapiclient.errors import HttpError
+from dotenv import load_dotenv
 import json
 import os
 import jwt
@@ -100,3 +101,33 @@ def listEmails(context: Context) -> str:
 def get_greeting(name: str) -> str:
     """Get a personalized greeting"""
     return f"Hello from your MCP resource, {name}!"
+
+def getSalesforceCreds(ctx):
+    """Retrieve Salesforce credentials for the logged-in user"""
+    JWT_SECRET_KEY = os.getenv("JWT_SECRET_KEY")
+    encoded_token = ctx.request_context.request.headers.get('Authorization').split(" ")[1]
+    payload = jwt.decode(encoded_token, JWT_SECRET_KEY, algorithms=["HS256"])
+    subject = payload.get('sub')
+
+    with open(Path(__file__).parent / "oauth.json", "r") as f:
+        data = json.load(f)
+        for user in data.get("users", []):
+            if user["user_id"] == subject:
+                return user.get("salesforce_creds")
+    return None
+
+@mcp.tool()
+def listAccounts(context: Context) -> str:
+    """Fetch Account data from Salesforce"""
+    creds = getSalesforceCreds(context)
+    if not creds:
+        return "User not authenticated with Salesforce."
+    
+    access_token = creds["access_token"]
+    instance_url = creds["instance_url"]
+    headers = {"Authorization": f"Bearer {access_token}"}
+    r = requests.get(f"{instance_url}/services/data/v61.0/sobjects/Account", headers=headers)
+    if r.status_code == 200:
+        return json.dumps(r.json(), indent=2)
+    return f"Error: {r.text}"
+
