@@ -1,4 +1,4 @@
-from flask import Flask, jsonify, request, session
+apfrom flask import Flask, jsonify, request, session
 from flask_cors import CORS
 from dotenv import load_dotenv
 import os
@@ -7,6 +7,10 @@ from pathlib import Path
 from openai import OpenAI
 from groq import Groq
 from uuid import uuid4
+
+from flask import request
+import requests
+from .telesign_auth import get_token  # Adjust import if needed for other functionalities
 
 # Load environment variables
 load_dotenv()
@@ -97,7 +101,6 @@ def chat():
         print(f"Error during chat request: {e}")
         return jsonify({"error": "Internal server error"}), 500
 
-
 @flask_app.route("/reset", methods=["POST"])
 def reset_conversation():
     """Resets the conversation memory for the user session."""
@@ -105,3 +108,56 @@ def reset_conversation():
     if session_id in conversations:
         del conversations[session_id]
     return jsonify({"status": "reset successful"})
+
+###WhatsaApp
+    @flask_app.route("/send_whatsapp", methods=["POST"])
+def send_whatsapp():
+    """Send WhatsApp message via TeleSign API"""
+    data = request.get_json()
+    phone = data.get("phone")
+    message = data.get("message", "Hello from Telesign!")
+
+    # Validate input
+    if not phone:
+        return jsonify({"error": "Phone number is required"}), 400
+
+    # Get authentication token
+    try:
+        token = get_token()
+    except Exception as e:
+        return jsonify({"error": f"Authentication failed: {str(e)}"}), 500
+
+    # Prepare headers
+    headers = {
+        "Authorization": f"Bearer {token}",
+        "x-API-key": os.getenv("TELESIGN_API_KEY", ""),  # Use env variable for security
+        "Content-Type": "application/json"
+    }
+
+    # Prepare payload
+    payload = {
+        "phone_number": phone,
+        "message": message,
+        "message_type": "ARN"  # Adjust to TeleSign WhatsApp API specs
+    }
+
+    # Make API request
+    try:
+        res = requests.post(
+            "https://rest-api.telesign.com/v1/messaging",
+            headers=headers,
+            json=payload,
+            timeout=10
+        )
+        return jsonify(res.json()), res.status_code
+    except requests.exceptions.Timeout:
+        return jsonify({"error": "Request timed out"}), 504
+    except requests.exceptions.RequestException as e:
+        return jsonify({"error": f"Request failed: {str(e)}"}), 500
+    except Exception as e:
+        return jsonify({"error": str(e)}), 500
+
+@flask_app.route("/health", methods=["GET"])
+def health_check():
+    """Health check endpoint"""
+    return jsonify({"status": "healthy"}), 200
