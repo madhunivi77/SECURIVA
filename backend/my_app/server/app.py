@@ -5,6 +5,8 @@ import httpx
 import os
 import secrets
 from .chat_handler import execute_chat_with_tools
+from .telesign_whatsapp import send_whatsapp_message
+from .telesign_auth import telesign_authenticate
 
 # Load environment variables for security configuration
 ENVIRONMENT = os.getenv("ENVIRONMENT", "development")
@@ -128,6 +130,15 @@ async def api_chat(request):
             status_code=500
         )
 
+# Send WhatsApp message route
+async def send_whatsapp(request):
+    data = await request.json()
+    phone = data["phone"]
+    message = data["message"]
+    # Use your telesign function
+    result = await send_whatsapp_message(phone, message)
+    return JSONResponse({"status": "sent" if result else "failed"})
+
 # Create the Starlette app instance with routes
 # Note: CORS is handled at the top level in main.py
 api_app = Starlette(
@@ -135,5 +146,6 @@ api_app = Starlette(
         Route("/", index),
         Route("/api/status", api_status),
         Route("/api/chat", api_chat, methods=["POST"]),
+        Route("/api/send_whatsapp", send_whatsapp, methods=["POST"]),
     ]
 )
