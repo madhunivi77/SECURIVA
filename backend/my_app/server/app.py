@@ -13,19 +13,23 @@ from starlette.middleware.wsgi import WSGIMiddleware
 
 flask_app.register_blueprint(salesforce_bp)
 
+
 # Load environment variables for security configuration
 ENVIRONMENT = os.getenv("ENVIRONMENT", "development")
 COOKIE_SAMESITE = os.getenv("COOKIE_SAMESITE", "lax")
 GOOGLE_CLIENT_ID = os.getenv("GOOGLE_CLIENT_ID")
 GOOGLE_CLIENT_SECRET = os.getenv("GOOGLE_CLIENT_SECRET")
 
-REDIRECT_URI = "https://localhost:8000/callback" # endpoint for google to refer user to after authentication
+os.environ["OAUTHLIB_INSECURE_TRANSPORT"] = "1"
+
+REDIRECT_URI = "http://localhost:8000/callback" # endpoint for google to refer user to after authentication
 
 # define the scopes granted via access tokens using principle of least priviledge
-SCOPES = [  "openid", 
-            "https://www.googleapis.com/auth/userinfo.email",
-            "https://www.googleapis.com/auth/userinfo.profile",
-            "https://www.googleapis.com/auth/gmail.readonly"]
+SCOPES = [  "openid",
+    "https://www.googleapis.com/auth/gmail.readonly",
+    "https://www.googleapis.com/auth/calendar.readonly",
+    "https://www.googleapis.com/auth/userinfo.profile",
+    "https://www.googleapis.com/auth/userinfo.email",]
 
 # define flow object representing the securiva application and the means of authentication
 flow = Flow.from_client_config(
