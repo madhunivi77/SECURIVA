@@ -1,3 +1,4 @@
+import datetime
 from mcp.server.fastmcp import FastMCP, Context
 from .token_verifier import SimpleTokenVerifier
 from mcp.server.auth.settings import AuthSettings
@@ -23,9 +24,9 @@ mcp = FastMCP(
     token_verifier=SimpleTokenVerifier(),
     auth=AuthSettings(
         # The issuer URL should point to where the auth server lives.
-        issuer_url=AnyHttpUrl("https://localhost:8000/auth"),
+        issuer_url=AnyHttpUrl("http://localhost:8000/auth"),
         # The resource server URL is the URL of this MCP server.
-        resource_server_url=AnyHttpUrl("https://localhost:8000/mcp"),
+        resource_server_url=AnyHttpUrl("http://localhost:8000/mcp"),
     ),
 )
 
@@ -95,7 +96,44 @@ def listEmails(context: Context) -> str:
         print("emails found")
         return res
 
+# list upcoming events from google calendar
+@mcp.tool()
+def listUpcomingEvents(context: Context, numEvents=5):
+    """List upcoming events from my calendar"""
+    creds = getGoogleCreds(context)
+    if creds == None:
+        return "User not authenticated with Google OAuth"
+    else:
+        try:
+            service = build("calendar", "v3", credentials=creds)
 
+            # Call the Calendar API
+            now = datetime.datetime.now(tz=datetime.timezone.utc).isoformat()
+            events_result = (
+                service.events()
+                .list(
+                    calendarId="primary",
+                    timeMin=now,
+                    maxResults=numEvents,
+                    singleEvents=True,
+                    orderBy="startTime",
+                )
+                .execute()
+            )
+            events = events_result.get("items", [])
+            if not events:
+                return "No upcoming events found."
+
+            # Prints the start and name of the next n events
+            res = ""
+            for event in events:
+                start = event["start"].get("dateTime", event["start"].get("date"))
+                res += f"\nStart {start}: {event['summary']}"
+            return res
+        except HttpError as error:
+            print(f"An error occurred: {error}")
+            return f"An error occurred: {error}"
+        
 # 3. Add a dynamic greeting resource
 @mcp.resource("greeting://{name}")
 def get_greeting(name: str) -> str:
