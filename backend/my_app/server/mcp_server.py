@@ -22,9 +22,9 @@ mcp = FastMCP(
     token_verifier=SimpleTokenVerifier(),
     auth=AuthSettings(
         # The issuer URL should point to where the auth server lives.
-        issuer_url=AnyHttpUrl("https://localhost:8000/auth"),
+        issuer_url=AnyHttpUrl("http://localhost:8000/auth"),
         # The resource server URL is the URL of this MCP server.
-        resource_server_url=AnyHttpUrl("https://localhost:8000/mcp"),
+        resource_server_url=AnyHttpUrl("http://localhost:8000/mcp"),
     ),
 )
 
