@@ -10,6 +10,4 @@ if __name__ == "__main__":
         port=8000, 
         reload=True, 
         env_file=".env",
-        ssl_keyfile="./key.pem",
-        ssl_certfile="./cert.pem"
     )
