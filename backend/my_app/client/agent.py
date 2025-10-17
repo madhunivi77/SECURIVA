@@ -8,11 +8,13 @@ from openai import OpenAI
 from mcp import ClientSession
 from mcp.client.streamable_http import streamablehttp_client
 from pathlib import Path
+from typing import Any
 
 # --- Configuration ---
 load_dotenv()
 MCP_SERVER_URL = "http://localhost:8000/mcp/"
 AUTH_SERVER_URL = "http://localhost:8000/auth/token"
+RESERVED_TOOL_PARAMS = {"session", "context"}
 
 with open(Path(__file__).parent / "config.json", "r") as f:
     config = json.load(f)
@@ -29,11 +31,10 @@ match api:
         print("Invalid model configuration: (Check config.json)")
         exit(-1)
 
-
 async def get_auth_token() -> str | None:
     """Fetches an authentication token from the authorization server."""
     try:
-        async with httpx.AsyncClient() as client:
+        async with httpx.AsyncClient(verify=False) as client: # TODO: Change to certificate 
             response = await client.post(AUTH_SERVER_URL)
             response.raise_for_status()
             return response.json()["access_token"]
@@ -116,12 +117,13 @@ async def main():
                     # Loop through each tool call the model wants to make
                     for tool_call in tool_calls:
                         tool_name = tool_call.function.name
-                        tool_args = json.loads(tool_call.function.arguments)
+                        # filter out reserved parameters for injection by mcp
+                        tool_args = {k: v for k, v in json.loads(tool_call.function.arguments).items() if k not in RESERVED_TOOL_PARAMS}
                         
                         print(f"🤖 {api} wants to call tool '{tool_name}' with args {tool_args}")
 
                         # Use the MCP session to call the actual tool on your server
-                        tool_result = await session.call_tool(tool_name, arguments=tool_args)
+                        tool_result = await session.call_tool(tool_name, arguments=(tool_args if tool_args else {"_": None}))
                         
                         if tool_result.isError:
                             print(f"❌ Tool call failed: {tool_result.content[0].text}")
