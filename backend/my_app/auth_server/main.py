@@ -1,17 +1,16 @@
-from flask import Flask, jsonify
+from starlette.applications import Starlette
+from starlette.routing import Route
+from starlette.responses import JSONResponse
 import jwt
 import datetime
 import os
-
-auth_app = Flask(__name__)
 
 # Load the secret key from an environment variable.
 JWT_SECRET_KEY = os.getenv("JWT_SECRET_KEY")
 if not JWT_SECRET_KEY:
     raise ValueError("No JWT_SECRET_KEY set for the authorization server. Please set it in your .env file.")
 
-@auth_app.route("/token", methods=["POST"])
-def get_token():
+async def get_token(request):
     """Generates and issues a JWT."""
     payload = {
         # 'exp' (Expiration Time) claim: token is valid for 1 hour
@@ -23,8 +22,14 @@ def get_token():
         # Custom claim for the client ID
         'client_id': 'test-client'
     }
-    
+
     # Encode the token with the secret key using the HS256 algorithm
     encoded_jwt = jwt.encode(payload, JWT_SECRET_KEY, algorithm="HS256")
-    
-    return jsonify({"access_token": encoded_jwt, "token_type": "Bearer"})
+
+    return JSONResponse({"access_token": encoded_jwt, "token_type": "Bearer"})
+
+auth_app = Starlette(
+    routes=[
+        Route("/token", get_token, methods=["POST"]),
+    ]
+)
