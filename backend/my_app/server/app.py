@@ -223,7 +223,10 @@ api_app = Starlette(
         Route("/api/status", api_status),
         Route("/api/chat", api_chat, methods=["POST"]),
         Route("/login", login),
-        Route("/callback", callback),
-        Route("/salesforce", app=WSGIMiddleware(flask_app))
+        Route("/callback", callback)
+        
     ]
 )
+
+# Mount Flask Salesforce app under /salesforce
+api_app.mount("/salesforce", WSGIMiddleware(flask_app))
