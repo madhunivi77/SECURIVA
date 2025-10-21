@@ -18,7 +18,7 @@ SF_DOMAIN = os.getenv("SF_DOMAIN", "login")
 USER_ID = "csecapstone2735@agentforce.com"
 
 
-@salesforce_bp.route("/salesforce/login")
+@salesforce_bp.route("/login")
 def salesforce_login():
    base = f"https://{SF_DOMAIN}.salesforce.com/services/oauth2/authorize"
    params = {
@@ -30,7 +30,7 @@ def salesforce_login():
    return redirect(f"{base}?{urlencode(params)}")
 
 
-@salesforce_bp.route("/salesforce/callback")
+@salesforce_bp.route("/callback")
 def salesforce_callback():
    code = request.args.get("code")
    if not code:
