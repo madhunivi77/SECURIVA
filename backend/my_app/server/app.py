@@ -23,6 +23,7 @@ REDIRECT_URI = "http://localhost:8000/callback" # endpoint for google to refer u
 # define the scopes granted via access tokens using principle of least priviledge
 SCOPES = [  "openid",
     "https://www.googleapis.com/auth/gmail.readonly",
+    "https://www.googleapis.com/auth/calendar",
     "https://www.googleapis.com/auth/calendar.readonly",
     "https://www.googleapis.com/auth/userinfo.profile",
     "https://www.googleapis.com/auth/userinfo.email",]
