@@ -133,6 +133,41 @@ def listUpcomingEvents(context: Context, numEvents=5):
             print(f"An error occurred: {error}")
             return f"An error occurred: {error}"
         
+@mcp.tool()
+def addCalendarEvent(context: Context, summary: str, startTime: datetime, endTime: datetime, location: str = "", description: str = "", attendees: list[str] = [], reminders: list[int] = [] ):
+    """Create an event in my calendar"""
+    creds = getGoogleCreds(context)
+    if creds == None:
+        return "User not authenticated with Google OAuth"
+    else:
+        try:
+            service = build("calendar", "v3", credentials=creds)
+            event = {
+                'summary': summary,
+                'location': location,
+                'description': description,
+                'start': {
+                    'dateTime': startTime,
+                    'timeZone': 'America/Los_Angeles',
+                },
+                'end': {
+                    'dateTime': endTime,
+                    'timeZone': 'America/Los_Angeles',
+                },
+                'recurrence': [],
+                'attendees': [{'email': item} for item in attendees],
+                'reminders': {
+                    'useDefault': False,
+                    'overrides': [{'method': 'email', 'minutes': sec} for sec in reminders],
+                },
+            }
+            event = service.events().insert(calendarId='primary', body=event).execute()
+            print(f"Event created: {(event.get('htmlLink'))}")
+            return f"Event created: {(event.get('htmlLink'))}"
+        except Exception as error:
+            print(f"An error occurred: {error}")
+            return f"An error occurred: {error}"
+        
 # 3. Add a dynamic greeting resource
 @mcp.resource("greeting://{name}")
 def get_greeting(name: str) -> str:
