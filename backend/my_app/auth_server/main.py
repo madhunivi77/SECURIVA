@@ -12,13 +12,20 @@ if not JWT_SECRET_KEY:
 
 async def get_token(request):
     """Generates and issues a JWT."""
+    # Parse request body to get user_id if provided
+    try:
+        body = await request.json()
+        user_id = body.get('user_id', 'test-user')  # Default to 'test-user' for backwards compatibility
+    except:
+        user_id = 'test-user'
+
     payload = {
         # 'exp' (Expiration Time) claim: token is valid for 1 hour
         'exp': datetime.datetime.now(datetime.timezone.utc) + datetime.timedelta(hours=1),
         # 'iat' (Issued At) claim: time the token was generated
         'iat': datetime.datetime.now(datetime.timezone.utc),
         # 'sub' (Subject) claim: identifier for the user
-        'sub': 'test-user',
+        'sub': user_id,
         # Custom claim for the client ID
         'client_id': 'test-client'
     }

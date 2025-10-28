@@ -23,11 +23,13 @@ DEFAULT_API = config.get("api", "openai")
 DEFAULT_MODEL = config.get("model", "gpt-3.5-turbo")
 
 
-async def get_mcp_auth_token() -> str | None:
+async def get_mcp_auth_token(user_id: str = None) -> str | None:
     """Fetches an authentication token from the authorization server."""
     try:
         async with httpx.AsyncClient() as client:
-            response = await client.post(AUTH_SERVER_URL)
+            # Include user_id in the request body if provided
+            body = {"user_id": user_id} if user_id else {}
+            response = await client.post(AUTH_SERVER_URL, json=body)
             response.raise_for_status()
             return response.json()["access_token"]
     except (httpx.RequestError, httpx.HTTPStatusError) as e:
@@ -45,7 +47,7 @@ def get_llm_client(api: str):
         raise ValueError(f"Unsupported API: {api}")
 
 
-async def execute_chat_with_tools(messages: list, model: str = None, api: str = None) -> dict:
+async def execute_chat_with_tools(messages: list, model: str = None, api: str = None, user_id: str = None) -> dict:
     """
     Execute a chat request with MCP tool-calling capabilities.
 
@@ -53,6 +55,7 @@ async def execute_chat_with_tools(messages: list, model: str = None, api: str = 
         messages: List of message objects in OpenAI format [{role, content}, ...]
         model: LLM model to use (defaults to config.json)
         api: Which API to use - "openai" or "groq" (defaults to config.json)
+        user_id: User ID for authentication (optional)
 
     Returns:
         dict with:
@@ -71,8 +74,8 @@ async def execute_chat_with_tools(messages: list, model: str = None, api: str = 
     session_id = str(uuid.uuid4())[:8]  # Short session ID for readability
 
     try:
-        # Get MCP authentication token
-        token = await get_mcp_auth_token()
+        # Get MCP authentication token with user_id
+        token = await get_mcp_auth_token(user_id)
         if not token:
             return {"error": "Could not retrieve MCP auth token"}
 
