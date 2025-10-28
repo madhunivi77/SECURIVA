@@ -135,7 +135,17 @@ def listUpcomingEvents(context: Context, numEvents=5):
         
 @mcp.tool()
 def addCalendarEvent(context: Context, summary: str, startTime: datetime, endTime: datetime, location: str = "", description: str = "", attendees: list[str] = [], reminders: list[int] = [] ):
-    """Create an event in my calendar"""
+    """
+    Create an event in my calendar
+    Args:
+        summary: The name of the event
+        startTime: A DateTime object representing the requested start time
+        endTime: A DateTime object representing the requested end time
+        location: A string representation of the location of the meeting
+        description: Any further details specified about the event
+        attendees: a list of email addresses of the people to attend the event
+        reminders: a list of integers representing the number of seconds before the event that the atendees should be notified
+    """
     creds = getGoogleCreds(context)
     if creds == None:
         return "User not authenticated with Google OAuth"
@@ -167,7 +177,53 @@ def addCalendarEvent(context: Context, summary: str, startTime: datetime, endTim
         except Exception as error:
             print(f"An error occurred: {error}")
             return f"An error occurred: {error}"
-        
+
+@mcp.tool()
+def addAttendeeToEvent(context: Context, eventId: str, attendeeEmail: str, calendarId: str = "primary"):
+    """
+    Add an attendee to an existing Google Calendar event.
+
+    Args:
+        calendar_id: The ID of the calendar (e.g., "primary" or a shared calendar ID)
+        event_id: The ID of the event to update
+        attendee_email: The email of the attendee to add
+        credentials: Authorized Google credentials (already fetched elsewhere)
+    """
+
+    creds = getGoogleCreds(context)
+    if creds == None:
+        return "User not authenticated with Google OAuth"
+    else:
+        try:
+            service = build("calendar", "v3", credentials=creds)
+
+            # Get the current event
+            event = service.events().get(calendarId=calendarId, eventId=eventId).execute()
+
+            # Initialize attendees list if missing
+            attendees = event.get("attendees", [])
+
+            # Check if attendee already exists
+            if any(a.get("email") == attendeeEmail for a in attendees):
+                return {"status": "exists", "message": f"{attendeeEmail} is already an attendee."}
+
+            # Add new attendee
+            attendees.append({"email": attendeeEmail})
+
+            # Update event
+            event["attendees"] = attendees
+            updated_event = service.events().update(
+                calendarId=calendarId,
+                eventId=eventId,
+                body=event,
+                sendUpdates="all"  # Sends email notification to new attendee
+            ).execute()
+
+            return f"Success. Updated attendees: {[a['email'] for a in updated_event.get('attendees', [])]}"
+        except Exception as error:
+            print(f"An error occurred: {error}")
+            return f"An error occurred: {error}"
+
 # 3. Add a dynamic greeting resource
 @mcp.resource("greeting://{name}")
 def get_greeting(name: str) -> str:
