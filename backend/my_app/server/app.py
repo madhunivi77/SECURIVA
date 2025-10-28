@@ -195,6 +195,9 @@ async def api_chat(request):
         # Execute chat with MCP tools
         result = await execute_chat_with_tools(messages, model, api)
 
+        #debug
+        print(f"DEBUG - {result}")
+
         # Check for errors
         if "error" in result:
             return JSONResponse(
