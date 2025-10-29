@@ -7,6 +7,10 @@ import secrets
 import os
 from pathlib import Path
 from .chat_handler import execute_chat_with_tools
+from .salesforce_app import salesforce_bp, flask_app
+from starlette.middleware.wsgi import WSGIMiddleware
+
+flask_app.register_blueprint(salesforce_bp)
 
 # Load environment variables
 GOOGLE_CLIENT_ID = os.getenv("GOOGLE_CLIENT_ID")
@@ -272,3 +276,6 @@ api_app = Starlette(
         Route("/callback", callback),
     ]
 )
+
+# Mount Flask Salesforce app under /salesforce
+api_app.mount("/salesforce", WSGIMiddleware(flask_app))
