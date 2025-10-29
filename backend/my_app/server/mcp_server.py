@@ -83,11 +83,11 @@ def list_emails(context: Context) -> str:
             # Format the messages into a string
             res = "Messages:"
             for message in messages:
-                res += f'Message ID: {message["id"]}'
+                res += f'\nMessage ID: {message["id"]}\n'
                 msg = (
                     service.users().messages().get(userId="me", id=message["id"]).execute()
                 )
-                res += f'  Subject: {msg["snippet"]}'
+                res += f'Subject: {msg["snippet"]}'
 
         except HttpError as error:
             print(f"An error occurred: {error}")
@@ -127,7 +127,7 @@ def list_upcoming_events(context: Context, numEvents=5):
             res = ""
             for event in events:
                 start = event["start"].get("dateTime", event["start"].get("date"))
-                res += f"\nStart {start}: {event['summary']}"
+                res += f"\n{event['summary']} at {start}"
             return res
         except HttpError as error:
             print(f"An error occurred: {error}")
