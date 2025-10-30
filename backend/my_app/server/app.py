@@ -3,6 +3,7 @@ from starlette.routing import Route
 from starlette.responses import HTMLResponse, JSONResponse, Response, RedirectResponse
 from google_auth_oauthlib.flow import Flow
 import json
+import bcrypt
 import jwt as pyjwt
 import os
 import uuid
@@ -280,8 +281,6 @@ async def api_chat(request):
             {"error": f"Chat request failed: {str(e)}"},
             status_code=500
         )
-
-import bcrypt
 
 # ---- Manual email/password signup ----
 async def signup(request):
