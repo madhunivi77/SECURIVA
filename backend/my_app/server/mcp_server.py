@@ -1,4 +1,6 @@
+import base64
 import datetime
+from email.message import EmailMessage
 from mcp.server.fastmcp import FastMCP, Context
 from .token_verifier import SimpleTokenVerifier
 from mcp.server.auth.settings import AuthSettings
@@ -120,9 +122,58 @@ def listEmails(context: Context, max_results: int = 10) -> str:
         print(f"Found and formatted {len(messages)} emails")
         return res
 
+
     except HttpError as error:
         print(f"An error occurred: {error}")
         return f"An error occurred: {error}"
+
+# Write an email draft
+@mcp.tool()
+def gmail_create_draft(context: Context, receiver: str, sender: str, subject: str, body: str):
+    """
+    Create and insert a draft email.
+    Params:
+        receiver: the email address who should receive the email
+        sender: the email address of the sender
+        subject: the subject line of the email
+        body: the body of the email
+    """
+    creds = getGoogleCreds(context)
+    if creds == None:
+        return "User not authenticated with Google OAuth"
+    else:
+        try:
+            # create gmail api client
+            service = build("gmail", "v1", credentials=creds)
+
+            message = EmailMessage()
+
+            message.set_content(body)
+
+            message["To"] = receiver
+            message["From"] = sender
+            message["Subject"] = subject
+
+            # encoded message
+            encoded_message = base64.urlsafe_b64encode(message.as_bytes()).decode()
+
+            create_message = {"message": {"raw": encoded_message}}
+            draft = (
+                service.users()
+                .drafts()
+                .create(userId="me", body=create_message)
+                .execute()
+            )
+            
+            return f'Draft id: {draft["id"]}\nDraft message: {draft["message"]}'
+
+        except HttpError as error:
+            print(f"An error occurred: {error}")
+            return f"An error occurred: {error}"
+
+# Edit an email draft
+
+# Send an email draft
 
 # list upcoming events from google calendar
 @mcp.tool()
