@@ -32,7 +32,7 @@ mcp = FastMCP(
 # Set the server to mount at the root of the path
 mcp.settings.streamable_http_path = "/"
     
-def get_google_creds(ctx) -> Credentials:
+def getGoogleCreds(ctx) -> Credentials:
     try:
         # extract the jwt from the request to get the subject
         encoded_token = ctx.request_context.request.headers.get('Authorization').split(" ")[1]
@@ -61,9 +61,9 @@ def add(a: int, b: int) -> int:
 
 # Fetch emails from google
 @mcp.tool()
-def list_emails(context: Context) -> str:
+def listEmails(context: Context):
     """List my emails"""
-    creds = get_google_creds(context)
+    creds = getGoogleCreds(context)
     if creds == None:
         return "User not authenticated with Google OAuth"
     else:
@@ -97,9 +97,9 @@ def list_emails(context: Context) -> str:
 
 # list upcoming events from google calendar
 @mcp.tool()
-def list_upcoming_events(context: Context, numEvents=5):
+def listUpcomingEvents(context: Context, numEvents=5):
     """List upcoming events from my calendar"""
-    creds = get_google_creds(context)
+    creds = getGoogleCreds(context)
     if creds == None:
         return "User not authenticated with Google OAuth"
     else:
@@ -134,7 +134,7 @@ def list_upcoming_events(context: Context, numEvents=5):
             return f"An error occurred: {error}"
         
 @mcp.tool()
-def add_calendar_event(context: Context, summary: str, start_time: datetime, end_time: datetime, location: str = "", description: str = "", attendees: list[str] = [], reminders: list[int] = [] ):
+def addCalendarEvent(context: Context, summary: str, startTime: datetime, endTime: datetime, location: str = "", description: str = "", attendees: list[str] = [], reminders: list[int] = [] ):
     """
     Create an event in my calendar
     Args:
@@ -146,7 +146,7 @@ def add_calendar_event(context: Context, summary: str, start_time: datetime, end
         attendees: a list of email addresses of the people to attend the event
         reminders: a list of integers representing the number of seconds before the event that the atendees should be notified
     """
-    creds = get_google_creds(context)
+    creds = getGoogleCreds(context)
     if creds == None:
         return "User not authenticated with Google OAuth"
     else:
@@ -157,11 +157,11 @@ def add_calendar_event(context: Context, summary: str, start_time: datetime, end
                 'location': location,
                 'description': description,
                 'start': {
-                    'dateTime': start_time,
+                    'dateTime': startTime,
                     'timeZone': 'America/Los_Angeles',
                 },
                 'end': {
-                    'dateTime': end_time,
+                    'dateTime': endTime,
                     'timeZone': 'America/Los_Angeles',
                 },
                 'recurrence': [],
@@ -179,18 +179,17 @@ def add_calendar_event(context: Context, summary: str, start_time: datetime, end
             return f"An error occurred: {error}"
 
 @mcp.tool()
-def add_attendee_to_event(context: Context, event_id: str, attendee_email: str, calendar_id: str = "primary"):
+def addAttendeeToEvent(context: Context, eventId: str, attendeeEmail: str, calendarId: str = "primary"):
     """
     Add an attendee to an existing Google Calendar event.
 
     Args:
-        calendar_id: The ID of the calendar (e.g., "primary" or a shared calendar ID)
-        event_id: The ID of the event to update
-        attendee_email: The email of the attendee to add
-        credentials: Authorized Google credentials (already fetched elsewhere)
+        calendarId: The ID of the calendar (e.g., "primary" or a shared calendar ID)
+        eventId: The ID of the event to update
+        attendeeEmail: The email of the attendee to add
     """
 
-    creds = get_google_creds(context)
+    creds = getGoogleCreds(context)
     if creds == None:
         return "User not authenticated with Google OAuth"
     else:
@@ -198,23 +197,23 @@ def add_attendee_to_event(context: Context, event_id: str, attendee_email: str, 
             service = build("calendar", "v3", credentials=creds)
 
             # Get the current event
-            event = service.events().get(calendarId=calendar_id, eventId=event_id).execute()
+            event = service.events().get(calendarId=calendarId, eventId=eventId).execute()
 
             # Initialize attendees list if missing
             attendees = event.get("attendees", [])
 
             # Check if attendee already exists
-            if any(a.get("email") == attendee_email for a in attendees):
-                return {"status": "exists", "message": f"{attendee_email} is already an attendee."}
+            if any(a.get("email") == attendeeEmail for a in attendees):
+                return {"status": "exists", "message": f"{attendeeEmail} is already an attendee."}
 
             # Add new attendee
-            attendees.append({"email": attendee_email})
+            attendees.append({"email": attendeeEmail})
 
             # Update event
             event["attendees"] = attendees
             updated_event = service.events().update(
-                calendarId=calendar_id,
-                eventId=event_id,
+                calendarId=calendarId,
+                eventId=eventId,
                 body=event,
                 sendUpdates="all"  # Sends email notification to new attendee
             ).execute()
