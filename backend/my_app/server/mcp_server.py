@@ -1,4 +1,7 @@
+import base64
 import datetime
+import email
+from email.message import EmailMessage
 from mcp.server.fastmcp import FastMCP, Context
 from .token_verifier import SimpleTokenVerifier
 from mcp.server.auth.settings import AuthSettings
@@ -120,9 +123,170 @@ def listEmails(context: Context, max_results: int = 10) -> str:
         print(f"Found and formatted {len(messages)} emails")
         return res
 
+
     except HttpError as error:
         print(f"An error occurred: {error}")
         return f"An error occurred: {error}"
+
+# Write an email draft
+@mcp.tool()
+def gmail_create_draft(context: Context, receiver: str, sender: str, subject: str, body: str):
+    """
+    Create and insert a draft email.
+    Params:
+        receiver: the email address who should receive the email
+        sender: the email address of the sender
+        subject: the subject line of the email
+        body: the body of the email
+    """
+    creds = getGoogleCreds(context)
+    if creds == None:
+        return "User not authenticated with Google OAuth"
+    else:
+        try:
+            # create gmail api client
+            service = build("gmail", "v1", credentials=creds)
+
+            message = EmailMessage()
+
+            message.set_content(body)
+
+            message["To"] = receiver
+            message["From"] = sender
+            message["Subject"] = subject
+
+            # encoded message
+            encoded_message = base64.urlsafe_b64encode(message.as_bytes()).decode()
+
+            create_message = {"message": {"raw": encoded_message}}
+            draft = (
+                service.users()
+                .drafts()
+                .create(userId="me", body=create_message)
+                .execute()
+            )
+            
+            return f'Draft id: {draft["id"]}\nDraft message: {draft["message"]}'
+
+        except HttpError as error:
+            print(f"An error occurred: {error}")
+            return f"An error occurred: {error}"
+
+@mcp.tool()
+def gmail_list_drafts(context: Context, max_results: int = 10):
+    """
+    List Gmail drafts for the authenticated user.
+    Use gmail_list_drafts to find a draft_id before calling gmail_edit_draft.
+    Params:
+        max_results: The maximum number of drafts to list (default 10).
+    """
+    creds = getGoogleCreds(context)
+    if creds is None:
+        return "User not authenticated with Google OAuth"
+
+    try:
+        service = build("gmail", "v1", credentials=creds)
+        drafts_response = (
+            service.users()
+            .drafts()
+            .list(userId="me", maxResults=max_results)
+            .execute()
+        )
+
+        drafts = drafts_response.get("drafts", [])
+        if not drafts:
+            return "No drafts found."
+
+        result_lines = []
+        for d in drafts:
+            # Fetch draft details to get subject, recipients, etc.
+            draft_detail = (
+                service.users()
+                .drafts()
+                .get(userId="me", id=d["id"])
+                .execute()
+            )
+            message = draft_detail.get("message", {})
+            headers = message.get("payload", {}).get("headers", [])
+
+            subject = next((h["value"] for h in headers if h["name"] == "Subject"), "(no subject)")
+            to = next((h["value"] for h in headers if h["name"] == "To"), "(no recipient)")
+
+            result_lines.append(f"Draft ID: {d['id']}\nSubject: {subject}\nTo: {to}\n---")
+
+        return "\n".join(result_lines)
+
+    except HttpError as error:
+        print(f"An error occurred: {error}")
+        return f"An error occurred while listing drafts: {error}"
+
+# Edit an existing Gmail draft
+@mcp.tool()
+def gmail_edit_draft(context: Context, draft_id: str, subject: str = None, body: str = None):
+    """
+    Edit an existing Gmail draft.
+    Use gmail_list_drafts to find a draft_id before calling gmail_edit_draft.
+    Params:
+        draft_id: The Gmail draft ID to update.
+        subject: Optional new subject line for the draft.
+        body: Optional new body text for the draft.
+    """
+    creds = getGoogleCreds(context)
+    if creds is None:
+        return "User not authenticated with Google OAuth"
+
+    try:
+        # Create Gmail API client
+        service = build("gmail", "v1", credentials=creds)
+
+        # Retrieve the existing draft to update
+        existing_draft = (
+            service.users()
+            .drafts()
+            .get(userId="me", id=draft_id)
+            .execute()
+        )
+
+        # Decode the existing message so we can edit its content
+        raw_message = existing_draft["message"]["raw"]
+        decoded_bytes = base64.urlsafe_b64decode(raw_message.encode("utf-8"))
+        message = EmailMessage()
+        message.set_content("")  # placeholder
+        message = email.message_from_bytes(decoded_bytes)
+
+        # Update subject or body if provided
+        if subject:
+            message.replace_header("Subject", subject)
+        if body:
+            # If multipart, replace first text/plain part; otherwise, set new content
+            if message.is_multipart():
+                for part in message.walk():
+                    if part.get_content_type() == "text/plain":
+                        part.set_payload(body)
+                        break
+            else:
+                message.set_content(body)
+
+        # Re-encode the updated message
+        encoded_message = base64.urlsafe_b64encode(message.as_bytes()).decode("utf-8")
+
+        update_body = {"message": {"raw": encoded_message}}
+
+        # Update the draft in Gmail
+        updated_draft = (
+            service.users()
+            .drafts()
+            .update(userId="me", id=draft_id, body=update_body)
+            .execute()
+        )
+
+        return f'Draft {draft_id} updated successfully.\nNew subject: {message["Subject"]}\nNew body: {body or "[unchanged]"}'
+
+    except HttpError as error:
+        print(f"An error occurred: {error}")
+        return f"An error occurred while updating draft: {error}"
+    except Exception as e:
+        return f"Unexpected error: {str(e)}"
 
 # list upcoming events from google calendar
 @mcp.tool()
@@ -131,36 +295,35 @@ def listUpcomingEvents(context: Context, numEvents=5):
     creds = getGoogleCreds(context)
     if creds == None:
         return "User not authenticated with Google OAuth"
-    else:
-        try:
-            service = build("calendar", "v3", credentials=creds)
+    try:
+        service = build("calendar", "v3", credentials=creds)
 
-            # Call the Calendar API
-            now = datetime.datetime.now(tz=datetime.timezone.utc).isoformat()
-            events_result = (
-                service.events()
-                .list(
-                    calendarId="primary",
-                    timeMin=now,
-                    maxResults=numEvents,
-                    singleEvents=True,
-                    orderBy="startTime",
-                )
-                .execute()
+        # Call the Calendar API
+        now = datetime.datetime.now(tz=datetime.timezone.utc).isoformat()
+        events_result = (
+            service.events()
+            .list(
+                calendarId="primary",
+                timeMin=now,
+                maxResults=numEvents,
+                singleEvents=True,
+                orderBy="startTime",
             )
-            events = events_result.get("items", [])
-            if not events:
-                return "No upcoming events found."
+            .execute()
+        )
+        events = events_result.get("items", [])
+        if not events:
+            return "No upcoming events found."
 
-            # Prints the start and name of the next n events
-            res = ""
-            for event in events:
-                start = event["start"].get("dateTime", event["start"].get("date"))
-                res += f"\nStart {start}: {event['summary']}"
-            return res
-        except HttpError as error:
-            print(f"An error occurred: {error}")
-            return f"An error occurred: {error}"
+        # Prints the start and name of the next n events
+        res = ""
+        for event in events:
+            start = event["start"].get("dateTime", event["start"].get("date"))
+            res += f"\nStart {start}: {event['summary']}"
+        return res
+    except HttpError as error:
+        print(f"An error occurred: {error}")
+        return f"An error occurred: {error}"
         
 # 3. Add a dynamic greeting resource
 @mcp.resource("greeting://{name}")
