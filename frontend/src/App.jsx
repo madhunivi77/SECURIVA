@@ -1,5 +1,6 @@
 import { useState, useEffect } from "react";
 import ChatBox from "./components/ChatBox";
+import LoginForm from "./components/LoginForm";
 
 function App() {
   const [backendStatus, setBackendStatus] = useState("Loading...");
@@ -10,6 +11,10 @@ function App() {
   const [isDarkMode, setIsDarkMode] = useState(
     window.matchMedia("(prefers-color-scheme: dark)").matches
   );
+
+  const handleAuthSuccess = (email) => {
+    setUserEmail(email);
+  };
 
   useEffect(() => {
     // Check for OAuth callback success
@@ -66,7 +71,7 @@ function App() {
     try {
       await fetch("http://localhost:8000/api/logout", {
         method: "POST",
-        credentials: "include"  // Send cookie to be cleared
+        credentials: "include"  
       });
       setIsAuthenticated(false);
       setUserEmail(null);
@@ -304,7 +309,11 @@ function App() {
             flexGrow: 1,
           }}
         >
-          <ChatBox />
+          {!userEmail ? (
+            <LoginForm onAuthSuccess={handleAuthSuccess} />
+          ) : (
+            <ChatBox />
+          )}
         </div>
       </main>
 
