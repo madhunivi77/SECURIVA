@@ -2,33 +2,44 @@ from starlette.applications import Starlette
 from starlette.routing import Route
 from starlette.responses import HTMLResponse, JSONResponse, Response, RedirectResponse
 from google_auth_oauthlib.flow import Flow
-from pathlib import Path
 import json
-import httpx
+import jwt as pyjwt
 import os
-import secrets
+import uuid
+from datetime import datetime
+from pathlib import Path
 from .chat_handler import execute_chat_with_tools
+from .salesforce_app import salesforce_app
+from .api_key_manager import generate_api_key, store_api_key, validate_api_key
 
-
-# Load environment variables for security configuration
-ENVIRONMENT = os.getenv("ENVIRONMENT", "development")
-COOKIE_SAMESITE = os.getenv("COOKIE_SAMESITE", "lax")
+# Load environment variables
 GOOGLE_CLIENT_ID = os.getenv("GOOGLE_CLIENT_ID")
 GOOGLE_CLIENT_SECRET = os.getenv("GOOGLE_CLIENT_SECRET")
+ENVIRONMENT = os.getenv("ENVIRONMENT", "development")
+COOKIE_SAMESITE = os.getenv("COOKIE_SAMESITE", "lax")
 
-os.environ["OAUTHLIB_INSECURE_TRANSPORT"] = "1"
+# Enable insecure transport for development
+if ENVIRONMENT == "development":
+    os.environ["OAUTHLIB_INSECURE_TRANSPORT"] = "1"
 
-REDIRECT_URI = "http://localhost:8000/callback" # endpoint for google to refer user to after authentication
-
-# define the scopes granted via access tokens using principle of least priviledge
-SCOPES = [  "openid",
+# OAuth configuration
+REDIRECT_URI = "http://localhost:8000/callback"
+FRONTEND_URL = "http://localhost:5173"
+SCOPES = [
+    "openid",
     "https://www.googleapis.com/auth/gmail.readonly",
     "https://www.googleapis.com/auth/calendar",
     "https://www.googleapis.com/auth/calendar.readonly",
     "https://www.googleapis.com/auth/userinfo.profile",
-    "https://www.googleapis.com/auth/userinfo.email",]
+    "https://www.googleapis.com/auth/userinfo.email",
+    "https://www.googleapis.com/auth/gmail.modify"
+]
 
-# define flow object representing the securiva application and the means of authentication
+# Cookie settings
+COOKIE_SECURE = ENVIRONMENT == "production" or (COOKIE_SAMESITE.lower() == "none" and ENVIRONMENT == "production")
+SESSION_COOKIE_MAX_AGE = 30 * 24 * 3600  # 30 days
+
+# Configure Google OAuth flow
 flow = Flow.from_client_config(
     {
         "web": {
@@ -42,142 +53,197 @@ flow = Flow.from_client_config(
 )
 flow.redirect_uri = REDIRECT_URI
 
-# In development with SameSite=None, we can use Secure=False (Chrome allows this for localhost)
-# In production, SameSite=None REQUIRES Secure=True
-if COOKIE_SAMESITE.lower() == "none":
-    COOKIE_SECURE = ENVIRONMENT == "production"
-else:
-    COOKIE_SECURE = ENVIRONMENT == "production" or os.getenv("COOKIE_SECURE", "False").lower() == "true"
-
-# Store CSRF tokens (in production, use Redis or database)
-csrf_tokens = {}
-
 # Define a simple root route
 async def index(request):
     return HTMLResponse("<h1>Hello from your Starlette App!</h1><p>Visit /api/status to see a JSON response.</p>")
 
-# Define an API-style route that returns status + JWT token
+# Define an API-style route that returns status
 async def api_status(request):
-    # Internally fetch JWT token from auth server
-    token = None
-    try:
-        async with httpx.AsyncClient() as client:
-            response = await client.post("http://localhost:8000/auth/token")
-            response.raise_for_status()
-            token = response.json()["access_token"]
-    except Exception as e:
-        print(f"Error fetching token: {e}")
+    # Check if user has a valid API key in cookie
+    api_key = request.cookies.get("api_key")
+    authenticated = False
+    user_email = None
+    salesforce_connected = False
 
-    # Generate CSRF token
-    csrf_token = secrets.token_urlsafe(32)
-    if token:
-        csrf_tokens[token] = csrf_token
+    if api_key:
+        oauth_file = Path(__file__).parent / "oauth.json"
+        user_id = validate_api_key(api_key, oauth_file)
 
-    # Create response with status and token
+        if user_id:
+            authenticated = True
+            # Get user email and service connections from oauth.json
+            try:
+                with open(oauth_file, "r") as f:
+                    data = json.load(f)
+                    for user in data.get("users", []):
+                        if user.get("user_id") == user_id:
+                            user_email = user.get("email")
+                            # Check if Salesforce is connected
+                            services = user.get("services", {})
+                            salesforce_connected = "salesforce" in services and services["salesforce"].get("credentials") is not None
+                            break
+            except:
+                pass
+
+    # Create response with status
     response_data = {
         "status": "ok",
         "source": "Starlette",
-        "token": token,
-        "authenticated": token is not None,
-        "csrf_token": csrf_token  # Send CSRF token to frontend
+        "authenticated": authenticated,
+        "email": user_email if authenticated else None,
+        "salesforce_connected": salesforce_connected
     }
 
-    response = JSONResponse(response_data)
+    return JSONResponse(response_data)
 
-    # Set token as HttpOnly cookie if we got one
-    if token:
-        print(f"DEBUG - Setting cookie with: secure={COOKIE_SECURE}, samesite={COOKIE_SAMESITE}")
-        response.set_cookie(
-            key="auth_token",
-            value=token,
-            httponly=True,
-            secure=COOKIE_SECURE,  # Automatically True in production
-            samesite=COOKIE_SAMESITE,
-            max_age=3600,  # 1 hour (matches JWT expiration)
-            domain=None  # Let browser decide
-        )
-        print(f"DEBUG - Cookie set successfully")
-
-    return response
-
-# Define a route to initiate oAuth
+# Define a route to initiate Google OAuth
 async def login(request):
     # Generate the Google OAuth URL
     authorization_url, state = flow.authorization_url(
-        access_type="offline",  # get refresh token
-        prompt="consent", # force new refresh token
-        include_granted_scopes="true"
+        access_type="offline",  # Get refresh token
+        prompt="consent",  # Force new refresh token
+        include_granted_scopes="false"  # Don't include previously granted scopes
     )
-    # Redirect the user’s browser to Google
+    # Redirect the user's browser to Google
     return RedirectResponse(authorization_url)
 
-# Define a route to handle the oAuth redirection
-def callback(request):
-    # Exchange authorization code for tokens
-    flow.fetch_token(authorization_response=str(request.url))
-    
-    # extract the tokens and expiry
-    credentials = flow.credentials.to_json()
+# Define a route to handle the Google OAuth callback
+async def callback(request):
+    try:
+        # Exchange authorization code for tokens
+        flow.fetch_token(authorization_response=str(request.url))
 
-    info = {
-        "user_id": "test-user",
-        "google_creds": credentials
-    }
-    # read the stored user data
-    with open(Path(__file__).parent / "oauth.json", "r") as f:
-        data = json.load(f)
+        # Extract the tokens
+        credentials = flow.credentials.to_json()
+        credentials_dict = json.loads(credentials)
 
-    # Update/Add the user's entry
-    users = data.get("users", [])
-    for i in range(len(users)):
-        if users[i].get("user_id") == info.get("user_id"):
-            users[i].update(info)
-            break
-    else:
-        users.append(info)
-    
-    data["users"] = users
+        # Extract email from credentials for user identification
+        user_email = credentials_dict.get("id_token_jwt", {})
 
-    # write back to the storage file
-    with open(Path(__file__).parent / "oauth.json", "w") as f:
-        json.dump(data, f)
-    
-    # display success
-    return JSONResponse(
-            {
-                "status": "OK",
-                "message": "Credentials successfully stored!"
-            },
-            status_code=200
+        # Try to extract email from token (simplified - in production use proper JWT decode)
+        try:
+            id_token = credentials_dict.get("id_token")
+            if id_token:
+                decoded = pyjwt.decode(id_token, options={"verify_signature": False})
+                user_email = decoded.get("email", user_email)
+        except:
+            pass
+
+        # Load existing oauth.json
+        oauth_file = Path(__file__).parent / "oauth.json"
+        if oauth_file.exists():
+            with open(oauth_file, "r") as f:
+                data = json.load(f)
+        else:
+            data = {"users": []}
+
+        users = data.get("users", [])
+
+        # Check if user already exists (by email)
+        user_entry = None
+        user_id = None
+        for user in users:
+            # Check if user exists by email or by Google service
+            google_service = user.get("services", {}).get("google", {})
+            if google_service.get("email") == user_email or user.get("email") == user_email:
+                user_entry = user
+                user_id = user.get("user_id")
+                break
+
+        # If user doesn't exist, create new user with UUID
+        if not user_entry:
+            user_id = str(uuid.uuid4())
+            user_entry = {
+                "user_id": user_id,
+                "email": user_email,
+                "created_at": datetime.now().isoformat(),
+                "services": {}
+            }
+            users.append(user_entry)
+
+        # Update Google service credentials
+        user_entry["services"]["google"] = {
+            "email": user_email,
+            "credentials": credentials,
+            "connected_at": datetime.now().isoformat(),
+            "scopes": SCOPES
+        }
+
+        data["users"] = users
+
+        # Write back to the storage file
+        with open(oauth_file, "w") as f:
+            json.dump(data, f, indent=2)
+
+        # Generate and store API key for the user
+        api_key = generate_api_key()
+        store_api_key(user_id, api_key, oauth_file)
+
+        # Create response that redirects to frontend
+        response = RedirectResponse(
+            url=f"{FRONTEND_URL}?auth=success&email={user_email}",
+            status_code=302
         )
-       
+
+        # Set API key as httpOnly cookie (secure, not accessible via JavaScript)
+        response.set_cookie(
+            key="api_key",
+            value=api_key,
+            httponly=True,  # JavaScript cannot access this cookie
+            secure=COOKIE_SECURE,  # Only sent over HTTPS in production
+            samesite=COOKIE_SAMESITE,  # CSRF protection
+            max_age=SESSION_COOKIE_MAX_AGE,  # 30 days
+            domain=None
+        )
+
+        return response
+
+    except Exception as e:
+        print(f"OAuth callback error: {e}")
+        return JSONResponse(
+            {"error": f"Authentication failed: {str(e)}"},
+            status_code=500
+        )
+
+
+# Define logout endpoint
+async def api_logout(request):
+    """Clear API key cookie and logout."""
+
+    # Create response
+    response = JSONResponse({
+        "status": "ok",
+        "message": "Logged out successfully"
+    })
+
+    # Clear API key cookie
+    response.delete_cookie(
+        key="api_key",
+        domain=None
+    )
+
+    return response
 
 # Define chat endpoint that integrates with MCP tools
 async def api_chat(request):
     try:
-        # Verify CSRF token
-        csrf_token = request.headers.get("X-CSRF-Token")
-        auth_token = request.cookies.get("auth_token")
+        # Get API key from cookie
+        api_key = request.cookies.get("api_key")
 
-        # Debug logging
-        print(f"DEBUG - CSRF Token from header: {csrf_token}")
-        print(f"DEBUG - Auth Token from cookie: {auth_token}")
-        print(f"DEBUG - All cookies: {request.cookies}")
-        print(f"DEBUG - All headers: {dict(request.headers)}")
-
-        if not csrf_token or not auth_token:
+        if not api_key:
             return JSONResponse(
-                {"error": f"Missing authentication or CSRF token. CSRF: {bool(csrf_token)}, Auth: {bool(auth_token)}"},
+                {"error": "Not authenticated. Please login first."},
                 status_code=401
             )
 
-        # Validate CSRF token
-        expected_csrf = csrf_tokens.get(auth_token)
-        print(f"DEBUG - Expected CSRF: {expected_csrf}, Got: {csrf_token}")
-        if expected_csrf != csrf_token:
+        # Validate API key and get user_id
+        oauth_file = Path(__file__).parent / "oauth.json"
+        user_id = validate_api_key(api_key, oauth_file)
+
+        if not user_id:
             return JSONResponse(
-                {"error": "Invalid CSRF token"},
-                status_code=403
+                {"error": "Invalid or expired API key. Please login again."},
+                status_code=401
             )
 
         # Parse request body
@@ -193,8 +259,11 @@ async def api_chat(request):
                 status_code=400
             )
 
-        # Execute chat with MCP tools
-        result = await execute_chat_with_tools(messages, model, api)
+        # Execute chat with MCP tools, passing the user_id
+        result = await execute_chat_with_tools(messages, model, api, user_id)
+
+        #debug
+        print(f"DEBUG - {result}")
 
         # Check for errors
         if "error" in result:
@@ -212,6 +281,59 @@ async def api_chat(request):
             status_code=500
         )
 
+import bcrypt
+
+# ---- Manual email/password signup ----
+async def signup(request):
+    form = await request.form()
+    email = form.get("email")
+    password = form.get("password")
+
+    users_file = Path(__file__).parent / "users.json"
+    users = []
+    if users_file.exists():
+        with open(users_file, "r") as f:
+            users = json.load(f)
+
+    if any(u["email"] == email for u in users):
+        return JSONResponse({"error": "User already exists"}, status_code=400)
+
+    hashed = bcrypt.hashpw(password.encode(), bcrypt.gensalt()).decode()
+    users.append({"email": email, "password": hashed})
+    with open(users_file, "w") as f:
+        json.dump(users, f, indent=2)
+
+    return JSONResponse({"message": "Signup successful"})
+
+
+# ---- Manual email/password login ----
+async def manual_login(request):
+    form = await request.form()
+    email = form.get("email")
+    password = form.get("password")
+
+    users_file = Path(__file__).parent / "users.json"
+    if not users_file.exists():
+        return JSONResponse({"error": "User not found"}, status_code=404)
+
+    with open(users_file, "r") as f:
+        users = json.load(f)
+
+    user = next((u for u in users if u["email"] == email), None)
+    if not user or not bcrypt.checkpw(password.encode(), user["password"].encode()):
+        return JSONResponse({"error": "Invalid credentials"}, status_code=401)
+
+    # Create a simple JWT token for the user
+    token = pyjwt.encode(
+        {"sub": email, "iat": datetime.now().timestamp()},
+        "dev-secret",  # use os.getenv("JWT_SECRET_KEY") in prod
+        algorithm="HS256"
+    )
+
+    response = JSONResponse({"message": "Login successful", "access_token": token})
+    response.set_cookie("auth_token", token, httponly=True, samesite="Lax")
+    return response
+
 # Create the Starlette app instance with routes
 # Note: CORS is handled at the top level in main.py
 api_app = Starlette(
@@ -219,7 +341,13 @@ api_app = Starlette(
         Route("/", index),
         Route("/api/status", api_status),
         Route("/api/chat", api_chat, methods=["POST"]),
-        Route("/login", login),
-        Route("/callback", callback)
+        Route("/api/logout", api_logout, methods=["POST"]),
+        Route("/login", login, methods=["GET"]),
+        Route("/callback", callback),
+        Route("/signup", signup, methods=["POST"]),  # ✅ Manual signup
+        Route("/login/manual", manual_login, methods=["POST"]),  # ✅ Manual login
     ]
 )
+
+# Mount Starlette Salesforce app under /salesforce
+api_app.mount("/salesforce", salesforce_app)
