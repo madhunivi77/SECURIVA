@@ -3,15 +3,37 @@ import ChatBox from "./components/ChatBox";
 
 function App() {
   const [backendStatus, setBackendStatus] = useState("Loading...");
-  const [authToken, setAuthToken] = useState(null);
-  const [csrfToken, setCsrfToken] = useState(null);
+  const [userEmail, setUserEmail] = useState(null);
   const [isAuthenticated, setIsAuthenticated] = useState(false);
+  const [isSalesforceConnected, setIsSalesforceConnected] = useState(false);
   const [showStatus, setShowStatus] = useState(false);
   const [isDarkMode, setIsDarkMode] = useState(
     window.matchMedia("(prefers-color-scheme: dark)").matches
   );
 
   useEffect(() => {
+    // Check for OAuth callback success
+    const urlParams = new URLSearchParams(window.location.search);
+    const authSuccess = urlParams.get("auth");
+    const emailParam = urlParams.get("email");
+
+    if (authSuccess === "success") {
+      // OAuth succeeded, cookie is set by backend
+      if (emailParam) {
+        setUserEmail(emailParam);
+      }
+      // Clean up URL
+      window.history.replaceState({}, document.title, window.location.pathname);
+    }
+
+    // Check for Salesforce connection success
+    if (urlParams.get("salesforce") === "connected") {
+      setIsSalesforceConnected(true);
+      // Clean up URL
+      window.history.replaceState({}, document.title, window.location.pathname);
+    }
+
+    // Always fetch status (cookie is sent automatically)
     fetchStatus();
 
     const mq = window.matchMedia("(prefers-color-scheme: dark)");
@@ -22,13 +44,15 @@ function App() {
 
   const fetchStatus = () => {
     setBackendStatus("Connecting...");
-    fetch("http://localhost:8000/api/status", { credentials: "include" })
+    fetch("http://localhost:8000/api/status", {
+      credentials: "include"  // Send cookies automatically
+    })
       .then((res) => res.json())
       .then((data) => {
-        setBackendStatus(`✅ Connected: ${JSON.stringify(data)}`);
+        setBackendStatus(`Connected: ${JSON.stringify(data)}`);
         if (data.authenticated !== undefined) setIsAuthenticated(data.authenticated);
-        if (data.token) setAuthToken(data.token);
-        if (data.csrf_token) setCsrfToken(data.csrf_token);
+        if (data.email) setUserEmail(data.email);
+        if (data.salesforce_connected !== undefined) setIsSalesforceConnected(data.salesforce_connected);
       })
       .catch(() => {
         setBackendStatus("❌ Could not connect to backend");
@@ -37,6 +61,33 @@ function App() {
   };
 
   const handleReconnect = () => fetchStatus();
+
+  const handleLogout = async () => {
+    try {
+      await fetch("http://localhost:8000/api/logout", {
+        method: "POST",
+        credentials: "include"  // Send cookie to be cleared
+      });
+      setIsAuthenticated(false);
+      setUserEmail(null);
+      setIsSalesforceConnected(false);
+      fetchStatus();  // Refresh status
+    } catch (error) {
+      console.error("Logout error:", error);
+    }
+  };
+
+  const handleGoogleLogin = () => {
+    window.location.href = "http://localhost:8000/login";
+  };
+
+  const handleSalesforceLogin = () => {
+    if (!isAuthenticated) {
+      alert("Please login with Google first");
+      return;
+    }
+    window.location.href = "http://localhost:8000/salesforce/login";
+  };
 
   const theme = isDarkMode
     ? {
@@ -153,14 +204,6 @@ function App() {
           }}
         >
           <p style={{ margin: "4px 0" }}>{backendStatus}</p>
-          <p style={{ margin: "4px 0" }}>
-            Authentication: {isAuthenticated ? "✅ Authenticated" : "❌ Not Authenticated"}
-          </p>
-          {authToken && (
-            <p style={{ wordBreak: "break-word", margin: "4px 0" }}>
-              Token (first 50 chars): {authToken.substring(0, 50)}...
-            </p>
-          )}
           <div
             style={{
               display: "flex",
@@ -183,6 +226,54 @@ function App() {
             >
               Reconnect
             </button>
+            {!isAuthenticated && (
+              <button
+                onClick={handleGoogleLogin}
+                style={{
+                  background: "#4285F4",
+                  border: "none",
+                  borderRadius: "6px",
+                  color: "white",
+                  padding: "6px 12px",
+                  cursor: "pointer",
+                  flexShrink: 0,
+                }}
+              >
+                Login with Google
+              </button>
+            )}
+            {!isSalesforceConnected && isAuthenticated && (
+              <button
+                onClick={handleSalesforceLogin}
+                style={{
+                  background: "#00A1E0",
+                  border: "none",
+                  borderRadius: "6px",
+                  color: "white",
+                  padding: "6px 12px",
+                  cursor: "pointer",
+                  flexShrink: 0,
+                }}
+              >
+                Connect Salesforce
+              </button>
+            )}
+            {isAuthenticated && (
+              <button
+                onClick={handleLogout}
+                style={{
+                  background: "#d32f2f",
+                  border: "none",
+                  borderRadius: "6px",
+                  color: "white",
+                  padding: "6px 12px",
+                  cursor: "pointer",
+                  flexShrink: 0,
+                }}
+              >
+                Logout
+              </button>
+            )}
           </div>
         </div>
       )}
@@ -213,7 +304,7 @@ function App() {
             flexGrow: 1,
           }}
         >
-          <ChatBox authToken={authToken} csrfToken={csrfToken} />
+          <ChatBox />
         </div>
       </main>
 
