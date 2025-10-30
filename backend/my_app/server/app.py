@@ -3,14 +3,14 @@ from starlette.routing import Route
 from starlette.responses import HTMLResponse, JSONResponse, Response, RedirectResponse
 from google_auth_oauthlib.flow import Flow
 import json
-import secrets
+import jwt as pyjwt
 import os
+import uuid
+from datetime import datetime
 from pathlib import Path
 from .chat_handler import execute_chat_with_tools
-from .salesforce_app import salesforce_bp, flask_app
-from starlette.middleware.wsgi import WSGIMiddleware
-
-flask_app.register_blueprint(salesforce_bp)
+from .salesforce_app import salesforce_app
+from .api_key_manager import generate_api_key, store_api_key, validate_api_key
 
 # Load environment variables
 GOOGLE_CLIENT_ID = os.getenv("GOOGLE_CLIENT_ID")
@@ -37,12 +37,6 @@ SCOPES = [
 COOKIE_SECURE = ENVIRONMENT == "production" or (COOKIE_SAMESITE.lower() == "none" and ENVIRONMENT == "production")
 SESSION_COOKIE_MAX_AGE = 30 * 24 * 3600  # 30 days
 
-# Store CSRF tokens (in production, use Redis or database)
-csrf_tokens = {}
-
-# Store sessions (in production, use Redis or database)
-sessions = {}
-
 # Configure Google OAuth flow
 flow = Flow.from_client_config(
     {
@@ -63,22 +57,39 @@ async def index(request):
 
 # Define an API-style route that returns status
 async def api_status(request):
-    # Check if user has a session
-    session_id = request.cookies.get("session_id")
-    authenticated = session_id and session_id in sessions
+    # Check if user has a valid API key in cookie
+    api_key = request.cookies.get("api_key")
+    authenticated = False
+    user_email = None
+    salesforce_connected = False
 
-    # Generate CSRF token
-    csrf_token = secrets.token_urlsafe(32)
-    if authenticated:
-        csrf_tokens[session_id] = csrf_token
+    if api_key:
+        oauth_file = Path(__file__).parent / "oauth.json"
+        user_id = validate_api_key(api_key, oauth_file)
+
+        if user_id:
+            authenticated = True
+            # Get user email and service connections from oauth.json
+            try:
+                with open(oauth_file, "r") as f:
+                    data = json.load(f)
+                    for user in data.get("users", []):
+                        if user.get("user_id") == user_id:
+                            user_email = user.get("email")
+                            # Check if Salesforce is connected
+                            services = user.get("services", {})
+                            salesforce_connected = "salesforce" in services and services["salesforce"].get("credentials") is not None
+                            break
+            except:
+                pass
 
     # Create response with status
     response_data = {
         "status": "ok",
         "source": "Starlette",
         "authenticated": authenticated,
-        "csrf_token": csrf_token if authenticated else None,
-        "token": session_id if authenticated else None
+        "email": user_email if authenticated else None,
+        "salesforce_connected": salesforce_connected
     }
 
     return JSONResponse(response_data)
@@ -104,14 +115,19 @@ async def callback(request):
         credentials = flow.credentials.to_json()
         credentials_dict = json.loads(credentials)
 
-        # Create a simple session
-        session_id = secrets.token_urlsafe(32)
-        sessions[session_id] = {
-            "google_credentials": credentials_dict,
-            "user_id": "google-user"
-        }
+        # Extract email from credentials for user identification
+        user_email = credentials_dict.get("id_token_jwt", {})
 
-        # Store credentials in oauth.json for MCP tools to use
+        # Try to extract email from token (simplified - in production use proper JWT decode)
+        try:
+            id_token = credentials_dict.get("id_token")
+            if id_token:
+                decoded = pyjwt.decode(id_token, options={"verify_signature": False})
+                user_email = decoded.get("email", user_email)
+        except:
+            pass
+
+        # Load existing oauth.json
         oauth_file = Path(__file__).parent / "oauth.json"
         if oauth_file.exists():
             with open(oauth_file, "r") as f:
@@ -119,21 +135,37 @@ async def callback(request):
         else:
             data = {"users": []}
 
-        # Update/Add the user's entry
-        user_entry = {
-            "user_id": "google-user",
-            "google_creds": credentials
-        }
-
         users = data.get("users", [])
-        found = False
-        for i, user in enumerate(users):
-            if user.get("user_id") == "google-user":
-                users[i] = user_entry
-                found = True
+
+        # Check if user already exists (by email)
+        user_entry = None
+        user_id = None
+        for user in users:
+            # Check if user exists by email or by Google service
+            google_service = user.get("services", {}).get("google", {})
+            if google_service.get("email") == user_email or user.get("email") == user_email:
+                user_entry = user
+                user_id = user.get("user_id")
                 break
-        if not found:
+
+        # If user doesn't exist, create new user with UUID
+        if not user_entry:
+            user_id = str(uuid.uuid4())
+            user_entry = {
+                "user_id": user_id,
+                "email": user_email,
+                "created_at": datetime.now().isoformat(),
+                "services": {}
+            }
             users.append(user_entry)
+
+        # Update Google service credentials
+        user_entry["services"]["google"] = {
+            "email": user_email,
+            "credentials": credentials,
+            "connected_at": datetime.now().isoformat(),
+            "scopes": SCOPES
+        }
 
         data["users"] = users
 
@@ -141,20 +173,24 @@ async def callback(request):
         with open(oauth_file, "w") as f:
             json.dump(data, f, indent=2)
 
+        # Generate and store API key for the user
+        api_key = generate_api_key()
+        store_api_key(user_id, api_key, oauth_file)
+
         # Create response that redirects to frontend
         response = RedirectResponse(
-            url=FRONTEND_URL,
+            url=f"{FRONTEND_URL}?auth=success&email={user_email}",
             status_code=302
         )
 
-        # Set session cookie
+        # Set API key as httpOnly cookie (secure, not accessible via JavaScript)
         response.set_cookie(
-            key="session_id",
-            value=session_id,
-            httponly=True,
-            secure=COOKIE_SECURE,
-            samesite=COOKIE_SAMESITE,
-            max_age=SESSION_COOKIE_MAX_AGE,
+            key="api_key",
+            value=api_key,
+            httponly=True,  # JavaScript cannot access this cookie
+            secure=COOKIE_SECURE,  # Only sent over HTTPS in production
+            samesite=COOKIE_SAMESITE,  # CSRF protection
+            max_age=SESSION_COOKIE_MAX_AGE,  # 30 days
             domain=None
         )
 
@@ -170,16 +206,7 @@ async def callback(request):
 
 # Define logout endpoint
 async def api_logout(request):
-    """Clear user session and logout."""
-    session_id = request.cookies.get("session_id")
-
-    # Remove session from memory
-    if session_id and session_id in sessions:
-        del sessions[session_id]
-
-    # Remove CSRF token
-    if session_id and session_id in csrf_tokens:
-        del csrf_tokens[session_id]
+    """Clear API key cookie and logout."""
 
     # Create response
     response = JSONResponse({
@@ -187,9 +214,9 @@ async def api_logout(request):
         "message": "Logged out successfully"
     })
 
-    # Clear session cookie
+    # Clear API key cookie
     response.delete_cookie(
-        key="session_id",
+        key="api_key",
         domain=None
     )
 
@@ -198,34 +225,23 @@ async def api_logout(request):
 # Define chat endpoint that integrates with MCP tools
 async def api_chat(request):
     try:
-        # Get session ID from cookie
-        session_id = request.cookies.get("session_id")
-        if not session_id or session_id not in sessions:
+        # Get API key from cookie
+        api_key = request.cookies.get("api_key")
+
+        if not api_key:
             return JSONResponse(
                 {"error": "Not authenticated. Please login first."},
                 status_code=401
             )
 
-        # Verify CSRF token
-        csrf_token = request.headers.get("X-CSRF-Token")
+        # Validate API key and get user_id
+        oauth_file = Path(__file__).parent / "oauth.json"
+        user_id = validate_api_key(api_key, oauth_file)
 
-        if not csrf_token:
+        if not user_id:
             return JSONResponse(
-                {"error": "Missing CSRF token"},
+                {"error": "Invalid or expired API key. Please login again."},
                 status_code=401
-            )
-
-        # Validate CSRF token
-        expected_csrf = csrf_tokens.get(session_id)
-
-        if expected_csrf is None:
-            # CSRF token mapping lost (e.g., server restart)
-            # If session is still valid, accept it and regenerate mapping
-            csrf_tokens[session_id] = csrf_token
-        elif expected_csrf != csrf_token:
-            return JSONResponse(
-                {"error": "Invalid CSRF token"},
-                status_code=403
             )
 
         # Parse request body
@@ -240,10 +256,6 @@ async def api_chat(request):
                 {"error": "Invalid request: 'messages' array is required"},
                 status_code=400
             )
-
-        # Get user_id from session
-        session = sessions.get(session_id, {})
-        user_id = session.get("user_id")
 
         # Execute chat with MCP tools, passing the user_id
         result = await execute_chat_with_tools(messages, model, api, user_id)
@@ -280,5 +292,5 @@ api_app = Starlette(
     ]
 )
 
-# Mount Flask Salesforce app under /salesforce
-api_app.mount("/salesforce", WSGIMiddleware(flask_app))
+# Mount Starlette Salesforce app under /salesforce
+api_app.mount("/salesforce", salesforce_app)

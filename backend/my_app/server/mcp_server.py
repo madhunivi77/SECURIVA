@@ -14,6 +14,7 @@ import os
 import jwt
 from pathlib import Path
 import time
+import requests
 
 JWT_SECRET_KEY = os.getenv("JWT_SECRET_KEY")
 
@@ -38,21 +39,25 @@ def getGoogleCreds(ctx) -> Credentials:
         # extract the jwt from the request to get the subject
         encoded_token = ctx.request_context.request.headers.get('Authorization').split(" ")[1]
         payload = jwt.decode(encoded_token, JWT_SECRET_KEY, algorithms=["HS256"])
-        subject = payload.get('sub')
+        user_id = payload.get('sub')
 
-        # fetch google tokens for the subject
+        # fetch google tokens for the user
         with open(Path(__file__).parent / "oauth.json", "r") as f:
             data = json.load(f)
             users = data.get("users", [])
             for user in users:
-                if user.get("user_id") == subject:
-                    # build credentials from google_creds json
-                    return Credentials.from_authorized_user_info(json.loads(user.get("google_creds")))
-            else:
-                return None
-            
+                if user.get("user_id") == user_id:
+                    # NEW SCHEMA: Access google service from services object
+                    google_service = user.get("services", {}).get("google")
+                    if google_service:
+                        credentials_json = google_service.get("credentials")
+                        if credentials_json:
+                            return Credentials.from_authorized_user_info(json.loads(credentials_json))
+            return None
+
     except Exception as e:
-        print(e)
+        print(f"Error getting Google credentials: {e}")
+        return None
 
 # 2. Add an addition tool
 @mcp.tool()
@@ -62,39 +67,62 @@ def add(a: int, b: int) -> int:
 
 # Fetch emails from google
 @mcp.tool()
-def listEmails(context: Context) -> str:
-    """List my emails"""
+def listEmails(context: Context, max_results: int = 10) -> str:
+    """
+    List recent emails from Gmail inbox
+
+    Args:
+        max_results: Maximum number of emails to return (default: 10, max: 50)
+    """
     creds = getGoogleCreds(context)
     if creds == None:
         return "User not authenticated with Google OAuth"
-    else:
-        # query google
-        try:
-            # Call the Gmail API to fetch emails
-            service = build("gmail", "v1", credentials=creds)
-            results = (
-                service.users().messages().list(userId="me", labelIds=["INBOX"]).execute()
-            )
-            messages = results.get("messages", [])
 
-            if not messages:
-                print("No messages found.")
-                return
+    try:
+        # Limit max_results to reasonable bounds
+        max_results = min(max(1, max_results), 50)
 
-            # Format the messages into a string
-            res = "Messages:"
-            for message in messages:
-                res += f'Message ID: {message["id"]}'
-                msg = (
-                    service.users().messages().get(userId="me", id=message["id"]).execute()
-                )
-                res += f'  Subject: {msg["snippet"]}'
+        # Call the Gmail API to fetch emails
+        service = build("gmail", "v1", credentials=creds)
+        results = service.users().messages().list(
+            userId="me",
+            labelIds=["INBOX"],
+            maxResults=max_results
+        ).execute()
 
-        except HttpError as error:
-            print(f"An error occurred: {error}")
-            return f"An error occurred: {error}"
-        print("emails found")
+        messages = results.get("messages", [])
+
+        if not messages:
+            return "No messages found in inbox."
+
+        # Format the messages into a string
+        res = f"Found {len(messages)} recent emails:\n\n"
+
+        for i, message in enumerate(messages, 1):
+            msg = service.users().messages().get(
+                userId="me",
+                id=message["id"],
+                format="metadata",
+                metadataHeaders=["From", "Subject", "Date"]
+            ).execute()
+
+            # Extract headers
+            headers = {h["name"]: h["value"] for h in msg.get("payload", {}).get("headers", [])}
+            from_addr = headers.get("From", "Unknown")
+            subject = headers.get("Subject", "(No subject)")
+            date = headers.get("Date", "Unknown date")
+
+            res += f"{i}. From: {from_addr}\n"
+            res += f"   Subject: {subject}\n"
+            res += f"   Date: {date}\n"
+            res += f"   ID: {message['id']}\n\n"
+
+        print(f"Found and formatted {len(messages)} emails")
         return res
+
+    except HttpError as error:
+        print(f"An error occurred: {error}")
+        return f"An error occurred: {error}"
 
 # list upcoming events from google calendar
 @mcp.tool()
@@ -142,17 +170,25 @@ def get_greeting(name: str) -> str:
 
 def getSalesforceCreds(ctx):
     """Retrieve Salesforce credentials for the logged-in user"""
-    JWT_SECRET_KEY = os.getenv("JWT_SECRET_KEY")
-    encoded_token = ctx.request_context.request.headers.get('Authorization').split(" ")[1]
-    payload = jwt.decode(encoded_token, JWT_SECRET_KEY, algorithms=["HS256"])
-    subject = payload.get('sub')
+    try:
+        JWT_SECRET_KEY = os.getenv("JWT_SECRET_KEY")
+        encoded_token = ctx.request_context.request.headers.get('Authorization').split(" ")[1]
+        payload = jwt.decode(encoded_token, JWT_SECRET_KEY, algorithms=["HS256"])
+        user_id = payload.get('sub')
 
-    with open(Path(__file__).parent / "oauth.json", "r") as f:
-        data = json.load(f)
-        for user in data.get("users", []):
-            if user["user_id"] == subject:
-                return user.get("salesforce_creds")
-    return None
+        with open(Path(__file__).parent / "oauth.json", "r") as f:
+            data = json.load(f)
+            for user in data.get("users", []):
+                if user["user_id"] == user_id:
+                    # NEW SCHEMA: Access salesforce service from services object
+                    sf_service = user.get("services", {}).get("salesforce")
+                    if sf_service:
+                        return sf_service.get("credentials")
+        return None
+
+    except Exception as e:
+        print(f"Error getting Salesforce credentials: {e}")
+        return None
 
 @mcp.tool()
 def listAccounts(context: Context) -> str:
