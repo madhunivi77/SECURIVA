@@ -279,6 +279,59 @@ async def api_chat(request):
             status_code=500
         )
 
+import bcrypt
+
+# ---- Manual email/password signup ----
+async def signup(request):
+    form = await request.form()
+    email = form.get("email")
+    password = form.get("password")
+
+    users_file = Path(__file__).parent / "users.json"
+    users = []
+    if users_file.exists():
+        with open(users_file, "r") as f:
+            users = json.load(f)
+
+    if any(u["email"] == email for u in users):
+        return JSONResponse({"error": "User already exists"}, status_code=400)
+
+    hashed = bcrypt.hashpw(password.encode(), bcrypt.gensalt()).decode()
+    users.append({"email": email, "password": hashed})
+    with open(users_file, "w") as f:
+        json.dump(users, f, indent=2)
+
+    return JSONResponse({"message": "Signup successful"})
+
+
+# ---- Manual email/password login ----
+async def manual_login(request):
+    form = await request.form()
+    email = form.get("email")
+    password = form.get("password")
+
+    users_file = Path(__file__).parent / "users.json"
+    if not users_file.exists():
+        return JSONResponse({"error": "User not found"}, status_code=404)
+
+    with open(users_file, "r") as f:
+        users = json.load(f)
+
+    user = next((u for u in users if u["email"] == email), None)
+    if not user or not bcrypt.checkpw(password.encode(), user["password"].encode()):
+        return JSONResponse({"error": "Invalid credentials"}, status_code=401)
+
+    # Create a simple JWT token for the user
+    token = pyjwt.encode(
+        {"sub": email, "iat": datetime.now().timestamp()},
+        "dev-secret",  # use os.getenv("JWT_SECRET_KEY") in prod
+        algorithm="HS256"
+    )
+
+    response = JSONResponse({"message": "Login successful", "access_token": token})
+    response.set_cookie("auth_token", token, httponly=True, samesite="Lax")
+    return response
+
 # Create the Starlette app instance with routes
 # Note: CORS is handled at the top level in main.py
 api_app = Starlette(
@@ -287,8 +340,10 @@ api_app = Starlette(
         Route("/api/status", api_status),
         Route("/api/chat", api_chat, methods=["POST"]),
         Route("/api/logout", api_logout, methods=["POST"]),
-        Route("/login", login),
+        Route("/login", login, methods=["GET"]),
         Route("/callback", callback),
+        Route("/signup", signup, methods=["POST"]),  # ✅ Manual signup
+        Route("/login/manual", manual_login, methods=["POST"]),  # ✅ Manual login
     ]
 )
 
