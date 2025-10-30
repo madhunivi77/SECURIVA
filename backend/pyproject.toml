@@ -15,4 +15,8 @@ dependencies = [
     "google-auth-oauthlib>=1.2.2",
     "google-api-python-client>=2.184.0",
     "google-auth-httplib2>=0.2.0",
+    "bcrypt>=5.0.0",
+    "cryptography>=46.0.3",
+    "telesignenterprise>=3.0.0",
+    "setuptools>=80.9.0",
 ]

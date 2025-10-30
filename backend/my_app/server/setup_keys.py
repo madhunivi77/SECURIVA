@@ -1,28 +1,31 @@
-import jwt
+﻿# setup_keys.py (SAFE)
 import os
-from mcp.server.auth.provider import AccessToken, TokenVerifier
+from cryptography.fernet import Fernet
+from dotenv import load_dotenv
 
-JWT_SECRET_KEY = os.getenv("JWT_SECRET_KEY")
-if not JWT_SECRET_KEY:
-    raise ValueError("No JWT_SECRET_KEY set for the token verifier. Please set it in your .env file.")
+load_dotenv()  # Load from .env file
 
-class SimpleTokenVerifier(TokenVerifier):
-    """Verifies a JWT token."""
+# Generate master key
+MASTER_KEY = Fernet.generate_key()
+print("MASTER KEY:", MASTER_KEY.decode())
+print("Save this master key to your .env file as MASTER_KEY")
 
-    async def verify_token(self, token: str) -> AccessToken | None:
-        """Verifies the token. Returns an AccessToken if valid, otherwise None."""
-        try:
-            payload = jwt.decode(token, JWT_SECRET_KEY, algorithms=["HS256"])
+cipher = Fernet(MASTER_KEY)
 
-            return AccessToken(
-                client_id=payload.get('client_id'), 
-                subject=payload.get('sub'), 
-                token=token, 
-                scopes=["user"]
-            )
-        except jwt.ExpiredSignatureError:
-            print("Token has expired.")
-            return None
-        except jwt.InvalidTokenError as e:
-            print(f"Invalid token: {e}")
-            return None
+# Get credentials from environment variables (NOT hardcoded)
+customer_id = os.getenv("TELESIGN_CUSTOMER_ID")
+api_key = os.getenv("TELESIGN_API_KEY")
+
+if not customer_id or not api_key:
+    print("Error: Set TELESIGN_CUSTOMER_ID and TELESIGN_API_KEY in .env file first!")
+    exit(1)
+
+# Encrypt credentials
+encrypted_customer_id = cipher.encrypt(customer_id.encode())
+encrypted_api_key = cipher.encrypt(api_key.encode())
+
+# Save encrypted values
+with open("secure_creds.txt", "wb") as f:
+    f.write(encrypted_customer_id + b"\n" + encrypted_api_key)
+
+print("Encrypted credentials saved to secure_creds.txt")
