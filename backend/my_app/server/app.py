@@ -8,6 +8,18 @@ import httpx
 import os
 import secrets
 from .chat_handler import execute_chat_with_tools
+from .telesign_auth import (
+    send_whatsapp_message,
+    send_sms,
+    verify_phone_number,
+    get_message_status,
+    send_verification_code,
+    verify_code,
+    assess_phone_risk,
+    send_whatsapp_template,
+    send_whatsapp_media,
+    send_whatsapp_buttons
+)
 
 
 # Load environment variables for security configuration
@@ -107,7 +119,7 @@ async def login(request):
         prompt="consent", # force new refresh token
         include_granted_scopes="true"
     )
-    # Redirect the user’s browser to Google
+    # Redirect the user's browser to Google
     return RedirectResponse(authorization_url)
 
 # Define a route to handle the oAuth redirection
@@ -211,6 +223,248 @@ async def api_chat(request):
             status_code=500
         )
 
+
+# ==================== TELESIGN/WHATSAPP ENDPOINTS ====================
+
+async def api_send_whatsapp(request):
+    """Send a basic WhatsApp message"""
+    try:
+        data = await request.json()
+        phone = data.get('phone_number')
+        message = data.get('message')
+        
+        if not phone or not message:
+            return JSONResponse(
+                {"error": "phone_number and message required"},
+                status_code=400
+            )
+        
+        # Remove + prefix if present (for trial accounts)
+        phone = phone.lstrip('+')
+        
+        result = send_whatsapp_message(phone, message)
+        return JSONResponse(result)
+    
+    except Exception as e:
+        return JSONResponse(
+            {"error": f"Failed to send WhatsApp message: {str(e)}"},
+            status_code=500
+        )
+
+
+async def api_send_sms(request):
+    """Send an SMS message"""
+    try:
+        data = await request.json()
+        phone = data.get('phone_number')
+        message = data.get('message')
+        
+        if not phone or not message:
+            return JSONResponse(
+                {"error": "phone_number and message required"},
+                status_code=400
+            )
+        
+        phone = phone.lstrip('+')
+        result = send_sms(phone, message)
+        return JSONResponse(result)
+    
+    except Exception as e:
+        return JSONResponse(
+            {"error": f"Failed to send SMS: {str(e)}"},
+            status_code=500
+        )
+
+
+async def api_verify_phone(request):
+    """Verify phone number details"""
+    try:
+        data = await request.json()
+        phone = data.get('phone_number')
+        
+        if not phone:
+            return JSONResponse(
+                {"error": "phone_number required"},
+                status_code=400
+            )
+        
+        phone = phone.lstrip('+')
+        result = verify_phone_number(phone)
+        return JSONResponse(result)
+    
+    except Exception as e:
+        return JSONResponse(
+            {"error": f"Failed to verify phone: {str(e)}"},
+            status_code=500
+        )
+
+
+async def api_message_status(request):
+    """Check message delivery status"""
+    try:
+        reference_id = request.path_params.get('reference_id')
+        
+        if not reference_id:
+            return JSONResponse(
+                {"error": "reference_id required"},
+                status_code=400
+            )
+        
+        result = get_message_status(reference_id)
+        return JSONResponse(result)
+    
+    except Exception as e:
+        return JSONResponse(
+            {"error": f"Failed to get message status: {str(e)}"},
+            status_code=500
+        )
+
+
+async def api_send_verification_code(request):
+    """Send 2FA verification code"""
+    try:
+        data = await request.json()
+        phone = data.get('phone_number')
+        
+        if not phone:
+            return JSONResponse(
+                {"error": "phone_number required"},
+                status_code=400
+            )
+        
+        phone = phone.lstrip('+')
+        result = send_verification_code(phone)
+        return JSONResponse(result)
+    
+    except Exception as e:
+        return JSONResponse(
+            {"error": f"Failed to send verification code: {str(e)}"},
+            status_code=500
+        )
+
+
+async def api_verify_code(request):
+    """Verify user-entered 2FA code"""
+    try:
+        data = await request.json()
+        reference_id = data.get('reference_id')
+        code = data.get('code')
+        
+        if not reference_id or not code:
+            return JSONResponse(
+                {"error": "reference_id and code required"},
+                status_code=400
+            )
+        
+        result = verify_code(reference_id, code)
+        return JSONResponse(result)
+    
+    except Exception as e:
+        return JSONResponse(
+            {"error": f"Failed to verify code: {str(e)}"},
+            status_code=500
+        )
+
+
+async def api_assess_risk(request):
+    """Assess phone number fraud risk"""
+    try:
+        data = await request.json()
+        phone = data.get('phone_number')
+        
+        if not phone:
+            return JSONResponse(
+                {"error": "phone_number required"},
+                status_code=400
+            )
+        
+        phone = phone.lstrip('+')
+        result = assess_phone_risk(phone)
+        return JSONResponse(result)
+    
+    except Exception as e:
+        return JSONResponse(
+            {"error": f"Failed to assess phone risk: {str(e)}"},
+            status_code=500
+        )
+
+
+async def api_send_template(request):
+    """Send WhatsApp template message"""
+    try:
+        data = await request.json()
+        phone = data.get('phone_number')
+        template_id = data.get('template_id')
+        parameters = data.get('parameters', [])
+        
+        if not phone or not template_id:
+            return JSONResponse(
+                {"error": "phone_number and template_id required"},
+                status_code=400
+            )
+        
+        phone = phone.lstrip('+')
+        result = send_whatsapp_template(phone, template_id, parameters)
+        return JSONResponse(result)
+    
+    except Exception as e:
+        return JSONResponse(
+            {"error": f"Failed to send template: {str(e)}"},
+            status_code=500
+        )
+
+
+async def api_send_media(request):
+    """Send WhatsApp media message"""
+    try:
+        data = await request.json()
+        phone = data.get('phone_number')
+        media_url = data.get('media_url')
+        caption = data.get('caption', '')
+        media_type = data.get('media_type', 'image')
+        
+        if not phone or not media_url:
+            return JSONResponse(
+                {"error": "phone_number and media_url required"},
+                status_code=400
+            )
+        
+        phone = phone.lstrip('+')
+        result = send_whatsapp_media(phone, media_url, caption, media_type)
+        return JSONResponse(result)
+    
+    except Exception as e:
+        return JSONResponse(
+            {"error": f"Failed to send media: {str(e)}"},
+            status_code=500
+        )
+
+
+async def api_send_buttons(request):
+    """Send WhatsApp interactive buttons"""
+    try:
+        data = await request.json()
+        phone = data.get('phone_number')
+        body_text = data.get('body_text')
+        buttons = data.get('buttons', [])
+        
+        if not phone or not body_text or not buttons:
+            return JSONResponse(
+                {"error": "phone_number, body_text, and buttons required"},
+                status_code=400
+            )
+        
+        phone = phone.lstrip('+')
+        result = send_whatsapp_buttons(phone, body_text, buttons)
+        return JSONResponse(result)
+    
+    except Exception as e:
+        return JSONResponse(
+            {"error": f"Failed to send buttons: {str(e)}"},
+            status_code=500
+        )
+
+
 # Create the Starlette app instance with routes
 # Note: CORS is handled at the top level in main.py
 api_app = Starlette(
@@ -219,6 +473,18 @@ api_app = Starlette(
         Route("/api/status", api_status),
         Route("/api/chat", api_chat, methods=["POST"]),
         Route("/login", login),
-        Route("/callback", callback)
+        Route("/callback", callback),
+        
+        # WhatsApp/Telesign endpoints
+        Route("/api/whatsapp/send-message", api_send_whatsapp, methods=["POST"]),
+        Route("/api/whatsapp/send-sms", api_send_sms, methods=["POST"]),
+        Route("/api/whatsapp/verify-phone", api_verify_phone, methods=["POST"]),
+        Route("/api/whatsapp/status/{reference_id}", api_message_status, methods=["GET"]),
+        Route("/api/whatsapp/send-verification", api_send_verification_code, methods=["POST"]),
+        Route("/api/whatsapp/verify-code", api_verify_code, methods=["POST"]),
+        Route("/api/whatsapp/assess-risk", api_assess_risk, methods=["POST"]),
+        Route("/api/whatsapp/send-template", api_send_template, methods=["POST"]),
+        Route("/api/whatsapp/send-media", api_send_media, methods=["POST"]),
+        Route("/api/whatsapp/send-buttons", api_send_buttons, methods=["POST"]),
     ]
 )
