@@ -1,0 +1,20 @@
+[
+  {
+    "timestamp": "2025-11-03T22:03:26.685232Z",
+    "transaction_type": "WhatsApp",
+    "phone_number": "16027395506",
+    "status_code": 200,
+    "reference_id": "56692EFC5BCC0168919158C832FC21F3",
+    "message": "Hey this is a whatsapp message!",
+    "error": [],
+    "response": {
+      "reference_id": "56692EFC5BCC0168919158C832FC21F3",
+      "external_id": null,
+      "status": {
+        "code": 290,
+        "description": "Message in progress"
+      }
+    },
+    "success": true
+  }
+]
