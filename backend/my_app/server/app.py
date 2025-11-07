@@ -349,6 +349,7 @@ async def api_verify_code(request):
         data = await request.json()
         reference_id = data.get('reference_id')
         code = data.get('code')
+        original_code = data.get('original_code')  # ADD THIS
         
         if not reference_id or not code:
             return JSONResponse(
@@ -356,7 +357,7 @@ async def api_verify_code(request):
                 status_code=400
             )
         
-        result = verify_code(reference_id, code)
+        result = verify_code(reference_id, code, original_code)  # UPDATE THIS
         return JSONResponse(result)
     
     except Exception as e:
@@ -371,6 +372,7 @@ async def api_assess_risk(request):
     try:
         data = await request.json()
         phone = data.get('phone_number')
+        lifecycle_event = data.get('account_lifecycle_event', 'create')  # ADD THIS
         
         if not phone:
             return JSONResponse(
@@ -379,7 +381,7 @@ async def api_assess_risk(request):
             )
         
         phone = phone.lstrip('+')
-        result = assess_phone_risk(phone)
+        result = assess_phone_risk(phone, lifecycle_event)  # UPDATE THIS
         return JSONResponse(result)
     
     except Exception as e:

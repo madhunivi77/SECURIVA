@@ -161,3 +161,24 @@ All MCP tool executions are automatically logged to `backend/logs/`:
 ```
 
 Toggle logging with `ENABLE_TOOL_LOGGING="false"` in `.env`.
+
+---
+
+## Telesign SMS Integration
+
+### Current Capabilities ✅
+- ✅ Send SMS messages
+- ✅ Phone number verification (PhoneID)
+- ✅ 2FA verification codes
+- ✅ Fraud risk assessment
+- ✅ Message delivery status tracking
+- ✅ Transaction logging
+
+### Future Enhancements (Requires WhatsApp Business API) 🔜
+- 🔜 WhatsApp message delivery
+- 🔜 WhatsApp template messages
+- 🔜 WhatsApp media messages (images, videos, docs)
+- 🔜 WhatsApp interactive buttons
+
+### Testing
+Run the SMS test suite:
