@@ -1,4 +1,4 @@
-"""uv 
+﻿"""
 Telesign authentication and messaging using the official Enterprise SDK
 """
 
@@ -9,98 +9,68 @@ import hashlib
 import json
 import random
 from email.utils import formatdate
-from telesignenterprise.messaging import MessagingClient
+from telesignenterprise.messaging import MessagingClient 
 from telesignenterprise.phoneid import PhoneIdClient
-from telesignenterprise.verify import VerifyClient  #no access without full client yet
+from telesignenterprise.verify import VerifyClient
+from telesign.score import ScoreClient
+from telesign.util import random_with_n_digits
 from dotenv import load_dotenv
 import requests
-from .telesign_logging import log_transaction #newly added
 
 load_dotenv()
 
 # Load credentials from environment
 CUSTOMER_ID = os.getenv("TELESIGN_CUSTOMER_ID")
 API_KEY = os.getenv("TELESIGN_API_KEY")
-
-
-def random_with_n_digits(n: int) -> str:
-    """
-    Generate a random number with n digits
-    
-    Args:
-        n: Number of digits
-    
-    Returns:
-        str: Random number as string with exactly n digits
-    """
-    range_start = 10 ** (n - 1)
-    range_end = (10 ** n) - 1
-    return str(random.randint(range_start, range_end))
+SENDER_ID = os.getenv("TELESIGN_SENDER_ID", "2623984079")
 
 
 def get_messaging_client() -> MessagingClient:
-    """
-    Get an authenticated Telesign Messaging client
-    
-    Returns:
-        MessagingClient: Ready-to-use Telesign messaging client
-    """
+    """Get an authenticated Telesign Messaging client"""
     if not CUSTOMER_ID or not API_KEY:
         raise ValueError("TELESIGN_CUSTOMER_ID and TELESIGN_API_KEY must be set in .env")
-    
     return MessagingClient(CUSTOMER_ID, API_KEY)
 
 
 def get_verify_client() -> VerifyClient:
-    """
-    Get an authenticated Telesign Verify client
-    
-    Returns:
-        VerifyClient: Ready-to-use Telesign verify client
-    """
+    """Get an authenticated Telesign Verify client"""
     if not CUSTOMER_ID or not API_KEY:
         raise ValueError("TELESIGN_CUSTOMER_ID and TELESIGN_API_KEY must be set in .env")
-    
     return VerifyClient(CUSTOMER_ID, API_KEY)
 
 
-def send_otp_sms(phone_number: str, code_length: int = 5, sender_id: str = None) -> dict:
+def get_score_client() -> ScoreClient:
+    """Get an authenticated Telesign Score (Intelligence) client"""
+    if not CUSTOMER_ID or not API_KEY:
+        raise ValueError("TELESIGN_CUSTOMER_ID and TELESIGN_API_KEY must be set in .env")
+    return ScoreClient(CUSTOMER_ID, API_KEY)
+
+
+def send_sms(phone_number: str, message: str) -> dict:
     """
-    Send a one-time passcode (OTP) via SMS using Telesign VerifyClient
-    This generates and sends a custom OTP code
+    Send an SMS message using Telesign - FOLLOWING TELESIGN'S EXAMPLE
     
     Args:
-        phone_number: Target phone number (without + prefix for trial accounts)
-        code_length: Length of OTP code (default: 5 digits)
-        sender_id: Optional sender ID for SMS
+        phone_number: Target phone number (without + prefix for trial)
+        message: SMS message text
     
     Returns:
-        dict: Contains reference_id, verify_code, and response details
-    
-    Example:
-        >>> result = send_otp_sms("16027395506", code_length=6)
-        >>> print(f"OTP sent! Reference: {result['reference_id']}")
-        >>> print(f"Code (for testing): {result['verify_code']}")
+        dict: Response from Telesign API
     """
-    # Generate one-time passcode (OTP) for verification
-    verify_code = random_with_n_digits(code_length)
+    # Set message type and sender ID (from Telesign example)
+    message_type = "OTP"
+    #sender_id = SENDER_ID
     
-    # Instantiate a verification client object
-    verify_client = get_verify_client()
+    # Instantiate a messaging client object (from Telesign example)
+    messaging = get_messaging_client()
     
-    # Create the parameters dictionary
-    params = {
-        'verify_code': verify_code
-    }
+    # Make the request and capture the response (from Telesign example)
+    response = messaging.message(phone_number, message, message_type)
     
-    # Add optional sender ID if provided
-    if sender_id:
-        params['sender_id'] = sender_id
+    # Display the response body in the console for debugging purposes
+    print(f"\nResponse:\n{response.body}\n")
     
-    # Make the request and capture the response
-    response = verify_client.sms(phone_number, **params)
-    
-    # Parse response body
+    # Parse response
     try:
         if isinstance(response.body, str):
             response_data = json.loads(response.body)
@@ -109,159 +79,59 @@ def send_otp_sms(phone_number: str, code_length: int = 5, sender_id: str = None)
     except (json.JSONDecodeError, AttributeError):
         response_data = {}
     
-    # Debug output
-    print(f"\nOTP SMS Response:")
-    print(f"  HTTP Status: {response.status_code}")
-    print(f"  Response Body: {response.body}")
-    print(f"  Generated OTP: {verify_code} (DO NOT expose in production!)")
-    
     return {
         "status_code": response.status_code,
         "reference_id": response_data.get("reference_id"),
-        "verify_code": verify_code,  # Include for testing (remove in production)
         "status": response_data.get("status"),
+        "errors": response_data.get("errors", []),
         "full_response": response_data
     }
 
 
-def verify_otp_code(original_code: str, user_entered_code: str) -> dict:
+def send_whatsapp_message(phone_number: str, message: str) -> dict:
     """
-    Verify a user-entered OTP code against the original code
-    This is a local comparison (not an API call)
-    
-    Args:
-        original_code: The original OTP code that was generated
-        user_entered_code: The code entered by the user
-    
-    Returns:
-        dict: Verification result with 'valid' boolean
-    
-    Example:
-        >>> result = verify_otp_code("12345", "12345")
-        >>> if result['valid']:
-        ...     print("Access granted!")
+    Send a WhatsApp message (when account is upgraded)
     """
-    is_valid = original_code == user_entered_code.strip()
+    message_type = "ARN"  # ARN for WhatsApp
+    sender_id = SENDER_ID
+    
+    messaging = get_messaging_client()
+    response = messaging.message(phone_number, message, message_type, **{"sender_id": sender_id})
+    
+    print(f"\nResponse:\n{response.body}\n")
+    
+    try:
+        if isinstance(response.body, str):
+            response_data = json.loads(response.body)
+        else:
+            response_data = response.body
+    except (json.JSONDecodeError, AttributeError):
+        response_data = {}
     
     return {
-        "valid": is_valid,
-        "message": "Code is correct" if is_valid else "Code is incorrect"
-    }
-
-
-def send_whatsapp_message(phone_number: str, message: str, message_type: str = "ARN") -> dict:
-    """
-    Send a WhatsApp message using Telesign Enterprise SDK
-    
-    Args:
-        phone_number: Target phone number in E.164 format (e.g., +12345678900)
-        message: Message text to send
-        message_type: Message type ("ARN" for WhatsApp, "OTP" for SMS, etc.)
-    
-    Returns:
-        dict: Response from Telesign API containing status and reference_id
-    
-    Example:
-        >>> response = send_whatsapp_message("+12345678900", "Hello from Securiva!")
-        >>> print(response.json)
-        {
-            "reference_id": "ABCD1234567890",
-            "status": {
-                "code": 290,
-                "description": "Message in progress"
-            }
-        }
-    """
-    client = get_messaging_client()
-    
-    # The SDK handles all authentication automatically
-    response = client.message(
-        phone_number=phone_number,
-        message=message,
-        message_type=message_type
-    )
-    
-    result = {
         "status_code": response.status_code,
-        "reference_id": response.json.get("reference_id"),
-        "status": response.json.get("status"),
-        "errors": response.json.get("errors", []),
-        "full_response": response.json
+        "reference_id": response_data.get("reference_id"),
+        "status": response_data.get("status"),
+        "errors": response_data.get("errors", []),
+        "full_response": response_data
     }
-    
-    # Log the transaction
-    log_transaction(
-        transaction_type="WhatsApp" if message_type == "ARN" else "SMS",
-        phone_number=phone_number,
-        status_code=result['status_code'],
-        reference_id=result.get('reference_id'),
-        message=message,
-        response_data=result.get('full_response'),
-        error=result.get('errors')
-    )
-    
-    return result
-
-
-def send_sms(phone_number: str, message: str) -> dict:
-    """
-    Send an SMS message using Telesign
-    
-    Args:
-        phone_number: Target phone number in E.164 format
-        message: SMS message text
-    
-    Returns:
-        dict: Response from Telesign API
-    """
-    result = send_whatsapp_message(phone_number, message, message_type="OTP")
-    
-    # Log the transaction
-    log_transaction(
-        transaction_type="SMS",
-        phone_number=phone_number,
-        status_code=result['status_code'],
-        reference_id=result.get('reference_id'),
-        message=message,
-        response_data=result.get('full_response'),
-        error=result.get('errors')
-    )
-    
-    return result
 
 
 def verify_phone_number(phone_number: str) -> dict:
-    """
-    Verify a phone number using Telesign PhoneID SDK
-    Following Telesign's official example pattern
-    
-    Args:
-        phone_number: Phone number to verify in E.164 format (e.g., +16027395506)
-    
-    Returns:
-        dict: Verification result with phone number details
-    """
+    """Verify a phone number using Telesign PhoneID SDK"""
     if not CUSTOMER_ID or not API_KEY:
         raise ValueError("TELESIGN_CUSTOMER_ID and TELESIGN_API_KEY must be set in .env")
     
-    # Instantiate a Phone ID client object
     client = PhoneIdClient(CUSTOMER_ID, API_KEY)
     
-    # Add the payload (matching Telesign's example)
     payload = {  
-        "addons": {
-            "contact": {}
-        },
+        "addons": {"contact": {}},
         "phone_number": phone_number
     }
     
-    # Make the request and capture the response
     response = client.phoneid(**payload)
-    
-    # Debug output (matching Telesign's example)
     print(f"\nPhoneID Response:\n{response.body}\n")
     
-    # Parse response - response.body might be string or dict
     try:
         if isinstance(response.body, str):
             response_data = json.loads(response.body)
@@ -271,11 +141,33 @@ def verify_phone_number(phone_number: str) -> dict:
         response_data = {}
     
     if response.status_code == 200:
+        # Extract detailed information from the response
+        location = response_data.get("location", {})
+        numbering = response_data.get("numbering", {})
+        contact = response_data.get("contact", {})
+        
         return {
             "status_code": response.status_code,
+            "reference_id": response_data.get("reference_id"),
             "phone_type": response_data.get("phone_type", {}).get("description", "Unknown"),
-            "carrier": response_data.get("numbering", {}).get("original", {}).get("carrier", {}).get("name", "Unknown"),
-            "country": response_data.get("location", {}).get("country", {}).get("name", "Unknown"),
+            "carrier": response_data.get("carrier", {}).get("name", "Unknown"),
+            "country": location.get("country", {}).get("name", "Unknown"),
+            "country_code": location.get("country", {}).get("iso2", ""),
+            "state": location.get("state", ""),
+            "city": location.get("city", ""),
+            "zip": location.get("zip", ""),
+            "time_zone": location.get("time_zone", {}).get("name", ""),
+            "formatted_number": numbering.get("original", {}).get("complete_phone_number", ""),
+            "blocked": response_data.get("blocklisting", {}).get("blocked", False),
+            "contact_info": {
+                "first_name": contact.get("first_name", ""),
+                "last_name": contact.get("last_name", ""),
+                "email": contact.get("email_address", ""),
+                "address": contact.get("address1", ""),
+                "city": contact.get("city", ""),
+                "state": contact.get("state_province", ""),
+                "zip": contact.get("zip_postal_code", "")
+            },
             "full_response": response_data
         }
     else:
@@ -290,15 +182,7 @@ def verify_phone_number(phone_number: str) -> dict:
 
 
 def get_message_status(reference_id: str) -> dict:
-    """
-    Check the delivery status of a sent message
-    
-    Args:
-        reference_id: Reference ID returned when message was sent
-    
-    Returns:
-        dict: Current status of the message
-    """
+    """Check the delivery status of a sent message"""
     client = get_messaging_client()
     response = client.status(reference_id)
     
@@ -309,148 +193,135 @@ def get_message_status(reference_id: str) -> dict:
     }
 
 
-# Alias for backward compatibility
-def load_credentials() -> tuple[str, str]:
+def send_verification_code(phone_number: str, code_length: int = 5) -> dict:
     """
-    Load Telesign credentials (legacy function for compatibility)
+    Send a 2FA verification code using Telesign Verify SDK
+    
+    Args:
+        phone_number: Target phone number (without + prefix for trial)
+        code_length: Length of verification code (default: 5)
     
     Returns:
-        tuple: (customer_id, api_key)
+        dict: Response with reference_id and generated code (for testing)
     """
-    if not CUSTOMER_ID or not API_KEY:
-        raise ValueError("TELESIGN_CUSTOMER_ID and TELESIGN_API_KEY must be set in .env")
-    return CUSTOMER_ID, API_KEY
-
-
-def send_verification_code(phone_number: str, code_length: int = 6) -> dict:
-    """
-    Send a 2FA verification code (legacy method using REST API)
+    # Generate one-time passcode (OTP) for verification
+    verify_code = random_with_n_digits(code_length)
     
-    Note: Consider using send_otp_sms() instead for better OTP handling
+    # Instantiate a verification client object
+    verify = get_verify_client()
     
-    Returns:
-        dict: Contains reference_id for later verification
-    """
-    timestamp = formatdate(timeval=None, localtime=False, usegmt=True)
-    resource = "/v1/verify/sms"
-    
-    signature = base64.b64encode(
-        hmac.new(
-            API_KEY.encode('utf-8'),
-            f"POST\napplication/json\n\nx-ts-date:{timestamp}\n{resource}".encode('utf-8'),
-            hashlib.sha256
-        ).digest()
-    ).decode('utf-8')
-    
-    headers = {
-        "Authorization": f"TSA {CUSTOMER_ID}:{signature}",
-        "x-ts-date": timestamp,
-        "Content-Type": "application/json"
+    # Create the parameters dictionary
+    params = {
+        'verify_code': verify_code,
+        'sender_id': SENDER_ID
     }
     
-    payload = {
-        "phone_number": phone_number,
-        "verify_code": None,  # Telesign generates it
-        "template": f"Your Securiva verification code is: $$CODE$$"
-    }
+    # Make the request and capture the response
+    response = verify.sms(phone_number, **params)
     
-    response = requests.post(f"https://rest-api.telesign.com{resource}", json=payload, headers=headers)
-    response_json = response.json()
+    # Display the response in the console for debugging purposes
+    print(f"Response HTTP status: {response.status_code}")
+    print(f"Response body: {response.body}")
+    
+    # Parse response
+    try:
+        if isinstance(response.body, str):
+            response_data = json.loads(response.body)
+        else:
+            response_data = response.body
+    except (json.JSONDecodeError, AttributeError):
+        response_data = {}
     
     return {
         "status_code": response.status_code,
-        "reference_id": response_json.get("reference_id"),
-        "verify_code": response_json.get("verify", {}).get("code_state"),  # Don't expose actual code
-        "full_response": response_json
+        "reference_id": response_data.get("reference_id"),
+        "verify_code": verify_code,  # Include for testing purposes
+        "status": response_data.get("status"),
+        "errors": response_data.get("errors", []),
+        "full_response": response_data
     }
 
 
-def verify_code(reference_id: str, user_code: str) -> dict:
+def verify_code(reference_id: str, user_code: str, original_code: str = None) -> dict:
     """
-    Verify a user-entered code against Telesign's stored code (legacy method)
+    Verify a user-entered code
     
     Args:
-        reference_id: From send_verification_code response
+        reference_id: Reference ID from send_verification_code
         user_code: Code entered by user
+        original_code: Original generated code (for local verification)
     
     Returns:
-        dict: Verification result (valid/invalid)
+        dict: Verification result
     """
-    timestamp = formatdate(timeval=None, localtime=False, usegmt=True)
-    resource = f"/v1/verify/{reference_id}"
+    # Strip whitespace from user input
+    user_code = user_code.strip()
     
-    # FIXED: Use POST instead of GET
-    signature = base64.b64encode(
-        hmac.new(
-            API_KEY.encode('utf-8'),
-            f"POST\napplication/json\n\nx-ts-date:{timestamp}\n{resource}".encode('utf-8'),
-            hashlib.sha256
-        ).digest()
-    ).decode('utf-8')
-    
-    headers = {
-        "Authorization": f"TSA {CUSTOMER_ID}:{signature}",
-        "x-ts-date": timestamp,
-        "Content-Type": "application/json"
-    }
-    
-    # Send code in request body, not query params
-    payload = {"verify_code": user_code}
-    
-    # FIXED: Use POST request
-    response = requests.post(
-        f"https://rest-api.telesign.com{resource}", 
-        json=payload, 
-        headers=headers
-    )
-    response_json = response.json()
-    
-    return {
-        "status_code": response.status_code,
-        "valid": response_json.get("verify", {}).get("code_state") == "VALID",
-        "full_response": response_json
-    }
+    # Determine if the codes match
+    if original_code:
+        is_valid = (original_code == user_code)
+        
+        return {
+            "status_code": 200,
+            "valid": is_valid,
+            "message": "Your code is correct." if is_valid else "Your code is incorrect.",
+            "reference_id": reference_id
+        }
+    else:
+        return {
+            "status_code": 400,
+            "valid": False,
+            "message": "Original verification code not provided",
+            "reference_id": reference_id
+        }
 
 
-def assess_phone_risk(phone_number: str) -> dict:
+def assess_phone_risk(phone_number: str, account_lifecycle_event: str = "create") -> dict:
     """
-    Get fraud risk assessment for a phone number using PhoneID Score
-    Useful for detecting suspicious registrations
+    Get fraud risk assessment for a phone number using Telesign Intelligence (Score API)
     
     Args:
-        phone_number: Phone number to assess in E.164 format
+        phone_number: Phone number to assess
+        account_lifecycle_event: Stage of account lifecycle (create, sign-in, transact, update)
     
     Returns:
-        dict: Risk assessment details
+        dict: Risk assessment results
     """
     if not CUSTOMER_ID or not API_KEY:
         raise ValueError("TELESIGN_CUSTOMER_ID and TELESIGN_API_KEY must be set in .env")
     
-    client = PhoneIdClient(CUSTOMER_ID, API_KEY)
-    
-    # Use SDK method for PhoneID Score
-    payload = {
-        "phone_number": phone_number,
-        "account_lifecycle_event": "create"  # Options: create, sign-in, transact, update, delete
-    }
+    # Instantiate an Intelligence client object
+    intelligence = get_score_client()
     
     try:
-        response = client.score(**payload)
+        # Make the request and capture the response
+        # The request_risk_insights flag is needed to use the latest version of Intelligence
+        response = intelligence.score(phone_number, account_lifecycle_event, request_risk_insights="true")
         
-        # Parse response body
+        # Display the response body in the console for debugging purposes
+        print(f"\nResponse:\n{response.body}\n")
+        
+        # Parse response
         if isinstance(response.body, str):
             response_data = json.loads(response.body)
         else:
             response_data = response.body
         
-        print(f"\nPhoneID Score Response:\n{response.body}\n")
-        
         if response.status_code == 200:
+            # Extract risk information
+            risk_data = response_data.get("risk", {})
+            phone_type_data = response_data.get("phone_type", {})
+            numbering_data = response_data.get("numbering", {})
+            
             return {
                 "status_code": response.status_code,
-                "risk_level": response_data.get("risk", {}).get("level"),  # low/medium/high
-                "risk_score": response_data.get("risk", {}).get("score"),  # 0-1000
-                "recommendation": response_data.get("risk", {}).get("recommendation"),  # allow/flag/block
+                "reference_id": response_data.get("reference_id"),
+                "risk_level": risk_data.get("level"),
+                "risk_score": risk_data.get("score"),
+                "recommendation": risk_data.get("recommendation"),
+                "phone_type": phone_type_data.get("description", "Unknown"),
+                "carrier": numbering_data.get("original", {}).get("carrier", {}).get("name", "Unknown"),
+                "account_lifecycle_event": account_lifecycle_event,
                 "full_response": response_data
             }
         else:
@@ -473,149 +344,34 @@ def assess_phone_risk(phone_number: str) -> dict:
         }
 
 
+# Placeholder functions for WhatsApp features (require upgraded account)
 def send_whatsapp_template(phone_number: str, template_id: str, parameters: list = None) -> dict:
-    """
-    Send a pre-approved WhatsApp template message
-    
-    Args:
-        phone_number: Target phone number in E.164 format
-        template_id: WhatsApp Business template ID
-        parameters: List of parameter values for template placeholders
-    
-    Returns:
-        dict: Response from Telesign API
-    """
-    timestamp = formatdate(timeval=None, localtime=False, usegmt=True)
-    resource = "/v1/messaging"
-    
-    signature = base64.b64encode(
-        hmac.new(
-            API_KEY.encode('utf-8'),
-            f"POST\napplication/json\n\nx-ts-date:{timestamp}\n{resource}".encode('utf-8'),
-            hashlib.sha256
-        ).digest()
-    ).decode('utf-8')
-    
-    headers = {
-        "Authorization": f"TSA {CUSTOMER_ID}:{signature}",
-        "x-ts-date": timestamp,
-        "Content-Type": "application/json"
-    }
-    
-    payload = {
-        "phone_number": phone_number,
-        "message_type": "ARN",
-        "template": template_id,
-        "template_params": parameters or []
-    }
-    
-    response = requests.post(f"https://rest-api.telesign.com{resource}", json=payload, headers=headers)
-    response_json = response.json()
-    
+    """Send WhatsApp template message (requires WhatsApp Business API)"""
     return {
-        "status_code": response.status_code,
-        "reference_id": response_json.get("reference_id"),
-        "status": response_json.get("status"),
-        "full_response": response_json
+        "status_code": 501,
+        "error": "WhatsApp templates require WhatsApp Business API access. Contact Telesign to upgrade."
     }
 
 
 def send_whatsapp_media(phone_number: str, media_url: str, caption: str = "", media_type: str = "image") -> dict:
-    """
-    Send WhatsApp media message (image, video, document)
-    
-    Args:
-        phone_number: Target phone number in E.164 format
-        media_url: Public URL of the media file
-        caption: Optional caption for the media
-        media_type: Type of media (image, video, document, audio)
-    
-    Returns:
-        dict: Response from Telesign API
-    """
-    timestamp = formatdate(timeval=None, localtime=False, usegmt=True)
-    resource = "/v1/messaging"
-    
-    signature = base64.b64encode(
-        hmac.new(
-            API_KEY.encode('utf-8'),
-            f"POST\napplication/json\n\nx-ts-date:{timestamp}\n{resource}".encode('utf-8'),
-            hashlib.sha256
-        ).digest()
-    ).decode('utf-8')
-    
-    headers = {
-        "Authorization": f"TSA {CUSTOMER_ID}:{signature}",
-        "x-ts-date": timestamp,
-        "Content-Type": "application/json"
-    }
-    
-    payload = {
-        "phone_number": phone_number,
-        "message_type": "ARN",
-        "media": {
-            "type": media_type,
-            "url": media_url,
-            "caption": caption
-        }
-    }
-    
-    response = requests.post(f"https://rest-api.telesign.com{resource}", json=payload, headers=headers)
-    response_json = response.json()
-    
+    """Send WhatsApp media message (requires WhatsApp Business API)"""
     return {
-        "status_code": response.status_code,
-        "reference_id": response_json.get("reference_id"),
-        "status": response_json.get("status"),
-        "full_response": response_json
+        "status_code": 501,
+        "error": "WhatsApp media requires WhatsApp Business API access. Contact Telesign to upgrade."
     }
 
 
-def send_whatsapp_buttons(phone_number: str, body_text: str, buttons: list[dict]) -> dict:
-    """
-    Send WhatsApp interactive button message
-    
-    Args:
-        phone_number: Target phone number in E.164 format
-        body_text: Main message text
-        buttons: List of button objects [{"id": "1", "title": "Option 1"}, ...]
-    
-    Returns:
-        dict: Response from Telesign API
-    """
-    timestamp = formatdate(timeval=None, localtime=False, usegmt=True)
-    resource = "/v1/messaging"
-    
-    signature = base64.b64encode(
-        hmac.new(
-            API_KEY.encode('utf-8'),
-            f"POST\napplication/json\n\nx-ts-date:{timestamp}\n{resource}".encode('utf-8'),
-            hashlib.sha256
-        ).digest()
-    ).decode('utf-8')
-    
-    headers = {
-        "Authorization": f"TSA {CUSTOMER_ID}:{signature}",
-        "x-ts-date": timestamp,
-        "Content-Type": "application/json"
-    }
-    
-    payload = {
-        "phone_number": phone_number,
-        "message_type": "ARN",
-        "interactive": {
-            "type": "button",
-            "body": {"text": body_text},
-            "action": {"buttons": buttons}
-        }
-    }
-    
-    response = requests.post(f"https://rest-api.telesign.com{resource}", json=payload, headers=headers)
-    response_json = response.json()
-    
+def send_whatsapp_buttons(phone_number: str, body_text: str, buttons: list) -> dict:
+    """Send WhatsApp interactive buttons (requires WhatsApp Business API)"""
     return {
-        "status_code": response.status_code,
-        "reference_id": response_json.get("reference_id"),
-        "status": response_json.get("status"),
-        "full_response": response_json
+        "status_code": 501,
+        "error": "WhatsApp buttons require WhatsApp Business API access. Contact Telesign to upgrade."
     }
+
+
+# Keep backward compatibility
+def load_credentials() -> tuple[str, str]:
+    """Load Telesign credentials"""
+    if not CUSTOMER_ID or not API_KEY:
+        raise ValueError("TELESIGN_CUSTOMER_ID and TELESIGN_API_KEY must be set in .env")
+    return CUSTOMER_ID, API_KEY

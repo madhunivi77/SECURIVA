@@ -1,25 +1,21 @@
 ﻿"""
-Test file for Telesign WhatsApp functionality using the Enterprise SDK
+Test file for Telesign SMS functionality using the Enterprise SDK
 """
 
 import os
 from dotenv import load_dotenv
 from my_app.server.telesign_auth import (
-    send_whatsapp_message,
     send_sms,
     verify_phone_number,
     get_message_status,
     get_messaging_client,
     send_verification_code,
     verify_code,
-    assess_phone_risk,
-    send_whatsapp_template,
-    send_whatsapp_media,
-    send_whatsapp_buttons
+    assess_phone_risk  
 )
 
 print("=" * 60)
-print("TELESIGN ENTERPRISE SDK TEST")
+print("TELESIGN SMS TEST SUITE")
 print("=" * 60)
 
 load_dotenv()
@@ -84,6 +80,35 @@ def confirm_action(action: str) -> bool:
     return response in ['yes', 'y']
 
 
+def get_lifecycle_event() -> str:
+    """
+    Get account lifecycle event selection from user
+    
+    Returns:
+        str: Selected lifecycle event
+    """
+    print("\nSelect account lifecycle stage:")
+    print("  1. create - New account registration")
+    print("  2. sign-in - User login/authentication")
+    print("  3. transact - Financial transaction")
+    print("  4. update - Account information update")
+    print("  Press Enter for default (create)")
+    
+    choice = input("Choice (1-4): ").strip()
+    
+    lifecycle_map = {
+        "1": "create",
+        "2": "sign-in",
+        "3": "transact",
+        "4": "update",
+        "": "create"
+    }
+    
+    event = lifecycle_map.get(choice, "create")
+    print(f"  → Using lifecycle event: {event}")
+    return event
+
+
 # ===== Test 1: Verify Credentials =====
 def test_credentials():
     print("\n" + "=" * 60)
@@ -112,7 +137,6 @@ def test_phone_verification():
     print("  • Phone type (mobile, landline, VoIP, etc.)")
     print("  • Carrier/operator name")
     print("  • Country information")
-    print("  • Line type and status")
     
     phone = get_phone_input("Enter phone number to verify")
     
@@ -129,6 +153,8 @@ def test_phone_verification():
             print(f"   Phone Type: {result.get('phone_type', 'Unknown')}")
             print(f"   Carrier: {result.get('carrier', 'Unknown')}")
             print(f"   Country: {result.get('country', 'Unknown')}")
+            print(f"   State: {result.get('state', 'Unknown')}")
+            print(f"   City: {result.get('city', 'Unknown')}")
         else:
             print(f"⚠️  Status Code: {result['status_code']}")
             print(f"   Error: {result.get('error', 'Unknown error')}")
@@ -183,56 +209,10 @@ def test_send_sms():
         return None
 
 
-# ===== Test 4: Send WhatsApp Message =====
-def test_send_whatsapp():
-    print("\n" + "=" * 60)
-    print("TEST 4: Send WhatsApp Message")
-    print("=" * 60)
-    print("This test sends a WhatsApp text message.")
-    print("Note: The recipient must have WhatsApp installed.")
-    
-    phone = get_phone_input("Enter destination phone number for WhatsApp")
-    
-    if not phone:
-        print("⚠️  Test skipped")
-        return None
-    
-    print("\nEnter your WhatsApp message:")
-    print("  (Press Enter for default message)")
-    message = input("Message: ").strip()
-    if not message:
-        message = "Hello from Securiva! This is a test WhatsApp message."
-        print(f"  → Using default: '{message}'")
-    
-    if not confirm_action(f"Send WhatsApp message to {phone}"):
-        print("❌ Test cancelled")
-        return None
-    
-    try:
-        print("\n🔄 Sending WhatsApp message...")
-        result = send_whatsapp_message(phone, message)
-        
-        if result['status_code'] == 200:
-            print(f"✅ SUCCESS: WhatsApp message sent")
-            print(f"   Reference ID: {result['reference_id']}")
-            print(f"   Status: {result['status']}")
-            return result['reference_id']
-        else:
-            print(f"⚠️  Status Code: {result['status_code']}")
-            print(f"   Errors: {result.get('errors', [])}")
-            return None
-    except Exception as e:
-        print(f"❌ FAILED: Could not send WhatsApp message")
-        print(f"   Error: {e}")
-        import traceback
-        traceback.print_exc()
-        return None
-
-
-# ===== Test 5: Check Message Status =====
+# ===== Test 4: Check Message Status =====
 def test_message_status(reference_id: str = None):
     print("\n" + "=" * 60)
-    print("TEST 5: Check Message Delivery Status")
+    print("TEST 4: Check Message Delivery Status")
     print("=" * 60)
     print("This test checks the delivery status of a previously sent message.")
     
@@ -268,10 +248,10 @@ def test_message_status(reference_id: str = None):
         print(f"   Error: {e}")
 
 
-# ===== Test 6: Send 2FA Verification Code =====
+# ===== Test 5: Send 2FA Verification Code =====
 def test_send_verification_code():
     print("\n" + "=" * 60)
-    print("TEST 6: Send 2FA Verification Code")
+    print("TEST 5: Send 2FA Verification Code")
     print("=" * 60)
     print("This test sends a verification code for two-factor authentication.")
     print("Telesign will automatically generate and send the code.")
@@ -293,11 +273,16 @@ def test_send_verification_code():
         if result['status_code'] == 200:
             print(f"✅ SUCCESS: Verification code sent")
             print(f"   Reference ID: {result['reference_id']}")
-            print(f"   → The recipient should receive a code via SMS")
-            print(f"   → Use Test 7 to verify the code they received")
-            return result['reference_id']
+            print(f"   Generated Code: {result['verify_code']} (for testing)")
+            print(f"   → The recipient should receive this code via SMS")
+            print(f"   → Use Test 6 to verify the code they received")
+            return {
+                'reference_id': result['reference_id'],
+                'verify_code': result['verify_code']
+            }
         else:
             print(f"⚠️  Status Code: {result['status_code']}")
+            print(f"   Errors: {result.get('errors', [])}")
             return None
     except Exception as e:
         print(f"❌ FAILED: Could not send verification code")
@@ -305,21 +290,32 @@ def test_send_verification_code():
         return None
 
 
-# ===== Test 7: Verify 2FA Code =====
-def test_verify_code(reference_id: str = None):
+# ===== Test 6: Verify 2FA Code =====
+def test_verify_code(verification_data: dict = None):
     print("\n" + "=" * 60)
-    print("TEST 7: Verify 2FA Code")
+    print("TEST 6: Verify 2FA Code")
     print("=" * 60)
-    print("This test verifies a code entered by the user against Telesign's stored code.")
+    print("This test verifies a code entered by the user.")
     
-    if not reference_id:
+    reference_id = None
+    original_code = None
+    
+    if verification_data:
+        reference_id = verification_data.get('reference_id')
+        original_code = verification_data.get('verify_code')
+        print(f"\nUsing Reference ID: {reference_id}")
+        print(f"Expected Code: {original_code} (hidden from user in production)")
+    else:
         print("\nEnter the Reference ID from the verification code message:")
         print("  (Press Enter to skip)")
         reference_id = input("Reference ID: ").strip()
-    
-    if not reference_id:
-        print("⚠️  Test skipped")
-        return
+        
+        if not reference_id:
+            print("⚠️  Test skipped")
+            return
+        
+        print("\nEnter the original verification code (for testing):")
+        original_code = input("Original Code: ").strip()
     
     print("\nEnter the verification code received:")
     user_code = input("Code: ").strip()
@@ -330,26 +326,27 @@ def test_verify_code(reference_id: str = None):
     
     try:
         print("\n🔄 Verifying code...")
-        result = verify_code(reference_id, user_code)
+        result = verify_code(reference_id, user_code, original_code)
         
         if result['status_code'] == 200:
             if result.get('valid'):
-                print(f"✅ SUCCESS: Code is VALID")
+                print(f"✅ SUCCESS: {result.get('message', 'Code is VALID')}")
             else:
-                print(f"❌ FAILED: Code is INVALID")
+                print(f"❌ FAILED: {result.get('message', 'Code is INVALID')}")
         else:
             print(f"⚠️  Status Code: {result['status_code']}")
+            print(f"   Message: {result.get('message', 'Unknown error')}")
     except Exception as e:
         print(f"❌ FAILED: Could not verify code")
         print(f"   Error: {e}")
 
 
-# ===== Test 8: Assess Phone Risk =====
+# ===== Test 7: Assess Phone Risk =====
 def test_assess_risk():
     print("\n" + "=" * 60)
-    print("TEST 8: Assess Phone Number Risk")
+    print("TEST 7: Assess Phone Number Risk (Intelligence/Score API)")
     print("=" * 60)
-    print("This test performs fraud risk assessment on a phone number.")
+    print("This test performs fraud risk assessment using Telesign Intelligence.")
     print("Useful for detecting suspicious registrations or transactions.")
     
     phone = get_phone_input("Enter phone number to assess")
@@ -358,15 +355,22 @@ def test_assess_risk():
         print("⚠️  Test skipped")
         return
     
+    # Get lifecycle event
+    lifecycle_event = get_lifecycle_event()
+    
     try:
-        print("\n🔄 Assessing phone risk...")
-        result = assess_phone_risk(phone)
+        print(f"\n🔄 Assessing phone risk (lifecycle: {lifecycle_event})...")
+        result = assess_phone_risk(phone, lifecycle_event)
         
         if result['status_code'] == 200:
             print(f"✅ SUCCESS: Risk assessment complete")
+            print(f"   Reference ID: {result.get('reference_id', 'N/A')}")
             print(f"   Risk Level: {result.get('risk_level', 'Unknown')}")
             print(f"   Risk Score: {result.get('risk_score', 'N/A')} (0-1000 scale)")
             print(f"   Recommendation: {result.get('recommendation', 'Unknown')}")
+            print(f"   Phone Type: {result.get('phone_type', 'Unknown')}")
+            print(f"   Carrier: {result.get('carrier', 'Unknown')}")
+            print(f"   Lifecycle Event: {result.get('account_lifecycle_event', 'N/A')}")
             
             # Explain recommendation
             recommendation = result.get('recommendation', '').lower()
@@ -386,166 +390,12 @@ def test_assess_risk():
         print(f"   Error: {e}")
 
 
-# ===== Test 9: Send WhatsApp Template =====
-def test_send_template():
-    print("\n" + "=" * 60)
-    print("TEST 9: Send WhatsApp Template Message")
-    print("=" * 60)
-    print("This test sends a pre-approved WhatsApp template message.")
-    print("Note: Templates must be created and approved in your WhatsApp Business account.")
-    
-    phone = get_phone_input("Enter destination phone number")
-    
-    if not phone:
-        print("⚠️  Test skipped")
-        return None
-    
-    print("\nEnter the WhatsApp template ID:")
-    print("  (This is the name/ID from your approved templates)")
-    template_id = input("Template ID: ").strip()
-    
-    if not template_id:
-        print("❌ Template ID is required")
-        return None
-    
-    print("\nEnter template parameters (comma-separated, or press Enter for none):")
-    print("  Example: John,123456,30")
-    params_input = input("Parameters: ").strip()
-    parameters = [p.strip() for p in params_input.split(',')] if params_input else []
-    
-    if not confirm_action(f"Send template '{template_id}' to {phone}"):
-        print("❌ Test cancelled")
-        return None
-    
-    try:
-        print("\n🔄 Sending template message...")
-        result = send_whatsapp_template(phone, template_id, parameters)
-        
-        if result['status_code'] == 200:
-            print(f"✅ SUCCESS: Template message sent")
-            print(f"   Reference ID: {result['reference_id']}")
-            return result['reference_id']
-        else:
-            print(f"⚠️  Status Code: {result['status_code']}")
-            print(f"   → Make sure the template is approved in your WhatsApp Business account")
-            return None
-    except Exception as e:
-        print(f"❌ FAILED: Could not send template")
-        print(f"   Error: {e}")
-        return None
-
-
-# ===== Test 10: Send WhatsApp Media =====
-def test_send_media():
-    print("\n" + "=" * 60)
-    print("TEST 10: Send WhatsApp Media Message")
-    print("=" * 60)
-    print("This test sends a media file (image, video, document) via WhatsApp.")
-    print("Note: The media must be hosted at a publicly accessible URL.")
-    
-    phone = get_phone_input("Enter destination phone number")
-    
-    if not phone:
-        print("⚠️  Test skipped")
-        return None
-    
-    print("\nEnter the public URL of the media file:")
-    print("  Example: https://example.com/image.jpg")
-    media_url = input("Media URL: ").strip()
-    
-    if not media_url:
-        print("❌ Media URL is required")
-        return None
-    
-    print("\nSelect media type:")
-    print("  1. Image (jpg, png, gif)")
-    print("  2. Video (mp4, 3gp)")
-    print("  3. Document (pdf, doc, xls)")
-    print("  4. Audio (mp3, ogg)")
-    media_choice = input("Choice (1-4): ").strip()
-    
-    media_type_map = {'1': 'image', '2': 'video', '3': 'document', '4': 'audio'}
-    media_type = media_type_map.get(media_choice, 'image')
-    
-    print(f"\nEnter optional caption (or press Enter to skip):")
-    caption = input("Caption: ").strip()
-    
-    if not confirm_action(f"Send {media_type} to {phone}"):
-        print("❌ Test cancelled")
-        return None
-    
-    try:
-        print("\n🔄 Sending media message...")
-        result = send_whatsapp_media(phone, media_url, caption, media_type)
-        
-        if result['status_code'] == 200:
-            print(f"✅ SUCCESS: Media message sent")
-            print(f"   Reference ID: {result['reference_id']}")
-            return result['reference_id']
-        else:
-            print(f"⚠️  Status Code: {result['status_code']}")
-            print(f"   → Ensure the URL is publicly accessible and the file format is supported")
-            return None
-    except Exception as e:
-        print(f"❌ FAILED: Could not send media")
-        print(f"   Error: {e}")
-        return None
-
-
-# ===== Test 11: Send WhatsApp Buttons =====
-def test_send_buttons():
-    print("\n" + "=" * 60)
-    print("TEST 11: Send WhatsApp Interactive Buttons")
-    print("=" * 60)
-    print("This test sends a WhatsApp message with interactive button options.")
-    
-    phone = get_phone_input("Enter destination phone number")
-    
-    if not phone:
-        print("⚠️  Test skipped")
-        return None
-    
-    print("\nEnter the message text:")
-    body_text = input("Message: ").strip()
-    
-    if not body_text:
-        body_text = "Please choose an option:"
-        print(f"  → Using default: '{body_text}'")
-    
-    # Create sample buttons
-    print("\nCreating sample buttons (Yes/No)...")
-    buttons = [
-        {"id": "1", "title": "Yes"},
-        {"id": "2", "title": "No"}
-    ]
-    print(f"  Buttons: {[b['title'] for b in buttons]}")
-    
-    if not confirm_action(f"Send button message to {phone}"):
-        print("❌ Test cancelled")
-        return None
-    
-    try:
-        print("\n🔄 Sending button message...")
-        result = send_whatsapp_buttons(phone, body_text, buttons)
-        
-        if result['status_code'] == 200:
-            print(f"✅ SUCCESS: Button message sent")
-            print(f"   Reference ID: {result['reference_id']}")
-            return result['reference_id']
-        else:
-            print(f"⚠️  Status Code: {result['status_code']}")
-            print(f"   → Interactive messages may require WhatsApp Business API approval")
-            return None
-    except Exception as e:
-        print(f"❌ FAILED: Could not send buttons")
-        print(f"   Error: {e}")
-        return None
-
-
 # ===== Main Test Runner =====
 def main():
-    print("\nWelcome to the Telesign Enterprise SDK Test Suite!")
-    print("This interactive tool helps you test all Telesign/WhatsApp features.\n")
+    print("\nWelcome to the Telesign SMS Test Suite!")
+    print("This interactive tool helps you test Telesign SMS features.\n")
+    print("⚠️  Note: WhatsApp features require WhatsApp Business API access.")
+    print("   Contact Telesign to upgrade your account for WhatsApp functionality.\n")
     
     # Test 1: Verify credentials (required)
     if not test_credentials():
@@ -557,25 +407,21 @@ def main():
     # Interactive test menu
     while True:
         print("\n" + "=" * 60)
-        print("TELESIGN TEST MENU")
+        print("TELESIGN SMS TEST MENU")
         print("=" * 60)
-        print("Basic Tests:")
-        print("  1.  Verify phone number (PhoneID)")
-        print("  2.  Send SMS")
-        print("  3.  Send WhatsApp message")
-        print("  4.  Check message status")
-        print("\nAdvanced Tests:")
-        print("  5.  Send 2FA verification code")
-        print("  6.  Verify 2FA code")
-        print("  7.  Assess phone fraud risk")
-        print("  8.  Send WhatsApp template")
-        print("  9.  Send WhatsApp media (image/video/doc)")
-        print("  10. Send WhatsApp interactive buttons")
+        print("Available Tests:")
+        print("  1. Verify phone number (PhoneID)")
+        print("  2. Send SMS message")
+        print("  3. Check message delivery status")
+        print("  4. Send 2FA verification code")
+        print("  5. Verify 2FA code")
+        print("  6. Assess phone fraud risk (Intelligence)")
         print("\nBatch Tests:")
-        print("  11. Run all basic tests")
-        print("  12. Run all advanced tests")
-        print("\n  0.  Exit")
+        print("  7. Run all SMS tests")
+        print("  8. Run complete 2FA workflow")
+        print("\n  0. Exit")
         print("=" * 60)
+        print("\n💡 TIP: Test 8 demonstrates a complete 2FA implementation!")
         
         choice = input("\nEnter choice: ").strip()
         
@@ -588,59 +434,42 @@ def main():
                 test_message_status(ref_id)
         
         elif choice == "3":
-            ref_id = test_send_whatsapp()
-            if ref_id and confirm_action("Check message status now"):
-                test_message_status(ref_id)
-        
-        elif choice == "4":
             test_message_status()
         
-        elif choice == "5":
-            ref_id = test_send_verification_code()
-            if ref_id and confirm_action("Verify code now"):
-                test_verify_code(ref_id)
+        elif choice == "4":
+            verification_data = test_send_verification_code()
+            if verification_data and confirm_action("Verify code now"):
+                test_verify_code(verification_data)
         
-        elif choice == "6":
+        elif choice == "5":
             test_verify_code()
         
-        elif choice == "7":
+        elif choice == "6":
             test_assess_risk()
         
-        elif choice == "8":
-            ref_id = test_send_template()
-            if ref_id and confirm_action("Check message status now"):
-                test_message_status(ref_id)
-        
-        elif choice == "9":
-            ref_id = test_send_media()
-            if ref_id and confirm_action("Check message status now"):
-                test_message_status(ref_id)
-        
-        elif choice == "10":
-            ref_id = test_send_buttons()
-            if ref_id and confirm_action("Check message status now"):
-                test_message_status(ref_id)
-        
-        elif choice == "11":
-            print("\n🔄 Running all basic tests...")
+        elif choice == "7":
+            print("\n🔄 Running all SMS tests...")
             test_phone_verification()
             ref_id = test_send_sms()
             if ref_id:
                 test_message_status(ref_id)
-            ref_id = test_send_whatsapp()
-            if ref_id:
-                test_message_status(ref_id)
-        
-        elif choice == "12":
-            print("\n🔄 Running all advanced tests...")
-            ref_id = test_send_verification_code()
-            if ref_id:
-                test_verify_code(ref_id)
             test_assess_risk()
-            test_send_template()
+        
+        elif choice == "8":
+            print("\n🔄 Running complete 2FA workflow...")
+            print("This simulates a real 2FA authentication flow:")
+            print("  1. Send verification code to user's phone")
+            print("  2. User enters the code they received")
+            print("  3. Verify the code matches\n")
+            
+            verification_data = test_send_verification_code()
+            if verification_data:
+                test_verify_code(verification_data)
         
         elif choice == "0":
-            print("\n👋 Thank you for using Telesign Test Suite!")
+            print("\n👋 Thank you for using Telesign SMS Test Suite!")
+            print("\n💡 Want WhatsApp? Contact Telesign to upgrade your account:")
+            print("   https://portal.telesign.com")
             break
         
         else:
