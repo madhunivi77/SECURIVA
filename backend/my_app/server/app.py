@@ -58,42 +58,55 @@ async def index(request):
 
 # Define an API-style route that returns status
 async def api_status(request):
-    # Check if user has a valid API key in cookie
-    api_key = request.cookies.get("api_key")
     authenticated = False
     user_email = None
     salesforce_connected = False
 
-    if api_key:
-        oauth_file = Path(__file__).parent / "oauth.json"
-        user_id = validate_api_key(api_key, oauth_file)
-
-        if user_id:
+    # --- First check manual login via auth_token cookie ---
+    token = request.cookies.get("auth_token")
+    if token:
+        try:
+            payload = pyjwt.decode(
+                token,
+                os.getenv("JWT_SECRET_KEY"),
+                algorithms=["HS256"]
+            )
             authenticated = True
-            # Get user email and service connections from oauth.json
-            try:
-                with open(oauth_file, "r") as f:
-                    data = json.load(f)
-                    for user in data.get("users", []):
-                        if user.get("user_id") == user_id:
-                            user_email = user.get("email")
-                            # Check if Salesforce is connected
-                            services = user.get("services", {})
-                            salesforce_connected = "salesforce" in services and services["salesforce"].get("credentials") is not None
-                            break
-            except:
-                pass
+            user_email = payload.get("sub")
+        except pyjwt.PyJWTError:
+            authenticated = False
 
-    # Create response with status
-    response_data = {
+    # --- If not authenticated yet, check Google OAuth api_key ---
+    if not authenticated:
+        api_key = request.cookies.get("api_key")
+        if api_key:
+            oauth_file = Path(__file__).parent / "oauth.json"
+            user_id = validate_api_key(api_key, oauth_file)
+
+            if user_id:
+                authenticated = True
+                try:
+                    with open(oauth_file, "r") as f:
+                        data = json.load(f)
+                        for user in data.get("users", []):
+                            if user.get("user_id") == user_id:
+                                user_email = user.get("email")
+                                services = user.get("services", {})
+                                salesforce_connected = (
+                                    "salesforce" in services and
+                                    services["salesforce"].get("credentials") is not None
+                                )
+                                break
+                except:
+                    pass
+
+    return JSONResponse({
         "status": "ok",
         "source": "Starlette",
         "authenticated": authenticated,
         "email": user_email if authenticated else None,
         "salesforce_connected": salesforce_connected
-    }
-
-    return JSONResponse(response_data)
+    })
 
 # Define a route to initiate Google OAuth
 async def login(request):
@@ -207,19 +220,16 @@ async def callback(request):
 
 # Define logout endpoint
 async def api_logout(request):
-    """Clear API key cookie and logout."""
+    """Clear authentication cookies and logout."""
 
-    # Create response
     response = JSONResponse({
         "status": "ok",
         "message": "Logged out successfully"
     })
 
-    # Clear API key cookie
-    response.delete_cookie(
-        key="api_key",
-        domain=None
-    )
+    # Clear both manual and OAuth login cookies
+    response.delete_cookie(key="api_key", domain=None)
+    response.delete_cookie(key="auth_token", domain=None)
 
     return response
 
@@ -304,8 +314,6 @@ async def signup(request):
 
     return JSONResponse({"message": "Signup successful"})
 
-
-# ---- Manual email/password login ----
 async def manual_login(request):
     form = await request.form()
     email = form.get("email")
@@ -322,15 +330,27 @@ async def manual_login(request):
     if not user or not bcrypt.checkpw(password.encode(), user["password"].encode()):
         return JSONResponse({"error": "Invalid credentials"}, status_code=401)
 
-    # Create a simple JWT token for the user
     token = pyjwt.encode(
         {"sub": email, "iat": datetime.now().timestamp()},
-        "dev-secret",  # use os.getenv("JWT_SECRET_KEY") in prod
+        os.getenv("JWT_SECRET_KEY"),
+        # "dev-secret",
         algorithm="HS256"
     )
 
-    response = JSONResponse({"message": "Login successful", "access_token": token})
-    response.set_cookie("auth_token", token, httponly=True, samesite="Lax")
+    response = JSONResponse({
+        "message": "Login successful",
+        "redirect": f"{FRONTEND_URL}?auth=success&email={email}"
+    })
+    response.set_cookie(
+        key="auth_token",
+        value=token,
+        httponly=True,
+        secure=COOKIE_SECURE,
+        samesite=COOKIE_SAMESITE,
+        max_age=SESSION_COOKIE_MAX_AGE,
+        domain=None
+    )
+
     return response
 
 # Create the Starlette app instance with routes
