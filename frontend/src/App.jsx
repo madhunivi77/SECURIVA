@@ -12,10 +12,6 @@ function App() {
     window.matchMedia("(prefers-color-scheme: dark)").matches
   );
 
-  const handleAuthSuccess = (email) => {
-    setUserEmail(email);
-  };
-
   useEffect(() => {
     // Check for OAuth callback success
     const urlParams = new URLSearchParams(window.location.search);
@@ -310,7 +306,11 @@ function App() {
           }}
         >
           {!userEmail ? (
-            <LoginForm onAuthSuccess={handleAuthSuccess} />
+            <LoginForm
+              onGoogleLogin={handleGoogleLogin}
+              onSalesforceLogin={handleSalesforceLogin}
+              isAuthenticated={isAuthenticated}
+            />
           ) : (
             <ChatBox />
           )}

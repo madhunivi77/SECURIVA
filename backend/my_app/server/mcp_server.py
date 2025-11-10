@@ -15,6 +15,7 @@ import jwt
 from pathlib import Path
 import time
 import requests
+from .salesforce_utils import get_fresh_salesforce_credentials
 
 JWT_SECRET_KEY = os.getenv("JWT_SECRET_KEY")
 
@@ -169,7 +170,7 @@ def get_greeting(name: str) -> str:
     return f"Hello from your MCP resource, {name}!"
 
 def getSalesforceCreds(ctx):
-    """Retrieve Salesforce credentials for the logged-in user"""
+    """Retrieve Salesforce credentials for the logged-in user, refreshing if needed"""
     try:
         JWT_SECRET_KEY = os.getenv("JWT_SECRET_KEY")
         encoded_token = ctx.request_context.request.headers.get('Authorization').split(" ")[1]
@@ -183,7 +184,10 @@ def getSalesforceCreds(ctx):
                     # NEW SCHEMA: Access salesforce service from services object
                     sf_service = user.get("services", {}).get("salesforce")
                     if sf_service:
-                        return sf_service.get("credentials")
+                        current_creds = sf_service.get("credentials")
+                        # Get fresh credentials (will refresh if needed)
+                        fresh_creds = get_fresh_salesforce_credentials(user_id, current_creds)
+                        return fresh_creds
         return None
 
     except Exception as e:
