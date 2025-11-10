@@ -15,6 +15,7 @@ import jwt
 from pathlib import Path
 import time
 import requests
+import base64
 from .salesforce_utils import get_fresh_salesforce_credentials
 
 JWT_SECRET_KEY = os.getenv("JWT_SECRET_KEY")
@@ -60,6 +61,50 @@ def getGoogleCreds(ctx) -> Credentials:
         print(f"Error getting Google credentials: {e}")
         return None
 
+def extract_email_body(payload):
+    """
+    Recursively extract text/plain or text/html body from Gmail message payload
+
+    Args:
+        payload: Gmail message payload object
+
+    Returns:
+        Decoded email body text or empty string if not found
+    """
+    body_text = ""
+
+    # Check if body data exists directly (simple single-part message)
+    if 'body' in payload and 'data' in payload['body']:
+        data = payload['body']['data']
+        body_text = base64.urlsafe_b64decode(data.encode('UTF-8')).decode('UTF-8')
+        return body_text
+
+    # Check if multipart message (has parts)
+    if 'parts' in payload:
+        for part in payload['parts']:
+            mime_type = part.get('mimeType', '')
+
+            # Prefer text/plain content
+            if mime_type == 'text/plain':
+                if 'data' in part['body']:
+                    data = part['body']['data']
+                    body_text = base64.urlsafe_b64decode(data.encode('UTF-8')).decode('UTF-8')
+                    return body_text
+
+            # Fallback to text/html if no plain text found yet
+            elif mime_type == 'text/html' and not body_text:
+                if 'data' in part['body']:
+                    data = part['body']['data']
+                    body_text = base64.urlsafe_b64decode(data.encode('UTF-8')).decode('UTF-8')
+
+            # Recursively check nested parts (for complex multipart messages)
+            elif 'parts' in part:
+                nested_body = extract_email_body(part)
+                if nested_body:
+                    return nested_body
+
+    return body_text
+
 # 2. Add an addition tool
 @mcp.tool()
 def add(a: int, b: int) -> int:
@@ -70,7 +115,11 @@ def add(a: int, b: int) -> int:
 @mcp.tool()
 def listEmails(context: Context, max_results: int = 10) -> str:
     """
-    List recent emails from Gmail inbox
+    List recent emails from Gmail inbox with basic metadata (From, Subject, Date, ID)
+
+    This tool returns email headers and IDs, but NOT the full email body content.
+    To get full email body content, use the getEmailBodies() tool with the email IDs
+    returned by this tool.
 
     Args:
         max_results: Maximum number of emails to return (default: 10, max: 50)
@@ -124,6 +173,83 @@ def listEmails(context: Context, max_results: int = 10) -> str:
     except HttpError as error:
         print(f"An error occurred: {error}")
         return f"An error occurred: {error}"
+
+@mcp.tool()
+def getEmailBodies(context: Context, email_ids: list[str]) -> str:
+    """
+    Fetch full email bodies for specified email message IDs
+
+    Use this tool to retrieve the complete content of emails. You can get email IDs
+    from the listEmails() tool. This tool supports fetching 1 to 20 emails at once.
+    The returned email bodies can then be summarized, analyzed, or processed.
+
+    Args:
+        email_ids: List of Gmail message IDs (obtained from listEmails tool)
+
+    Returns:
+        Formatted string containing full email content (headers + body) for each email
+    """
+    creds = getGoogleCreds(context)
+    if creds == None:
+        return "User not authenticated with Google OAuth"
+
+    try:
+        # Validate input: limit to prevent token overflow and API rate limits
+        if not email_ids:
+            return "Error: Please provide at least one email ID"
+
+        if len(email_ids) > 20:
+            return "Error: Maximum 20 email IDs allowed per request. Please split into multiple requests."
+
+        service = build("gmail", "v1", credentials=creds)
+
+        result = f"Fetched {len(email_ids)} email(s):\n\n"
+
+        for i, email_id in enumerate(email_ids, 1):
+            # Fetch full message with complete MIME structure
+            msg = service.users().messages().get(
+                userId="me",
+                id=email_id,
+                format="full"
+            ).execute()
+
+            # Extract headers for metadata
+            headers = {h["name"]: h["value"]
+                      for h in msg.get("payload", {}).get("headers", [])}
+            from_addr = headers.get("From", "Unknown")
+            subject = headers.get("Subject", "(No subject)")
+            date = headers.get("Date", "Unknown date")
+
+            # Extract body content using helper function
+            payload = msg.get("payload", {})
+            body = extract_email_body(payload)
+
+            if not body:
+                body = "(No content or unsupported format)"
+
+            # Truncate very long emails to prevent token overflow
+            if len(body) > 5000:
+                body = body[:5000] + "\n\n...(content truncated due to length)"
+
+            # Format output in readable structure
+            result += f"{'='*70}\n"
+            result += f"EMAIL {i}/{len(email_ids)}\n"
+            result += f"{'='*70}\n"
+            result += f"From: {from_addr}\n"
+            result += f"Subject: {subject}\n"
+            result += f"Date: {date}\n"
+            result += f"Message ID: {email_id}\n\n"
+            result += f"Body:\n{body}\n\n"
+
+        print(f"Successfully fetched {len(email_ids)} email bodies")
+        return result
+
+    except HttpError as error:
+        print(f"An error occurred: {error}")
+        return f"An error occurred: {error}"
+    except Exception as e:
+        print(f"Unexpected error: {e}")
+        return f"An unexpected error occurred: {e}"
 
 # list upcoming events from google calendar
 @mcp.tool()
