@@ -38,6 +38,32 @@ SCOPES = [
 COOKIE_SECURE = ENVIRONMENT == "production" or (COOKIE_SAMESITE.lower() == "none" and ENVIRONMENT == "production")
 SESSION_COOKIE_MAX_AGE = 30 * 24 * 3600  # 30 days
 
+# logging code
+import logging
+from logging.handlers import RotatingFileHandler
+
+# --- AI Call Logging Configuration ---
+log_path = Path(__file__).parent / "ai_calls.log"
+handler = RotatingFileHandler(log_path, maxBytes=5_000_000, backupCount=5, encoding="utf-8")
+
+logging.basicConfig(
+    level=logging.INFO,
+    handlers=[handler],
+    format="%(asctime)s [%(levelname)s] %(message)s",
+)
+
+def log_ai_call(user_id, model, messages, result):
+    """Log AI request/response in a readable format."""
+    entry = (
+        f"\n{'='*80}\n"
+        f"User ID: {user_id}\n"
+        f"Model: {model}\n"
+        f"Messages:\n{json.dumps(messages, indent=2)}\n\n"
+        f"Response:\n{json.dumps(result, indent=2)}\n"
+        f"{'='*80}\n"
+    )
+    logging.info(entry)
+
 # Configure Google OAuth flow
 flow = Flow.from_client_config(
     {
@@ -58,55 +84,42 @@ async def index(request):
 
 # Define an API-style route that returns status
 async def api_status(request):
+    # Check if user has a valid API key in cookie
+    api_key = request.cookies.get("api_key")
     authenticated = False
     user_email = None
     salesforce_connected = False
 
-    # --- First check manual login via auth_token cookie ---
-    token = request.cookies.get("auth_token")
-    if token:
-        try:
-            payload = pyjwt.decode(
-                token,
-                os.getenv("JWT_SECRET_KEY"),
-                algorithms=["HS256"]
-            )
+    if api_key:
+        oauth_file = Path(__file__).parent / "oauth.json"
+        user_id = validate_api_key(api_key, oauth_file)
+
+        if user_id:
             authenticated = True
-            user_email = payload.get("sub")
-        except pyjwt.PyJWTError:
-            authenticated = False
+            # Get user email and service connections from oauth.json
+            try:
+                with open(oauth_file, "r") as f:
+                    data = json.load(f)
+                    for user in data.get("users", []):
+                        if user.get("user_id") == user_id:
+                            user_email = user.get("email")
+                            # Check if Salesforce is connected
+                            services = user.get("services", {})
+                            salesforce_connected = "salesforce" in services and services["salesforce"].get("credentials") is not None
+                            break
+            except:
+                pass
 
-    # --- If not authenticated yet, check Google OAuth api_key ---
-    if not authenticated:
-        api_key = request.cookies.get("api_key")
-        if api_key:
-            oauth_file = Path(__file__).parent / "oauth.json"
-            user_id = validate_api_key(api_key, oauth_file)
-
-            if user_id:
-                authenticated = True
-                try:
-                    with open(oauth_file, "r") as f:
-                        data = json.load(f)
-                        for user in data.get("users", []):
-                            if user.get("user_id") == user_id:
-                                user_email = user.get("email")
-                                services = user.get("services", {})
-                                salesforce_connected = (
-                                    "salesforce" in services and
-                                    services["salesforce"].get("credentials") is not None
-                                )
-                                break
-                except:
-                    pass
-
-    return JSONResponse({
+    # Create response with status
+    response_data = {
         "status": "ok",
         "source": "Starlette",
         "authenticated": authenticated,
         "email": user_email if authenticated else None,
         "salesforce_connected": salesforce_connected
-    })
+    }
+
+    return JSONResponse(response_data)
 
 # Define a route to initiate Google OAuth
 async def login(request):
@@ -270,6 +283,9 @@ async def api_chat(request):
 
         # Execute chat with MCP tools, passing the user_id
         result = await execute_chat_with_tools(messages, model, api, user_id)
+
+        # Log the result into a file
+        log_ai_call(user_id, model, messages, result)
 
         #debug
         print(f"DEBUG - {result}")
