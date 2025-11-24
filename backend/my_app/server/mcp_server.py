@@ -347,6 +347,9 @@ def getEmailBodies(context: Context, email_ids: list[str]) -> str:
     from the listEmails() tool. This tool supports fetching 1 to 20 emails at once.
     The returned email bodies can then be summarized, analyzed, or processed.
 
+    IMPORTANT: When user asks to summarize N emails, you MUST pass ALL N email IDs
+    to this tool. Do not arbitrarily reduce the number of emails.
+
     Args:
         email_ids: List of Gmail message IDs (obtained from listEmails tool)
 
@@ -574,12 +577,147 @@ def getSalesforceCreds(ctx):
         return None
 
 @mcp.tool()
+def summarizeEmail(email_content: str) -> str:
+    """
+    Summarize a single email's content using a structured prompt.
+
+    This tool takes raw email content and returns a concise summary including:
+    - Main purpose/topic of the email
+    - Key action items or requests
+    - Important deadlines or dates
+    - Overall sentiment/urgency
+
+    Args:
+        email_content: The full text content of the email to summarize
+
+    Returns:
+        A structured summary of the email
+    """
+    # Create the summarization prompt
+    summarization_prompt = f"""
+Please analyze and summarize the following email. Provide a concise summary with these sections:
+
+**Subject/Purpose:** What is this email about?
+**Key Points:** Main information or topics discussed (bullet points)
+**Action Items:** Any tasks, requests, or actions needed
+**Deadlines/Dates:** Important dates or time-sensitive information
+**Sentiment/Urgency:** Overall tone and priority level
+
+Email content:
+---
+{email_content}
+---
+
+Summary:"""
+
+    # Return the prompt which will be processed by the LLM
+    # The LLM agent will see this prompt and generate the summary
+    return summarization_prompt
+
+@mcp.tool()
+def summarizeRecentEmails(context: Context, num_emails: int = 5) -> str:
+    """
+    Fetch and summarize recent emails from Gmail inbox in one step.
+
+    This is a convenience tool that combines listEmails, getEmailBodies, and summarizeEmail
+    into a single operation. Use this when the user asks to summarize their recent emails.
+
+    Args:
+        num_emails: Number of recent emails to summarize (default: 5, max: 20)
+
+    Returns:
+        Formatted summaries of the requested number of emails with structured information
+    """
+    creds = getGoogleCreds(context)
+    if creds == None:
+        return "User not authenticated with Google OAuth"
+
+    try:
+        # Limit num_emails to reasonable bounds
+        num_emails = min(max(1, num_emails), 20)
+
+        # Step 1: List recent emails to get IDs
+        service = build("gmail", "v1", credentials=creds)
+        results = service.users().messages().list(
+            userId="me",
+            labelIds=["INBOX"],
+            maxResults=num_emails
+        ).execute()
+
+        messages = results.get("messages", [])
+        if not messages:
+            return "No messages found in inbox."
+
+        # Step 2: Fetch full email bodies for all emails
+        summaries = f"Summaries of your {len(messages)} most recent emails:\n\n"
+
+        for i, message in enumerate(messages, 1):
+            # Fetch full message
+            msg = service.users().messages().get(
+                userId="me",
+                id=message["id"],
+                format="full"
+            ).execute()
+
+            # Extract headers
+            headers = {h["name"]: h["value"]
+                      for h in msg.get("payload", {}).get("headers", [])}
+            from_addr = headers.get("From", "Unknown")
+            subject = headers.get("Subject", "(No subject)")
+            date = headers.get("Date", "Unknown date")
+
+            # Extract body
+            payload = msg.get("payload", {})
+            body = extract_email_body(payload)
+            if not body:
+                body = "(No content or unsupported format)"
+
+            # Truncate very long emails
+            if len(body) > 3000:
+                body = body[:3000] + "\n...(truncated)"
+
+            # Format the summary prompt for this email
+            summaries += f"{'='*70}\n"
+            summaries += f"EMAIL {i}/{len(messages)}\n"
+            summaries += f"{'='*70}\n"
+            summaries += f"From: {from_addr}\n"
+            summaries += f"Subject: {subject}\n"
+            summaries += f"Date: {date}\n\n"
+
+            # Add the summarization instruction
+            summaries += f"""Please analyze and summarize this email:
+
+**Subject/Purpose:** What is this email about?
+**Key Points:** Main information or topics discussed
+**Action Items:** Any tasks or requests
+**Deadlines/Dates:** Important dates
+**Sentiment/Urgency:** Tone and priority
+
+Email body:
+{body}
+
+---
+
+"""
+
+        summaries += f"\nPlease provide concise summaries for all {len(messages)} emails above."
+
+        return summaries
+
+    except HttpError as error:
+        print(f"An error occurred: {error}")
+        return f"An error occurred: {error}"
+    except Exception as e:
+        print(f"Unexpected error: {e}")
+        return f"An unexpected error occurred: {e}"
+
+@mcp.tool()
 def listAccounts(context: Context) -> str:
     """Fetch Account data from Salesforce"""
     creds = getSalesforceCreds(context)
     if not creds:
         return "User not authenticated with Salesforce."
-    
+
     access_token = creds["access_token"]
     instance_url = creds["instance_url"]
     headers = {"Authorization": f"Bearer {access_token}"}
