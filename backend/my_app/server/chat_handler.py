@@ -3,12 +3,17 @@ import json
 import httpx
 import time
 import uuid
-from groq import Groq
-from openai import OpenAI
 from mcp import ClientSession
 from mcp.client.streamable_http import streamablehttp_client
 from pathlib import Path
 from .tool_logger import get_tool_logger
+from langchain_mcp_adapters.tools import load_mcp_tools
+from langchain.agents.middleware import wrap_tool_call
+from langchain_core.messages import AIMessage, ToolMessage
+from langchain.agents import create_agent
+from langchain_openai import ChatOpenAI
+from langchain_groq import ChatGroq
+
 
 # --- Configuration ---
 MCP_SERVER_URL = "http://localhost:8000/mcp/"
@@ -40,13 +45,40 @@ async def get_mcp_auth_token(user_id: str = None) -> str | None:
 def get_llm_client(api: str):
     """Initialize the appropriate LLM client based on API choice."""
     if api == "openai":
-        return OpenAI(api_key=os.getenv("OPENAI_API_KEY"))
+        return ChatOpenAI(api_key=os.getenv("OPENAI_API_KEY"))
     elif api == "groq":
-        return Groq(api_key=os.getenv("GROQ_API_KEY"))
+        return ChatGroq(api_key=os.getenv("GROQ_API_KEY"))
     else:
         raise ValueError(f"Unsupported API: {api}")
 
-
+# this wrapper is used as middleware for the langgraph agent. It is used so that we can collect metrics and handle errors for individual tool calls
+@wrap_tool_call
+async def handle_tool_errors(request, handler):
+    """Handle tool execution errors with custom messages."""
+    try:
+        # time the tool call
+        start_time = time.time()
+        response =  await handler(request)
+        duration_ms = (time.time() - start_time) * 1000
+        # account for both singular and list of responses
+        if isinstance(response, ToolMessage):
+            # inject custom metrics
+            response.error = 0
+            response.duration_ms = duration_ms
+        elif isinstance(response, list):
+            for msg in response:
+                msg.error = 0
+                msg.duration_ms = duration_ms
+        return response
+    except Exception as e:
+        # Return a custom error message to the model
+        return ToolMessage(
+            content=f"Tool error:({str(e)})",
+            tool_call_id=request.tool_call["id"],
+            error=1,
+            duration_ms = None
+        )
+    
 async def execute_chat_with_tools(messages: list, model: str = None, api: str = None, user_id: str = None) -> dict:
     """
     Execute a chat request with MCP tool-calling capabilities.
@@ -90,107 +122,75 @@ async def execute_chat_with_tools(messages: list, model: str = None, api: str = 
                     return {"error": f"MCP session initialization failed: {e}"}
 
                 # Discover available tools
-                mcp_tools_response = await session.list_tools()
-
-                # Format tools for LLM API
-                agent_tools = [
-                    {
-                        "type": "function",
-                        "function": {
-                            "name": tool.name,
-                            "description": tool.description,
-                            "parameters": tool.inputSchema,
-                        },
-                    }
-                    for tool in mcp_tools_response.tools
-                ]
+                try:
+                    mcp_tools_response = await load_mcp_tools(session)
+                except Exception as e:
+                    return {"error": f"MCP tool response failed: {e}"}
 
                 # Initialize LLM client
                 llm_client = get_llm_client(api)
 
-                # Call LLM with tools
-                response = llm_client.chat.completions.create(
-                    model=model,
-                    messages=messages,
-                    tools=agent_tools,
-                    tool_choice="auto"
-                )
+                # Initialize the langgraph agent
+                graph = create_agent(
+                    model = llm_client, 
+                    tools = mcp_tools_response,
+                    middleware = [handle_tool_errors])
+                try:
+                    # make llm query
+                    agent_response = await graph.ainvoke({"messages": messages})
+                except Exception as e:
+                    return {"error": f"Agent response failed: {e}"}
+                
+                tool_calls = []
+                # store the starting index of the new messages appended to the conversation
+                new_index = len(messages)
+                # store the final response provided by the agent
+                final_response = agent_response['messages'][-1].content
+                try:
+                    # extract logging information from new messages
+                    for msg in agent_response['messages'][new_index:]:
+                        
+                        # AIMessages will contain tool name, args and id
+                        if isinstance(msg, AIMessage) and getattr(msg, 'tool_calls', None):
+                            tool_calls.extend(msg.tool_calls)
+                        pass
 
-                response_message = response.choices[0].message
-                tool_calls = response_message.tool_calls
-                tool_calls_made = []
-
-                # Execute tool calls if LLM requested them
-                if tool_calls:
-                    messages.append(response_message)
-
+                        # Tool messages will contain result as well as injected duration and error status info
+                        if isinstance(msg, ToolMessage):
+                            tool_call_id = msg.tool_call_id
+                            for i in range(len(tool_calls)):
+                                if tool_calls[i]['id'] == tool_call_id:
+                                    tool_calls[i]['duration_ms'] = msg.duration_ms
+                                    if msg.error:
+                                        tool_calls[i]['error'] = msg.content
+                                        tool_calls[i]['result'] = ''
+                                    else:
+                                        tool_calls[i]['result'] = msg.content
+                                        tool_calls[i]['error'] = ''
+                            pass
+                except Exception as e:
+                    return {"error": f"Extracting tool information failed: {e}"}
+                try:
+                    # log each tool call
                     for tool_call in tool_calls:
-                        tool_name = tool_call.function.name
-                        tool_args = json.loads(tool_call.function.arguments)
-
-                        tool_calls_made.append({
-                            "name": tool_name,
-                            "arguments": tool_args
-                        })
-
-                        # Time the tool execution
-                        start_time = time.time()
-                        tool_error = None
-                        result_text = None
-
-                        try:
-                            # Execute tool via MCP
-                            tool_result = await session.call_tool(tool_name, arguments=tool_args)
-
-                            if tool_result.isError:
-                                result_text = f"Error: {tool_result.content[0].text}"
-                                tool_error = result_text
-                            else:
-                                result_text = tool_result.content[0].text
-
-                        except Exception as e:
-                            result_text = f"Exception: {str(e)}"
-                            tool_error = str(e)
-
-                        # Calculate duration
-                        duration_ms = (time.time() - start_time) * 1000
-
-                        # Log the tool call
                         logger.log_tool_call(
                             session_id=session_id,
-                            tool_name=tool_name,
-                            arguments=tool_args,
-                            result=result_text if not tool_error else None,
-                            error=tool_error,
-                            duration_ms=duration_ms,
+                            tool_name = tool_call['name'],
+                            arguments = tool_call['args'],
+                            result = tool_call['result'],
+                            error = tool_call['error'],
+                            duration_ms=tool_call['duration_ms'],
                             metadata={
-                                "model": model,
-                                "api": api,
-                                "tool_call_id": tool_call.id
-                            }
+                                    "model": model,
+                                    "api": api,
+                                    "tool_call_id": tool_call['id']
+                                }
                         )
-
-                        # Add tool result to messages
-                        messages.append({
-                            "tool_call_id": tool_call.id,
-                            "role": "tool",
-                            "name": tool_name,
-                            "content": result_text,
-                        })
-
-                    # Get final response from LLM with tool results
-                    final_response = llm_client.chat.completions.create(
-                        model=model,
-                        messages=messages
-                    )
-                    final_text = final_response.choices[0].message.content
-                else:
-                    # No tool calls, just return the response
-                    final_text = response_message.content
-
+                except Exception as e:
+                    return {"error": f"Logging tool information failed: {e}"}
                 return {
-                    "response": final_text,
-                    "tool_calls": tool_calls_made
+                    "response": final_response,
+                    "tool_calls": [t['name'] for t in tool_calls]
                 }
 
     except Exception as e:
