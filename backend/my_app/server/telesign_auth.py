@@ -368,6 +368,133 @@ def send_whatsapp_buttons(phone_number: str, body_text: str, buttons: list) -> d
         "error": "WhatsApp buttons require WhatsApp Business API access. Contact Telesign to upgrade."
     }
 
+    def get_detailed_message_status(reference_id: str) -> dict:
+    """
+    Get detailed message status including delivery timestamps and carrier info
+    
+    Returns:
+        dict: Detailed status including timestamps, errors, and carrier feedback
+    """
+    client = get_messaging_client()
+    response = client.status(reference_id)
+    
+    try:
+        if isinstance(response.body, str):
+            response_data = json.loads(response.body)
+        else:
+            response_data = response.body
+    except (json.JSONDecodeError, AttributeError):
+        response_data = {}
+    
+    status = response_data.get('status', {})
+    
+    return {
+        "status_code": response.status_code,
+        "reference_id": reference_id,
+        "status_code": status.get('code'),
+        "status_description": status.get('description'),
+        "updated_on": status.get('updated_on'),
+        "completed_on": response_data.get('completed_on'),
+        "submitted_at": response_data.get('submitted_at'),
+        "errors": response_data.get('errors', []),
+        "recipient": response_data.get('recipient'),
+        "price": response_data.get('price'),
+        "currency": response_data.get('currency'),
+        "full_response": response_data
+    }
+
+def poll_message_until_complete(reference_id: str, max_attempts: int = 10, delay_seconds: int = 2) -> dict:
+    """
+    Poll message status until delivered or failed
+    
+    Args:
+        reference_id: Message reference ID
+        max_attempts: Maximum polling attempts
+        delay_seconds: Delay between polls
+    
+    Returns:
+        dict: Final message status
+    """
+    import time
+    
+    for attempt in range(max_attempts):
+        status = get_detailed_message_status(reference_id)
+        
+        status_code = status.get('status_code')
+        
+        # Check if message is in final state
+        if status_code in [200, 203, 207, 220, 221, 222, 290, 295]:  # Delivered
+            return {**status, "polling_complete": True, "attempts": attempt + 1}
+        elif status_code and status_code >= 400:  # Failed
+            return {**status, "polling_complete": True, "attempts": attempt + 1, "failed": True}
+        
+        # Continue polling
+        if attempt < max_attempts - 1:
+            time.sleep(delay_seconds)
+    
+    return {**status, "polling_complete": False, "attempts": max_attempts, "timeout": True}
+
+def batch_verify_phones(phone_numbers: list[str]) -> list[dict]:
+    """
+    Verify multiple phone numbers in batch
+    
+    Args:
+        phone_numbers: List of phone numbers to verify
+    
+    Returns:
+        list[dict]: Verification results for each number
+    """
+    results = []
+    
+    for phone in phone_numbers:
+        try:
+            result = verify_phone_number(phone)
+            results.append({
+                "phone_number": phone,
+                "success": result.get('status_code') == 200,
+                "data": result
+            })
+        except Exception as e:
+            results.append({
+                "phone_number": phone,
+                "success": False,
+                "error": str(e)
+            })
+    
+    return results
+
+def batch_send_sms(recipients: list[dict]) -> list[dict]:
+    """
+    Send SMS to multiple recipients
+    
+    Args:
+        recipients: List of dicts with 'phone_number' and 'message' keys
+    
+    Returns:
+        list[dict]: Send results for each recipient
+    """
+    results = []
+    
+    for recipient in recipients:
+        phone = recipient.get('phone_number')
+        message = recipient.get('message')
+        
+        try:
+            result = send_sms(phone, message)
+            results.append({
+                "phone_number": phone,
+                "success": result.get('status_code') == 200,
+                "reference_id": result.get('reference_id'),
+                "data": result
+            })
+        except Exception as e:
+            results.append({
+                "phone_number": phone,
+                "success": False,
+                "error": str(e)
+            })
+    
+    return results
 
 # Keep backward compatibility
 def load_credentials() -> tuple[str, str]:
