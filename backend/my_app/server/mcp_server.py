@@ -458,3 +458,90 @@ def listAccounts(context: Context) -> str:
         return json.dumps(r.json(), indent=2)
     return f"Error: {r.text}"
 
+
+@mcp.tool()
+def createSalesforceCase(context: Context, subject: str,
+                           description: str = "",
+                           origin: str = "Web",
+                           status: str = "New"):
+    """
+    Creates a Salesforce case if a related one doesn't already exist.
+    Returns: Case ID on success.
+    """
+    creds = getSalesforceCreds(context)
+    if not creds:
+        return "User not authenticated with Salesforce."
+
+    instance_url = creds.get('instance_url')
+    access_token = creds.get('access_token')
+
+    url = f"{instance_url}/services/data/v60.0/sobjects/Case"
+    headers = {
+        "Authorization": f"Bearer {access_token}",
+        "Content-Type": "application/json"
+    }
+    payload = {
+        "Subject": subject,
+        "Description": description,
+        "Origin": origin,
+        "Status": status
+    }
+
+    resp = requests.post(url, json=payload, headers=headers)
+
+    if resp.status_code not in (200, 201):
+        return {
+            "success": False,
+            "status_code": resp.status_code,
+            "error": resp.text
+        }
+
+    data = resp.json()
+    return {
+        "success": data.get("success", False),
+        "case_id": data.get("id"),
+        "errors": data.get("errors", [])
+    }
+
+@mcp.tool()
+def listSalesforceCases(context: Context, limit: int = 10):
+    """
+    List the most recent Salesforce Cases for a user.
+    
+    Args:
+        limit: number of cases to retrieve (default 10)
+        
+    Returns:
+        List of cases with Id, Subject, Status, CreatedDate
+    """
+    creds = getSalesforceCreds(context)
+    if not creds:
+        return "User not authenticated with Salesforce."
+
+    instance_url = creds.get("instance_url")
+    access_token = creds.get("access_token")
+
+    if not instance_url or not access_token:
+        return {"success": False, "error": "Incomplete Salesforce credentials."}
+
+    # query for cases
+    query = f"SELECT Id, Subject, Status, CreatedDate FROM Case ORDER BY CreatedDate DESC LIMIT {limit}"
+    url = f"{instance_url}/services/data/v60.0/query"
+    headers = {
+        "Authorization": f"Bearer {access_token}",
+        "Content-Type": "application/json"
+    }
+    params = {"q": query}
+
+    try:
+        response = requests.get(url, headers=headers, params=params)
+        response.raise_for_status()
+        data = response.json()
+        cases = data.get("records", [])
+        return {"success": True, "cases": cases}
+    except requests.exceptions.HTTPError as e:
+        return {"success": False, "error": str(e), "response": response.text}
+    except Exception as e:
+        return {"success": False, "error": str(e)}
+
+
