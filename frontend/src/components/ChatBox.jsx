@@ -1,7 +1,10 @@
 import { useState, useEffect, useRef } from "react";
+import ReactMarkdown from "react-markdown";
+import rehypeHighlight from "rehype-highlight";
+import "highlight.js/styles/github-dark.css"; // Code syntax highlighting theme
 import "./ChatBox.css";
 
-function ChatBox({ authToken, csrfToken }) {
+function ChatBox() {
   // Initialize with system message in OpenAI format
   const [messages, setMessages] = useState(() => {
     const saved = localStorage.getItem("chat_messages");
@@ -11,7 +14,7 @@ function ChatBox({ authToken, csrfToken }) {
     return [
       {
         role: "system",
-        content: "You are a helpful assistant. You have access to a set of tools. Only use these tools when the user asks you to perform a specific action that requires them."
+        content: "You are a helpful assistant. You have access to a set of tools. Only use these tools when the user asks you to perform a specific action that requires them. Output your response in markdown format so that it can be rendered properly in a markdown viewer."
       }
     ];
   });
@@ -48,20 +51,14 @@ function ChatBox({ authToken, csrfToken }) {
 
     try {
       // Log request details
-      console.log("=== CHAT REQUEST DEBUG ===");
-      console.log("CSRF Token:", csrfToken);
-      console.log("Auth Token:", authToken);
-      console.log("Credentials mode:", "include");
-      console.log("All cookies:", document.cookie);
 
       // Call backend API
       const response = await fetch("http://localhost:8000/api/chat", {
         method: "POST",
         headers: {
           "Content-Type": "application/json",
-          "X-CSRF-Token": csrfToken, // Include CSRF token for protection
         },
-        credentials: "include", // Include cookies
+        credentials: "include",  // Automatically send httpOnly cookies
         body: JSON.stringify({
           messages: newMessages,
           model: "gpt-3.5-turbo", // Could make this configurable
@@ -148,7 +145,12 @@ function ChatBox({ authToken, csrfToken }) {
             key={index}
             className={`chatbox-message ${msg.role === "user" ? "user" : "bot"}`}
           >
-            <strong>{msg.role === "user" ? "You" : "Assistant"}:</strong> {msg.content}
+            <strong>{msg.role === "user" ? "You" : "Assistant"}:</strong>
+            <div className="message-content">
+              <ReactMarkdown rehypePlugins={[rehypeHighlight]}>
+                {msg.content}
+              </ReactMarkdown>
+            </div>
           </div>
         ))}
         {isLoading && (
