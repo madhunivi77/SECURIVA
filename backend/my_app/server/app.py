@@ -12,6 +12,7 @@ from pathlib import Path
 from .chat_handler import execute_chat_with_tools
 from .salesforce_app import salesforce_app
 from .api_key_manager import generate_api_key, store_api_key, validate_api_key
+from .s3_service import s3_app
 
 # Load environment variables
 GOOGLE_CLIENT_ID = os.getenv("GOOGLE_CLIENT_ID")
@@ -333,6 +334,8 @@ async def manual_login(request):
     response.set_cookie("auth_token", token, httponly=True, samesite="Lax")
     return response
 
+
+
 # Create the Starlette app instance with routes
 # Note: CORS is handled at the top level in main.py
 api_app = Starlette(
@@ -345,8 +348,10 @@ api_app = Starlette(
         Route("/callback", callback),
         Route("/signup", signup, methods=["POST"]),  # ✅ Manual signup
         Route("/login/manual", manual_login, methods=["POST"]),  # ✅ Manual login
+       
     ]
 )
 
 # Mount Starlette Salesforce app under /salesforce
 api_app.mount("/salesforce", salesforce_app)
+api_app.mount("/storage", s3_app)
