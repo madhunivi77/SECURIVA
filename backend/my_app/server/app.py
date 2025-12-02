@@ -40,6 +40,32 @@ SCOPES = [
 COOKIE_SECURE = ENVIRONMENT == "production" or (COOKIE_SAMESITE.lower() == "none" and ENVIRONMENT == "production")
 SESSION_COOKIE_MAX_AGE = 30 * 24 * 3600  # 30 days
 
+# logging code
+import logging
+from logging.handlers import RotatingFileHandler
+
+# --- AI Call Logging Configuration ---
+log_path = Path(__file__).parent / "ai_calls.log"
+handler = RotatingFileHandler(log_path, maxBytes=5_000_000, backupCount=5, encoding="utf-8")
+
+logging.basicConfig(
+    level=logging.INFO,
+    handlers=[handler],
+    format="%(asctime)s [%(levelname)s] %(message)s",
+)
+
+def log_ai_call(user_id, model, messages, result):
+    """Log AI request/response in a readable format."""
+    entry = (
+        f"\n{'='*80}\n"
+        f"User ID: {user_id}\n"
+        f"Model: {model}\n"
+        f"Messages:\n{json.dumps(messages, indent=2)}\n\n"
+        f"Response:\n{json.dumps(result, indent=2)}\n"
+        f"{'='*80}\n"
+    )
+    logging.info(entry)
+
 # Configure Google OAuth flow
 flow = Flow.from_client_config(
     {
@@ -209,19 +235,16 @@ async def callback(request):
 
 # Define logout endpoint
 async def api_logout(request):
-    """Clear API key cookie and logout."""
+    """Clear authentication cookies and logout."""
 
-    # Create response
     response = JSONResponse({
         "status": "ok",
         "message": "Logged out successfully"
     })
 
-    # Clear API key cookie
-    response.delete_cookie(
-        key="api_key",
-        domain=None
-    )
+    # Clear both manual and OAuth login cookies
+    response.delete_cookie(key="api_key", domain=None)
+    response.delete_cookie(key="auth_token", domain=None)
 
     return response
 
@@ -262,6 +285,9 @@ async def api_chat(request):
 
         # Execute chat with MCP tools, passing the user_id
         result = await execute_chat_with_tools(messages, model, api, user_id)
+
+        # Log the result into a file
+        log_ai_call(user_id, model, messages, result)
 
         #debug
         print(f"DEBUG - {result}")
@@ -304,8 +330,6 @@ async def signup(request):
 
     return JSONResponse({"message": "Signup successful"})
 
-
-# ---- Manual email/password login ----
 async def manual_login(request):
     form = await request.form()
     email = form.get("email")
@@ -322,15 +346,27 @@ async def manual_login(request):
     if not user or not bcrypt.checkpw(password.encode(), user["password"].encode()):
         return JSONResponse({"error": "Invalid credentials"}, status_code=401)
 
-    # Create a simple JWT token for the user
     token = pyjwt.encode(
         {"sub": email, "iat": datetime.now().timestamp()},
-        "dev-secret",  # use os.getenv("JWT_SECRET_KEY") in prod
+        os.getenv("JWT_SECRET_KEY"),
+        # "dev-secret",
         algorithm="HS256"
     )
 
-    response = JSONResponse({"message": "Login successful", "access_token": token})
-    response.set_cookie("auth_token", token, httponly=True, samesite="Lax")
+    response = JSONResponse({
+        "message": "Login successful",
+        "redirect": f"{FRONTEND_URL}?auth=success&email={email}"
+    })
+    response.set_cookie(
+        key="auth_token",
+        value=token,
+        httponly=True,
+        secure=COOKIE_SECURE,
+        samesite=COOKIE_SAMESITE,
+        max_age=SESSION_COOKIE_MAX_AGE,
+        domain=None
+    )
+
     return response
 
 # Create the Starlette app instance with routes

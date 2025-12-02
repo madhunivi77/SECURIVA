@@ -114,3 +114,26 @@ export default function LoginForm({ onGoogleLogin, onSalesforceLogin, isAuthenti
     </div>
   );
 }
+
+/* ----------------- Styles ------------------- */
+
+const inputStyle = {
+  width: "100%",
+  padding: "10px",
+  marginBottom: "12px",
+  borderRadius: "6px",
+  border: "1px solid #555",
+  backgroundColor: "#1e1e1e",
+  color: "white",
+  boxSizing: "border-box",
+};
+
+const buttonStyle = (backgroundColor, width = "100%") => ({
+  width,
+  padding: "10px",
+  backgroundColor,
+  color: "white",
+  border: "none",
+  borderRadius: "6px",
+  cursor: "pointer",
+});
