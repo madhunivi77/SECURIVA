@@ -368,7 +368,8 @@ def send_whatsapp_buttons(phone_number: str, body_text: str, buttons: list) -> d
         "error": "WhatsApp buttons require WhatsApp Business API access. Contact Telesign to upgrade."
     }
 
-    def get_detailed_message_status(reference_id: str) -> dict:
+
+def get_detailed_message_status(reference_id: str) -> dict:
     """
     Get detailed message status including delivery timestamps and carrier info
     
@@ -391,7 +392,7 @@ def send_whatsapp_buttons(phone_number: str, body_text: str, buttons: list) -> d
     return {
         "status_code": response.status_code,
         "reference_id": reference_id,
-        "status_code": status.get('code'),
+        "message_status_code": status.get('code'),  # Renamed to avoid conflict
         "status_description": status.get('description'),
         "updated_on": status.get('updated_on'),
         "completed_on": response_data.get('completed_on'),
@@ -402,6 +403,7 @@ def send_whatsapp_buttons(phone_number: str, body_text: str, buttons: list) -> d
         "currency": response_data.get('currency'),
         "full_response": response_data
     }
+
 
 def poll_message_until_complete(reference_id: str, max_attempts: int = 10, delay_seconds: int = 2) -> dict:
     """
@@ -420,7 +422,7 @@ def poll_message_until_complete(reference_id: str, max_attempts: int = 10, delay
     for attempt in range(max_attempts):
         status = get_detailed_message_status(reference_id)
         
-        status_code = status.get('status_code')
+        status_code = status.get('message_status_code')  # Updated key name
         
         # Check if message is in final state
         if status_code in [200, 203, 207, 220, 221, 222, 290, 295]:  # Delivered
@@ -433,6 +435,7 @@ def poll_message_until_complete(reference_id: str, max_attempts: int = 10, delay
             time.sleep(delay_seconds)
     
     return {**status, "polling_complete": False, "attempts": max_attempts, "timeout": True}
+
 
 def batch_verify_phones(phone_numbers: list[str]) -> list[dict]:
     """
@@ -462,6 +465,7 @@ def batch_verify_phones(phone_numbers: list[str]) -> list[dict]:
             })
     
     return results
+
 
 def batch_send_sms(recipients: list[dict]) -> list[dict]:
     """
@@ -495,6 +499,7 @@ def batch_send_sms(recipients: list[dict]) -> list[dict]:
             })
     
     return results
+
 
 # Keep backward compatibility
 def load_credentials() -> tuple[str, str]:
