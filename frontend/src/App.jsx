@@ -91,6 +91,19 @@ function App() {
     window.location.href = "http://localhost:8000/salesforce/login";
   };
 
+  const handleSalesforceLogout = async () => {
+    try {
+      await fetch("http://localhost:8000/salesforce/logout", {
+        method: "POST",
+        credentials: "include"
+      });
+      setIsSalesforceConnected(false);
+      fetchStatus();  // Refresh status
+    } catch (error) {
+      console.error("Logout error:", error);
+    }
+  }
+
   const theme = isDarkMode
     ? {
         // ----- DARK MODE (more blue) -----
@@ -266,6 +279,24 @@ function App() {
               </button>
             )}
 
+            {
+              isSalesforceConnected && isAuthenticated && (
+                <button
+                  onClick={handleSalesforceLogout}
+                  style={{
+                    background: "#d32f2f",
+                    border: "none",
+                    borderRadius: "6px",
+                    color: "white",
+                    padding: "6px 12px",
+                    cursor: "pointer",
+                    flexShrink: 0,
+                }}
+                >
+                  Disconnect Salesforce
+                </button>
+              )
+            }
             {isAuthenticated && (
               <button
                 onClick={handleLogout}
@@ -296,16 +327,29 @@ function App() {
           padding: "1rem 0",
         }}
       >
-        <div style={{ width:"100%", maxWidth:"1200px", padding:"0 1rem" }}>
-          
+        <div
+          style={{
+            width: "100%",
+            maxWidth: "1200px",
+            height: "100%",
+            padding: "0 1rem",
+            display: "flex",
+            flexDirection: "column",
+            justifyContent: "flex-start",
+            flexGrow: 1,
+          }}
+        >
           {page === "home" && (
             <Homepage onLoginClick={() => setPage("login")} />
           )}
 
           {page === "login" && (
-            <LoginForm 
+            <LoginForm
               onAuthSuccess={handleAuthSuccess}
               onBack={() => setPage("home")}
+              onGoogleLogin={handleGoogleLogin}
+              onSalesforceLogin={handleSalesforceLogin}
+              isAuthenticated={isAuthenticated}
             />
           )}
 
