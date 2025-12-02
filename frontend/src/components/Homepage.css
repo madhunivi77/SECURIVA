@@ -1,0 +1,22 @@
+.hero {
+  padding: 60px 20px;
+  text-align: center;
+}
+
+.solutions-section,
+.why-section {
+  margin: 40px auto;
+  padding: 20px;
+}
+
+.solutions-section ul,
+.why-section ul {
+  margin-top: 10px;
+  line-height: 1.8;
+}
+
+.closing-line {
+  margin-top: 20px;
+  font-weight: bold;
+  text-align: center;
+}
