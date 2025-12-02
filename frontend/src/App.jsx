@@ -1,6 +1,8 @@
 import { useState, useEffect } from "react";
 import ChatBox from "./components/ChatBox";
 import LoginForm from "./components/LoginForm";
+import Homepage from "./components/Homepage";
+import Footer from "./components/Footer";
 
 function App() {
   const [backendStatus, setBackendStatus] = useState("Loading...");
@@ -8,37 +10,32 @@ function App() {
   const [isAuthenticated, setIsAuthenticated] = useState(false);
   const [isSalesforceConnected, setIsSalesforceConnected] = useState(false);
   const [showStatus, setShowStatus] = useState(false);
+  const [page, setPage] = useState("home"); 
   const [isDarkMode, setIsDarkMode] = useState(
     window.matchMedia("(prefers-color-scheme: dark)").matches
   );
 
   const handleAuthSuccess = (email) => {
     setUserEmail(email);
+    setPage("chat");
   };
 
   useEffect(() => {
-    // Check for OAuth callback success
     const urlParams = new URLSearchParams(window.location.search);
     const authSuccess = urlParams.get("auth");
     const emailParam = urlParams.get("email");
 
     if (authSuccess === "success") {
-      // OAuth succeeded, cookie is set by backend
-      if (emailParam) {
-        setUserEmail(emailParam);
-      }
-      // Clean up URL
+      if (emailParam) setUserEmail(emailParam);
       window.history.replaceState({}, document.title, window.location.pathname);
+      setPage("chat");
     }
 
-    // Check for Salesforce connection success
     if (urlParams.get("salesforce") === "connected") {
       setIsSalesforceConnected(true);
-      // Clean up URL
       window.history.replaceState({}, document.title, window.location.pathname);
     }
 
-    // Always fetch status (cookie is sent automatically)
     fetchStatus();
 
     const mq = window.matchMedia("(prefers-color-scheme: dark)");
@@ -50,7 +47,7 @@ function App() {
   const fetchStatus = () => {
     setBackendStatus("Connecting...");
     fetch("http://localhost:8000/api/status", {
-      credentials: "include"  // Send cookies automatically
+      credentials: "include"
     })
       .then((res) => res.json())
       .then((data) => {
@@ -66,17 +63,17 @@ function App() {
   };
 
   const handleReconnect = () => fetchStatus();
-
   const handleLogout = async () => {
     try {
       await fetch("http://localhost:8000/api/logout", {
         method: "POST",
-        credentials: "include"  
+        credentials: "include"
       });
       setIsAuthenticated(false);
       setUserEmail(null);
       setIsSalesforceConnected(false);
-      fetchStatus();  // Refresh status
+      setPage("home");
+      fetchStatus();
     } catch (error) {
       console.error("Logout error:", error);
     }
@@ -96,22 +93,24 @@ function App() {
 
   const theme = isDarkMode
     ? {
-        bg: "#1e1f22",
-        surface: "#2a2b31",
-        border: "#2f2f2f",
-        text: "#e5e5e5",
-        subtext: "#aaa",
-        buttonBg: "#444",
+        // ----- DARK MODE (more blue) -----
+        bg: "#0a0f1f",            // deep navy blue
+        surface: "#11182b",       // richer navy surface
+        border: "#1c2a44",        // blue-tinted border
+        text: "#d9e6ff",          // soft icy-blue white
+        subtext: "#8fa8d6",       // desaturated cool blue
+        buttonBg: "#1f5fbf",      // strong blue button
         buttonText: "white",
       }
     : {
-        bg: "#f5f5f5",
-        surface: "#ffffff",
-        border: "#d0d0d0",
-        text: "#222",
-        subtext: "#555",
-        buttonBg: "#ddd",
-        buttonText: "#000",
+        // ----- LIGHT MODE (more blue) -----
+        bg: "#e7f1ff",            // pale powder-blue background
+        surface: "#ffffff",       // white card surface
+        border: "#b3cff5",        // gentle sky-blue border
+        text: "#0d2b66",          // deep cobalt text
+        subtext: "#3d5fa8",       // cooler muted blue-gray
+        buttonBg: "#d8e7ff",      // soft light-blue button
+        buttonText: "#0a3aa8",    // bold royal blue text
       };
 
   return (
@@ -120,11 +119,12 @@ function App() {
         display: "flex",
         flexDirection: "column",
         width: "100vw",
-        height: "100vh",
+        minHeight: "100vh",
         backgroundColor: theme.bg,
         color: theme.text,
       }}
     >
+      {/* ---------- HEADER ---------- */}
       <header
         style={{
           flexShrink: 0,
@@ -140,15 +140,8 @@ function App() {
           boxSizing: "border-box",
         }}
       >
-        <div
-          style={{
-            display: "flex",
-            alignItems: "center",
-            gap: "10px",
-            flexShrink: 1,
-            overflow: "hidden",
-          }}
-        >
+        {/* Left: logo + SECURIVA */}
+        <div style={{ display:"flex", alignItems:"center", gap:"10px", overflow:"hidden" }}>
           <img
             src="/logo.png"
             alt="SECURIVA Logo"
@@ -157,40 +150,63 @@ function App() {
               width: "32px",
               objectFit: "cover",
               borderRadius: "6px",
-              flexShrink: 0,
             }}
           />
-          <h1
-            style={{
-              margin: 0,
-              fontSize: "1.1rem",
-              color: theme.text,
-              whiteSpace: "nowrap",
-              textOverflow: "ellipsis",
-              overflow: "hidden",
-            }}
-          >
+          <h1 style={{ margin: 0, fontSize: "1.1rem", whiteSpace:"nowrap" }}>
             SECURIVA
           </h1>
         </div>
 
-        <button
-          onClick={() => setShowStatus((prev) => !prev)}
-          style={{
-            background: "none",
-            border: `1px solid ${theme.border}`,
-            color: theme.subtext,
-            borderRadius: "6px",
-            padding: "4px 10px",
-            cursor: "pointer",
-            flexShrink: 0,
-            whiteSpace: "nowrap",
-          }}
-        >
-          {showStatus ? "Hide Status" : "Show Status"}
-        </button>
+        {/* Right: Login buttons if NOT authenticated */}
+        {!isAuthenticated ? (
+          <div style={{ display: "flex", gap: "10px" }}>
+            <button
+              onClick={() => setPage("login")}
+              style={{
+                background: "none",
+                border: `1px solid ${theme.border}`,
+                color: theme.text,
+                borderRadius: "6px",
+                padding: "6px 12px",
+                cursor: "pointer",
+              }}
+            >
+              Sign In
+            </button>
+
+            <button
+              onClick={() => setPage("login")}
+              style={{
+                background: "none",
+                border: `1px solid ${theme.border}`,
+                color: theme.text,
+                borderRadius: "6px",
+                padding: "6px 12px",
+                cursor: "pointer",
+              }}
+            >
+              Sign Up
+            </button>
+          </div>
+        ) : (
+          /* If logged in → show your status toggle */
+          <button
+            onClick={() => setShowStatus((prev) => !prev)}
+            style={{
+              background: "none",
+              border: `1px solid ${theme.border}`,
+              color: theme.subtext,
+              borderRadius: "6px",
+              padding: "4px 10px",
+              cursor: "pointer",
+            }}
+          >
+            {showStatus ? "Hide Status" : "Show Status"}
+          </button>
+        )}
       </header>
 
+      {/* ---------- STATUS SECTION ---------- */}
       {showStatus && (
         <div
           style={{
@@ -200,23 +216,10 @@ function App() {
             borderBottom: `1px solid ${theme.border}`,
             fontSize: "0.9em",
             color: theme.subtext,
-            width: "100%",
-            boxSizing: "border-box",
-            display: "flex",
-            flexDirection: "column",
-            flexWrap: "wrap",
-            overflowWrap: "break-word",
           }}
         >
           <p style={{ margin: "4px 0" }}>{backendStatus}</p>
-          <div
-            style={{
-              display: "flex",
-              flexWrap: "wrap",
-              gap: "8px",
-              marginTop: "8px",
-            }}
-          >
+          <div style={{ display:"flex", flexWrap:"wrap", gap:"8px", marginTop:"8px" }}>
             <button
               onClick={handleReconnect}
               style={{
@@ -226,11 +229,11 @@ function App() {
                 color: theme.buttonText,
                 padding: "6px 12px",
                 cursor: "pointer",
-                flexShrink: 0,
               }}
             >
               Reconnect
             </button>
+
             {!isAuthenticated && (
               <button
                 onClick={handleGoogleLogin}
@@ -241,12 +244,12 @@ function App() {
                   color: "white",
                   padding: "6px 12px",
                   cursor: "pointer",
-                  flexShrink: 0,
                 }}
               >
                 Login with Google
               </button>
             )}
+
             {!isSalesforceConnected && isAuthenticated && (
               <button
                 onClick={handleSalesforceLogin}
@@ -255,14 +258,14 @@ function App() {
                   border: "none",
                   borderRadius: "6px",
                   color: "white",
-                  padding: "6px 12px",
-                  cursor: "pointer",
-                  flexShrink: 0,
+                  padding:"6px 12px",
+                  cursor:"pointer",
                 }}
               >
                 Connect Salesforce
               </button>
             )}
+
             {isAuthenticated && (
               <button
                 onClick={handleLogout}
@@ -273,7 +276,6 @@ function App() {
                   color: "white",
                   padding: "6px 12px",
                   cursor: "pointer",
-                  flexShrink: 0,
                 }}
               >
                 Logout
@@ -283,54 +285,38 @@ function App() {
         </div>
       )}
 
+      {/* ---------- MAIN CONTENT SWITCHER ---------- */}
       <main
         style={{
           flexGrow: 1,
           display: "flex",
-          flexDirection: "column",
-          justifyContent: "flex-start",
-          alignItems: "center",
+          justifyContent: "center",
           width: "100%",
-          height: "100%",
           overflowY: "auto",
-          overflowX: "hidden",
           padding: "1rem 0",
         }}
       >
-        <div
-          style={{
-            width: "100%",
-            maxWidth: "1200px",
-            height: "100%",
-            padding: "0 1rem",
-            display: "flex",
-            flexDirection: "column",
-            justifyContent: "flex-start",
-            flexGrow: 1,
-          }}
-        >
-          {!userEmail ? (
-            <LoginForm onAuthSuccess={handleAuthSuccess} />
-          ) : (
-            <ChatBox />
+        <div style={{ width:"100%", maxWidth:"1200px", padding:"0 1rem" }}>
+          
+          {page === "home" && (
+            <Homepage onLoginClick={() => setPage("login")} />
+          )}
+
+          {page === "login" && (
+            <LoginForm 
+              onAuthSuccess={handleAuthSuccess}
+              onBack={() => setPage("home")}
+            />
+          )}
+
+          {page === "chat" && (
+            <ChatBox userEmail={userEmail} />
           )}
         </div>
       </main>
 
-      <footer
-        style={{
-          flexShrink: 0,
-          padding: "8px 0",
-          textAlign: "center",
-          fontSize: "0.8em",
-          color: theme.subtext,
-          borderTop: `1px solid ${theme.border}`,
-          background: theme.surface,
-          width: "100%",
-        }}
-      >
-        SECURIVA Chat System © 2025
-      </footer>
+      {/* ---------- FOOTER ---------- */}
+      <Footer theme={theme} />
     </div>
   );
 }
