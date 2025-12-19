@@ -3,6 +3,7 @@ import ChatBox from "./components/ChatBox";
 import LoginForm from "./components/LoginForm";
 import Homepage from "./components/Homepage";
 import Footer from "./components/Footer";
+import Home_Info from "./components/Home_Info";
 
 function App() {
   const [backendStatus, setBackendStatus] = useState("Loading...");
@@ -106,24 +107,22 @@ function App() {
 
   const theme = isDarkMode
     ? {
-        // ----- DARK MODE (more blue) -----
-        bg: "#0a0f1f",            // deep navy blue
-        surface: "#11182b",       // richer navy surface
-        border: "#1c2a44",        // blue-tinted border
-        text: "#d9e6ff",          // soft icy-blue white
-        subtext: "#8fa8d6",       // desaturated cool blue
-        buttonBg: "#1f5fbf",      // strong blue button
+        bg: "#0a0f1f",            
+        surface: "#ffffff",      
+        border: "#1c2a44",        
+        text: "#d9e6ff",          
+        subtext: "#8fa8d6",       
+        buttonBg: "#1f5fbf",     
         buttonText: "white",
       }
     : {
-        // ----- LIGHT MODE (more blue) -----
-        bg: "#e7f1ff",            // pale powder-blue background
-        surface: "#ffffff",       // white card surface
-        border: "#b3cff5",        // gentle sky-blue border
-        text: "#0d2b66",          // deep cobalt text
-        subtext: "#3d5fa8",       // cooler muted blue-gray
-        buttonBg: "#d8e7ff",      // soft light-blue button
-        buttonText: "#0a3aa8",    // bold royal blue text
+        bg: "#e7f1ff",            
+        surface: "#ffffff",       
+        border: "#b3cff5",        
+        text: "#0d2b66",          
+        subtext: "#3d5fa8",       
+        buttonBg: "#d8e7ff",      
+        buttonText: "#0a3aa8",   
       };
 
   return (
@@ -142,43 +141,42 @@ function App() {
         style={{
           flexShrink: 0,
           padding: "12px 20px",
-          borderBottom: `1px solid ${theme.border}`,
-          background: theme.surface,
+          //borderBottom: `1px solid ${theme.border}`,
+          background: "#b3cff5",
           display: "flex",
-          justifyContent: "space-between",
-          alignItems: "center",
+          justifyContent: "space_between",
+          alignItems: "right",
           width: "100%",
           flexWrap: "wrap",
-          gap: "10px",
+          //gap: "10px",
           boxSizing: "border-box",
         }}
       >
-        {/* Left: logo + SECURIVA */}
-        <div style={{ display:"flex", alignItems:"center", gap:"10px", overflow:"hidden" }}>
-          <img
-            src="/logo.png"
-            alt="SECURIVA Logo"
-            style={{
-              height: "32px",
-              width: "32px",
-              objectFit: "cover",
-              borderRadius: "6px",
-            }}
-          />
-          <h1 style={{ margin: 0, fontSize: "1.1rem", whiteSpace:"nowrap" }}>
-            SECURIVA
-          </h1>
-        </div>
+        
 
-        {/* Right: Login buttons if NOT authenticated */}
+        {/* Right: Login buttons if not authenticated */}
         {!isAuthenticated ? (
           <div style={{ display: "flex", gap: "10px" }}>
             <button
               onClick={() => setPage("login")}
               style={{
                 background: "none",
-                border: `1px solid ${theme.border}`,
-                color: theme.text,
+                //border: `1px solid ${theme.border}`,
+                color: "#0d2b66",
+                borderRadius: "6px",
+                padding: "6px 12px",
+                cursor: "pointer",
+              }}
+            >
+              Demo
+            </button>
+
+            <button
+              onClick={() => setPage("login")}
+              style={{
+                background: "none",
+                //border: `1px solid ${theme.border}`,
+                color: "#0d2b66",
                 borderRadius: "6px",
                 padding: "6px 12px",
                 cursor: "pointer",
@@ -191,14 +189,148 @@ function App() {
               onClick={() => setPage("login")}
               style={{
                 background: "none",
-                border: `1px solid ${theme.border}`,
-                color: theme.text,
+                //border: `1px solid ${theme.border}`,
+                color: "#0d2b66",
                 borderRadius: "6px",
                 padding: "6px 12px",
                 cursor: "pointer",
               }}
             >
               Sign Up
+            </button>
+
+            <button
+              //onClick={() => setPage("login")}
+              style={{
+                background: "none",
+                //border: `1px solid ${theme.border}`,
+                color: "#0d2b66",
+                borderRadius: "6px",
+                padding: "6px 12px",
+                cursor: "pointer",
+              }}
+            >
+              Support
+            </button>
+
+            <button
+              //onClick={() => setPage("login")}
+              style={{
+                background: "none",
+                //border: `1px solid ${theme.border}`,
+                color: "#0d2b66",
+                borderRadius: "6px",
+                padding: "6px 12px",
+                cursor: "pointer",
+              }}
+            >
+              Contact
+            </button>
+          </div>
+        ) : (
+          /* If logged in → show your status toggle */
+          <button
+            onClick={() => setShowStatus((prev) => !prev)}
+            style={{
+              background: "none",
+              //border: `1px solid ${theme.border}`,
+              color: theme.subtext,
+              borderRadius: "6px",
+              padding: "4px 10px",
+              cursor: "pointer",
+            }}
+          >
+            {showStatus ? "Hide Status" : "Show Status"}
+          </button>
+        )}
+      </header>
+
+      <header
+        style={{
+          flexShrink: 0,
+          padding: "12px 20px",
+          borderBottom: `1px solid ${theme.border}`,
+          background: theme.surface,
+          display: "flex",
+          justifyContent: "space-between",
+          alignItems: "center",
+          width: "100%",
+          flexWrap: "wrap",
+          gap: "10px",
+          boxSizing: "border-box",
+          fontSize: 25,
+        }}
+      >
+        {/* Left: logo + SECURIVA */}
+        <div style={{ display:"flex", alignItems:"center", overflow:"hidden" }}>
+          <img
+            src="/logo.png"
+            alt="SECURIVA Logo"
+            style={{
+              height: "auto",
+              width: "250px",
+              objectFit: "cover",
+            }}
+          />
+        </div>
+
+        {/* Right: Login buttons if not authenticated */}
+        {!isAuthenticated ? (
+          <div style={{ display: "flex", gap: "10px" }}>
+            <button
+              onClick={() => setPage("login")}
+              style={{
+                background: "none",
+                //border: `1px solid ${theme.border}`,
+                color: "#0d2b66",
+                borderRadius: "6px",
+                padding: "6px 12px",
+                cursor: "pointer",
+              }}
+            >
+              Features
+            </button>
+
+            <button
+              onClick={() => setPage("login")}
+              style={{
+                background: "none",
+                //border: `1px solid ${theme.border}`,
+                color: "#0d2b66",
+                borderRadius: "6px",
+                padding: "6px 12px",
+                cursor: "pointer",
+              }}
+            >
+              Solutions
+            </button>
+
+            <button
+              //onClick={() => setPage("login")}
+              style={{
+                background: "none",
+                //border: `1px solid ${theme.border}`,
+                color: "#0d2b66",
+                borderRadius: "6px",
+                padding: "6px 12px",
+                cursor: "pointer",
+              }}
+            >
+              Pricing
+            </button>
+
+            <button
+              //onClick={() => setPage("login")}
+              style={{
+                background: "none",
+                //border: `1px solid ${theme.border}`,
+                color: "#0d2b66",
+                borderRadius: "6px",
+                padding: "6px 12px",
+                cursor: "pointer",
+              }}
+            >
+              About
             </button>
           </div>
         ) : (
@@ -330,7 +462,7 @@ function App() {
         <div
           style={{
             width: "100%",
-            maxWidth: "1200px",
+            maxWidth: "90%",
             height: "100%",
             padding: "0 1rem",
             display: "flex",
@@ -358,6 +490,8 @@ function App() {
           )}
         </div>
       </main>
+
+      <Home_Info theme={theme} />
 
       {/* ---------- FOOTER ---------- */}
       <Footer theme={theme} />
