@@ -24,7 +24,7 @@ function ChatBox() {
   const [error, setError] = useState(null);
 
   // Ref for auto-scrolling to bottom
-  const messagesEndRef = useRef(null);
+  const messagesContainerRef = useRef(null);
 
   // Save messages to localStorage whenever they change
   useEffect(() => {
@@ -33,7 +33,10 @@ function ChatBox() {
 
   // Auto-scroll to bottom when messages change
   useEffect(() => {
-    messagesEndRef.current?.scrollIntoView({ behavior: "smooth" });
+    const container = messagesContainerRef.current;
+    if (!container) return;
+
+    container.scrollTop = container.scrollHeight; // jump to bottom
   }, [messages, isLoading]);
 
   const handleSend = async () => {
@@ -139,7 +142,7 @@ function ChatBox() {
         </div>
       )}
 
-      <div className="chatbox-messages">
+      <div className="chatbox-messages" ref={messagesContainerRef}>
         {messages.filter(msg => msg.role !== "system").map((msg, index) => (
           <div
             key={index}
