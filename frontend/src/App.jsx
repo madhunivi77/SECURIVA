@@ -3,7 +3,7 @@ import ChatBox from "./components/ChatBox";
 import LoginForm from "./components/LoginForm";
 import Homepage from "./components/Homepage";
 import Footer from "./components/Footer";
-import Home_Info from "./components/Home_Info";
+import NavOption from "./components/NavOption";
 
 function App() {
   const [backendStatus, setBackendStatus] = useState("Loading...");
@@ -74,6 +74,7 @@ function App() {
       setUserEmail(null);
       setIsSalesforceConnected(false);
       setPage("home");
+      setShowStatus(false)
       fetchStatus();
     } catch (error) {
       console.error("Logout error:", error);
@@ -136,7 +137,7 @@ function App() {
         color: theme.text,
       }}
     >
-      {/* ---------- HEADER ---------- */}
+      {/* ---------- UPPER NAV BAR ---------- */}
       <header
         style={{
           flexShrink: 0,
@@ -154,81 +155,22 @@ function App() {
       >
         
 
-        {/* Right: Login buttons if not authenticated */}
         {!isAuthenticated ? (
+          // LOGGED OUT
           <div style={{ display: "flex", gap: "10px" }}>
-            <button
-              onClick={() => setPage("login")}
-              style={{
-                background: "none",
-                //border: `1px solid ${theme.border}`,
-                color: "#0d2b66",
-                borderRadius: "6px",
-                padding: "6px 12px",
-                cursor: "pointer",
-              }}
-            >
-              Demo
-            </button>
+            
+            <NavOption label={"Demo"} target={"login"} setPage={setPage}/>
 
-            <button
-              onClick={() => setPage("login")}
-              style={{
-                background: "none",
-                //border: `1px solid ${theme.border}`,
-                color: "#0d2b66",
-                borderRadius: "6px",
-                padding: "6px 12px",
-                cursor: "pointer",
-              }}
-            >
-              Sign In
-            </button>
+            <NavOption label={"Sign In"} target={"login"} setPage={setPage}/>
 
-            <button
-              onClick={() => setPage("login")}
-              style={{
-                background: "none",
-                //border: `1px solid ${theme.border}`,
-                color: "#0d2b66",
-                borderRadius: "6px",
-                padding: "6px 12px",
-                cursor: "pointer",
-              }}
-            >
-              Sign Up
-            </button>
+            <NavOption label={"Sign Up"} target={"login"} setPage={setPage}/>
 
-            <button
-              //onClick={() => setPage("login")}
-              style={{
-                background: "none",
-                //border: `1px solid ${theme.border}`,
-                color: "#0d2b66",
-                borderRadius: "6px",
-                padding: "6px 12px",
-                cursor: "pointer",
-              }}
-            >
-              Support
-            </button>
+            <NavOption label={"Support"} target={"login"} setPage={setPage}/>
 
-            <button
-              //onClick={() => setPage("login")}
-              style={{
-                background: "none",
-                //border: `1px solid ${theme.border}`,
-                color: "#0d2b66",
-                borderRadius: "6px",
-                padding: "6px 12px",
-                cursor: "pointer",
-              }}
-            >
-              Contact
-            </button>
+            <NavOption label={"Contact"} target={"login"} setPage={setPage}/>
           </div>
         ) : (
-          /* If logged in → show your status toggle */
+          /* LOGGED IN → show your status toggle */
           <button
             onClick={() => setShowStatus((prev) => !prev)}
             style={{
@@ -245,6 +187,7 @@ function App() {
         )}
       </header>
 
+      {/* ---------- LOWER NAV BAR ---------- */}
       <header
         style={{
           flexShrink: 0,
@@ -271,67 +214,21 @@ function App() {
               width: "250px",
               objectFit: "cover",
             }}
+            onClick={() => setPage("home")}
           />
         </div>
 
         {/* Right: Login buttons if not authenticated */}
         {!isAuthenticated ? (
           <div style={{ display: "flex", gap: "10px" }}>
-            <button
-              onClick={() => setPage("login")}
-              style={{
-                background: "none",
-                //border: `1px solid ${theme.border}`,
-                color: "#0d2b66",
-                borderRadius: "6px",
-                padding: "6px 12px",
-                cursor: "pointer",
-              }}
-            >
-              Features
-            </button>
 
-            <button
-              onClick={() => setPage("login")}
-              style={{
-                background: "none",
-                //border: `1px solid ${theme.border}`,
-                color: "#0d2b66",
-                borderRadius: "6px",
-                padding: "6px 12px",
-                cursor: "pointer",
-              }}
-            >
-              Solutions
-            </button>
+            <NavOption label={"Features"} target={"login"} setPage={setPage}/>
+            
+            <NavOption label={"Solutions"} target={"login"} setPage={setPage}/>
 
-            <button
-              //onClick={() => setPage("login")}
-              style={{
-                background: "none",
-                //border: `1px solid ${theme.border}`,
-                color: "#0d2b66",
-                borderRadius: "6px",
-                padding: "6px 12px",
-                cursor: "pointer",
-              }}
-            >
-              Pricing
-            </button>
+            <NavOption label={"Pricing"} target={"login"} setPage={setPage}/>
 
-            <button
-              //onClick={() => setPage("login")}
-              style={{
-                background: "none",
-                //border: `1px solid ${theme.border}`,
-                color: "#0d2b66",
-                borderRadius: "6px",
-                padding: "6px 12px",
-                cursor: "pointer",
-              }}
-            >
-              About
-            </button>
+            <NavOption label={"About"} target={"login"} setPage={setPage}/>
           </div>
         ) : (
           /* If logged in → show your status toggle */
@@ -472,7 +369,7 @@ function App() {
           }}
         >
           {page === "home" && (
-            <Homepage onLoginClick={() => setPage("login")} />
+            <Homepage/>
           )}
 
           {page === "login" && (
@@ -485,13 +382,17 @@ function App() {
             />
           )}
 
+          {page === "security" && (
+            <Security />
+          )
+
+          }
+
           {page === "chat" && (
             <ChatBox userEmail={userEmail} />
           )}
         </div>
       </main>
-
-      <Home_Info theme={theme} />
 
       {/* ---------- FOOTER ---------- */}
       <Footer theme={theme} />
