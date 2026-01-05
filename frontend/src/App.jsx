@@ -5,6 +5,7 @@ import Homepage from "./components/Homepage";
 import Footer from "./components/Footer";
 import NavOption from "./components/NavOption";
 import Security from "./components/Security";
+import Agent from "./components/Agent";
 
 function App() {
   const [backendStatus, setBackendStatus] = useState("Loading...");
@@ -225,7 +226,7 @@ function App() {
 
               <NavOption label={"Features"} target={"security"} setPage={setPage} />
 
-              <NavOption label={"Solutions"} target={"login"} setPage={setPage} />
+              <NavOption label={"Solutions"} target={"agent"} setPage={setPage} />
 
               <NavOption label={"Pricing"} target={"login"} setPage={setPage} />
 
@@ -387,8 +388,11 @@ function App() {
           {page === "security" && (
             <Security />
           )
-
           }
+
+          {page === "agent" && (
+            <Agent />
+          )}
 
           {page === "chat" && (
             <ChatBox userEmail={userEmail} />
