@@ -29,7 +29,7 @@ function Security() {
                         alt="security_page_image"
                         style={{
                             height: "auto",
-                            width: "500px",
+                            width: "450px",
                             //objectFit: "cover",
                             //borderRadius: "6px",
                             paddingTop: "30px",
