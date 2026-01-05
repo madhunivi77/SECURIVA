@@ -4,6 +4,7 @@ import LoginForm from "./components/LoginForm";
 import Homepage from "./components/Homepage";
 import Footer from "./components/Footer";
 import NavOption from "./components/NavOption";
+import Security from "./components/Security";
 
 function App() {
   const [backendStatus, setBackendStatus] = useState("Loading...");
@@ -222,7 +223,7 @@ function App() {
         {!isAuthenticated ? (
           <div style={{ display: "flex", gap: "10px" }}>
 
-            <NavOption label={"Features"} target={"login"} setPage={setPage}/>
+            <NavOption label={"Features"} target={"security"} setPage={setPage}/>
             
             <NavOption label={"Solutions"} target={"login"} setPage={setPage}/>
 
