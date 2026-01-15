@@ -161,8 +161,6 @@ function ChatBox() {
             <strong>Assistant:</strong> <em>Thinking...</em>
           </div>
         )}
-        {/* Invisible div at the bottom for auto-scroll */}
-        <div ref={messagesEndRef} />
       </div>
 
       <div className="chatbox-input">
