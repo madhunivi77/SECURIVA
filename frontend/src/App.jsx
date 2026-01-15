@@ -3,7 +3,9 @@ import ChatBox from "./components/ChatBox";
 import LoginForm from "./components/LoginForm";
 import Homepage from "./components/Homepage";
 import Footer from "./components/Footer";
-import Home_Info from "./components/Home_Info";
+import NavOption from "./components/NavOption";
+import Security from "./components/Security";
+import Agent from "./components/Agent";
 
 function App() {
   const [backendStatus, setBackendStatus] = useState("Loading...");
@@ -11,7 +13,7 @@ function App() {
   const [isAuthenticated, setIsAuthenticated] = useState(false);
   const [isSalesforceConnected, setIsSalesforceConnected] = useState(false);
   const [showStatus, setShowStatus] = useState(false);
-  const [page, setPage] = useState("home"); 
+  const [page, setPage] = useState("home");
   const [isDarkMode, setIsDarkMode] = useState(
     window.matchMedia("(prefers-color-scheme: dark)").matches
   );
@@ -74,6 +76,7 @@ function App() {
       setUserEmail(null);
       setIsSalesforceConnected(false);
       setPage("home");
+      setShowStatus(false)
       fetchStatus();
     } catch (error) {
       console.error("Logout error:", error);
@@ -107,23 +110,23 @@ function App() {
 
   const theme = isDarkMode
     ? {
-        bg: "#0a0f1f",            
-        surface: "#ffffff",      
-        border: "#1c2a44",        
-        text: "#d9e6ff",          
-        subtext: "#8fa8d6",       
-        buttonBg: "#1f5fbf",     
-        buttonText: "white",
-      }
+      bg: "#0a0f1f",
+      surface: "#ffffff",
+      border: "#1c2a44",
+      text: "#d9e6ff",
+      subtext: "#8fa8d6",
+      buttonBg: "#1f5fbf",
+      buttonText: "white",
+    }
     : {
-        bg: "#e7f1ff",            
-        surface: "#ffffff",       
-        border: "#b3cff5",        
-        text: "#0d2b66",          
-        subtext: "#3d5fa8",       
-        buttonBg: "#d8e7ff",      
-        buttonText: "#0a3aa8",   
-      };
+      bg: "#e7f1ff",
+      surface: "#ffffff",
+      border: "#b3cff5",
+      text: "#0d2b66",
+      subtext: "#3d5fa8",
+      buttonBg: "#d8e7ff",
+      buttonText: "#0a3aa8",
+    };
 
   return (
     <div
@@ -136,285 +139,198 @@ function App() {
         color: theme.text,
       }}
     >
-      {/* ---------- HEADER ---------- */}
-      <header
-        style={{
-          flexShrink: 0,
-          padding: "12px 20px",
-          //borderBottom: `1px solid ${theme.border}`,
-          background: "#b3cff5",
-          display: "flex",
-          justifyContent: "space_between",
-          alignItems: "right",
-          width: "100%",
-          flexWrap: "wrap",
-          //gap: "10px",
-          boxSizing: "border-box",
-        }}
-      >
-        
-
-        {/* Right: Login buttons if not authenticated */}
-        {!isAuthenticated ? (
-          <div style={{ display: "flex", gap: "10px" }}>
-            <button
-              onClick={() => setPage("login")}
-              style={{
-                background: "none",
-                //border: `1px solid ${theme.border}`,
-                color: "#0d2b66",
-                borderRadius: "6px",
-                padding: "6px 12px",
-                cursor: "pointer",
-              }}
-            >
-              Demo
-            </button>
-
-            <button
-              onClick={() => setPage("login")}
-              style={{
-                background: "none",
-                //border: `1px solid ${theme.border}`,
-                color: "#0d2b66",
-                borderRadius: "6px",
-                padding: "6px 12px",
-                cursor: "pointer",
-              }}
-            >
-              Sign In
-            </button>
-
-            <button
-              onClick={() => setPage("login")}
-              style={{
-                background: "none",
-                //border: `1px solid ${theme.border}`,
-                color: "#0d2b66",
-                borderRadius: "6px",
-                padding: "6px 12px",
-                cursor: "pointer",
-              }}
-            >
-              Sign Up
-            </button>
-
-            <button
-              //onClick={() => setPage("login")}
-              style={{
-                background: "none",
-                //border: `1px solid ${theme.border}`,
-                color: "#0d2b66",
-                borderRadius: "6px",
-                padding: "6px 12px",
-                cursor: "pointer",
-              }}
-            >
-              Support
-            </button>
-
-            <button
-              //onClick={() => setPage("login")}
-              style={{
-                background: "none",
-                //border: `1px solid ${theme.border}`,
-                color: "#0d2b66",
-                borderRadius: "6px",
-                padding: "6px 12px",
-                cursor: "pointer",
-              }}
-            >
-              Contact
-            </button>
-          </div>
-        ) : (
-          /* If logged in → show your status toggle */
-          <button
-            onClick={() => setShowStatus((prev) => !prev)}
-            style={{
-              background: "none",
-              //border: `1px solid ${theme.border}`,
-              color: theme.subtext,
-              borderRadius: "6px",
-              padding: "4px 10px",
-              cursor: "pointer",
-            }}
-          >
-            {showStatus ? "Hide Status" : "Show Status"}
-          </button>
-        )}
-      </header>
-
-      <header
-        style={{
-          flexShrink: 0,
-          padding: "12px 20px",
-          borderBottom: `1px solid ${theme.border}`,
-          background: theme.surface,
-          display: "flex",
-          justifyContent: "space-between",
-          alignItems: "center",
-          width: "100%",
-          flexWrap: "wrap",
-          gap: "10px",
-          boxSizing: "border-box",
-          fontSize: 25,
-        }}
-      >
-        {/* Left: logo + SECURIVA */}
-        <div style={{ display:"flex", alignItems:"center", overflow:"hidden" }}>
-          <img
-            src="/logo.png"
-            alt="SECURIVA Logo"
-            style={{
-              height: "auto",
-              width: "250px",
-              objectFit: "cover",
-            }}
-          />
-        </div>
-
-        {/* Right: Login buttons if not authenticated */}
-        {!isAuthenticated ? (
-          <div style={{ display: "flex", gap: "10px" }}>
-            <button
-              onClick={() => setPage("login")}
-              style={{
-                background: "none",
-                //border: `1px solid ${theme.border}`,
-                color: "#0d2b66",
-                borderRadius: "6px",
-                padding: "6px 12px",
-                cursor: "pointer",
-              }}
-            >
-              Features
-            </button>
-
-            <button
-              onClick={() => setPage("login")}
-              style={{
-                background: "none",
-                //border: `1px solid ${theme.border}`,
-                color: "#0d2b66",
-                borderRadius: "6px",
-                padding: "6px 12px",
-                cursor: "pointer",
-              }}
-            >
-              Solutions
-            </button>
-
-            <button
-              //onClick={() => setPage("login")}
-              style={{
-                background: "none",
-                //border: `1px solid ${theme.border}`,
-                color: "#0d2b66",
-                borderRadius: "6px",
-                padding: "6px 12px",
-                cursor: "pointer",
-              }}
-            >
-              Pricing
-            </button>
-
-            <button
-              //onClick={() => setPage("login")}
-              style={{
-                background: "none",
-                //border: `1px solid ${theme.border}`,
-                color: "#0d2b66",
-                borderRadius: "6px",
-                padding: "6px 12px",
-                cursor: "pointer",
-              }}
-            >
-              About
-            </button>
-          </div>
-        ) : (
-          /* If logged in → show your status toggle */
-          <button
-            onClick={() => setShowStatus((prev) => !prev)}
-            style={{
-              background: "none",
-              border: `1px solid ${theme.border}`,
-              color: theme.subtext,
-              borderRadius: "6px",
-              padding: "4px 10px",
-              cursor: "pointer",
-            }}
-          >
-            {showStatus ? "Hide Status" : "Show Status"}
-          </button>
-        )}
-      </header>
-
-      {/* ---------- STATUS SECTION ---------- */}
-      {showStatus && (
+      <nav style={{ position: "fixed", width: "100%" }}>
+        {/* UPPER NAV BAR */}
         <div
           style={{
             flexShrink: 0,
-            background: theme.surface,
-            padding: "10px 20px",
-            borderBottom: `1px solid ${theme.border}`,
-            fontSize: "0.9em",
-            color: theme.subtext,
+            padding: "12px 20px",
+            //borderBottom: `1px solid ${theme.border}`,
+            background: "#b3cff5",
+            display: "flex",
+            justifyContent: "space_between",
+            alignItems: "right",
+            width: "100%",
+            flexWrap: "wrap",
+            //gap: "10px",
+            boxSizing: "border-box"
           }}
         >
-          <p style={{ margin: "4px 0" }}>{backendStatus}</p>
-          <div style={{ display:"flex", flexWrap:"wrap", gap:"8px", marginTop:"8px" }}>
+
+
+          {!isAuthenticated ? (
+            // LOGGED OUT
+            <div style={{ display: "flex", gap: "10px" }}>
+
+              <NavOption label={"Demo"} target={"login"} setPage={setPage} />
+
+              <NavOption label={"Sign In"} target={"login"} setPage={setPage} />
+
+              <NavOption label={"Sign Up"} target={"login"} setPage={setPage} />
+
+              <NavOption label={"Support"} target={"login"} setPage={setPage} />
+
+              <NavOption label={"Contact"} target={"login"} setPage={setPage} />
+            </div>
+          ) : (
+            /* LOGGED IN → show your status toggle */
             <button
-              onClick={handleReconnect}
+              onClick={() => setShowStatus((prev) => !prev)}
               style={{
-                background: theme.buttonBg,
-                border: "none",
+                background: "none",
+                //border: `1px solid ${theme.border}`,
+                color: theme.subtext,
                 borderRadius: "6px",
-                color: theme.buttonText,
-                padding: "6px 12px",
+                padding: "4px 10px",
                 cursor: "pointer",
               }}
             >
-              Reconnect
+              {showStatus ? "Hide Status" : "Show Status"}
             </button>
+          )}
+        </div>
+        {/* LOWER NAV BAR */}
+        <div
+          style={{
+            flexShrink: 0,
+            padding: "12px 20px",
+            borderBottom: `1px solid ${theme.border}`,
+            background: theme.surface,
+            display: "flex",
+            justifyContent: "space-between",
+            alignItems: "center",
+            width: "100%",
+            flexWrap: "wrap",
+            gap: "10px",
+            boxSizing: "border-box",
+            fontSize: 25,
+          }}
+        >
+          {/* Left: logo + SECURIVA */}
+          <div style={{ display: "flex", alignItems: "center", overflow: "hidden" }}>
+            <img
+              src="/logo.png"
+              alt="SECURIVA Logo"
+              style={{
+                height: "auto",
+                width: "250px",
+                objectFit: "cover",
+              }}
+              onClick={() => setPage("home")}
+            />
+          </div>
 
-            {!isAuthenticated && (
+          {/* Right: Login buttons if not authenticated */}
+          {!isAuthenticated ? (
+            <div style={{ display: "flex", gap: "10px" }}>
+
+              <NavOption label={"Features"} target={"security"} setPage={setPage} />
+
+              <NavOption label={"Solutions"} target={"agent"} setPage={setPage} />
+
+              <NavOption label={"Pricing"} target={"login"} setPage={setPage} />
+
+              <NavOption label={"About"} target={"login"} setPage={setPage} />
+            </div>
+          ) : (
+            /* If logged in → show your status toggle */
+            <button
+              onClick={() => setShowStatus((prev) => !prev)}
+              style={{
+                background: "none",
+                border: `1px solid ${theme.border}`,
+                color: theme.subtext,
+                borderRadius: "6px",
+                padding: "4px 10px",
+                cursor: "pointer",
+              }}
+            >
+              {showStatus ? "Hide Status" : "Show Status"}
+            </button>
+          )}
+        </div>
+
+        {/* ---------- STATUS SECTION ---------- */}
+        {showStatus && (
+          <div
+            style={{
+              flexShrink: 0,
+              background: theme.surface,
+              padding: "10px 20px",
+              borderBottom: `1px solid ${theme.border}`,
+              fontSize: "0.9em",
+              color: theme.subtext,
+            }}
+          >
+            <p style={{ margin: "4px 0" }}>{backendStatus}</p>
+            <div style={{ display: "flex", flexWrap: "wrap", gap: "8px", marginTop: "8px" }}>
               <button
-                onClick={handleGoogleLogin}
+                onClick={handleReconnect}
                 style={{
-                  background: "#4285F4",
+                  background: theme.buttonBg,
                   border: "none",
                   borderRadius: "6px",
-                  color: "white",
+                  color: theme.buttonText,
                   padding: "6px 12px",
                   cursor: "pointer",
                 }}
               >
-                Login with Google
+                Reconnect
               </button>
-            )}
 
-            {!isSalesforceConnected && isAuthenticated && (
-              <button
-                onClick={handleSalesforceLogin}
-                style={{
-                  background: "#00A1E0",
-                  border: "none",
-                  borderRadius: "6px",
-                  color: "white",
-                  padding:"6px 12px",
-                  cursor:"pointer",
-                }}
-              >
-                Connect Salesforce
-              </button>
-            )}
-
-            {
-              isSalesforceConnected && isAuthenticated && (
+              {!isAuthenticated && (
                 <button
-                  onClick={handleSalesforceLogout}
+                  onClick={handleGoogleLogin}
+                  style={{
+                    background: "#4285F4",
+                    border: "none",
+                    borderRadius: "6px",
+                    color: "white",
+                    padding: "6px 12px",
+                    cursor: "pointer",
+                  }}
+                >
+                  Login with Google
+                </button>
+              )}
+
+              {!isSalesforceConnected && isAuthenticated && (
+                <button
+                  onClick={handleSalesforceLogin}
+                  style={{
+                    background: "#00A1E0",
+                    border: "none",
+                    borderRadius: "6px",
+                    color: "white",
+                    padding: "6px 12px",
+                    cursor: "pointer",
+                  }}
+                >
+                  Connect Salesforce
+                </button>
+              )}
+
+              {
+                isSalesforceConnected && isAuthenticated && (
+                  <button
+                    onClick={handleSalesforceLogout}
+                    style={{
+                      background: "#d32f2f",
+                      border: "none",
+                      borderRadius: "6px",
+                      color: "white",
+                      padding: "6px 12px",
+                      cursor: "pointer",
+                      flexShrink: 0,
+                    }}
+                  >
+                    Disconnect Salesforce
+                  </button>
+                )
+              }
+              {isAuthenticated && (
+                <button
+                  onClick={handleLogout}
                   style={{
                     background: "#d32f2f",
                     border: "none",
@@ -422,31 +338,15 @@ function App() {
                     color: "white",
                     padding: "6px 12px",
                     cursor: "pointer",
-                    flexShrink: 0,
-                }}
+                  }}
                 >
-                  Disconnect Salesforce
+                  Logout
                 </button>
-              )
-            }
-            {isAuthenticated && (
-              <button
-                onClick={handleLogout}
-                style={{
-                  background: "#d32f2f",
-                  border: "none",
-                  borderRadius: "6px",
-                  color: "white",
-                  padding: "6px 12px",
-                  cursor: "pointer",
-                }}
-              >
-                Logout
-              </button>
-            )}
+              )}
+            </div>
           </div>
-        </div>
-      )}
+        )}
+      </nav>
 
       {/* ---------- MAIN CONTENT SWITCHER ---------- */}
       <main
@@ -456,7 +356,7 @@ function App() {
           justifyContent: "center",
           width: "100%",
           overflowY: "auto",
-          padding: "1rem 0",
+          paddingTop: "167.5px",
         }}
       >
         <div
@@ -472,7 +372,7 @@ function App() {
           }}
         >
           {page === "home" && (
-            <Homepage onLoginClick={() => setPage("login")} />
+            <Homepage />
           )}
 
           {page === "login" && (
@@ -485,13 +385,20 @@ function App() {
             />
           )}
 
+          {page === "security" && (
+            <Security />
+          )
+          }
+
+          {page === "agent" && (
+            <Agent />
+          )}
+
           {page === "chat" && (
             <ChatBox userEmail={userEmail} />
           )}
         </div>
       </main>
-
-      <Home_Info theme={theme} />
 
       {/* ---------- FOOTER ---------- */}
       <Footer theme={theme} />

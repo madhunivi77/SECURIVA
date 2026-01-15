@@ -2,7 +2,7 @@
 import React from "react";
 import Home_Info from "./Home_Info";
 
-export default function Homepage({ onLoginClick }) {
+export default function Homepage() {
 
   return (
     <div className="homepage">
@@ -46,7 +46,7 @@ export default function Homepage({ onLoginClick }) {
         </div>
       </header>
       
-      
+      <Home_Info/>
     </div>
   );
 }
