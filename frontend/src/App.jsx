@@ -174,19 +174,28 @@ function App() {
             </div>
           ) : (
             /* LOGGED IN → show your status toggle */
-            <button
-              onClick={() => setShowStatus((prev) => !prev)}
-              style={{
-                background: "none",
-                //border: `1px solid ${theme.border}`,
-                color: theme.subtext,
-                borderRadius: "6px",
-                padding: "4px 10px",
-                cursor: "pointer",
-              }}
-            >
-              {showStatus ? "Hide Status" : "Show Status"}
-            </button>
+            <div style={{ display: "flex", gap: "10px" }}>
+
+              <NavOption label={"Demo"} target={"login"} setPage={setPage} />
+
+              <NavOption label={"Support"} target={"login"} setPage={setPage} />
+
+              <NavOption label={"Contact"} target={"login"} setPage={setPage} />
+            
+              <button
+                onClick={() => setShowStatus((prev) => !prev)}
+                style={{
+                  background: "none",
+                  //border: `1px solid ${theme.border}`,
+                  color: theme.border,
+                  borderRadius: "6px",
+                  padding: "4px 10px",
+                  cursor: "pointer",
+                }}
+              >
+                {showStatus ? "Hide Status" : "Show Status"}
+              </button>
+            </div>
           )}
         </div>
         {/* LOWER NAV BAR */}
@@ -234,19 +243,16 @@ function App() {
             </div>
           ) : (
             /* If logged in → show your status toggle */
-            <button
-              onClick={() => setShowStatus((prev) => !prev)}
-              style={{
-                background: "none",
-                border: `1px solid ${theme.border}`,
-                color: theme.subtext,
-                borderRadius: "6px",
-                padding: "4px 10px",
-                cursor: "pointer",
-              }}
-            >
-              {showStatus ? "Hide Status" : "Show Status"}
-            </button>
+            <div style={{ display: "flex", gap: "10px" }}>
+
+              <NavOption label={"Features"} target={"security"} setPage={setPage} />
+
+              <NavOption label={"Solutions"} target={"agent"} setPage={setPage} />
+
+              <NavOption label={"Pricing"} target={"login"} setPage={setPage} />
+
+              <NavOption label={"About"} target={"login"} setPage={setPage} />
+            </div>
           )}
         </div>
 
@@ -364,7 +370,7 @@ function App() {
             width: "100%",
             maxWidth: "90%",
             height: "100%",
-            padding: "0 1rem",
+            //padding: "0 1rem",
             display: "flex",
             flexDirection: "column",
             justifyContent: "flex-start",
