@@ -1,5 +1,4 @@
 // Homepage.jsx
-import React from "react";
 import Home_Info from "./Home_Info";
 
 export default function Homepage() {
@@ -8,22 +7,17 @@ export default function Homepage() {
     <div className="homepage">
 
       {/* ---------- HEADER ---------- */}
-      <header className="hero">
+      <header className="hero section-min-height">
 
-        <div className="hero-content" style={{display: "flex", justifyContent: "space-evenly"}}>
+        <div className="hero-content flex justify-evenly">
           <div>
-            <h1 style={{fontSize: 40, textAlign: "left", paddingTop: "20px"}}>THE AI PLATFORM THAT PROTECTS AND AUTOMATES YOUR BUSINESS</h1>
-            <p style={{fontSize: 25, textAlign: "left", paddingTop: "30px", paddingBottom: "40px"}}>
+            <h1 className="text-xl text-left pt-5">THE AI PLATFORM THAT PROTECTS AND AUTOMATES YOUR BUSINESS</h1>
+            <p className="text-m text-left pt-7.5 pb-10">
               SecuriVA unifies AI automation, cybersecurity protection, and secure communication
               into one intelligent platform designed for modern enterprises.
             </p>
             <button
-              style={{
-                fontSize: 20,
-                width: "200px",
-                height: "70px",
-                background: "red",
-              }}
+              className="text-sm w-50 h-17.5 bg-red-500"
             >
               Start Free Trial
             </button>
@@ -33,14 +27,7 @@ export default function Homepage() {
             <img
               src="/IMAGE_1.png"
               alt="homepage_image"
-              style={{
-                height: "auto",
-                width: "600px",
-                //objectFit: "cover",
-                //borderRadius: "6px",
-                paddingTop: "30px",
-                paddingLeft: "30px",
-              }}
+              className="h-auto w-300 pt-7.5 pl-7.5"
             />
           </div>
         </div>
