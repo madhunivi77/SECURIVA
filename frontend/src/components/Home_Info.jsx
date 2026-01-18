@@ -1,18 +1,13 @@
-import React from "react";
 import Card from "./Card";
 
 export default function Home_Info() {
   return (
     <div className="info">
       <div
+          className="gap-12.5 p-20 mx-0 my-auto text-black"
           style={{
             display: "grid",
-            gridTemplateColumns: "repeat(3, 1fr)",
-            gap: "50px",
-            //maxWidth: "1100px",
-            margin: "0 auto",
-            padding: "80px",
-            color: "black",
+            gridTemplateColumns: "repeat(3, 1fr)"
           }}
         >
           <Card image={"/AI_Virtual_assistant.png"} title={"AI Virtual Agent"} text={"Streamline workflows, scheduling, and communications with smart automation tools."}/>
@@ -24,10 +19,7 @@ export default function Home_Info() {
         </div>
         
         <h2
-          style={{
-            fontSize: "40px",
-            paddingTop: "30px",
-          }}
+          className="text-[40px] pt-7.5"
         >
           💼 Why Choose SecuriVA
         </h2>

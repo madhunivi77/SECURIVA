@@ -1,6 +1,6 @@
 function CenteredArrow({ width = 50, height = 100, color = "white" }) {
   return (
-    <div style={{ display: "flex", justifyContent: "center", margin: "20px 0" }}>
+    <div class="flex justify-center mx-5 my-0">
       <svg
         width={width}
         height={height}
