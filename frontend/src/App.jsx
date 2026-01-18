@@ -139,7 +139,7 @@ function App() {
         color: theme.text,
       }}
     >
-      <nav style={{ position: "fixed", width: "100%" }}>
+      <nav style={{ position: "fixed", width: "100%", zIndex: 10}}>
         {/* UPPER NAV BAR */}
         <div
           style={{
