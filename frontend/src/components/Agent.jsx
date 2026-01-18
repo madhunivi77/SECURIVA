@@ -48,15 +48,15 @@ function Agent() {
             <div className="graph" style={{ color: "black" }}>
 
                 <div className="layer">
-                    <Card image={""} title={"AVA"} text={"SecuriVA AI Bot"} />
+                    <Card image={"/agent_page/AVA_Assistant.png"} title={"AVA"} text={"SecuriVA AI Bot"} />
                 </div>
 
                 <CenteredArrow />
 
                 <div className="layer">
-                    <Card image={""} title={"Email"} text={"Send and Respond"} />
-                    <Card image={""} title={"WhatsApp"} text={"Auto-replies"} />
-                    <Card image={""} title={"SMS Texting"} text={"Automated Alerts"} />
+                    <Card image={"/agent_page/email.png"} title={"Email"} text={"Send and Respond"} />
+                    <Card image={"/agent_page/whatsapp.png"} title={"WhatsApp"} text={"Auto-replies"} />
+                    <Card image={"/agent_page/sms.png"} title={"SMS Texting"} text={"Automated Alerts"} />
                 </div>
                 
                 <div style={{display: "flex", flexDirection: "row", justifyContent: "center", gap: "30%"}}>
@@ -66,21 +66,21 @@ function Agent() {
                 </div>
 
                 <div className="layer">
-                    <Card image={""} title={"Calls"} text={"Voice Assistant"} />
-                    <Card image={""} title={"Calendar"} text={"Meetings & Bookings"} />
-                    <Card image={""} title={"Cyber Shield"} text={"Secure Workflows"} />
+                    <Card image={"/agent_page/call.png"} title={"Calls"} text={"Voice Assistant"} />
+                    <Card image={"/agent_page/calendar.png"} title={"Calendar"} text={"Meetings & Bookings"} />
+                    <Card image={"/agent_page/shield.png"} title={"Cyber Shield"} text={"Secure Workflows"} />
                 </div>
 
                 <CenteredArrow />
 
                 <div className="layer">
-                    <Card image={""} title={"Integration Hub"} text={"Gmail • WhatsApp API • WordPress • Shopify • Salesforce • AWS • SMS"} />
+                    <Card image={"/agent_page/integration.png"} title={"Integration Hub"} text={"Gmail • WhatsApp API • WordPress • Shopify • Salesforce • AWS • SMS"} />
                 </div>
 
                 <CenteredArrow />
 
                 <div className="layer">
-                    <Card image={""} title={"SecuriVA Automation Engine"} text={"Emails • Calls • Tasks • Alerts • AI Responses • Scheduling"} />
+                    <Card image={"/agent_page/automation.png"} title={"SecuriVA Automation Engine"} text={"Emails • Calls • Tasks • Alerts • AI Responses • Scheduling"} />
                 </div>
             </div>
         </div>
