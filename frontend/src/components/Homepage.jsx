@@ -1,5 +1,5 @@
 // Homepage.jsx
-import Home_Info from "./Home_Info";
+import Card from "./Card";
 
 export default function Homepage() {
 
@@ -23,7 +23,7 @@ export default function Homepage() {
             </button>
           </div>
 
-          <div style={{}}>
+          <div>
             <img
               src="/IMAGE_1.png"
               alt="homepage_image"
@@ -33,7 +33,50 @@ export default function Homepage() {
         </div>
       </header>
       
-      <Home_Info/>
+      <div className="info">
+        <div
+            className="gap-12.5 p-20 mx-0 my-auto text-black"
+            style={{
+              display: "grid",
+              gridTemplateColumns: "repeat(3, 1fr)"
+            }}
+          >
+            <Card image={"/AI_Virtual_assistant.png"} title={"AI Virtual Agent"} text={"Streamline workflows, scheduling, and communications with smart automation tools."}/>
+            <Card image={"/Cybersecurity_Protection.png"} title={"Cybersecurity Protection"} text={"Real-time AI defense for data, users, and digital assets."}/>
+            <Card image={"/AI_VPN.png"} title={"AI VPN"} text={"Secure every connection using adaptive, encrypted networking."}/>
+            <Card image={"/Customer_Interaction.png"} title={"Customer Interaction"} text={"Manage calls, chats, and emails through an intelligent AI avatar."}/>
+            <Card image={"/ebook.png"} title={"eBook Generator"} text={"Instantly create training manuals and awareness guides."}/>
+            <Card image={"/Integrations.png"} title={"Integrations"} text={"Connect with Gmail, Microsoft 365, Salesforce, OpenAI, and more."}/>
+          </div>
+          
+          <h2
+            className="text-[40px] pt-7.5"
+          >
+            💼 Why Choose SecuriVA
+          </h2>
+          <ul>
+            <li>
+              <strong>All-in-One Platform:</strong> AI automation, cybersecurity, and
+              communication in one unified system.
+            </li>
+            <li>
+              <strong>Enterprise-Grade Security:</strong> Built for complete protection
+              with encrypted AI-driven systems.
+            </li>
+            <li>
+              <strong>Intelligent & Human-Like:</strong> Engage with a smart,
+              conversational AI assistant that adapts to your business.
+            </li>
+            <li>
+              <strong>Seamless Integration:</strong> Works effortlessly with your
+              existing tools and cloud services.
+            </li>
+            <li>
+              <strong>Future-Ready:</strong> Powered by AI VPN and Digital Twin
+              technology for next-generation innovation.
+            </li>
+          </ul>
+      </div>
     </div>
   );
 }
