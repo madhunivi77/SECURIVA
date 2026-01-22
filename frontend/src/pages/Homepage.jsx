@@ -1,5 +1,5 @@
 // Homepage.jsx
-import Card from "./Card";
+import Card from "../components/Card";
 export default function Homepage() {
 
   return (
