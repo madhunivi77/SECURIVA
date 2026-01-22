@@ -351,53 +351,37 @@ function App() {
       {/* ---------- MAIN CONTENT SWITCHER ---------- */}
       <main
         style={{
-          flexGrow: 1,
-          display: "flex",
-          justifyContent: "center",
           width: "100%",
           overflowY: "auto",
           paddingTop: "167.5px",
         }}
       >
-        <div
-          style={{
-            width: "100%",
-            maxWidth: "90%",
-            height: "100%",
-            padding: "0 1rem",
-            display: "flex",
-            flexDirection: "column",
-            justifyContent: "flex-start",
-            flexGrow: 1,
-          }}
-        >
-          {page === "home" && (
-            <Homepage />
-          )}
+        {page === "home" && (
+          <Homepage />
+        )}
 
-          {page === "login" && (
-            <LoginForm
-              onAuthSuccess={handleAuthSuccess}
-              onBack={() => setPage("home")}
-              onGoogleLogin={handleGoogleLogin}
-              onSalesforceLogin={handleSalesforceLogin}
-              isAuthenticated={isAuthenticated}
-            />
-          )}
+        {page === "login" && (
+          <LoginForm
+            onAuthSuccess={handleAuthSuccess}
+            onBack={() => setPage("home")}
+            onGoogleLogin={handleGoogleLogin}
+            onSalesforceLogin={handleSalesforceLogin}
+            isAuthenticated={isAuthenticated}
+          />
+        )}
 
-          {page === "security" && (
-            <Security />
-          )
-          }
+        {page === "security" && (
+          <Security />
+        )
+        }
 
-          {page === "agent" && (
-            <Agent />
-          )}
+        {page === "agent" && (
+          <Agent />
+        )}
 
-          {page === "chat" && (
-            <ChatBox userEmail={userEmail} />
-          )}
-        </div>
+        {page === "chat" && (
+          <ChatBox userEmail={userEmail} />
+        )}
       </main>
 
       {/* ---------- FOOTER ---------- */}
