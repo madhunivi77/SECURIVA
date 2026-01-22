@@ -1,6 +1,10 @@
 import { useState } from "react";
+import { useOutletContext } from "react-router-dom";
 
-export default function LoginForm({ onGoogleLogin, onSalesforceLogin, isAuthenticated = false }) {
+export default function LoginForm() {
+
+  const {onGoogleLogin, onSalesforceLogin, isAuthenticated = false} = useOutletContext();
+
   const [loadingGoogle, setLoadingGoogle] = useState(false);
   const [loadingSalesforce, setLoadingSalesforce] = useState(false);
 
