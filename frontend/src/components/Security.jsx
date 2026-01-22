@@ -1,23 +1,17 @@
-import React from "react";
 import Card from "./Card";
 function Security() {
     return (
         <div>
             {/* ---------- HEADER ---------- */}
-            <header className="hero">
-                <div className="hero-content" style={{display: "flex", justifyContent: "space-evenly"}}>
+            <header className="hero section-min-height">
+                <div className="hero-content flex justify-evenly">
                     <div>
-                        <h1 style={{fontSize: 40, textAlign: "left", paddingTop: "20px"}}>PROACTIVE SECURITY MEASURES TO PROTECT YOUR BUSINESS</h1>
-                        <p style={{fontSize: 25, textAlign: "left", paddingTop: "30px", paddingBottom: "40px"}}>
+                        <h1 className="text-[40px] text-left pt-5">PROACTIVE SECURITY MEASURES TO PROTECT YOUR BUSINESS</h1>
+                        <p className="text-[25px] text-left pt-7.5 pb-10">
                         SecuriVA's cyber defense core secures your business operations by providing a suite of real time monitoring appliances to give you peace of mind in a world of evolving cyber threats.
                         </p>
                         <button
-                        style={{
-                            fontSize: 20,
-                            width: "200px",
-                            height: "70px",
-                            background: "red",
-                        }}
+                            className="font-[20px] w-50 h-17.5 bg-red-500"
                         >
                         Start Free Trial
                         </button>
@@ -27,28 +21,17 @@ function Security() {
                         <img
                         src="/Security_shield.png"
                         alt="security_page_image"
-                        style={{
-                            height: "auto",
-                            width: "450px",
-                            //objectFit: "cover",
-                            //borderRadius: "6px",
-                            paddingTop: "30px",
-                            paddingLeft: "30px",
-                        }}
+                        className="h-auto w-300 px-7.5 py-7.5"
                         />
                     </div>
                 </div>
             </header>
-            <h1 style={{textAlign: "center"}}>Protection Layers</h1>
+            <h1 className="text-center">Protection Layers</h1>
             <div
+                className="gap-12.5 mx-0 my-auto p-20 text-black"
                 style={{
                     display: "grid",
                     gridTemplateColumns: "repeat(3, 1fr)",
-                    gap: "50px",
-                    //maxWidth: "1100px",
-                    margin: "0 auto",
-                    padding: "80px",
-                    color: "black",
                 }}
             >
                 <Card image={""} title={"Domain Shield"} text={"Protect Domain"}/>
@@ -61,11 +44,10 @@ function Security() {
                 <Card image={""} title={"Whois Privacy"} text={"Hide Identity"}/>
                 <Card image={""} title={"Alerts & Logs"} text={"Real-time Warnings"}/>
             </div>
-            <h1 style={{textAlign: "center"}}><span style={{color: "lightblue", fontSize: ".75em"}}>▼</span> ALL CONNECTED TO  <span style={{color: "lightblue", fontSize: ".75em"}}>▼</span></h1>
-            <div style={{
-                justifyContent: "center",
-                color: "black"
-            }}>
+            <h1 className="text-center" ><span className="text-blue-300 text-[.75em]">▼</span> ALL CONNECTED TO  <span className="text-blue-300 text-[.75em]">▼</span></h1>
+            <div 
+                className="justify-center text-black"
+            >
                 <Card image={""} title={"SECURIVA AI ENGINE"} text={"Real-time monitoring & Automation Predict • Block • Secure • Recover"}/>
             </div>
         </div>

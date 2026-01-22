@@ -1,18 +1,8 @@
-import React from "react";
-import { useState, useEffect } from "react";
-
 function NavOption({label, target, setPage}){
     return (
         <button
               onClick={() => setPage(target)}
-              style={{
-                background: "none",
-                //border: `1px solid ${theme.border}`,
-                color: "#0d2b66",
-                borderRadius: "6px",
-                padding: "6px 12px",
-                cursor: "pointer",
-              }}
+              className="bg-none text-[#0d2b66] rounded-md px-1.5 py-3 cursor-pointer"
             >
               {label}
         </button>

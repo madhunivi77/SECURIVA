@@ -23,9 +23,9 @@ export default function LoginForm({ onGoogleLogin, onSalesforceLogin, isAuthenti
   };
 
   return (
-    <div style={{ maxWidth: "400px", margin: "2rem auto", textAlign: "center" }}>
+    <div className="max-w-100 my-8 mx-auto text-center section-min-height">
       <h2>Welcome to SECURIVA</h2>
-      <p style={{ marginBottom: "1.5rem", color: "#666" }}>
+      <p className="mb-6 color-[#666]">
         Sign in to access your account
       </p>
 
