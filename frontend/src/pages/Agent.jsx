@@ -1,6 +1,6 @@
-import Card from "./Card";
+import Card from "../components/Card";
 import "./Agent.css";
-import CenteredArrow from "./CenteredArrow";
+import CenteredArrow from "../components/CenteredArrow";
 
 function Agent() {
     return (

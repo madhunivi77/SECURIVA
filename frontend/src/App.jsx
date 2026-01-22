@@ -1,26 +1,22 @@
 import { useState, useEffect } from "react";
-import ChatBox from "./components/ChatBox";
-import LoginForm from "./components/LoginForm";
-import Homepage from "./components/Homepage";
 import Footer from "./components/Footer";
 import NavOption from "./components/NavOption";
-import Security from "./components/Security";
-import Agent from "./components/Agent";
+import { Outlet, useNavigate } from "react-router-dom";
 
 function App() {
+  const navigate = useNavigate();
   const [backendStatus, setBackendStatus] = useState("Loading...");
   const [userEmail, setUserEmail] = useState(null);
   const [isAuthenticated, setIsAuthenticated] = useState(false);
   const [isSalesforceConnected, setIsSalesforceConnected] = useState(false);
   const [showStatus, setShowStatus] = useState(false);
-  const [page, setPage] = useState("home");
   const [isDarkMode, setIsDarkMode] = useState(
     window.matchMedia("(prefers-color-scheme: dark)").matches
   );
 
   const handleAuthSuccess = (email) => {
     setUserEmail(email);
-    setPage("chat");
+    navigate("/chat")
   };
 
   useEffect(() => {
@@ -31,7 +27,7 @@ function App() {
     if (authSuccess === "success") {
       if (emailParam) setUserEmail(emailParam);
       window.history.replaceState({}, document.title, window.location.pathname);
-      setPage("chat");
+      navigate("/chat")
     }
 
     if (urlParams.get("salesforce") === "connected") {
@@ -75,7 +71,7 @@ function App() {
       setIsAuthenticated(false);
       setUserEmail(null);
       setIsSalesforceConnected(false);
-      setPage("home");
+      navigate("/")
       setShowStatus(false)
       fetchStatus();
     } catch (error) {
@@ -162,25 +158,25 @@ function App() {
             // LOGGED OUT
             <div style={{ display: "flex", gap: "10px" }}>
 
-              <NavOption label={"Demo"} target={"login"} setPage={setPage} />
+              <NavOption label={"Demo"} target={"login"} />
 
-              <NavOption label={"Sign In"} target={"login"} setPage={setPage} />
+              <NavOption label={"Sign In"} target={"login"} />
 
-              <NavOption label={"Sign Up"} target={"login"} setPage={setPage} />
+              <NavOption label={"Sign Up"} target={"login"} />
 
-              <NavOption label={"Support"} target={"login"} setPage={setPage} />
+              <NavOption label={"Support"} target={"login"} />
 
-              <NavOption label={"Contact"} target={"login"} setPage={setPage} />
+              <NavOption label={"Contact"} target={"login"} />
             </div>
           ) : (
             /* LOGGED IN → show your status toggle */
             <div style={{ display: "flex", gap: "10px" }}>
 
-              <NavOption label={"Demo"} target={"login"} setPage={setPage} />
+              <NavOption label={"Demo"} target={"login"}/>
 
-              <NavOption label={"Support"} target={"login"} setPage={setPage} />
+              <NavOption label={"Support"} target={"login"}/>
 
-              <NavOption label={"Contact"} target={"login"} setPage={setPage} />
+              <NavOption label={"Contact"} target={"login"}/>
             
               <button
                 onClick={() => setShowStatus((prev) => !prev)}
@@ -225,7 +221,7 @@ function App() {
                 width: "250px",
                 objectFit: "cover",
               }}
-              onClick={() => setPage("home")}
+              onClick={() => navigate("/")}
             />
           </div>
 
@@ -233,25 +229,25 @@ function App() {
           {!isAuthenticated ? (
             <div style={{ display: "flex", gap: "10px" }}>
 
-              <NavOption label={"Features"} target={"security"} setPage={setPage} />
+              <NavOption label={"Features"} target={"security"} />
 
-              <NavOption label={"Solutions"} target={"agent"} setPage={setPage} />
+              <NavOption label={"Solutions"} target={"agent"} />
 
-              <NavOption label={"Pricing"} target={"login"} setPage={setPage} />
+              <NavOption label={"Pricing"} target={"login"} />
 
-              <NavOption label={"About"} target={"login"} setPage={setPage} />
+              <NavOption label={"About"} target={"login"} />
             </div>
           ) : (
             /* If logged in → show your status toggle */
             <div style={{ display: "flex", gap: "10px" }}>
 
-              <NavOption label={"Features"} target={"security"} setPage={setPage} />
+              <NavOption label={"Features"} target={"security"} />
 
-              <NavOption label={"Solutions"} target={"agent"} setPage={setPage} />
+              <NavOption label={"Solutions"} target={"agent"} />
 
-              <NavOption label={"Pricing"} target={"login"} setPage={setPage} />
+              <NavOption label={"Pricing"} target={"login"} />
 
-              <NavOption label={"About"} target={"login"} setPage={setPage} />
+              <NavOption label={"About"} target={"login"} />
             </div>
           )}
         </div>
@@ -362,32 +358,9 @@ function App() {
           paddingTop: "167.5px",
         }}
       >
-        {page === "home" && (
-          <Homepage />
-        )}
-
-        {page === "login" && (
-          <LoginForm
-            onAuthSuccess={handleAuthSuccess}
-            onBack={() => setPage("home")}
-            onGoogleLogin={handleGoogleLogin}
-            onSalesforceLogin={handleSalesforceLogin}
-            isAuthenticated={isAuthenticated}
-          />
-        )}
-
-        {page === "security" && (
-          <Security />
-        )
-        }
-
-        {page === "agent" && (
-          <Agent />
-        )}
-
-        {page === "chat" && (
-          <ChatBox userEmail={userEmail} />
-        )}
+        {/* Pass any context used by App.jsx subpages. If used across other routes, elevate to an AuthContext wrapper in main.jsx */}
+        <Outlet context={{handleAuthSuccess, handleGoogleLogin, handleSalesforceLogin, isAuthenticated}}/>
+        
       </main>
 
       {/* ---------- FOOTER ---------- */}
