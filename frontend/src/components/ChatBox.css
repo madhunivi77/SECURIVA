@@ -3,7 +3,6 @@
   border-radius: 8px;
   padding: 10px;
   width: 100%;
-  max-width: 1200px;
   height: 70vh; /* 70% of viewport height */
   min-height: 400px;
   display: flex;
@@ -29,19 +28,26 @@
 .chatbox-message {
   margin: 10px 0;
   padding: 12px;
+  padding-left: 24px;
+  padding-right: 24px;
   border-radius: 8px;
   background: var(--msg-item-bg);
   line-height: 1.6;
+
+  width: fit-content;
+  max-width: 80%;
+  word-wrap: break-word;
+  overflow-wrap: break-word;
 }
 
 .chatbox-message.user {
+  margin-left: auto;
   background: var(--user-msg-bg);
-  margin-left: 20%;
 }
 
 .chatbox-message.bot {
+  margin-right: auto;
   background: var(--bot-msg-bg);
-  margin-right: 20%;
 }
 
 /* Markdown content styling */
