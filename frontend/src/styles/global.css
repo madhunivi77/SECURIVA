@@ -21,6 +21,18 @@
     min-height: calc(100vh - 167.5px); 
 }
 
+.why-card figure{
+  @apply flex-grow
+}
+
+.why-card div {
+  @apply max-w-[175px] p-1
+}
+
+.why-card {
+  @apply p-1.5
+}
+
 a {
   font-weight: 500;
   color: #646cff;
