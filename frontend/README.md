@@ -192,6 +192,147 @@ const [isAuthenticated, setIsAuthenticated] = useState(false);
 
 ---
 
+---
+
+## VAPI Voice Widget
+
+The frontend includes a voice-enabled AI assistant widget powered by [VAPI](https://vapi.ai).
+
+### Component: `VapiVoiceWidget`
+
+**Location:** `src/components/VapiVoiceWidget.jsx`
+
+A full-screen 3D animated voice interface that allows users to interact with the AI assistant using voice.
+
+### Features
+
+- **3D Animated Orb**: WebGL sphere with distortion effects (React Three Fiber)
+- **Color-coded States**:
+  - Gray (`#71717a`) - Idle
+  - Purple (`#8b5cf6`) - Active/Connected
+  - Green (`#10b981`) - Listening
+  - Indigo (`#6366f1`) - Speaking
+- **Audio-reactive**: Orb scale and distortion respond to volume levels
+- **Particle Background**: Floating particles for visual depth
+
+### Configuration
+
+**Environment Variables (`.env`):**
+```bash
+# VAPI public key (from VAPI dashboard)
+VITE_VAPI_PUBLIC_KEY=your-public-key
+
+# Backend webhook URL (use ngrok for local dev)
+VITE_VAPI_SERVER_URL=https://your-ngrok-url.ngrok-free.dev
+
+# Optional: Pre-configured assistant ID (leave empty for inline config)
+# VITE_VAPI_ASSISTANT_ID=
+```
+
+### Assistant Configuration
+
+The widget uses an inline (transient) assistant configuration:
+
+```javascript
+const assistantConfig = {
+  name: 'SECURIVA',
+  transcriber: {
+    provider: 'deepgram',
+    model: 'nova-2',
+    language: 'en'
+  },
+  model: {
+    provider: 'custom-llm',
+    model: 'gpt-4o-mini',
+    url: `${serverUrl}/api/vapi/chat/completions`,
+    messages: [{
+      role: 'system',
+      content: 'You are SECURIVA, a helpful voice assistant...'
+    }]
+  },
+  voice: {
+    provider: 'deepgram',
+    voiceId: 'asteria'  // Female voice
+  },
+  firstMessage: 'Hi! How can I help you today?',
+  serverUrl: `${serverUrl}/api/vapi/webhook`
+};
+```
+
+### Available Deepgram Voices
+
+| Voice ID | Gender | Description |
+|----------|--------|-------------|
+| `asteria` | Female | Natural, friendly |
+| `luna` | Female | Warm, conversational |
+| `stella` | Female | Professional |
+| `athena` | Female | Clear, authoritative |
+| `orion` | Male | Deep, professional |
+| `arcas` | Male | Friendly, casual |
+| `perseus` | Male | Clear, articulate |
+| `zeus` | Male | Deep, commanding |
+
+### Usage
+
+```jsx
+import VapiVoiceWidget from './components/VapiVoiceWidget';
+
+function App() {
+  return (
+    <div>
+      <VapiVoiceWidget />
+    </div>
+  );
+}
+```
+
+### VAPI SDK Events
+
+The widget handles these VAPI events:
+
+| Event | Handler |
+|-------|---------|
+| `call-start` | Sets connected state, shows listening indicator |
+| `call-end` | Resets all states |
+| `speech-start` | Shows speaking indicator |
+| `speech-end` | Shows listening indicator |
+| `volume-level` | Updates orb animation intensity |
+| `error` | Displays error message |
+
+### Authentication Flow
+
+If the user is logged in (has `api_key` cookie), it's embedded in the system message:
+
+```javascript
+const systemContent = apiKey
+  ? `You are SECURIVA... [AUTH:${apiKey}]`
+  : 'You are SECURIVA...';
+```
+
+The backend extracts this token to authenticate MCP tool access.
+
+### Styling
+
+**CSS:** `src/components/VapiVoiceWidget.css`
+
+The widget is styled as a full-screen overlay with:
+- Dark background (`#0a0a0b`)
+- Centered orb (400x400px on desktop, 280x280px on mobile)
+- Status text below orb (uppercase, letter-spaced)
+
+### Dependencies
+
+```json
+{
+  "@vapi-ai/web": "^2.x",
+  "@react-three/fiber": "^8.x",
+  "@react-three/drei": "^9.x",
+  "three": "^0.x"
+}
+```
+
+---
+
 ## React Compiler
 
 The React Compiler is not enabled on this template. To add it, see [this documentation](https://react.dev/learn/react-compiler/installation).

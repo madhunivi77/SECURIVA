@@ -1,6 +1,7 @@
 import { useState, useEffect } from "react";
 import ChatBox from "./components/ChatBox";
 import LoginForm from "./components/LoginForm";
+import VoiceTest from "./pages/VoiceTest";
 
 function App() {
   const [backendStatus, setBackendStatus] = useState("Loading...");
@@ -8,6 +9,7 @@ function App() {
   const [isAuthenticated, setIsAuthenticated] = useState(false);
   const [isSalesforceConnected, setIsSalesforceConnected] = useState(false);
   const [showStatus, setShowStatus] = useState(false);
+  const [currentPage, setCurrentPage] = useState("chat");
   const [isDarkMode, setIsDarkMode] = useState(
     window.matchMedia("(prefers-color-scheme: dark)").matches
   );
@@ -183,21 +185,53 @@ function App() {
           </h1>
         </div>
 
-        <button
-          onClick={() => setShowStatus((prev) => !prev)}
-          style={{
-            background: "none",
-            border: `1px solid ${theme.border}`,
-            color: theme.subtext,
-            borderRadius: "6px",
-            padding: "4px 10px",
-            cursor: "pointer",
-            flexShrink: 0,
-            whiteSpace: "nowrap",
-          }}
-        >
-          {showStatus ? "Hide Status" : "Show Status"}
-        </button>
+        <div style={{ display: "flex", gap: "8px", alignItems: "center" }}>
+          <button
+            onClick={() => setCurrentPage("chat")}
+            style={{
+              background: currentPage === "chat" ? theme.buttonBg : "none",
+              border: `1px solid ${theme.border}`,
+              color: currentPage === "chat" ? theme.buttonText : theme.subtext,
+              borderRadius: "6px",
+              padding: "4px 10px",
+              cursor: "pointer",
+              flexShrink: 0,
+              whiteSpace: "nowrap",
+            }}
+          >
+            Chat
+          </button>
+          <button
+            onClick={() => setCurrentPage("voice")}
+            style={{
+              background: currentPage === "voice" ? theme.buttonBg : "none",
+              border: `1px solid ${theme.border}`,
+              color: currentPage === "voice" ? theme.buttonText : theme.subtext,
+              borderRadius: "6px",
+              padding: "4px 10px",
+              cursor: "pointer",
+              flexShrink: 0,
+              whiteSpace: "nowrap",
+            }}
+          >
+            Voice
+          </button>
+          <button
+            onClick={() => setShowStatus((prev) => !prev)}
+            style={{
+              background: "none",
+              border: `1px solid ${theme.border}`,
+              color: theme.subtext,
+              borderRadius: "6px",
+              padding: "4px 10px",
+              cursor: "pointer",
+              flexShrink: 0,
+              whiteSpace: "nowrap",
+            }}
+          >
+            {showStatus ? "Hide Status" : "Show Status"}
+          </button>
+        </div>
       </header>
 
       {showStatus && (
@@ -336,7 +370,9 @@ function App() {
             flexGrow: 1,
           }}
         >
-          {!userEmail ? (
+          {currentPage === "voice" ? (
+            <VoiceTest />
+          ) : !userEmail ? (
             <LoginForm
               onGoogleLogin={handleGoogleLogin}
               onSalesforceLogin={handleSalesforceLogin}
