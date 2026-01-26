@@ -10,6 +10,7 @@ import Security from './pages/Security.jsx';
 import ChatBox from './pages/ChatBox.jsx';
 import Homepage from './pages/Homepage.jsx'
 import LoginForm from './pages/LoginForm.jsx';
+import VoiceTest from './pages/VoiceTest.jsx';
 
 const router = createBrowserRouter([
   {
@@ -35,6 +36,10 @@ const router = createBrowserRouter([
       {
         path: '/login',
         element: <LoginForm />
+      },
+      {
+        path: '/voice',
+        element: <VoiceTest />
       }
     ]
   },
