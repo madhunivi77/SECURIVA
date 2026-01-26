@@ -236,6 +236,8 @@ function App() {
               <NavOption label={"Pricing"} target={"login"} />
 
               <NavOption label={"About"} target={"login"} />
+
+              <NavOption label={"Voice"} target={"voice"} />
             </div>
           ) : (
             /* If logged in → show your status toggle */
@@ -250,6 +252,8 @@ function App() {
               <NavOption label={"About"} target={"login"} />
             </div>
           )}
+
+              <NavOption label={"Voice"} target={"voice"} />
         </div>
 
         {/* ---------- STATUS SECTION ---------- */}
