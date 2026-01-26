@@ -3,28 +3,24 @@ from starlette.applications import Starlette
 from starlette.routing import Mount
 from starlette.middleware.cors import CORSMiddleware
 
-# Import your app instances from the other files
 from .app import api_app
 from .mcp_server import mcp
 from ..auth_server.main import auth_app
+from .vapi_webhook import vapi_app
 
-# This lifespan function manages the MCP server's session manager
+
 @contextlib.asynccontextmanager
 async def lifespan(app: Starlette):
     async with contextlib.AsyncExitStack() as stack:
         await stack.enter_async_context(mcp.session_manager.run())
         yield
 
-# Create the main Starlette application with all services mounted
+
 app = Starlette(
     routes=[
-        # Mount the MCP server under the /mcp path
         Mount("/mcp", app=mcp.streamable_http_app()),
-
-        # Mount the Auth server under the /auth path
         Mount("/auth", app=auth_app),
-
-        # Mount the API app at the root path
+        Mount("/api/vapi", app=vapi_app),
         Mount("/", app=api_app)
     ],
     lifespan=lifespan
