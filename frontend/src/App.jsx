@@ -240,8 +240,11 @@ function App() {
               <NavOption label={"Solutions"} target={"agent"} theme={theme.navbutton}/>
 
               <NavOption label={"Pricing"} target={"login"} theme={theme.navbutton}/>
-
+              
               <NavOption label={"About"} target={"login"} theme={theme.navbutton}/>
+
+              <NavOption label={"Voice"} target={"voice"} theme={theme.navbutton}/>
+
             </div>
           ) : (
             /* If logged in → show your status toggle */
@@ -256,6 +259,8 @@ function App() {
               <NavOption label={"About"} target={"login"} theme={theme.navbutton}/>
             </div>
           )}
+
+              <NavOption label={"Voice"} target={"voice"} />
         </div>
 
         {/* ---------- STATUS SECTION ---------- */}
