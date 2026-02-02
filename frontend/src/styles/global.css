@@ -21,16 +21,25 @@
     min-height: calc(100vh - 167.5px); 
 }
 
+.section-max-height {
+  max-height: calc(100vh - 167.5px); 
+}
+
 .why-card figure{
-  @apply flex-grow
+  @apply flex-grow p-3
+
+}
+
+.why-card figure img {
+  @apply w-full h-auto object-contain max-w-[150px]
 }
 
 .why-card div {
-  @apply max-w-[175px] p-1
+  @apply pt-3
 }
 
 .why-card {
-  @apply p-1.5
+  @apply p-2 w-[450px]
 }
 
 a {
