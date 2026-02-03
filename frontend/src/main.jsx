@@ -11,6 +11,7 @@ import ChatBox from './pages/ChatBox.jsx';
 import Homepage from './pages/Homepage.jsx'
 import LoginForm from './pages/LoginForm.jsx';
 import VoiceTest from './pages/VoiceTest.jsx';
+import Pricing from "./pages/Pricing";
 
 const router = createBrowserRouter([
   {
@@ -40,6 +41,10 @@ const router = createBrowserRouter([
       {
         path: '/voice',
         element: <VoiceTest />
+      },
+      {
+        path: "pricing",
+        element: <Pricing />,
       }
     ]
   },

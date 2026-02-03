@@ -239,7 +239,7 @@ function App() {
 
               <NavOption label={"Solutions"} target={"agent"} theme={theme.navbutton}/>
 
-              <NavOption label={"Pricing"} target={"login"} theme={theme.navbutton}/>
+              <NavOption label={"Pricing"} target={"pricing"} theme={theme.navbutton}/>
               
               <NavOption label={"About"} target={"login"} theme={theme.navbutton}/>
 
@@ -254,7 +254,7 @@ function App() {
 
               <NavOption label={"Solutions"} target={"agent"} theme={theme.navbutton}/>
 
-              <NavOption label={"Pricing"} target={"login"} theme={theme.navbutton}/>
+              <NavOption label={"Pricing"} target={"pricing"} theme={theme.navbutton}/>
 
               <NavOption label={"About"} target={"login"} theme={theme.navbutton}/>
             </div>
