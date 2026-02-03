@@ -335,3 +335,15 @@ Toggle logging with `ENABLE_TOOL_LOGGING="false"` in `.env`.
 
 ### Testing
 Run the SMS test suite:
+
+### Tool Mappings
+
+The MCP server provides these Telesign SMS tools: (trial version restricted to verified numbers only)
+
+| Tool Name | Description | Example Usage |
+|-----------|-------------|---------------|
+| `sendSMS` | Send SMS message | "Send SMS to (___): Meeting at 3pm" |
+| `verifyPhoneNumber` | Verify phone details | "Verify phone number (____) |
+| `sendVerificationCode` | Send 2FA code | "Send verification code to (___) |
+| `checkPhoneRisk` | Assess fraud risk | "Check risk for phone 2623984079" |
+| `checkMessageStatus` | Check delivery status | "Check status of message ABC123" |
