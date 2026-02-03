@@ -164,6 +164,159 @@ Toggle logging with `ENABLE_TOOL_LOGGING="false"` in `.env`.
 
 ---
 
+## VAPI Voice AI Integration
+
+The backend includes webhook handlers for [VAPI](https://vapi.ai) voice AI integration, enabling voice-controlled access to MCP tools.
+
+### Architecture Overview
+
+```
+VAPI Cloud
+    ↓ (HTTP POST)
+/api/vapi/chat/completions  ←── Custom LLM endpoint
+    ↓
+┌─────────────────────────────────┐
+│  Has API key (authenticated)?   │
+└─────────────────────────────────┘
+       ↓ YES              ↓ NO
+/api/chat (LangGraph     OpenAI Direct
+ + MCP tools)            (basic chat)
+       ↓                      ↓
+Full tool access         Conversation only
+```
+
+### Endpoints
+
+#### `POST /api/vapi/chat/completions`
+Custom LLM endpoint that VAPI calls for AI responses.
+
+**Request (from VAPI):**
+```json
+{
+  "messages": [
+    {"role": "system", "content": "..."},
+    {"role": "user", "content": "What's on my calendar?"}
+  ],
+  "stream": true,
+  "call": {
+    "metadata": {"apiKey": "user-api-key"}
+  }
+}
+```
+
+**Response (OpenAI-compatible):**
+```json
+{
+  "id": "chatcmpl-xxx",
+  "object": "chat.completion",
+  "choices": [{
+    "index": 0,
+    "message": {
+      "role": "assistant",
+      "content": "You have 3 events today..."
+    },
+    "finish_reason": "stop"
+  }]
+}
+```
+
+**Features:**
+- Supports streaming responses (SSE) for faster voice output
+- Extracts API key from call metadata or `[AUTH:xxx]` tag in system message
+- Falls back to direct OpenAI if not authenticated
+- Dev mode allows tool access without authentication
+
+#### `POST /api/vapi/webhook`
+Handles VAPI webhook events (tool calls, status updates, etc.).
+
+**Supported Message Types:**
+| Type | Description |
+|------|-------------|
+| `tool-calls` | Execute MCP tools and return results |
+| `assistant-request` | Return dynamic assistant configuration |
+| `function-call` | Legacy function call format |
+| `status-update` | Call status changes |
+| `end-of-call-report` | Call completion summary |
+| `conversation-update` | Transcript updates |
+| `hang` | User hangup event |
+
+### Configuration
+
+**Environment Variables (`.env`):**
+```bash
+# VAPI webhook URL (use ngrok for local development)
+VAPI_SERVER_URL=https://your-ngrok-url.ngrok-free.dev
+
+# OpenAI API key (required for voice responses)
+OPENAI_API_KEY=sk-proj-xxx
+
+# Deepgram API key (for transcription/TTS)
+DEEPGRAM_API_KEY=xxx
+```
+
+**Dev Mode (`vapi_webhook.py`):**
+```python
+# Set to True to allow voice assistant to use tools without login
+VOICE_DEV_MODE = True
+VOICE_DEV_USER_ID = "voice-dev-user"
+```
+
+### Tool Mappings
+
+The webhook handler maps VAPI tool names to MCP tools:
+
+| VAPI Tool Name | MCP Tool | Description |
+|---------------|----------|-------------|
+| `listEmails` | `listEmails` | List inbox emails |
+| `getEmailBodies` | `getEmailBodies` | Get full email content |
+| `createGmailDraft` | `createGmailDraft` | Create email draft |
+| `summarizeEmail` | `summarizeEmail` | Summarize single email |
+| `summarizeRecentEmails` | `summarizeRecentEmails` | Summarize recent emails |
+| `listUpcomingEvents` | `listUpcomingEvents` | List calendar events |
+| `addCalendarEvent` | `addCalendarEvent` | Create calendar event |
+| `listAccounts` | `listAccounts` | List Salesforce accounts |
+| `listSalesforceCases` | `listSalesforceCases` | List Salesforce cases |
+| `createSalesforceCase` | `createSalesforceCase` | Create Salesforce case |
+
+### Local Development with ngrok
+
+1. Start the backend server:
+   ```bash
+   uv run python run.py
+   ```
+
+2. Start ngrok tunnel:
+   ```bash
+   ngrok http 8000
+   ```
+
+3. Update `.env` with ngrok URL:
+   ```bash
+   VAPI_SERVER_URL=https://xxx.ngrok-free.dev
+   ```
+
+4. Update frontend `.env`:
+   ```bash
+   VITE_VAPI_SERVER_URL=https://xxx.ngrok-free.dev
+   ```
+
+### Streaming Support
+
+The custom LLM endpoint supports streaming responses when `stream: true` is in the request:
+
+```python
+# Proxies OpenAI's SSE stream directly to VAPI
+return StreamingResponse(
+    stream_openai(),
+    media_type="text/event-stream"
+)
+```
+
+This enables faster voice responses as VAPI can start speaking before the full response is generated.
+Toggle logging with `ENABLE_TOOL_LOGGING="false"` in `.env`.
+
+---
+
 ## Telesign SMS Integration
 
 ### Current Capabilities ✅

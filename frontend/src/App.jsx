@@ -1,37 +1,59 @@
 import { useState, useEffect } from "react";
-import ChatBox from "./components/ChatBox";
+import Footer from "./components/Footer";
+import NavOption from "./components/NavOption";
+import { Outlet, useNavigate } from "react-router-dom";
 
 function App() {
+  const navigate = useNavigate();
   const [backendStatus, setBackendStatus] = useState("Loading...");
-  const [authToken, setAuthToken] = useState(null);
-  const [csrfToken, setCsrfToken] = useState(null);
+  const [userEmail, setUserEmail] = useState(null);
   const [isAuthenticated, setIsAuthenticated] = useState(false);
+  const [isSalesforceConnected, setIsSalesforceConnected] = useState(false);
+  const [showStatus, setShowStatus] = useState(false);
+  const [isDarkMode, setIsDarkMode] = useState(
+    window.matchMedia("(prefers-color-scheme: dark)").matches
+  );
+
+  const handleAuthSuccess = (email) => {
+    setUserEmail(email);
+    navigate("/chat")
+  };
 
   useEffect(() => {
-    // Call backend to get status and new token
-    // Token will be stored in HTTP-only cookie by backend
+    const urlParams = new URLSearchParams(window.location.search);
+    const authSuccess = urlParams.get("auth");
+    const emailParam = urlParams.get("email");
+
+    if (authSuccess === "success") {
+      if (emailParam) setUserEmail(emailParam);
+      window.history.replaceState({}, document.title, window.location.pathname);
+      navigate("/chat")
+    }
+
+    if (urlParams.get("salesforce") === "connected") {
+      setIsSalesforceConnected(true);
+      window.history.replaceState({}, document.title, window.location.pathname);
+    }
+
     fetchStatus();
+
+    const mq = window.matchMedia("(prefers-color-scheme: dark)");
+    const handleThemeChange = (e) => setIsDarkMode(e.matches);
+    mq.addEventListener("change", handleThemeChange);
+    return () => mq.removeEventListener("change", handleThemeChange);
   }, []);
 
   const fetchStatus = () => {
     setBackendStatus("Connecting...");
     fetch("http://localhost:8000/api/status", {
-      credentials: "include" // Important: allows cookies to be sent/received
+      credentials: "include"
     })
       .then((res) => res.json())
       .then((data) => {
-        setBackendStatus(`✅ Connected: ${JSON.stringify(data)}`);
-
-        // Token is stored in HTTP-only cookie by backend
-        if (data.authenticated !== undefined) {
-          setIsAuthenticated(data.authenticated);
-        }
-        if (data.token) {
-          setAuthToken(data.token);
-        }
-        if (data.csrf_token) {
-          setCsrfToken(data.csrf_token);
-        }
+        setBackendStatus(`Connected: ${JSON.stringify(data)}`);
+        if (data.authenticated !== undefined) setIsAuthenticated(data.authenticated);
+        if (data.email) setUserEmail(data.email);
+        if (data.salesforce_connected !== undefined) setIsSalesforceConnected(data.salesforce_connected);
       })
       .catch(() => {
         setBackendStatus("❌ Could not connect to backend");
@@ -39,30 +61,314 @@ function App() {
       });
   };
 
-  const handleReconnect = () => {
-    fetchStatus();
+  const handleReconnect = () => fetchStatus();
+  const handleLogout = async () => {
+    try {
+      await fetch("http://localhost:8000/api/logout", {
+        method: "POST",
+        credentials: "include"
+      });
+      setIsAuthenticated(false);
+      setUserEmail(null);
+      setIsSalesforceConnected(false);
+      navigate("/")
+      setShowStatus(false)
+      fetchStatus();
+    } catch (error) {
+      console.error("Logout error:", error);
+    }
   };
 
+  const handleGoogleLogin = () => {
+    window.location.href = "http://localhost:8000/login";
+  };
+
+  const handleSalesforceLogin = () => {
+    if (!isAuthenticated) {
+      alert("Please login with Google first");
+      return;
+    }
+    window.location.href = "http://localhost:8000/salesforce/login";
+  };
+
+  const handleSalesforceLogout = async () => {
+    try {
+      await fetch("http://localhost:8000/salesforce/logout", {
+        method: "POST",
+        credentials: "include"
+      });
+      setIsSalesforceConnected(false);
+      fetchStatus();  // Refresh status
+    } catch (error) {
+      console.error("Logout error:", error);
+    }
+  }
+
+  const theme = isDarkMode
+    ? {
+      bg: "#0a0f1f",
+      surface: "#ffffff",
+      border: "#1c2a44",
+      text: "#d9e6ff",
+      subtext: "#8fa8d6",
+      buttonBg: "#1f5fbf",
+      buttonText: "white",
+    }
+    : {
+      bg: "#e7f1ff",
+      surface: "#ffffff",
+      border: "#b3cff5",
+      text: "#0d2b66",
+      subtext: "#3d5fa8",
+      buttonBg: "#d8e7ff",
+      buttonText: "#0a3aa8",
+    };
+
   return (
-    <div style={{ padding: "20px" }}>
-      <h1>React Frontend</h1>
+    <div
+      style={{
+        display: "flex",
+        flexDirection: "column",
+        width: "100vw",
+        minHeight: "100vh",
+        backgroundColor: theme.bg,
+        color: theme.text,
+      }}
+    >
+      <nav style={{ position: "fixed", width: "100%", zIndex: 10}}>
+        {/* UPPER NAV BAR */}
+        <div
+          style={{
+            flexShrink: 0,
+            padding: "12px 20px",
+            //borderBottom: `1px solid ${theme.border}`,
+            background: "#b3cff5",
+            display: "flex",
+            justifyContent: "space_between",
+            alignItems: "right",
+            width: "100%",
+            flexWrap: "wrap",
+            //gap: "10px",
+            boxSizing: "border-box"
+          }}
+        >
 
-      <h2>Backend Connection Test:</h2>
-      {/* <p>{backendStatus}</p> */}
-      <p>
-        Authentication Status: {isAuthenticated ? "✅ Authenticated" : "❌ Not Authenticated"}
-      </p>
-      {authToken && (
-        <p style={{ fontSize: "0.8em", color: "#666", wordBreak: "break-all" }}>
-          Token (first 50 chars): {authToken.substring(0, 50)}...
-        </p>
-      )}
-      <button onClick={handleReconnect} style={{ marginTop: "10px" }}>
-        Reconnect
-      </button>
 
-      <h2>Chatbox Demo:</h2>
-      <ChatBox authToken={authToken} csrfToken={csrfToken} />
+          {!isAuthenticated ? (
+            // LOGGED OUT
+            <div style={{ display: "flex", gap: "10px" }}>
+
+              <NavOption label={"Demo"} target={"login"} />
+
+              <NavOption label={"Sign In"} target={"login"} />
+
+              <NavOption label={"Sign Up"} target={"login"} />
+
+              <NavOption label={"Support"} target={"login"} />
+
+              <NavOption label={"Contact"} target={"login"} />
+            </div>
+          ) : (
+            /* LOGGED IN → show your status toggle */
+            <div style={{ display: "flex", gap: "10px" }}>
+
+              <NavOption label={"Demo"} target={"login"}/>
+
+              <NavOption label={"Support"} target={"login"}/>
+
+              <NavOption label={"Contact"} target={"login"}/>
+            
+              <button
+                onClick={() => setShowStatus((prev) => !prev)}
+                style={{
+                  background: "none",
+                  //border: `1px solid ${theme.border}`,
+                  color: theme.border,
+                  borderRadius: "6px",
+                  padding: "4px 10px",
+                  cursor: "pointer",
+                }}
+              >
+                {showStatus ? "Hide Status" : "Show Status"}
+              </button>
+            </div>
+          )}
+        </div>
+        {/* LOWER NAV BAR */}
+        <div
+          style={{
+            flexShrink: 0,
+            padding: "12px 20px",
+            borderBottom: `1px solid ${theme.border}`,
+            background: theme.surface,
+            display: "flex",
+            justifyContent: "space-between",
+            alignItems: "center",
+            width: "100%",
+            flexWrap: "wrap",
+            gap: "10px",
+            boxSizing: "border-box",
+            fontSize: 25,
+          }}
+        >
+          {/* Left: logo + SECURIVA */}
+          <div style={{ display: "flex", alignItems: "center", overflow: "hidden" }}>
+            <img
+              src="/logo.png"
+              alt="SECURIVA Logo"
+              style={{
+                height: "auto",
+                width: "250px",
+                objectFit: "cover",
+              }}
+              onClick={() => navigate("/")}
+            />
+          </div>
+
+          {/* Right: Login buttons if not authenticated */}
+          {!isAuthenticated ? (
+            <div style={{ display: "flex", gap: "10px" }}>
+
+              <NavOption label={"Features"} target={"security"} />
+
+              <NavOption label={"Solutions"} target={"agent"} />
+
+              <NavOption label={"Pricing"} target={"login"} />
+
+              <NavOption label={"About"} target={"login"} />
+
+              <NavOption label={"Voice"} target={"voice"} />
+            </div>
+          ) : (
+            /* If logged in → show your status toggle */
+            <div style={{ display: "flex", gap: "10px" }}>
+
+              <NavOption label={"Features"} target={"security"} />
+
+              <NavOption label={"Solutions"} target={"agent"} />
+
+              <NavOption label={"Pricing"} target={"login"} />
+
+              <NavOption label={"About"} target={"login"} />
+            </div>
+          )}
+
+              <NavOption label={"Voice"} target={"voice"} />
+        </div>
+
+        {/* ---------- STATUS SECTION ---------- */}
+        {showStatus && (
+          <div
+            style={{
+              flexShrink: 0,
+              background: theme.surface,
+              padding: "10px 20px",
+              borderBottom: `1px solid ${theme.border}`,
+              fontSize: "0.9em",
+              color: theme.subtext,
+            }}
+          >
+            <p style={{ margin: "4px 0" }}>{backendStatus}</p>
+            <div style={{ display: "flex", flexWrap: "wrap", gap: "8px", marginTop: "8px" }}>
+              <button
+                onClick={handleReconnect}
+                style={{
+                  background: theme.buttonBg,
+                  border: "none",
+                  borderRadius: "6px",
+                  color: theme.buttonText,
+                  padding: "6px 12px",
+                  cursor: "pointer",
+                }}
+              >
+                Reconnect
+              </button>
+
+              {!isAuthenticated && (
+                <button
+                  onClick={handleGoogleLogin}
+                  style={{
+                    background: "#4285F4",
+                    border: "none",
+                    borderRadius: "6px",
+                    color: "white",
+                    padding: "6px 12px",
+                    cursor: "pointer",
+                  }}
+                >
+                  Login with Google
+                </button>
+              )}
+
+              {!isSalesforceConnected && isAuthenticated && (
+                <button
+                  onClick={handleSalesforceLogin}
+                  style={{
+                    background: "#00A1E0",
+                    border: "none",
+                    borderRadius: "6px",
+                    color: "white",
+                    padding: "6px 12px",
+                    cursor: "pointer",
+                  }}
+                >
+                  Connect Salesforce
+                </button>
+              )}
+
+              {
+                isSalesforceConnected && isAuthenticated && (
+                  <button
+                    onClick={handleSalesforceLogout}
+                    style={{
+                      background: "#d32f2f",
+                      border: "none",
+                      borderRadius: "6px",
+                      color: "white",
+                      padding: "6px 12px",
+                      cursor: "pointer",
+                      flexShrink: 0,
+                    }}
+                  >
+                    Disconnect Salesforce
+                  </button>
+                )
+              }
+              {isAuthenticated && (
+                <button
+                  onClick={handleLogout}
+                  style={{
+                    background: "#d32f2f",
+                    border: "none",
+                    borderRadius: "6px",
+                    color: "white",
+                    padding: "6px 12px",
+                    cursor: "pointer",
+                  }}
+                >
+                  Logout
+                </button>
+              )}
+            </div>
+          </div>
+        )}
+      </nav>
+
+      {/* ---------- MAIN CONTENT SWITCHER ---------- */}
+      <main
+        style={{
+          width: "100%",
+          overflowY: "auto",
+          paddingTop: "167.5px",
+        }}
+      >
+        {/* Pass any context used by App.jsx subpages. If used across other routes, elevate to an AuthContext wrapper in main.jsx */}
+        <Outlet context={{handleAuthSuccess, handleGoogleLogin, handleSalesforceLogin, isAuthenticated}}/>
+        
+      </main>
+
+      {/* ---------- FOOTER ---------- */}
+      <Footer theme={theme} />
     </div>
   );
 }
