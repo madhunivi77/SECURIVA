@@ -2,12 +2,16 @@
 from starlette.routing import Route
 from starlette.responses import HTMLResponse, JSONResponse, Response, RedirectResponse
 from google_auth_oauthlib.flow import Flow
-from pathlib import Path
 import json
-import httpx
+import bcrypt
+import jwt as pyjwt
 import os
-import secrets
+import uuid
+from datetime import datetime
+from pathlib import Path
 from .chat_handler import execute_chat_with_tools
+from .salesforce_app import salesforce_app
+from .api_key_manager import generate_api_key, store_api_key, validate_api_key
 from .telesign_auth import (
     send_whatsapp_message,
     send_sms,
@@ -21,6 +25,7 @@ from .telesign_auth import (
     send_whatsapp_buttons
 )
 
+# Load environment variables
 
 # ==================== SECURITY: ENVIRONMENT CONFIGURATION ====================
 # 🔒 LEAST PRIVILEGE: Load only required environment variables
@@ -31,7 +36,12 @@ ENVIRONMENT = os.getenv("ENVIRONMENT", "development")
 COOKIE_SAMESITE = os.getenv("COOKIE_SAMESITE", "lax")
 GOOGLE_CLIENT_ID = os.getenv("GOOGLE_CLIENT_ID")
 GOOGLE_CLIENT_SECRET = os.getenv("GOOGLE_CLIENT_SECRET")
+ENVIRONMENT = os.getenv("ENVIRONMENT", "development")
+COOKIE_SAMESITE = os.getenv("COOKIE_SAMESITE", "lax")
 
+# Enable insecure transport for development
+if ENVIRONMENT == "development":
+    os.environ["OAUTHLIB_INSECURE_TRANSPORT"] = "1"
 # 🔴 SECURITY CONCERN: OAUTHLIB_INSECURE_TRANSPORT allows OAuth over HTTP
 # ⚡ MUST BE REMOVED IN PRODUCTION - This is a critical vulnerability
 # ⚡ RECOMMENDATION: Remove this line and use HTTPS in production
@@ -42,6 +52,14 @@ else:
     if "OAUTHLIB_INSECURE_TRANSPORT" in os.environ:
         del os.environ["OAUTHLIB_INSECURE_TRANSPORT"]
 
+# OAuth configuration
+REDIRECT_URI = "http://localhost:8000/callback"
+FRONTEND_URL = "http://localhost:5173"
+SCOPES = [
+    "openid",
+    "https://www.googleapis.com/auth/gmail.readonly",
+    "https://www.googleapis.com/auth/calendar",
+    "https://www.googleapis.com/auth/calendar.readonly",
 # ⚠️ SECURITY CONCERN: Hardcoded redirect URI
 # ⚡ RECOMMENDATION: Make configurable via environment variable with validation
 REDIRECT_URI = os.getenv("OAUTH_REDIRECT_URI", "http://localhost:8000/callback")
@@ -53,8 +71,41 @@ SCOPES = [  "openid",
     "https://www.googleapis.com/auth/gmail.readonly",       # ✅ Read-only
     "https://www.googleapis.com/auth/calendar.readonly",    # ✅ Read-only
     "https://www.googleapis.com/auth/userinfo.profile",
-    "https://www.googleapis.com/auth/userinfo.email",]
+    "https://www.googleapis.com/auth/userinfo.email",
+    "https://www.googleapis.com/auth/gmail.modify"
+]
 
+# Cookie settings
+COOKIE_SECURE = ENVIRONMENT == "production" or (COOKIE_SAMESITE.lower() == "none" and ENVIRONMENT == "production")
+SESSION_COOKIE_MAX_AGE = 30 * 24 * 3600  # 30 days
+
+# logging code
+import logging
+from logging.handlers import RotatingFileHandler
+
+# --- AI Call Logging Configuration ---
+log_path = Path(__file__).parent / "ai_calls.log"
+handler = RotatingFileHandler(log_path, maxBytes=5_000_000, backupCount=5, encoding="utf-8")
+
+logging.basicConfig(
+    level=logging.INFO,
+    handlers=[handler],
+    format="%(asctime)s [%(levelname)s] %(message)s",
+)
+
+def log_ai_call(user_id, model, messages, result):
+    """Log AI request/response in a readable format."""
+    entry = (
+        f"\n{'='*80}\n"
+        f"User ID: {user_id}\n"
+        f"Model: {model}\n"
+        f"Messages:\n{json.dumps(messages, indent=2)}\n\n"
+        f"Response:\n{json.dumps(result, indent=2)}\n"
+        f"{'='*80}\n"
+    )
+    logging.info(entry)
+
+# Configure Google OAuth flow
 ## ==================== SECURITY: OAUTH FLOW CONFIGURATION ====================
 # 🔴 SECURITY CONCERN: No validation of GOOGLE_CLIENT_ID and GOOGLE_CLIENT_SECRET
 # ⚡ RECOMMENDATION: Validate credentials exist before creating flow
@@ -102,8 +153,13 @@ async def index(request):
     """
     return HTMLResponse("<h1>Hello from your Starlette App!</h1><p>Visit /api/status to see a JSON response.</p>")
 
-# Define an API-style route that returns status + JWT token
+# Define an API-style route that returns status
 async def api_status(request):
+    # Check if user has a valid API key in cookie
+    api_key = request.cookies.get("api_key")
+    authenticated = False
+    user_email = None
+    salesforce_connected = False
     """
     🔒 SECURITY: Token distribution endpoint
     ⚡ CONCERNS:
@@ -131,6 +187,9 @@ async def api_status(request):
         # ⚠️ SECURITY: Should log to security audit log, not just print
         # TODO: Implement proper logging
 
+    if api_key:
+        oauth_file = Path(__file__).parent / "oauth.json"
+        user_id = validate_api_key(api_key, oauth_file)
     # Generate CSRF token
     # ✅ GOOD: Using secrets.token_urlsafe for cryptographically secure random
     csrf_token = secrets.token_urlsafe(32)
@@ -141,13 +200,17 @@ async def api_status(request):
     response_data = {
         "status": "ok",
         "source": "Starlette",
+        "authenticated": authenticated,
+        "email": user_email if authenticated else None,
+        "salesforce_connected": salesforce_connected
         "token": token,
         "authenticated": token is not None,
         "csrf_token": csrf_token
     }
 
-    response = JSONResponse(response_data)
+    return JSONResponse(response_data)
 
+# Define a route to initiate Google OAuth
     # ==================== SECURITY: HTTP-ONLY COOKIE CONFIGURATION ====================
     # ✅ GOOD: HttpOnly prevents XSS attacks
     # ✅ GOOD: Secure flag in production prevents man-in-the-middle
@@ -187,10 +250,14 @@ async def login(request):
     # ✅ GOOD: Requests offline access for refresh token
     # ✅ GOOD: Forces consent to get new refresh token
     authorization_url, state = flow.authorization_url(
+        access_type="offline",  # Get refresh token
+        prompt="consent",  # Force new refresh token
+        include_granted_scopes="false"  # Don't include previously granted scopes
         access_type="offline",  # ✅ GOOD: Get refresh token
         prompt="consent",       # ✅ GOOD: Force new refresh token
         include_granted_scopes="true"
     )
+    # Redirect the user's browser to Google
     
     # ⚠️ SECURITY CONCERN: State parameter not stored/validated
     # ⚡ RECOMMENDATION: Store state in session and validate on callback
@@ -198,6 +265,15 @@ async def login(request):
     
     return RedirectResponse(authorization_url)
 
+# Define a route to handle the Google OAuth callback
+async def callback(request):
+    try:
+        # Exchange authorization code for tokens
+        flow.fetch_token(authorization_response=str(request.url))
+
+        # Extract the tokens
+        credentials = flow.credentials.to_json()
+        credentials_dict = json.loads(credentials)
 # Define a route to handle the oAuth redirection
 def callback(request):
     """
@@ -228,6 +304,25 @@ def callback(request):
     # Extract the tokens and expiry
     credentials = flow.credentials.to_json()
 
+        # Extract email from credentials for user identification
+        user_email = credentials_dict.get("id_token_jwt", {})
+
+        # Try to extract email from token (simplified - in production use proper JWT decode)
+        try:
+            id_token = credentials_dict.get("id_token")
+            if id_token:
+                decoded = pyjwt.decode(id_token, options={"verify_signature": False})
+                user_email = decoded.get("email", user_email)
+        except:
+            pass
+
+        # Load existing oauth.json
+        oauth_file = Path(__file__).parent / "oauth.json"
+        if oauth_file.exists():
+            with open(oauth_file, "r") as f:
+                data = json.load(f)
+        else:
+            data = {"users": []}
     # ⚠️ SECURITY CONCERN: Hardcoded user_id
     # ⚡ RECOMMENDATION: Extract from authenticated session or JWT
     info = {
@@ -258,17 +353,89 @@ def callback(request):
         # ⚠️ Handle corrupted file
         data = {"users": []}
 
-    # Update/Add the user's entry
-    users = data.get("users", [])
-    for i in range(len(users)):
-        if users[i].get("user_id") == info.get("user_id"):
-            users[i].update(info)
-            break
-    else:
-        users.append(info)
-    
-    data["users"] = users
+        users = data.get("users", [])
 
+        # Check if user already exists (by email)
+        user_entry = None
+        user_id = None
+        for user in users:
+            # Check if user exists by email or by Google service
+            google_service = user.get("services", {}).get("google", {})
+            if google_service.get("email") == user_email or user.get("email") == user_email:
+                user_entry = user
+                user_id = user.get("user_id")
+                break
+
+        # If user doesn't exist, create new user with UUID
+        if not user_entry:
+            user_id = str(uuid.uuid4())
+            user_entry = {
+                "user_id": user_id,
+                "email": user_email,
+                "created_at": datetime.now().isoformat(),
+                "services": {}
+            }
+            users.append(user_entry)
+
+        # Update Google service credentials
+        user_entry["services"]["google"] = {
+            "email": user_email,
+            "credentials": credentials,
+            "connected_at": datetime.now().isoformat(),
+            "scopes": SCOPES
+        }
+
+        data["users"] = users
+
+        # Write back to the storage file
+        with open(oauth_file, "w") as f:
+            json.dump(data, f, indent=2)
+
+        # Generate and store API key for the user
+        api_key = generate_api_key()
+        store_api_key(user_id, api_key, oauth_file)
+
+        # Create response that redirects to frontend
+        response = RedirectResponse(
+            url=f"{FRONTEND_URL}?auth=success&email={user_email}",
+            status_code=302
+        )
+
+        # Set API key as httpOnly cookie (secure, not accessible via JavaScript)
+        response.set_cookie(
+            key="api_key",
+            value=api_key,
+            httponly=True,  # JavaScript cannot access this cookie
+            secure=COOKIE_SECURE,  # Only sent over HTTPS in production
+            samesite=COOKIE_SAMESITE,  # CSRF protection
+            max_age=SESSION_COOKIE_MAX_AGE,  # 30 days
+            domain=None
+        )
+
+        return response
+
+    except Exception as e:
+        print(f"OAuth callback error: {e}")
+        return JSONResponse(
+            {"error": f"Authentication failed: {str(e)}"},
+            status_code=500
+        )
+
+
+# Define logout endpoint
+async def api_logout(request):
+    """Clear authentication cookies and logout."""
+
+    response = JSONResponse({
+        "status": "ok",
+        "message": "Logged out successfully"
+    })
+
+    # Clear both manual and OAuth login cookies
+    response.delete_cookie(key="api_key", domain=None)
+    response.delete_cookie(key="auth_token", domain=None)
+
+    return response
     # 🔴 SECURITY: Writing plaintext credentials to file
     # ⚡ RECOMMENDATION: Encrypt before writing
     with open(oauth_file, "w") as f:
@@ -309,6 +476,8 @@ async def api_chat(request):
         - Add user-level permissions (not all users should access all tools)
     """
     try:
+        # Get API key from cookie
+        api_key = request.cookies.get("api_key")
         # ==================== AUTHENTICATION & CSRF VALIDATION ====================
         # ✅ GOOD: Dual-token validation (CSRF + JWT)
         csrf_token = request.headers.get("X-CSRF-Token")
@@ -321,15 +490,21 @@ async def api_chat(request):
         print(f"DEBUG - All cookies: {request.cookies}")
         print(f"DEBUG - All headers: {dict(request.headers)}")
 
+        if not api_key:
         # ✅ GOOD: Check for missing tokens
         if not csrf_token or not auth_token:
             # ⚠️ SECURITY: Log authentication failures
             # TODO: Implement security audit logging
             return JSONResponse(
-                {"error": f"Missing authentication or CSRF token. CSRF: {bool(csrf_token)}, Auth: {bool(auth_token)}"},
+                {"error": "Not authenticated. Please login first."},
                 status_code=401
             )
 
+        # Validate API key and get user_id
+        oauth_file = Path(__file__).parent / "oauth.json"
+        user_id = validate_api_key(api_key, oauth_file)
+
+        if not user_id:
         # ✅ GOOD: CSRF token validation
         expected_csrf = csrf_tokens.get(auth_token)
         print(f"DEBUG - Expected CSRF: {expected_csrf}, Got: {csrf_token}")
@@ -340,8 +515,8 @@ async def api_chat(request):
             # ⚠️ SECURITY: Log CSRF validation failures
             # TODO: Implement rate limiting on failed CSRF attempts
             return JSONResponse(
-                {"error": "Invalid CSRF token"},
-                status_code=403
+                {"error": "Invalid or expired API key. Please login again."},
+                status_code=401
             )
 
         # ==================== INPUT VALIDATION ====================
@@ -358,6 +533,14 @@ async def api_chat(request):
                 status_code=400
             )
 
+        # Execute chat with MCP tools, passing the user_id
+        result = await execute_chat_with_tools(messages, model, api, user_id)
+
+        # Log the result into a file
+        log_ai_call(user_id, model, messages, result)
+
+        #debug
+        print(f"DEBUG - {result}")
         # ⚠️ ADDITIONAL VALIDATIONS NEEDED:
         # TODO: Validate message structure
         # TODO: Limit message length to prevent memory exhaustion
@@ -801,6 +984,67 @@ async def api_send_buttons(request):
             status_code=500
         )
 
+# ---- Manual email/password signup ----
+async def signup(request):
+    form = await request.form()
+    email = form.get("email")
+    password = form.get("password")
+
+    users_file = Path(__file__).parent / "users.json"
+    users = []
+    if users_file.exists():
+        with open(users_file, "r") as f:
+            users = json.load(f)
+
+    if any(u["email"] == email for u in users):
+        return JSONResponse({"error": "User already exists"}, status_code=400)
+
+    hashed = bcrypt.hashpw(password.encode(), bcrypt.gensalt()).decode()
+    users.append({"email": email, "password": hashed})
+    with open(users_file, "w") as f:
+        json.dump(users, f, indent=2)
+
+    return JSONResponse({"message": "Signup successful"})
+
+async def manual_login(request):
+    form = await request.form()
+    email = form.get("email")
+    password = form.get("password")
+
+    users_file = Path(__file__).parent / "users.json"
+    if not users_file.exists():
+        return JSONResponse({"error": "User not found"}, status_code=404)
+
+    with open(users_file, "r") as f:
+        users = json.load(f)
+
+    user = next((u for u in users if u["email"] == email), None)
+    if not user or not bcrypt.checkpw(password.encode(), user["password"].encode()):
+        return JSONResponse({"error": "Invalid credentials"}, status_code=401)
+
+    token = pyjwt.encode(
+        {"sub": email, "iat": datetime.now().timestamp()},
+        os.getenv("JWT_SECRET_KEY"),
+        # "dev-secret",
+        algorithm="HS256"
+    )
+
+    response = JSONResponse({
+        "message": "Login successful",
+        "redirect": f"{FRONTEND_URL}?auth=success&email={email}"
+    })
+    response.set_cookie(
+        key="auth_token",
+        value=token,
+        httponly=True,
+        secure=COOKIE_SECURE,
+        samesite=COOKIE_SAMESITE,
+        max_age=SESSION_COOKIE_MAX_AGE,
+        domain=None
+    )
+
+    return response
+
 
 # ==================== APPLICATION SETUP ====================
 # Create the Starlette app instance with routes
@@ -810,6 +1054,11 @@ api_app = Starlette(
         Route("/", index),
         Route("/api/status", api_status),
         Route("/api/chat", api_chat, methods=["POST"]),
+        Route("/api/logout", api_logout, methods=["POST"]),
+        Route("/login", login, methods=["GET"]),
+        Route("/callback", callback),
+        Route("/signup", signup, methods=["POST"]),  # ✅ Manual signup
+        Route("/login/manual", manual_login, methods=["POST"]),  # ✅ Manual login
         Route("/login", login),
         Route("/callback", callback),
         
@@ -826,3 +1075,6 @@ api_app = Starlette(
         Route("/api/whatsapp/send-buttons", api_send_buttons, methods=["POST"]),
     ]
 )
+
+# Mount Starlette Salesforce app under /salesforce
+api_app.mount("/salesforce", salesforce_app)
