@@ -20,6 +20,14 @@ import time
 import requests
 import base64
 from .salesforce_utils import get_fresh_salesforce_credentials
+from .telesign_auth import (
+    send_sms,
+    verify_phone_number,
+    send_verification_code,
+    verify_code,
+    assess_phone_risk,
+    get_message_status
+)
 
 JWT_SECRET_KEY = os.getenv("JWT_SECRET_KEY")
 
@@ -811,5 +819,190 @@ def listSalesforceCases(context: Context, limit: int = 10):
         return {"success": False, "error": str(e), "response": response.text}
     except Exception as e:
         return {"success": False, "error": str(e)}
+
+# Add these tools after your existing MCP tools (after Salesforce tools)
+
+@mcp.tool()
+def sendSMS(phone_number: str, message: str) -> str:
+    """
+    Send an SMS message using Telesign
+    
+    Args:
+        phone_number: Target phone number (e.g., "2623984079" without + prefix)
+        message: SMS message text to send
+    
+    Returns:
+        JSON string with status, reference_id, and delivery status
+    """
+    try:
+        # Remove + prefix if present
+        phone_number = phone_number.lstrip('+')
+        
+        result = send_sms(phone_number, message)
+        
+        if result.get('status_code') == 200:
+            return json.dumps({
+                "success": True,
+                "message": "SMS sent successfully",
+                "reference_id": result.get('reference_id'),
+                "status": result.get('status'),
+                "phone_number": phone_number
+            }, indent=2)
+        else:
+            return json.dumps({
+                "success": False,
+                "error": result.get('errors', 'Unknown error'),
+                "status_code": result.get('status_code')
+            }, indent=2)
+            
+    except Exception as e:
+        return json.dumps({
+            "success": False,
+            "error": str(e)
+        }, indent=2)
+
+
+@mcp.tool()
+def verifyPhoneNumber(phone_number: str) -> str:
+    """
+    Verify a phone number and get detailed information
+    
+    Args:
+        phone_number: Phone number to verify (e.g., "2623984079")
+    
+    Returns:
+        JSON string with phone type, carrier, location, and contact info
+    """
+    try:
+        phone_number = phone_number.lstrip('+')
+        result = verify_phone_number(phone_number)
+        
+        if result.get('status_code') == 200:
+            return json.dumps({
+                "success": True,
+                "phone_number": result.get('formatted_number'),
+                "phone_type": result.get('phone_type'),
+                "carrier": result.get('carrier'),
+                "country": result.get('country'),
+                "city": result.get('city'),
+                "state": result.get('state'),
+                "blocked": result.get('blocked'),
+                "contact_info": result.get('contact_info')
+            }, indent=2)
+        else:
+            return json.dumps({
+                "success": False,
+                "error": result.get('error', 'Verification failed')
+            }, indent=2)
+            
+    except Exception as e:
+        return json.dumps({
+            "success": False,
+            "error": str(e)
+        }, indent=2)
+
+
+@mcp.tool()
+def sendVerificationCode(phone_number: str, code_length: int = 5) -> str:
+    """
+    Send a 2FA verification code via SMS
+    
+    Args:
+        phone_number: Target phone number (e.g., "2623984079")
+        code_length: Length of verification code (default: 5)
+    
+    Returns:
+        JSON string with reference_id and verification code (for testing)
+    """
+    try:
+        phone_number = phone_number.lstrip('+')
+        result = send_verification_code(phone_number, code_length)
+        
+        if result.get('status_code') == 200:
+            return json.dumps({
+                "success": True,
+                "message": "Verification code sent",
+                "reference_id": result.get('reference_id'),
+                "verify_code": result.get('verify_code'),  # For testing only
+                "phone_number": phone_number
+            }, indent=2)
+        else:
+            return json.dumps({
+                "success": False,
+                "error": result.get('errors', 'Failed to send code')
+            }, indent=2)
+            
+    except Exception as e:
+        return json.dumps({
+            "success": False,
+            "error": str(e)
+        }, indent=2)
+
+
+@mcp.tool()
+def checkPhoneRisk(phone_number: str, lifecycle_event: str = "create") -> str:
+    """
+    Assess fraud risk for a phone number
+    
+    Args:
+        phone_number: Phone number to assess (e.g., "2623984079")
+        lifecycle_event: Account lifecycle stage (create, sign-in, transact, update)
+    
+    Returns:
+        JSON string with risk level, score, and recommendation
+    """
+    try:
+        phone_number = phone_number.lstrip('+')
+        result = assess_phone_risk(phone_number, lifecycle_event)
+        
+        if result.get('status_code') == 200:
+            return json.dumps({
+                "success": True,
+                "phone_number": phone_number,
+                "risk_level": result.get('risk_level'),
+                "risk_score": result.get('risk_score'),
+                "recommendation": result.get('recommendation'),
+                "phone_type": result.get('phone_type'),
+                "carrier": result.get('carrier')
+            }, indent=2)
+        else:
+            return json.dumps({
+                "success": False,
+                "error": result.get('error', 'Risk assessment failed')
+            }, indent=2)
+            
+    except Exception as e:
+        return json.dumps({
+            "success": False,
+            "error": str(e)
+        }, indent=2)
+
+
+@mcp.tool()
+def checkMessageStatus(reference_id: str) -> str:
+    """
+    Check the delivery status of a sent message
+    
+    Args:
+        reference_id: Reference ID from sendSMS or sendVerificationCode
+    
+    Returns:
+        JSON string with delivery status and timestamps
+    """
+    try:
+        result = get_message_status(reference_id)
+        
+        return json.dumps({
+            "success": True,
+            "reference_id": reference_id,
+            "status": result.get('status'),
+            "full_response": result.get('full_response')
+        }, indent=2)
+            
+    except Exception as e:
+        return json.dumps({
+            "success": False,
+            "error": str(e)
+        }, indent=2)
 
 
