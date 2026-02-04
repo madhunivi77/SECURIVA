@@ -4,7 +4,7 @@ export default function Pricing() {
   const [annual, setAnnual] = useState(false);
 
   return (
-    <div className="min-h-screen flex flex-col gap-8 items-center pt-24 px-4 bg-base-100">
+    <div className="min-h-screen flex flex-col gap-8 items-center pt-24 px-4">
 
       {/* Title */}
       <div className="flex flex-col gap-2 text-center">
@@ -20,7 +20,7 @@ export default function Pricing() {
 
         <input
           type="checkbox"
-          className="toggle toggle-secondary"
+          className="toggle toggle-primary"
           checked={annual}
           onChange={(e) => setAnnual(e.target.checked)}
         />
@@ -35,7 +35,7 @@ export default function Pricing() {
       <div className="flex gap-8 px-2 max-w-6xl w-full justify-center">
 
         {/* Free */}
-        <div className="flex flex-col gap-6 bg-base-200 rounded-box p-8 flex-1 max-w-sm">
+        <div className="flex flex-col gap-6 bg-[#091932] rounded-box p-8 flex-1 max-w-sm">
           <div className="flex flex-col gap-4 text-center pt-13">
             <h2 className="text-xl">Free</h2>
 
@@ -54,7 +54,7 @@ export default function Pricing() {
         </div>
 
         {/* Startup (Most popular) */}
-        <div className="flex flex-col gap-6 bg-base-200 rounded-box p-8 border border-primary shadow flex-1 max-w-sm">
+        <div className="flex flex-col gap-6 bg-[#091932] rounded-box p-8 border border-primary shadow flex-1 max-w-sm">
 
           <div className="badge badge-primary self-center badge-lg">
             Most popular
@@ -82,7 +82,7 @@ export default function Pricing() {
         </div>
 
         {/* Team */}
-        <div className="flex flex-col gap-6 bg-base-200 rounded-box p-8 flex-1 max-w-sm">
+        <div className="flex flex-col gap-6 bg-[#091932] rounded-box p-8 flex-1 max-w-sm">
           <div className="flex flex-col gap-4 text-center pt-13">
             <h2 className="text-xl">Team</h2>
 
