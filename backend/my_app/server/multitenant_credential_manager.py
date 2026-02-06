@@ -312,4 +312,4 @@ def get_credential_manager() -> MultiTenantCredentialManager:
     global _credential_manager
     if _credential_manager is None:
         _credential_manager = MultiTenantCredentialManager()
-    return _credential_manager
+    return _credential_managercd
