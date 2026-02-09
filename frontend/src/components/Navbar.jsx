@@ -14,7 +14,8 @@ const Navbar = ({ onCreateAutomation }) => {
             <Plus className="w-4 h-4" />
             New Automation
         </button>
-        <Link to="/">
+        {/* Configure a logout function using auth context provider */}
+        <Link to="/"> 
             <button 
             className="hover:bg-red-300"
             >
