@@ -1,0 +1,181 @@
+// Homepage.jsx
+import Card from "../components/Card";
+import { ChevronRight} from "lucide-react";
+
+export default function Homepage() {
+
+  return (
+    <div id="homepage">
+
+      {/* ---------- HERO ---------- */}
+      <header className="hero section-min-height">
+
+        <div className="hero-content flex justify-between">
+          <div className="pb-5">
+            <h1 className="text-xl text-left pt-10 text-white">The AI Platform that Protects and Automates Your Business</h1>
+            <p className="text-[28px] text-left pt-7.5 pb-10 text-blue-600">
+              <span className="text-white text-bold">SecuriVA</span> unifies <span className="text-white text-bold">AI automation</span>, <span className="text-white text-bold">cybersecurity protection</span>, and <span className="text-white text-bold">secure communication </span>
+              into <span className="text-white text-bold">one intelligent platform</span> designed for modern enterprises.
+            </p>
+            <button
+              className="text-sm w-50 h-17.5 bg-red-500"
+            >
+              Start Free Trial
+            </button>
+          </div>
+
+          <div>
+            <div className="overflow-hidden rounded-2xl w-150 mt-7.5 ml-7.5">
+              <video
+                autoPlay
+                loop
+                muted
+                playsInline
+              >
+                <source src="/landing_page/SecurivaHero.mp4" type="video/mp4" />
+                Your browser does not support the video tag.
+              </video>
+            </div>
+          </div>
+        </div>
+      </header>
+      
+      {/* Video */}
+      <div className="w-full justify-center overflow-hidden max-h-25 bg-black">
+        <video
+          autoPlay
+          loop
+          muted
+          playsInline
+        >
+          <source src="/landing_page/banner.mp4" type="video/mp4" />
+          Your browser does not support the video tag.
+      </video>
+    </div>
+
+      {/* Card Display */}
+      <div id="feature-cards-wrapper" className="section-min-height text-center text-black" style={{background: "#007bff"}}>
+        <h2 className="text-[40px] pt-7.5 text-center text-white">Everything your business needs — automated, secured, and connected.</h2>
+        <p className="text-center px-[20%] pt-5 text-2xl text-white" >SecuriVA unifies AI automation, enterprise-grade cybersecurity, and secure AI VPN networking in one intelligent platform. Acting as a 24/7 digital team member, it manages calls, emails, texts, and chats while protecting your domain, website, and data. With built-in eBook creation and seamless integrations across leading business tools, SecuriVA helps organizations operate faster, stay secure, and deliver better customer experiences — all from a single platform.</p>
+        <div
+          id="feature-cards" className="gap-12.5 px-20 pb-20 pt-9 mx-0 my-auto"
+          style={{
+            display: "grid",
+            gridTemplateColumns: "repeat(3, 1fr)"
+          }}
+        >
+          <Card image={"landing_page/AI_Virtual_assistant.png"} title={"AI Virtual Agent"} text={"Streamline workflows, scheduling, and communications with smart automation tools."}/>
+          <Card image={"landing_page/Cybersecurity_Protection.png"} title={"Cybersecurity Protection"} text={"Real-time AI defense for data, users, and digital assets."}/>
+          <Card image={"landing_page/AI_VPN.png"} title={"AI VPN"} text={"Secure every connection using adaptive, encrypted networking."}/>
+          <Card image={"landing_page/Customer_Interaction.png"} title={"Customer Interaction"} text={"Manage calls, chats, and emails through an intelligent AI avatar."}/>
+          <Card image={"landing_page/ebook.png"} title={"eBook Generator"} text={"Instantly create training manuals and awareness guides."}/>
+          <Card image={"landing_page/Integrations.png"} title={"Integrations"} text={"Connect with Gmail, Microsoft 365, Salesforce, OpenAI, and more."}/>
+        </div>
+      </div>
+      
+      {/* Why Choose SECURIVA */}
+      <div className="flex flex-col justify-center section-min-height px-20 pb-10 bg-black text-white">
+        <h2 className="text-[40px] pt-7.5 text-center">Why Choose SecuriVA?</h2>
+        <p className="text-center px-[20%] pt-5 pb-9 text-2xl">SecuriVA brings together AI automation, intelligent virtual assistance, and enterprise-grade cybersecurity in one powerful platform. Designed to integrate seamlessly with your existing tools, SecuriVA protects your business, streamlines operations, and enhances customer interactions through secure, human-like AI. Built with future-ready technologies such as AI-driven VPN and Digital Twin capabilities, SecuriVA helps organizations scale confidently, efficiently, and securely.</p>
+
+        <div className="px-20 flex flex-col text-black">
+          <div id="why-cards-wrapper" className="flex flex-1 flex-col justify-center">
+            <div id="why-cards" className="flex flex-row gap-5 ">
+
+              <div className="card bg-white shadow-sm why-card">
+                <h2 className="text-center text-xl font-medium">All-in-One Platform</h2>
+                <figure>
+                  <img
+                    src="landing_page/aio.png"
+                    alt="All-in-One Platform" />
+                </figure>
+
+                <p className="text-center">AI automation, cybersecurity, and
+                communication in one unified system.</p>
+                <div className="flex justify-center">
+                  <button className="flex justify-center items-center btn" style={{backgroundColor: "#007bff"}}>
+                    Get More
+                    <ChevronRight />
+                  </button>
+                </div>
+              </div>
+
+              <div className="card bg-white shadow-sm why-card">
+                <h2 className="text-center text-xl font-medium">Intelligent & Human-Like</h2>
+                <figure>
+                  <img
+                    src="landing_page/intelligent.png"
+                    alt="Intelligent & Human-Like" />
+                </figure>
+                
+                <p className="text-center">Engage with a smart,
+                conversational AI assistant that adapts to your business.</p>
+                <div className="flex justify-center">
+                  <button className="flex justify-center items-center btn" style={{backgroundColor: "#007bff"}}>
+                    Get More
+                    <ChevronRight />
+                  </button>
+                </div>
+              </div>
+
+              <div className="card bg-white shadow-sm why-card">
+                <h2 className="text-center text-xl font-medium">Seamless Integration</h2>
+                <figure>
+                  <img
+                    src="landing_page/seamless.png"
+                    alt="Seamless Integration" />
+                </figure>
+                <p className="text-center">Works effortlessly with your
+                existing tools and cloud services.</p>
+                <div className="flex justify-center">
+                  <button className="flex justify-center items-center btn" style={{backgroundColor: "#007bff"}}>
+                    Get More
+                    <ChevronRight />
+                  </button>
+                </div>
+              </div>
+
+              <div className="card bg-white shadow-sm why-card">
+                <h2 className="text-center text-xl font-medium">Future Ready</h2>
+                <figure>
+                  <img
+                    src="landing_page/future_ready.png"
+                    alt="Future-Ready"
+                      />
+                </figure>
+                <p className="text-center">Powered by AI VPN and Digital Twin
+                technology for next-generation innovation.</p>
+                <div className="flex justify-center">
+                  <button className="flex justify-center items-center btn" style={{backgroundColor: "#007bff"}}>
+                    Get More
+                    <ChevronRight />
+                  </button>
+                </div>
+              </div>
+            </div>
+          </div>
+        </div>
+      </div>
+      {/* Text */}
+      <div id="demo" className="bg-black text-center text-white pb-10">
+          <h2 className="text-3xl">Experience how SecuriVA can Transform Your Business</h2>
+          <p className="text-xl/12 pb-5">Transform fragmented security tools into a unified, intelligent defense.</p>
+          <button className="text-sm w-50 h-12 bg-red-500 text-white">Request a Demo</button>
+      </div>
+      
+      {/* Video */}
+      <div className="flex flex-1 justify-center overflow-hidden bg-black rounded-2xl">
+        <video
+          autoPlay
+          loop
+          muted
+          playsInline
+        >
+          <source src="/landing_page/LandingVideo.mp4" type="video/mp4" />
+          Your browser does not support the video tag.
+      </video>
+    </div>
+
+    </div>
+  );
+}
