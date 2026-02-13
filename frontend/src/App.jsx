@@ -1,7 +1,7 @@
 import { useState, useEffect } from "react";
 import Footer from "./components/Footer";
 import NavOption from "./components/NavOption";
-import { Outlet, useNavigate } from "react-router-dom";
+import { Link, Outlet, useNavigate } from "react-router-dom";
 
 function App() {
   const navigate = useNavigate();
@@ -113,6 +113,7 @@ function App() {
       subtext: "#8fa8d6",
       buttonBg: "#1f5fbf",
       buttonText: "white",
+      navbutton: "#212854",
     }
     : {
       bg: "#e7f1ff",
@@ -122,6 +123,8 @@ function App() {
       subtext: "#3d5fa8",
       buttonBg: "#d8e7ff",
       buttonText: "#0a3aa8",
+      navbutton: "#061d42",
+
     };
 
   return (
@@ -142,7 +145,7 @@ function App() {
             flexShrink: 0,
             padding: "12px 20px",
             //borderBottom: `1px solid ${theme.border}`,
-            background: "#b3cff5",
+            background: theme.bg,
             display: "flex",
             justifyContent: "space_between",
             alignItems: "right",
@@ -156,27 +159,30 @@ function App() {
 
           {!isAuthenticated ? (
             // LOGGED OUT
-            <div style={{ display: "flex", gap: "10px" }}>
+            <div className="flex justify-between flex-1 pl-[7.5%]">
+              <div style={{ display: "flex", gap: "10px" }}>
 
-              <NavOption label={"Demo"} target={"login"} />
+                <NavOption label={"Sign In"} target={"login"} theme={theme.text} />
 
-              <NavOption label={"Sign In"} target={"login"} />
+                <NavOption label={"Sign Up"} target={"login"} theme={theme.text} />
 
-              <NavOption label={"Sign Up"} target={"login"} />
+                <NavOption label={"Support"} target={"login"} theme={theme.text} />
 
-              <NavOption label={"Support"} target={"login"} />
-
-              <NavOption label={"Contact"} target={"login"} />
+                <NavOption label={"Contact"} target={"login"} theme={theme.text} />
+              </div>
+              <Link to="/login">
+                <button className="bg-red-500 text-white">Request a Demo</button>
+              </Link>
             </div>
           ) : (
             /* LOGGED IN → show your status toggle */
             <div style={{ display: "flex", gap: "10px" }}>
 
-              <NavOption label={"Demo"} target={"login"}/>
+              <NavOption label={"Demo"} target={"login"} theme={theme.text}/>
 
-              <NavOption label={"Support"} target={"login"}/>
+              <NavOption label={"Support"} target={"login"} theme={theme.text}/>
 
-              <NavOption label={"Contact"} target={"login"}/>
+              <NavOption label={"Contact"} target={"login"} theme={theme.text}/>
             
               <button
                 onClick={() => setShowStatus((prev) => !prev)}
@@ -212,7 +218,7 @@ function App() {
           }}
         >
           {/* Left: logo + SECURIVA */}
-          <div style={{ display: "flex", alignItems: "center", overflow: "hidden" }}>
+          <div style={{ display: "flex", alignItems: "center", overflow: "hidden", paddingLeft: 23}}>
             <img
               src="/logo.png"
               alt="SECURIVA Logo"
@@ -229,27 +235,28 @@ function App() {
           {!isAuthenticated ? (
             <div style={{ display: "flex", gap: "10px" }}>
 
-              <NavOption label={"Features"} target={"security"} />
+              <NavOption label={"Features"} target={"security"} theme={theme.navbutton}/>
 
-              <NavOption label={"Solutions"} target={"agent"} />
+              <NavOption label={"Solutions"} target={"agent"} theme={theme.navbutton}/>
 
-              <NavOption label={"Pricing"} target={"login"} />
+              <NavOption label={"Pricing"} target={"pricing"} theme={theme.navbutton}/>
+              
+              <NavOption label={"About"} target={"login"} theme={theme.navbutton}/>
 
-              <NavOption label={"About"} target={"login"} />
+              <NavOption label={"Voice"} target={"voice"} theme={theme.navbutton}/>
 
-              <NavOption label={"Voice"} target={"voice"} />
             </div>
           ) : (
             /* If logged in → show your status toggle */
             <div style={{ display: "flex", gap: "10px" }}>
 
-              <NavOption label={"Features"} target={"security"} />
+              <NavOption label={"Features"} target={"security"} theme={theme.navbutton}/>
 
-              <NavOption label={"Solutions"} target={"agent"} />
+              <NavOption label={"Solutions"} target={"agent"} theme={theme.navbutton}/>
 
-              <NavOption label={"Pricing"} target={"login"} />
+              <NavOption label={"Pricing"} target={"pricing"} theme={theme.navbutton}/>
 
-              <NavOption label={"About"} target={"login"} />
+              <NavOption label={"About"} target={"login"} theme={theme.navbutton}/>
             </div>
           )}
 

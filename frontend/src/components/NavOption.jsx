@@ -1,9 +1,9 @@
 import { Link } from "react-router-dom";
 
-function NavOption({label, target}){
+function NavOption({label, target, theme}){
     return (
         <Link to={target}>
-            <button className="bg-none text-[#0d2b66] rounded-md px-1.5 py-3 cursor-pointer">
+            <button className='bg-none rounded-md px-1.5 py-3 cursor-pointer' style={{color: theme}}>
                 {label}
             </button>
         </Link>

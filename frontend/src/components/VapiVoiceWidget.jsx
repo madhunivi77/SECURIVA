@@ -233,17 +233,17 @@ export default function VapiVoiceWidget() {
             language: 'en'
           },
           model: {
-            provider: 'custom-llm',
-            model: 'gpt-4o-mini',
-            url: `${serverUrl}/api/vapi/chat/completions`,
+            provider: 'groq',
+            model: 'openai/gpt-oss-20b',
             messages: [{
               role: 'system',
               content: systemContent
-            }]
+            }],
+            temperature: 0.5
           },
           voice: {
-            provider: 'deepgram',
-            voiceId: 'asteria'
+            provider: 'vapi',
+            voiceId: 'Elliot'
           },
           firstMessage: 'Hi! How can I help you today?',
           serverUrl: `${serverUrl}/api/vapi/webhook`
