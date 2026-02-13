@@ -20,4 +20,5 @@ dependencies = [
     "langchain-mcp-adapters>=0.1.12",
     "langchain-openai>=1.0.2",
     "langchain-groq>=1.0.0",
+    "boto3>=1.42.40",
 ]
