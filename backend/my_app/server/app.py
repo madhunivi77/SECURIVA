@@ -13,6 +13,7 @@ from .chat_handler import execute_chat_with_tools
 from .salesforce_app import salesforce_app
 from .api_key_manager import generate_api_key, store_api_key, validate_api_key
 from .s3_service import s3_app
+from .db import db_app
 
 # Load environment variables
 GOOGLE_CLIENT_ID = os.getenv("GOOGLE_CLIENT_ID")
@@ -391,3 +392,4 @@ api_app = Starlette(
 # Mount Starlette Salesforce app under /salesforce
 api_app.mount("/salesforce", salesforce_app)
 api_app.mount("/storage", s3_app)
+api_app.mount("/chat",db_app)
