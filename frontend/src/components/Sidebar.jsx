@@ -1,4 +1,4 @@
-import { MessageSquarePlus, Settings, User } from "lucide-react";
+import { MessageSquarePlus, Settings, User, Mic } from "lucide-react";
 import { Link } from "react-router-dom";
 
 
@@ -15,6 +15,13 @@ const Sidebar = () => {
             <button className=" inline-flex justify-normal w-full items-center text-black bg-gray-200 border-gray-300 gap-4 ">
                 <MessageSquarePlus className="w-4 h-4" />
                 New Chat
+            </button>
+        </Link>
+        {/*Voice Agent Button*/}
+        <Link to="/voice" className="m-2">
+            <button className=" inline-flex justify-normal w-full items-center text-black bg-gray-200 border-gray-300 gap-4 ">
+                <Mic className="w-4 h-4" />
+                Voice Chat
             </button>
         </Link>
 

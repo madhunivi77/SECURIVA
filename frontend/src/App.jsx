@@ -27,7 +27,7 @@ function App() {
     if (authSuccess === "success") {
       if (emailParam) setUserEmail(emailParam);
       window.history.replaceState({}, document.title, window.location.pathname);
-      navigate("/chat")
+      navigate("/dashboard")
     }
 
     if (urlParams.get("salesforce") === "connected") {
@@ -239,11 +239,11 @@ function App() {
 
               <NavOption label={"Solutions"} target={"agent"} theme={theme.navbutton}/>
 
-              <NavOption label={"Pricing"} target={"login"} theme={theme.navbutton}/>
+              <NavOption label={"Pricing"} target={"pricing"} theme={theme.navbutton}/>
               
               <NavOption label={"About"} target={"login"} theme={theme.navbutton}/>
 
-              <NavOption label={"Voice"} target={"voice"} theme={theme.navbutton}/>
+              {/* <NavOption label={"Voice"} target={"voice"} theme={theme.navbutton}/> */}
 
             </div>
           ) : (
@@ -254,13 +254,13 @@ function App() {
 
               <NavOption label={"Solutions"} target={"agent"} theme={theme.navbutton}/>
 
-              <NavOption label={"Pricing"} target={"login"} theme={theme.navbutton}/>
+              <NavOption label={"Pricing"} target={"pricing"} theme={theme.navbutton}/>
 
               <NavOption label={"About"} target={"login"} theme={theme.navbutton}/>
+              
+              {/* <NavOption label={"Voice"} target={"voice"} theme={theme.navbutton}/> */}
             </div>
           )}
-
-              <NavOption label={"Voice"} target={"voice"} />
         </div>
 
         {/* ---------- STATUS SECTION ---------- */}
