@@ -3,7 +3,21 @@ import React from "react";
 export default function Footer({ theme = {} }) {
   const textColor = "#ffffff";
 
+  const images = [
+    "/LOGOS(46).png",
+    "/LOGOS(47).png",
+    "/LOGOS(48).png",
+    "/LOGOS(49).png",
+  ];
+
   return (
+    <div>
+      <div className="flex overflow-hidden bg-white py-6 justify-between">
+        <img src={"/LOGOS(46).png"} className="h-auto w-50" />
+        <img src={"/LOGOS(47).png"} className="w-50" />
+        <img src={"/LOGOS(48).png"} className="w-50" />
+        <img src={"/LOGOS(49).png"} className="w-50" />
+      </div>
     <footer
       style={{
         background: "#052050", // BLUE main footer
@@ -143,5 +157,6 @@ export default function Footer({ theme = {} }) {
         </div>
       </div>
     </footer>
+    </div>
   );
 }
