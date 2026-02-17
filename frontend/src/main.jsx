@@ -9,7 +9,9 @@ import Agent from './pages/Agent.jsx';
 import Security from './pages/Security.jsx';
 import ChatBox from './pages/ChatBox.jsx';
 import Homepage from './pages/Homepage.jsx'
+import ProviderForm from './pages/ProviderForm.jsx';
 import LoginForm from './pages/LoginForm.jsx';
+import SignupForm from './pages/SignupForm.jsx';
 import VoiceTest from './pages/VoiceTest.jsx';
 import Pricing from "./pages/Pricing";
 
@@ -35,8 +37,16 @@ const router = createBrowserRouter([
         element: <ChatBox />
       },
       {
-        path: '/login',
+        path: '/provider', // select a login provider
+        element: <ProviderForm />
+      },
+      {
+        path: '/login', // Local login
         element: <LoginForm />
+      },
+      {
+        path: '/signup', // create a new account
+        element: <SignupForm />
       },
       {
         path: '/voice',
