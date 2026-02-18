@@ -7,9 +7,6 @@ function Card({ image, title, text }) {
           alt={title} />
       </figure>
       <div className="card-body items-center text-center">
-        <h2 className="card-title text-2xl">{title}</h2>
-        <p className="text-lg">{text}</p>
-      <div className="card-body items-center text-center">
         <h2 className="card-title text-3xl">{title}</h2>
         <p className="text-xl">{text}</p>
       </div>
