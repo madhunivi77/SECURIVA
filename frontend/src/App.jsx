@@ -1,7 +1,7 @@
 import { useState, useEffect } from "react";
 import Footer from "./components/Footer";
 import NavOption from "./components/NavOption";
-import { Link, Outlet, useNavigate } from "react-router-dom";
+import {Outlet, useNavigate, useLocation} from "react-router-dom";
 
 function App() {
   const navigate = useNavigate();
@@ -13,11 +13,20 @@ function App() {
   const [isDarkMode, setIsDarkMode] = useState(
     window.matchMedia("(prefers-color-scheme: dark)").matches
   );
+  const { pathname } = useLocation();
 
   const handleAuthSuccess = (email) => {
     setUserEmail(email);
     navigate("/chat")
   };
+
+  //Scroll to top on every subpage load
+  useEffect(() => {
+    if (location.hash) return; // ignore anchor navigation
+    window.scrollTo({
+      top: 0
+    });
+  }, [pathname]);
 
   useEffect(() => {
     const urlParams = new URLSearchParams(window.location.search);

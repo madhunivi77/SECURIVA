@@ -1,4 +1,5 @@
 import { HashLink } from 'react-router-hash-link';
+import { Link } from 'react-router-dom';
 
 export default function Footer({ theme = {} }) {
   const textColor = "#ffffff";
@@ -102,7 +103,7 @@ export default function Footer({ theme = {} }) {
 
           {/* Industries */}
           <div className="sec-footer-col">
-            <HashLink to={"/industries"}><h2>Industries</h2></HashLink>
+            <Link to={"/industries"}><h2>Industries</h2></Link>
             <ul>
               <li><HashLink smooth scroll={scrollWithOffset} to='/industries/#healthcare'>Healthcare</HashLink></li>
               <li><HashLink smooth scroll={scrollWithOffset} to='/industries/#fintech'>Finance &amp; Fintech</HashLink></li>
