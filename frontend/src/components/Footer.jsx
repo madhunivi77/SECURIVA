@@ -1,4 +1,4 @@
-import React from "react";
+import { HashLink } from 'react-router-hash-link';
 
 export default function Footer({ theme = {} }) {
   const textColor = "#ffffff";
@@ -102,16 +102,16 @@ export default function Footer({ theme = {} }) {
 
           {/* Industries */}
           <div className="sec-footer-col">
-            <h2>Industries</h2>
+            <HashLink to={"/industries"}><h2>Industries</h2></HashLink>
             <ul>
-              <li><a href="#">Healthcare</a></li>
-              <li><a href="#">Finance &amp; Fintech</a></li>
-              <li><a href="#">E-commerce</a></li>
-              <li><a href="#">SMBs</a></li>
-              <li><a href="#">Agriculture</a></li>
-              <li><a href="#">Technology</a></li>
-              <li><a href="#">Non Profit</a></li>
-              <li><a href="#">Government</a></li>
+              <li><HashLink smooth scroll={scrollWithOffset} to='/industries/#healthcare'>Healthcare</HashLink></li>
+              <li><HashLink smooth scroll={scrollWithOffset} to='/industries/#fintech'>Finance &amp; Fintech</HashLink></li>
+              <li><HashLink smooth scroll={scrollWithOffset} to='/industries/#ecommerce'>E-commerce</HashLink></li>
+              <li><HashLink smooth scroll={scrollWithOffset} to='/industries/#smb'>SMBs</HashLink></li>
+              <li><HashLink smooth scroll={scrollWithOffset} to='/industries/#agriculture'>Agriculture</HashLink></li>
+              <li><HashLink smooth scroll={scrollWithOffset} to='/industries/#technology'>Technology</HashLink></li>
+              <li><HashLink smooth scroll={scrollWithOffset} to='/industries/#nonprofit'>Non Profit</HashLink></li>
+              <li><HashLink smooth scroll={scrollWithOffset} to='/industries/#government'>Government</HashLink></li>
             </ul>
           </div>
 
@@ -160,3 +160,17 @@ export default function Footer({ theme = {} }) {
     </div>
   );
 }
+
+// function passed to hash-link scroll prop to offset navbar
+export const scrollWithOffset = (el) => {
+  const yOffset = -167.5;
+  const y =
+    el.getBoundingClientRect().top +
+    window.pageYOffset +
+    yOffset;
+
+  window.scrollTo({
+    top: y,
+    behavior: "smooth",
+  });
+};
