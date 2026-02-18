@@ -174,9 +174,9 @@ function App() {
               </div>
 
               <div style={{ display: "flex", gap: "10px" }}>
-                <NavOption label={"Sign In"} target={"login"} theme={theme.text} />
+                <NavOption label={"Sign In"} target={"provider"} theme={theme.text} />
 
-                <NavOption label={"Sign Up"} target={"login"} theme={theme.text} />
+                <NavOption label={"Sign Up"} target={"signup"} theme={theme.text} />
 
                 <NavOption label={"Support"} target={"login"} theme={theme.text}/>
               </div>
