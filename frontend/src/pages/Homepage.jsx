@@ -66,18 +66,14 @@ export default function Homepage() {
           <p className="text-center pt-5 text-2xl text-white font-mono" >SecuriVA unifies AI automation, enterprise-grade cybersecurity, and secure AI VPN networking in one intelligent platform. Acting as a 24/7 digital team member, it manages calls, emails, texts, and chats while protecting your domain, website, and data. With built-in eBook creation and seamless integrations across leading business tools, SecuriVA helps organizations operate faster, stay secure, and deliver better customer experiences — all from a single platform.</p>
         </div>
         <div
-          id="feature-cards" className="gap-12.5 px-20 pb-20 pt-9 mx-0"
-          style={{
-            display: "grid",
-            gridTemplateColumns: "repeat(3, 1fr)"
-          }}
+          id="feature-cards" className="flex flex-wrap justify-center gap-12.5 px-20 pb-20 pt-9 mx-0"
         >
-          <Card image={"landing_page/AI_Virtual_assistant.png"} title={"AI Virtual Agent"} text={"Streamline workflows, scheduling, and communications with smart automation tools."}/>
-          <Card image={"landing_page/Cybersecurity_Protection.png"} title={"Cybersecurity Protection"} text={"Real-time AI defense for data, users, and digital assets."}/>
-          <Card image={"landing_page/AI_VPN.png"} title={"AI VPN"} text={"Secure every connection using adaptive, encrypted networking."}/>
-          <Card image={"landing_page/Customer_Interaction.png"} title={"Customer Interaction"} text={"Manage calls, chats, and emails through an intelligent AI avatar."}/>
-          <Card image={"landing_page/ebook.png"} title={"eBook Generator"} text={"Instantly create training manuals and awareness guides."}/>
-          <Card image={"landing_page/Integrations.png"} title={"Integrations"} text={"Connect with Gmail, Microsoft 365, Salesforce, OpenAI, and more."}/>
+          <Card className={"w-auto sm:w-[25%]"} image={"landing_page/AI_Virtual_assistant.png"} title={"AI Virtual Agent"} text={"Streamline workflows, scheduling, and communications with smart automation tools."}/>
+          <Card className={"w-auto sm:w-[25%]"} image={"landing_page/Cybersecurity_Protection.png"} title={"Cybersecurity Protection"} text={"Real-time AI defense for data, users, and digital assets."}/>
+          <Card className={"w-auto sm:w-[25%]"} image={"landing_page/AI_VPN.png"} title={"AI VPN"} text={"Secure every connection using adaptive, encrypted networking."}/>
+          <Card className={"w-auto sm:w-[25%]"} image={"landing_page/Customer_Interaction.png"} title={"Customer Interaction"} text={"Manage calls, chats, and emails through an intelligent AI avatar."}/>
+          <Card className={"w-auto sm:w-[25%]"} image={"landing_page/ebook.png"} title={"eBook Generator"} text={"Instantly create training manuals and awareness guides."}/>
+          <Card className={"w-auto sm:w-[25%]"} image={"landing_page/Integrations.png"} title={"Integrations"} text={"Connect with Gmail, Microsoft 365, Salesforce, OpenAI, and more."}/>
         </div>
       </div>
 

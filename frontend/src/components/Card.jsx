@@ -1,6 +1,8 @@
-function Card({ image, title, text }) {
+function Card({ className, image, title, text }) {
+  // Combine internal classes with the passed className prop
+  const combinedClasses = `card bg-white shadow-sm border-3 border-white ${className || ''}`.trim();
   return (
-    <div className="card bg-white w-120 shadow-sm border-3 border-white">
+    <div className={combinedClasses}>
       <figure>
         <img
           src={image}
