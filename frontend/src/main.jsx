@@ -14,6 +14,7 @@ import LoginForm from './pages/LoginForm.jsx';
 import SignupForm from './pages/SignupForm.jsx';
 import VoiceTest from './pages/VoiceTest.jsx';
 import Pricing from "./pages/Pricing";
+import Industry from './pages/Industry.jsx';
 
 const router = createBrowserRouter([
   {
@@ -53,8 +54,12 @@ const router = createBrowserRouter([
         element: <VoiceTest />
       },
       {
-        path: "pricing",
+        path: "/pricing",
         element: <Pricing />,
+      },
+      {
+        path: "/industries",
+        element: <Industry />
       }
     ]
   },
