@@ -188,11 +188,21 @@ export default function VapiVoiceWidget() {
     return () => vapiRef.current?.stop();
   }, []);
 
-  // Helper to get cookie value
-  const getCookie = (name) => {
-    const value = `; ${document.cookie}`;
-    const parts = value.split(`; ${name}=`);
-    if (parts.length === 2) return parts.pop().split(';').shift();
+  // Fetch a short-lived voice session JWT from backend
+  // The raw API key never leaves browser↔backend; only this JWT goes to VAPI
+  const fetchVoiceSession = async () => {
+    try {
+      const res = await fetch('http://localhost:8000/api/voice-session', {
+        method: 'POST',
+        credentials: 'include',
+      });
+      if (res.ok) {
+        const data = await res.json();
+        return data.voice_token;
+      }
+    } catch (e) {
+      console.warn('Could not fetch voice session:', e);
+    }
     return null;
   };
 
@@ -217,36 +227,64 @@ export default function VapiVoiceWidget() {
           return;
         }
 
-        // Get the API key from cookie if available (optional)
-        const apiKey = getCookie('api_key');
-
-        // Build system message with optional auth
-        const systemContent = apiKey
-          ? `You are SECURIVA, a helpful voice assistant. Keep responses brief and conversational. [AUTH:${apiKey}]`
-          : 'You are SECURIVA, a helpful voice assistant. Keep responses brief and conversational.';
+        // Fetch a short-lived voice session JWT (raw API key stays in browser↔backend)
+        const voiceToken = await fetchVoiceSession();
 
         const assistantConfig = {
           name: 'SECURIVA',
+
+          // Pass voice session JWT via metadata (not in system message)
+          metadata: voiceToken ? { voiceToken } : {},
+
+          // STT: Nova-3 is faster than Nova-2
           transcriber: {
             provider: 'deepgram',
-            model: 'nova-2',
-            language: 'en'
+            model: 'nova-3',
+            language: 'en',
           },
+
+          // LLM: Custom endpoint with capped tokens
           model: {
-            provider: 'groq',
-            model: 'openai/gpt-oss-20b',
+            provider: 'custom-llm',
+            model: 'gpt-4o-mini',
+            url: `${serverUrl}/api/vapi/chat/completions`,
             messages: [{
               role: 'system',
-              content: systemContent
+              content: 'You are SECURIVA, a voice assistant with Gmail, Calendar, and Salesforce tools. Be brief (1-2 sentences). Prefer single tool calls when possible.'
             }],
-            temperature: 0.5
+            maxTokens: 150,
+            temperature: 0.3,
           },
+
+          // TTS: Cartesia Sonic 3 (~40-90ms TTFB vs ~100ms for VAPI built-in)
           voice: {
-            provider: 'vapi',
-            voiceId: 'Elliot'
+            provider: 'cartesia',
+            voiceId: '228fca29-3a0a-435c-8728-5cb483251068', // Kiefer - clear male voice
           },
+
           firstMessage: 'Hi! How can I help you today?',
-          serverUrl: `${serverUrl}/api/vapi/webhook`
+          serverUrl: `${serverUrl}/api/vapi/events`,
+          silenceTimeoutSeconds: 20,
+
+          // Turn detection: Aggressive settings to eliminate dead air
+          // Default onNoPunctuationSeconds is 1.5s (!) - this kills latency
+          startSpeakingPlan: {
+            waitSeconds: 0.2,
+            smartEndpointingPlan: {
+              provider: 'livekit',
+              waitFunction: '200 + 4000 * x',
+            },
+            transcriptionEndpointingPlan: {
+              onPunctuationSeconds: 0.05,
+              onNoPunctuationSeconds: 0.6,
+              onNumberSeconds: 0.3,
+            },
+          },
+          stopSpeakingPlan: {
+            numWords: 2,
+            voiceSeconds: 0.2,
+            backoffSeconds: 0.8,
+          },
         };
 
         console.log('Starting VAPI with config:', JSON.stringify(assistantConfig, null, 2));

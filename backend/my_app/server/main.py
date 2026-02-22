@@ -7,13 +7,16 @@ from .app import api_app
 from .mcp_server import mcp
 from ..auth_server.main import auth_app
 from .vapi_webhook import vapi_app
+from .mcp_pool import mcp_pool
 
 
 @contextlib.asynccontextmanager
 async def lifespan(app: Starlette):
     async with contextlib.AsyncExitStack() as stack:
         await stack.enter_async_context(mcp.session_manager.run())
+        mcp_pool.start_cleanup_task()
         yield
+        await mcp_pool.close_all()
 
 
 app = Starlette(

@@ -10,9 +10,44 @@ from .tool_logger import get_tool_logger
 from langchain_mcp_adapters.tools import load_mcp_tools
 from langchain.agents.middleware import wrap_tool_call
 from langchain_core.messages import AIMessage, ToolMessage
+from langchain_core.callbacks import BaseCallbackHandler
 from langchain.agents import create_agent
 from langchain_openai import ChatOpenAI
 from langchain_groq import ChatGroq
+
+
+class TimingCallbackHandler(BaseCallbackHandler):
+    """Logs timing for every LLM call and tool call in the agent loop."""
+
+    def __init__(self):
+        self.llm_starts = {}
+        self.tool_starts = {}
+        self.llm_call_count = 0
+        self.agent_start = time.perf_counter()
+
+    def on_llm_start(self, serialized, prompts, *, run_id, **kwargs):
+        self.llm_call_count += 1
+        self.llm_starts[run_id] = time.perf_counter()
+        elapsed = (time.perf_counter() - self.agent_start) * 1000
+        print(f"⏱️  [AGENT]  +{elapsed:.0f}ms | LLM call #{self.llm_call_count} started")
+
+    def on_llm_end(self, response, *, run_id, **kwargs):
+        if run_id in self.llm_starts:
+            duration = (time.perf_counter() - self.llm_starts[run_id]) * 1000
+            elapsed = (time.perf_counter() - self.agent_start) * 1000
+            print(f"⏱️  [AGENT]  +{elapsed:.0f}ms | LLM call #{self.llm_call_count} done: {duration:.0f}ms")
+
+    def on_tool_start(self, serialized, input_str, *, run_id, **kwargs):
+        self.tool_starts[run_id] = time.perf_counter()
+        name = serialized.get("name", "unknown")
+        elapsed = (time.perf_counter() - self.agent_start) * 1000
+        print(f"⏱️  [AGENT]  +{elapsed:.0f}ms | Tool '{name}' started")
+
+    def on_tool_end(self, output, *, run_id, **kwargs):
+        if run_id in self.tool_starts:
+            duration = (time.perf_counter() - self.tool_starts[run_id]) * 1000
+            elapsed = (time.perf_counter() - self.agent_start) * 1000
+            print(f"⏱️  [AGENT]  +{elapsed:.0f}ms | Tool done: {duration:.0f}ms")
 
 
 # --- Configuration ---
@@ -42,12 +77,18 @@ async def get_mcp_auth_token(user_id: str = None) -> str | None:
         return None
 
 
-def get_llm_client(api: str):
+def get_llm_client(api: str, model: str = None):
     """Initialize the appropriate LLM client based on API choice."""
     if api == "openai":
-        return ChatOpenAI(api_key=os.getenv("OPENAI_API_KEY"))
+        return ChatOpenAI(
+            api_key=os.getenv("OPENAI_API_KEY"),
+            model=model or "gpt-4o-mini",
+        )
     elif api == "groq":
-        return ChatGroq(api_key=os.getenv("GROQ_API_KEY"))
+        return ChatGroq(
+            api_key=os.getenv("GROQ_API_KEY"),
+            model=model or "meta-llama/llama-4-maverick-17b-128e-instruct",
+        )
     else:
         raise ValueError(f"Unsupported API: {api}")
 
@@ -106,8 +147,12 @@ async def execute_chat_with_tools(messages: list, model: str = None, api: str = 
     session_id = str(uuid.uuid4())[:8]  # Short session ID for readability
 
     try:
+        t0 = time.perf_counter()
+
         # Get MCP authentication token with user_id
         token = await get_mcp_auth_token(user_id)
+        t1 = time.perf_counter()
+        print(f"⏱️  [CHAT]   get_auth_token: {(t1-t0)*1000:.0f}ms")
         if not token:
             return {"error": "Could not retrieve MCP auth token"}
 
@@ -121,25 +166,43 @@ async def execute_chat_with_tools(messages: list, model: str = None, api: str = 
                 except Exception as e:
                     return {"error": f"MCP session initialization failed: {e}"}
 
+                t2 = time.perf_counter()
+                print(f"⏱️  [CHAT]   mcp_connect+init: {(t2-t1)*1000:.0f}ms")
+
                 # Discover available tools
                 try:
                     mcp_tools_response = await load_mcp_tools(session)
                 except Exception as e:
                     return {"error": f"MCP tool response failed: {e}"}
 
+                t3 = time.perf_counter()
+                print(f"⏱️  [CHAT]   load_tools: {(t3-t2)*1000:.0f}ms ({len(mcp_tools_response)} tools)")
+
                 # Initialize LLM client
-                llm_client = get_llm_client(api)
+                llm_client = get_llm_client(api, model)
 
                 # Initialize the langgraph agent
                 graph = create_agent(
-                    model = llm_client, 
+                    model = llm_client,
                     tools = mcp_tools_response,
                     middleware = [handle_tool_errors])
+
+                t4 = time.perf_counter()
+                print(f"⏱️  [CHAT]   create_agent: {(t4-t3)*1000:.0f}ms")
+
+                timing_cb = TimingCallbackHandler()
                 try:
                     # make llm query
-                    agent_response = await graph.ainvoke({"messages": messages})
+                    agent_response = await graph.ainvoke(
+                        {"messages": messages},
+                        config={"callbacks": [timing_cb]},
+                    )
                 except Exception as e:
                     return {"error": f"Agent response failed: {e}"}
+
+                t5 = time.perf_counter()
+                print(f"⏱️  [CHAT]   agent_invoke: {(t5-t4)*1000:.0f}ms ({timing_cb.llm_call_count} LLM calls)")
+                print(f"⏱️  [CHAT]   TOTAL: {(t5-t0)*1000:.0f}ms")
                 
                 tool_calls = []
                 # store the starting index of the new messages appended to the conversation
@@ -195,3 +258,5 @@ async def execute_chat_with_tools(messages: list, model: str = None, api: str = 
 
     except Exception as e:
         return {"error": f"Chat execution failed: {str(e)}"}
+
+

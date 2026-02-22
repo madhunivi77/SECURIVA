@@ -41,6 +41,7 @@ mcp.settings.streamable_http_path = "/"
     
 def getGoogleCreds(ctx) -> Credentials:
     try:
+        t0 = time.time()
         # extract the jwt from the request to get the subject
         encoded_token = ctx.request_context.request.headers.get('Authorization').split(" ")[1]
         payload = jwt.decode(encoded_token, JWT_SECRET_KEY, algorithms=["HS256"])
@@ -57,7 +58,9 @@ def getGoogleCreds(ctx) -> Credentials:
                     if google_service:
                         credentials_json = google_service.get("credentials")
                         if credentials_json:
-                            return Credentials.from_authorized_user_info(json.loads(credentials_json))
+                            creds = Credentials.from_authorized_user_info(json.loads(credentials_json))
+                            print(f"⏱️  [MCP-TOOL] getGoogleCreds: {((time.time()-t0)*1000):.0f}ms")
+                            return creds
             return None
 
     except Exception as e:
@@ -420,7 +423,7 @@ def getEmailBodies(context: Context, email_ids: list[str]) -> str:
 
 # list upcoming events from google calendar
 @mcp.tool()
-def listUpcomingEvents(context: Context, numEvents=5):
+def listUpcomingEvents(context: Context, numEvents: int = 5):
     """List upcoming events from my calendar"""
     creds = getGoogleCreds(context)
     if creds == None:
@@ -633,6 +636,7 @@ def summarizeRecentEmails(context: Context, num_emails: int = 5) -> str:
         return "User not authenticated with Google OAuth"
 
     try:
+        t0 = time.time()
         # Limit num_emails to reasonable bounds
         num_emails = min(max(1, num_emails), 20)
 
@@ -643,6 +647,8 @@ def summarizeRecentEmails(context: Context, num_emails: int = 5) -> str:
             labelIds=["INBOX"],
             maxResults=num_emails
         ).execute()
+        t1 = time.time()
+        print(f"⏱️  [MCP-TOOL] summarizeRecentEmails: gmail_list={((t1-t0)*1000):.0f}ms")
 
         messages = results.get("messages", [])
         if not messages:
@@ -652,12 +658,15 @@ def summarizeRecentEmails(context: Context, num_emails: int = 5) -> str:
         summaries = f"Summaries of your {len(messages)} most recent emails:\n\n"
 
         for i, message in enumerate(messages, 1):
+            tf0 = time.time()
             # Fetch full message
             msg = service.users().messages().get(
                 userId="me",
                 id=message["id"],
                 format="full"
             ).execute()
+            tf1 = time.time()
+            print(f"⏱️  [MCP-TOOL] summarizeRecentEmails: fetch_email_{i}={((tf1-tf0)*1000):.0f}ms")
 
             # Extract headers
             headers = {h["name"]: h["value"]
@@ -701,6 +710,8 @@ Email body:
 """
 
         summaries += f"\nPlease provide concise summaries for all {len(messages)} emails above."
+        t2 = time.time()
+        print(f"⏱️  [MCP-TOOL] summarizeRecentEmails: TOTAL={((t2-t0)*1000):.0f}ms ({len(messages)} emails fetched)")
 
         return summaries
 
