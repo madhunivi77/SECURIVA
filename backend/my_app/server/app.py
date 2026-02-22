@@ -7,7 +7,7 @@ import bcrypt
 import jwt as pyjwt
 import os
 import uuid
-from datetime import datetime
+from datetime import datetime, timedelta, timezone
 from pathlib import Path
 from .chat_handler import execute_chat_with_tools
 from .salesforce_app import salesforce_app
@@ -369,6 +369,49 @@ async def manual_login(request):
 
     return response
 
+# Voice token endpoint - returns the API key so the voice widget can pass it to VAPI
+# (The api_key cookie is httpOnly, so JavaScript can't read it directly)
+# DEPRECATED: Use /api/voice-session instead
+async def api_voice_token(request):
+    api_key = request.cookies.get("api_key")
+    if not api_key:
+        return JSONResponse({"error": "Not authenticated"}, status_code=401)
+
+    oauth_file = Path(__file__).parent / "oauth.json"
+    user_id = validate_api_key(api_key, oauth_file)
+    if not user_id:
+        return JSONResponse({"error": "Invalid API key"}, status_code=401)
+
+    return JSONResponse({"token": api_key})
+
+
+# Voice session endpoint - issues a short-lived JWT for voice auth
+# The raw API key never leaves the browser-to-backend channel
+async def api_voice_session(request):
+    api_key = request.cookies.get("api_key")
+    if not api_key:
+        return JSONResponse({"error": "Not authenticated"}, status_code=401)
+
+    oauth_file = Path(__file__).parent / "oauth.json"
+    user_id = validate_api_key(api_key, oauth_file)
+    if not user_id:
+        return JSONResponse({"error": "Invalid API key"}, status_code=401)
+
+    JWT_SECRET = os.getenv("JWT_SECRET_KEY")
+    voice_token = pyjwt.encode(
+        {
+            "sub": user_id,
+            "type": "voice_session",
+            "exp": datetime.now(timezone.utc) + timedelta(minutes=5),
+            "iat": datetime.now(timezone.utc),
+        },
+        JWT_SECRET,
+        algorithm="HS256",
+    )
+
+    return JSONResponse({"voice_token": voice_token})
+
+
 # Create the Starlette app instance with routes
 # Note: CORS is handled at the top level in main.py
 api_app = Starlette(
@@ -377,6 +420,8 @@ api_app = Starlette(
         Route("/api/status", api_status),
         Route("/api/chat", api_chat, methods=["POST"]),
         Route("/api/logout", api_logout, methods=["POST"]),
+        Route("/api/voice-token", api_voice_token, methods=["GET"]),
+        Route("/api/voice-session", api_voice_session, methods=["POST"]),
         Route("/login", login, methods=["GET"]),
         Route("/callback", callback),
         Route("/signup", signup, methods=["POST"]),  # ✅ Manual signup
