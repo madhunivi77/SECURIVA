@@ -12,7 +12,7 @@ const Sidebar = () => {
 
       {/* New Chat Button */}
         <Link to="/chat" className="m-2">
-            <button className=" inline-flex justify-normal w-full items-center text-black bg-gray-200 border-gray-300 gap-4 ">
+            <button className="inline-flex justify-normal w-full items-center text-black bg-gray-200 border-gray-300 gap-4 ">
                 <MessageSquarePlus className="w-4 h-4" />
                 New Chat
             </button>

@@ -322,7 +322,61 @@ async def api_send_sms(request):
             status_code=500
         )
 
-
+async def dashboard_refresh(request):
+    """Fetch integration data to update dashboard"""
+    # query database
+    # test information
+    data = [
+      {
+        "id": 1,
+        "title": "Email Notification",
+        "description": "Send email when new lead is created",
+        "isActive": True,
+        "lastRun": "2 hours ago",
+        "triggerCount": 142,
+      },
+      {
+        "id": 2,
+        "title": "Slack Alert",
+        "description": "Post to Slack on high-priority tickets",
+        "isActive": True,
+        "lastRun": "5 mins ago",
+        "triggerCount": 89,
+      },
+      {
+        "id": 3,
+        "title": "Data Sync",
+        "description": "Sync CRM data every hour",
+        "isActive": False,
+        "lastRun": "1 day ago",
+        "triggerCount": 456,
+      },
+      {
+        "id": 4,
+        "title": "Report Generator",
+        "description": "Generate weekly reports on Monday",
+        "isActive": True,
+        "lastRun": "3 days ago",
+        "triggerCount": 24,
+      },
+      {
+        "id": 5,
+        "title": "Lead Scoring",
+        "description": "Auto-score leads based on activity",
+        "isActive": True,
+        "lastRun": "Just now",
+        "triggerCount": 1203,
+      },
+      {
+        "id": 6,
+        "title": "Task Assignment",
+        "description": "Assign tasks to team based on workload",
+        "isActive": False,
+        "lastRun": "1 week ago",
+        "triggerCount": 67,
+      },
+    ]
+    return JSONResponse({"cards": data}, status_code=200)
 # ==================== APPLICATION SETUP ====================
 api_app = Starlette(
     routes=[
@@ -333,6 +387,7 @@ api_app = Starlette(
         Route("/login", login, methods=["GET"]),
         Route("/callback", callback),
         Route("/api/whatsapp/send-sms", api_send_sms, methods=["POST"]),
+        Route("/api/dashboard/refresh", dashboard_refresh, methods=["GET"])
         # Add other routes as needed
     ]
 )
