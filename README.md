@@ -64,4 +64,32 @@ To keep GitHub and Taiga linked, reference Taiga task IDs in your commit message
 git commit -m "Add login API TG-45"
 git commit -m "Fix authentication bug TG-46"
 git commit -m "Update test cases for signup TG-47"
+```
 
+## Local Testing
+
+Local testing may be conducted 1 of 2 ways: 
+
+### Command Line
+Frontend:<br>
+- Ensure that node packages are installed with `npm install`<br>
+- Ensure that voice agent environment variables are set in .env<br>
+- Run `npm run dev` and navigate to the corresponding vite link
+
+Backend:<br>
+- Ensure that environment variables are set in .env<br>
+- run `uv sync` to install packages from uv.lock<br>
+- Run `uv run run.py`
+
+### Docker
+With docker installed (For ease use we recommend Docker Desktop):
+- You MUST set /backend/run.py host address to 0.0.0.0 for correct mapping
+- Ensure that Docker is properly recognized in your command line environment using the following commands:<br>
+```
+docker --version
+docker compose version
+docker ps
+```
+- Simply run `docker compose up --build`. This will create a docker network as well as a frontend and backend container
+- When finished, `docker compose down`
+- To clean up after rebuilds, use `docker system prune`

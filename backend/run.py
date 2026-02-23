@@ -6,7 +6,7 @@ if __name__ == "__main__":
     # loaded in the reloader subprocess.
     uvicorn.run(
         "my_app.server.main:app", 
-        host="127.0.0.1", 
+        host="127.0.0.1", # if using docker this must be 0.0.0.0
         port=8000, 
         reload=True, 
         env_file=".env",
