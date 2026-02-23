@@ -347,3 +347,16 @@ The MCP server provides these Telesign SMS tools: (trial version restricted to v
 | `sendVerificationCode` | Send 2FA code | "Send verification code to (___) |
 | `checkPhoneRisk` | Assess fraud risk | "Check risk for phone 2623984079" |
 | `checkMessageStatus` | Check delivery status | "Check status of message ABC123" |
+
+## Telesign WhatsApp Token Management
+
+### Overview
+Secure token storage and management for Telesign WhatsApp Business API integration with:
+- **AES-256 encryption** for token storage
+- **Automatic token refresh** before expiration
+- **Thread-safe operations** for concurrent access
+- **Audit logging** of all token operations
+
+### Configuration
+
+#### 1. Generate Encryption Key

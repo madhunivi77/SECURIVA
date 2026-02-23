@@ -26,6 +26,7 @@ from .telesign_auth import (
     send_whatsapp_media,
     send_whatsapp_buttons
 )
+from .telesign_token_api import telesign_token_app
 
 # Load environment variables
 ENVIRONMENT = os.getenv("ENVIRONMENT", "development")
@@ -338,3 +339,4 @@ api_app = Starlette(
 )
 
 api_app.mount("/salesforce", salesforce_app)
+api_app.mount("/api/telesign", telesign_token_app)
