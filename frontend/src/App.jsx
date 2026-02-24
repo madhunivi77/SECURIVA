@@ -1,14 +1,22 @@
 import { useState, useEffect } from "react";
 import Footer from "./components/Footer";
 import NavOption from "./components/NavOption";
-import {Outlet, useNavigate, useLocation} from "react-router-dom";
+import { Link, Outlet, useNavigate, useLocation } from "react-router-dom";
+import { useAuth } from "./context/AuthContext";
 
 function App() {
   const navigate = useNavigate();
-  const [backendStatus, setBackendStatus] = useState("Loading...");
-  const [userEmail, setUserEmail] = useState(null);
-  const [isAuthenticated, setIsAuthenticated] = useState(false);
-  const [isSalesforceConnected, setIsSalesforceConnected] = useState(false);
+  const {
+    isAuthenticated,
+    userEmail,
+    isSalesforceConnected,
+    backendStatus,
+    fetchStatus,
+    logout,
+    setUserEmail,
+    setIsSalesforceConnected,
+  } = useAuth();
+
   const [showStatus, setShowStatus] = useState(false);
   const [isDarkMode, setIsDarkMode] = useState(
     window.matchMedia("(prefers-color-scheme: dark)").matches
@@ -17,7 +25,7 @@ function App() {
 
   const handleAuthSuccess = (email) => {
     setUserEmail(email);
-    navigate("/chat")
+    navigate("/dashboard/chat")
   };
 
   //Scroll to top on every subpage load
@@ -44,48 +52,18 @@ function App() {
       window.history.replaceState({}, document.title, window.location.pathname);
     }
 
-    fetchStatus();
-
     const mq = window.matchMedia("(prefers-color-scheme: dark)");
     const handleThemeChange = (e) => setIsDarkMode(e.matches);
     mq.addEventListener("change", handleThemeChange);
     return () => mq.removeEventListener("change", handleThemeChange);
   }, []);
 
-  const fetchStatus = () => {
-    setBackendStatus("Connecting...");
-    fetch("http://localhost:8000/api/status", {
-      credentials: "include"
-    })
-      .then((res) => res.json())
-      .then((data) => {
-        setBackendStatus(`Connected: ${JSON.stringify(data)}`);
-        if (data.authenticated !== undefined) setIsAuthenticated(data.authenticated);
-        if (data.email) setUserEmail(data.email);
-        if (data.salesforce_connected !== undefined) setIsSalesforceConnected(data.salesforce_connected);
-      })
-      .catch(() => {
-        setBackendStatus("❌ Could not connect to backend");
-        setIsAuthenticated(false);
-      });
-  };
-
   const handleReconnect = () => fetchStatus();
   const handleLogout = async () => {
-    try {
-      await fetch("http://localhost:8000/api/logout", {
-        method: "POST",
-        credentials: "include"
-      });
-      setIsAuthenticated(false);
-      setUserEmail(null);
-      setIsSalesforceConnected(false);
-      navigate("/")
-      setShowStatus(false)
-      fetchStatus();
-    } catch (error) {
-      console.error("Logout error:", error);
-    }
+    await logout();
+    navigate("/");
+    setShowStatus(false);
+    fetchStatus();
   };
 
   const handleGoogleLogin = () => {
@@ -258,6 +236,7 @@ function App() {
               Request a Demo
             </button>
           </div>
+
 
         </div>
 

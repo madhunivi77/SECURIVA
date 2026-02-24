@@ -13,6 +13,7 @@ Security:
 import secrets
 import hashlib
 import json
+import time
 from pathlib import Path
 from datetime import datetime
 from typing import Optional, Dict, Any
@@ -71,15 +72,18 @@ def validate_api_key(api_key: str, oauth_file_path: Path) -> Optional[str]:
     Returns:
         Optional[str]: user_id if valid, None if invalid
     """
+    t0 = time.perf_counter()
     if not oauth_file_path.exists():
         return None
 
     # Hash the provided key
     key_hash = hash_api_key(api_key)
+    t1 = time.perf_counter()
 
     # Load oauth.json
     with open(oauth_file_path, "r") as f:
         data = json.load(f)
+    t2 = time.perf_counter()
 
     # Search for matching hash
     users = data.get("users", [])
@@ -88,6 +92,8 @@ def validate_api_key(api_key: str, oauth_file_path: Path) -> Optional[str]:
         if api_key_data and api_key_data.get("key_hash") == key_hash:
             # Update last_used timestamp
             update_last_used(user.get("user_id"), oauth_file_path)
+            t3 = time.perf_counter()
+            print(f"⏱️  [AUTH]   validate_key: hash={(.0 if not t1 else (t1-t0)*1000):.0f}ms | read={((t2-t1)*1000):.0f}ms | write={((t3-t2)*1000):.0f}ms | total={((t3-t0)*1000):.0f}ms")
             return user.get("user_id")
 
     return None

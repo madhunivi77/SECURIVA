@@ -3,6 +3,7 @@ from starlette.routing import Route
 from starlette.responses import JSONResponse
 import jwt
 import datetime
+import time
 import os
 
 # Load the secret key from an environment variable.
@@ -12,6 +13,7 @@ if not JWT_SECRET_KEY:
 
 async def get_token(request):
     """Generates and issues a JWT."""
+    t0 = time.perf_counter()
     # Parse request body to get user_id if provided
     try:
         body = await request.json()
@@ -33,6 +35,7 @@ async def get_token(request):
     # Encode the token with the secret key using the HS256 algorithm
     encoded_jwt = jwt.encode(payload, JWT_SECRET_KEY, algorithm="HS256")
 
+    print(f"⏱️  [AUTH]   jwt_generate: {(time.perf_counter()-t0)*1000:.0f}ms | user={user_id}")
     return JSONResponse({"access_token": encoded_jwt, "token_type": "Bearer"})
 
 auth_app = Starlette(

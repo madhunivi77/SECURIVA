@@ -1,6 +1,6 @@
 import AutomationCard from "./AutomationCard";
 
-const AutomationGrid = ({data}) => {
+const AutomationGrid = ({data = []}) => {
   return (
     <div className="grid grid-cols-1 md:grid-cols-2 xl:grid-cols-3 gap-4">
       {data.map((automation, index) => (

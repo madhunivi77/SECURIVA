@@ -1,6 +1,6 @@
+import { Outlet } from "react-router-dom";
 import Sidebar from "../components/Sidebar";
 import Navbar from "../components/Navbar";
-import AutomationGrid from "../components/AutomationGrid";
 import { useState, useEffect } from "react";
 
 const Dashboard = () => {
@@ -41,12 +41,12 @@ const Dashboard = () => {
       <div className="flex-1 flex flex-col overflow-hidden">
         <Navbar onCreateAutomation={handleCreateAutomation} onRefresh={handleRefresh} />
 
-        <main className="flex-1 overflow-auto p-6">
-          <AutomationGrid data={cards}/>
+        <main className="flex-1 overflow-auto p-6 relative">
+          <Outlet />
         </main>
 
       </div>
-      
+
     </div>
   );
 };

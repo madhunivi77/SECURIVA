@@ -1,260 +1,156 @@
 """
-Vapi webhook handler for voice AI integration.
-Handles tool calls from Vapi and routes them to MCP tools.
+Vapi Custom LLM handler for voice AI integration.
+Routes voice conversations through our backend for full MCP tool access.
+
+Auth flow:
+  Frontend → POST /api/voice-session → short-lived JWT (5min)
+  Frontend → passes JWT in VAPI metadata.voiceToken
+  VAPI → sends to this webhook → decode JWT → extract user_id → voice agent
 """
 
 import os
-import re
 import json
+import time
+import uuid
 import httpx
-from pathlib import Path
-from typing import Optional, Any
+import jwt as pyjwt  # PyJWT package
 from starlette.applications import Starlette
 from starlette.routing import Route
 from starlette.requests import Request
 from starlette.responses import JSONResponse, StreamingResponse
 
-from .api_key_manager import validate_api_key
-from .chat_handler import execute_chat_with_tools
+from .voice_agent import run_voice_agent_streaming, FILLER_MESSAGE
+
+JWT_SECRET_KEY = os.getenv("JWT_SECRET_KEY")
 
 # Dev mode: Set to True to allow voice assistant to use tools without login
-VOICE_DEV_MODE = True
-VOICE_DEV_USER_ID = "voice-dev-user"  # Used for dev mode tool access
+VOICE_DEV_MODE = False
+VOICE_DEV_USER_ID = "voice-dev-user"
+
+# Cache user_id by VAPI call ID so subsequent requests (which may lack metadata) still work
+_call_user_cache: dict[str, str] = {}
 
 
-async def handle_vapi_webhook(request: Request) -> JSONResponse:
+def _extract_user_id(body: dict) -> str | None:
     """
-    Handle incoming webhooks from Vapi.
-
-    Vapi sends different message types:
-    - tool-calls: Execute tools and return results
-    - assistant-request: Return assistant config for incoming calls
-    - status-update, end-of-call-report, etc.: Informational (no response needed)
+    Extract user_id from the voice session JWT in VAPI metadata.
+    Falls back to cached user_id by call ID for subsequent requests
+    (VAPI doesn't always include metadata on every turn).
     """
+    call_data = body.get("call", {})
+    call_id = call_data.get("id")
+    # VAPI nests metadata inside assistant object, not at call root
+    assistant_data = call_data.get("assistant", {}) or {}
+    metadata = (
+        assistant_data.get("metadata")
+        or call_data.get("metadata")
+        or {}
+    )
+    voice_token = metadata.get("voiceToken") if metadata else None
+
+    print(f"[VAPI] _extract_user_id: call_id={call_id}, has_metadata={bool(metadata)}, has_token={bool(voice_token)}")
+
+    if not voice_token:
+        # Try cache for subsequent requests that lack the token
+        if call_id and call_id in _call_user_cache:
+            cached = _call_user_cache[call_id]
+            print(f"[VAPI] Using cached user_id={cached} for call={call_id}")
+            return cached
+        print(f"[VAPI] No voice token and no cached user for call={call_id}")
+        return None
+
     try:
-        body = await request.json()
-        message = body.get("message", {})
-        message_type = message.get("type")
+        payload = pyjwt.decode(voice_token, JWT_SECRET_KEY, algorithms=["HS256"])
+        if payload.get("type") != "voice_session":
+            print(f"[VAPI] Invalid token type: {payload.get('type')}")
+            return None
+        user_id = payload.get("sub")
+        # Cache for subsequent requests in this call
+        if call_id and user_id:
+            _call_user_cache[call_id] = user_id
+        return user_id
+    except pyjwt.ExpiredSignatureError:
+        # Token expired but we may have a cached user_id
+        if call_id and call_id in _call_user_cache:
+            cached = _call_user_cache[call_id]
+            print(f"[VAPI] Token expired but using cached user_id={cached} for call={call_id}")
+            return cached
+        print("[VAPI] Voice session token expired")
+        return None
+    except pyjwt.InvalidTokenError as e:
+        print(f"[VAPI] Invalid voice token: {e}")
+        return None
 
-        print(f"Vapi webhook received: {message_type}")
 
-        if message_type == "tool-calls":
-            return await handle_tool_calls(message, body)
+async def _stream_from_agent(messages: list, user_id: str):
+    """
+    True SSE streaming — yields OpenAI-compatible SSE chunks
+    as tokens arrive from the voice agent.
 
-        elif message_type == "assistant-request":
-            return await handle_assistant_request(message, body)
+    Wraps the voice agent stream in try/except so that if the agent throws,
+    we emit a proper error SSE chunk instead of dropping the connection.
+    """
+    chunk_id = f"chatcmpl-{uuid.uuid4().hex[:8]}"
+    first_chunk = True
 
-        elif message_type == "function-call":
-            # Legacy function call format
-            return await handle_function_call(message, body)
+    try:
+        async for token in run_voice_agent_streaming(messages, user_id):
+            # Filler message: agent is calling tools, fill the silence
+            if token == "__FILLER__":
+                data = json.dumps({
+                    "id": chunk_id,
+                    "object": "chat.completion.chunk",
+                    "choices": [{
+                        "index": 0,
+                        "delta": {"role": "assistant", "content": FILLER_MESSAGE} if first_chunk else {"content": FILLER_MESSAGE},
+                        "finish_reason": None,
+                    }]
+                })
+                yield f"data: {data}\n\n"
+                first_chunk = False
+                continue
 
-        elif message_type in ["status-update", "end-of-call-report", "transcript",
-                              "conversation-update", "speech-update", "hang"]:
-            # Informational events - just acknowledge
-            print(f"Vapi event: {message_type}")
-            return JSONResponse({"status": "ok"})
+            # Regular content token
+            delta = {"role": "assistant", "content": token} if first_chunk else {"content": token}
+            first_chunk = False
 
-        else:
-            print(f"Unknown Vapi message type: {message_type}")
-            return JSONResponse({"status": "ok"})
+            data = json.dumps({
+                "id": chunk_id,
+                "object": "chat.completion.chunk",
+                "choices": [{
+                    "index": 0,
+                    "delta": delta,
+                    "finish_reason": None,
+                }]
+            })
+            yield f"data: {data}\n\n"
 
     except Exception as e:
-        print(f"Vapi webhook error: {e}")
-        return JSONResponse({"error": str(e)}, status_code=500)
-
-
-async def handle_tool_calls(message: dict, body: dict) -> JSONResponse:
-    """
-    Handle tool-calls from Vapi.
-    Execute the requested tools via MCP and return results.
-    """
-    tool_calls = message.get("toolWithToolCallList", [])
-    results = []
-
-    for tool_item in tool_calls:
-        tool_name = tool_item.get("name", "")
-        tool_call = tool_item.get("toolCall", {})
-        tool_call_id = tool_call.get("id", "")
-        parameters = tool_call.get("parameters", {})
-
-        print(f"Executing tool: {tool_name} with params: {parameters}")
-
-        try:
-            # Execute the tool via MCP
-            result = await execute_mcp_tool(tool_name, parameters, body)
-            results.append({
-                "name": tool_name,
-                "toolCallId": tool_call_id,
-                "result": json.dumps(result) if isinstance(result, dict) else str(result)
-            })
-        except Exception as e:
-            print(f"Tool execution error: {e}")
-            results.append({
-                "name": tool_name,
-                "toolCallId": tool_call_id,
-                "error": str(e)
-            })
-
-    return JSONResponse({"results": results})
-
-
-async def handle_function_call(message: dict, body: dict) -> JSONResponse:
-    """
-    Handle legacy function-call format from Vapi.
-    """
-    function_call = message.get("functionCall", {})
-    function_name = function_call.get("name", "")
-    parameters = function_call.get("parameters", {})
-
-    print(f"Executing function: {function_name} with params: {parameters}")
-
-    try:
-        result = await execute_mcp_tool(function_name, parameters, body)
-        return JSONResponse({
-            "result": json.dumps(result) if isinstance(result, dict) else str(result)
+        import traceback
+        print(f"❌ [VAPI] _stream_from_agent error: {e}")
+        print(f"   ↳ traceback: {traceback.format_exc()}")
+        # Emit an error message as a content chunk so the user hears something
+        error_msg = "Sorry, I encountered an error processing your request."
+        delta = {"role": "assistant", "content": error_msg} if first_chunk else {"content": error_msg}
+        data = json.dumps({
+            "id": chunk_id,
+            "object": "chat.completion.chunk",
+            "choices": [{
+                "index": 0,
+                "delta": delta,
+                "finish_reason": None,
+            }]
         })
-    except Exception as e:
-        print(f"Function execution error: {e}")
-        return JSONResponse({"error": str(e)})
+        yield f"data: {data}\n\n"
 
-
-async def handle_assistant_request(message: dict, body: dict) -> JSONResponse:
-    """
-    Handle assistant-request for dynamic assistant configuration.
-    Returns the assistant configuration for the call.
-    """
-    # Return inline assistant configuration with our tools
-    return JSONResponse({
-        "assistant": {
-            "firstMessage": "Hi! I'm SECURIVA, your voice assistant. I can help you with emails, calendar, and Salesforce. What would you like to do?",
-            "model": {
-                "provider": "openai",
-                "model": "gpt-4o-mini",
-                "messages": [
-                    {
-                        "role": "system",
-                        "content": """You are SECURIVA, a helpful voice assistant. You have access to:
-- Gmail tools: list emails, read emails, create drafts, summarize emails
-- Google Calendar: list events, create events, add attendees
-- Salesforce: list accounts, create cases, list cases
-
-Keep responses concise and conversational since they will be spoken aloud.
-When using tools, briefly acknowledge what you're doing."""
-                    }
-                ]
-            },
-            "voice": {
-                "provider": "deepgram",
-                "voiceId": "asteria"
-            },
-            "serverUrl": os.getenv("VAPI_SERVER_URL", "http://localhost:8000/api/vapi/webhook"),
-            "serverMessages": ["tool-calls", "end-of-call-report"]
-        }
+    # Send finish chunk
+    finish = json.dumps({
+        "id": chunk_id,
+        "object": "chat.completion.chunk",
+        "choices": [{"index": 0, "delta": {}, "finish_reason": "stop"}]
     })
-
-
-async def execute_mcp_tool(tool_name: str, parameters: dict, body: dict) -> Any:
-    """
-    Execute an MCP tool by calling the MCP server.
-
-    Maps Vapi tool names to MCP tool names and executes them.
-    """
-    # Get user context from the call metadata
-    call_data = body.get("message", {}).get("call", {})
-    metadata = call_data.get("metadata", {})
-    api_key = metadata.get("apiKey")
-
-    # Get user_id from the API key if available
-    user_id = None
-    if api_key:
-        oauth_file = Path(__file__).parent / "oauth.json"
-        user_id = validate_api_key(api_key, oauth_file)
-        print(f"Tool execution: authenticated user_id={user_id}")
-
-    if not user_id:
-        # Fallback to customer number if no API key (for phone calls)
-        customer_data = call_data.get("customer", {})
-        user_id = customer_data.get("number", "guest")
-        print(f"Tool execution: using fallback user_id={user_id}")
-
-    # Map common tool names to MCP tool names
-    tool_mapping = {
-        # Gmail tools
-        "listEmails": "listEmails",
-        "list_emails": "listEmails",
-        "getEmailBodies": "getEmailBodies",
-        "get_email_bodies": "getEmailBodies",
-        "createGmailDraft": "createGmailDraft",
-        "create_gmail_draft": "createGmailDraft",
-        "summarizeEmail": "summarizeEmail",
-        "summarize_email": "summarizeEmail",
-        "summarizeRecentEmails": "summarizeRecentEmails",
-        "summarize_recent_emails": "summarizeRecentEmails",
-
-        # Calendar tools
-        "listUpcomingEvents": "listUpcomingEvents",
-        "list_upcoming_events": "listUpcomingEvents",
-        "listEvents": "listUpcomingEvents",
-        "list_events": "listUpcomingEvents",
-        "addCalendarEvent": "addCalendarEvent",
-        "add_calendar_event": "addCalendarEvent",
-        "createEvent": "addCalendarEvent",
-        "create_event": "addCalendarEvent",
-
-        # Salesforce tools
-        "listAccounts": "listAccounts",
-        "list_accounts": "listAccounts",
-        "listSalesforceCases": "listSalesforceCases",
-        "list_salesforce_cases": "listSalesforceCases",
-        "createSalesforceCase": "createSalesforceCase",
-        "create_salesforce_case": "createSalesforceCase",
-    }
-
-    mcp_tool_name = tool_mapping.get(tool_name, tool_name)
-
-    # Call the MCP server to execute the tool
-    try:
-        async with httpx.AsyncClient() as client:
-            # Get auth token for MCP
-            token_response = await client.post(
-                "http://localhost:8000/auth/token",
-                json={"user_id": user_id},
-                timeout=10.0
-            )
-
-            if token_response.status_code != 200:
-                return {"error": "Failed to get auth token"}
-
-            token = token_response.json().get("access_token")
-
-            # Call the MCP tool
-            mcp_response = await client.post(
-                "http://localhost:8000/mcp/",
-                headers={"Authorization": f"Bearer {token}"},
-                json={
-                    "jsonrpc": "2.0",
-                    "id": 1,
-                    "method": "tools/call",
-                    "params": {
-                        "name": mcp_tool_name,
-                        "arguments": parameters
-                    }
-                },
-                timeout=30.0
-            )
-
-            if mcp_response.status_code == 200:
-                result = mcp_response.json()
-                if "result" in result:
-                    return result["result"]
-                elif "error" in result:
-                    return {"error": result["error"]}
-
-            return {"error": f"MCP call failed: {mcp_response.status_code}"}
-
-    except Exception as e:
-        print(f"MCP tool execution error: {e}")
-        return {"error": str(e)}
+    yield f"data: {finish}\n\n"
+    yield "data: [DONE]\n\n"
 
 
 async def handle_custom_llm(request: Request):
@@ -262,89 +158,42 @@ async def handle_custom_llm(request: Request):
     Handle custom LLM requests from Vapi.
     Vapi sends OpenAI-compatible chat completion requests.
 
-    - If user is authenticated (has API key), route through /api/chat for full MCP tool access
+    - If user is authenticated (has voice session JWT), route through voice agent with MCP tools
     - If not authenticated, call OpenAI directly for basic chat functionality
-    - Supports both streaming and non-streaming responses
     """
+    t_start = time.perf_counter()
     try:
         body = await request.json()
         messages = body.get("messages", [])
-        stream = body.get("stream", False)  # Check if VAPI wants streaming
+        stream = body.get("stream", False)
 
-        # Try to extract API key from call metadata first
-        call_data = body.get("call", {})
-        metadata = call_data.get("metadata", {})
-        api_key = metadata.get("apiKey") if metadata else None
+        # Extract user_id from voice session JWT in metadata
+        user_id = _extract_user_id(body)
 
-        # Fallback: extract API key from system message [AUTH:xxx] tag
-        if not api_key and messages:
-            for msg in messages:
-                if msg.get("role") == "system":
-                    content = msg.get("content", "")
-                    match = re.search(r'\[AUTH:([^\]]+)\]', content)
-                    if match:
-                        api_key = match.group(1)
-                        # Remove the AUTH tag from the message so it's not sent to LLM
-                        msg["content"] = re.sub(r'\s*\[AUTH:[^\]]+\]', '', content)
-                    break
-
-        print(f"Custom LLM request with {len(messages)} messages, has_api_key={bool(api_key)}, stream={stream}, dev_mode={VOICE_DEV_MODE}")
-
-        # Add system message if not present
-        if not messages or messages[0].get("role") != "system":
-            messages.insert(0, {
-                "role": "system",
-                "content": "You are SECURIVA, a helpful voice assistant. You have access to Gmail, Google Calendar, and Salesforce tools. Keep responses brief and conversational since they will be spoken aloud."
-            })
-
-        # Determine user_id for tool access
-        user_id = None
-        if api_key:
-            oauth_file = Path(__file__).parent / "oauth.json"
-            user_id = validate_api_key(api_key, oauth_file)
-
-        # Dev mode: use dev user for tool access even without auth
+        # Dev mode fallback
         if not user_id and VOICE_DEV_MODE:
             user_id = VOICE_DEV_USER_ID
-            print(f"Voice dev mode: using {user_id} for tool access")
 
-        # If we have a user_id (authenticated or dev mode), use chat with MCP tools
+        t_auth = time.perf_counter()
+        print(f"\n⏱️  [VAPI] Request | {len(messages)} msgs | user={user_id} | stream={stream} | auth: {(t_auth-t_start)*1000:.0f}ms")
+
+        # Authenticated: route through voice agent with MCP tools
         if user_id:
-            async with httpx.AsyncClient() as client:
-                response = await client.post(
-                    "http://localhost:8000/api/chat",
-                    cookies={"api_key": api_key},
-                    json={
-                        "messages": messages,
-                        "model": "gpt-4o-mini",
-                        "api": "openai"
+            try:
+                return StreamingResponse(
+                    _stream_from_agent(messages, user_id),
+                    media_type="text/event-stream",
+                    headers={
+                        "Cache-Control": "no-cache",
+                        "Connection": "keep-alive",
+                        "X-Accel-Buffering": "no",
                     },
-                    timeout=60.0
                 )
+            except Exception as e:
+                print(f"[VAPI] Voice agent error: {e} — falling back to direct OpenAI")
+                # Fall through to direct OpenAI call
 
-                if response.status_code == 200:
-                    data = response.json()
-                    assistant_response = data.get("response", "Sorry, I couldn't process that.")
-                    return JSONResponse({
-                        "id": "chatcmpl-securiva",
-                        "object": "chat.completion",
-                        "choices": [{
-                            "index": 0,
-                            "message": {
-                                "role": "assistant",
-                                "content": assistant_response
-                            },
-                            "finish_reason": "stop"
-                        }]
-                    })
-                elif response.status_code == 401:
-                    print(f"Chat API auth error - falling back to direct OpenAI")
-                    # Fall through to direct OpenAI call
-                else:
-                    print(f"Chat API error: {response.status_code} - falling back to direct OpenAI")
-                    # Fall through to direct OpenAI call
-
-        # Unauthenticated or auth failed: call OpenAI directly (no MCP tools)
+        # Unauthenticated or agent failed: call OpenAI directly (no MCP tools)
         openai_api_key = os.getenv("OPENAI_API_KEY")
         if not openai_api_key:
             return JSONResponse({
@@ -360,7 +209,7 @@ async def handle_custom_llm(request: Request):
                 }]
             })
 
-        # If streaming is requested, proxy the stream from OpenAI
+        # Proxy streaming from OpenAI
         if stream:
             async def stream_openai():
                 async with httpx.AsyncClient() as client:
@@ -387,11 +236,12 @@ async def handle_custom_llm(request: Request):
                 media_type="text/event-stream",
                 headers={
                     "Cache-Control": "no-cache",
-                    "Connection": "keep-alive"
+                    "Connection": "keep-alive",
+                    "X-Accel-Buffering": "no",
                 }
             )
 
-        # Non-streaming response
+        # Non-streaming fallback
         async with httpx.AsyncClient() as client:
             response = await client.post(
                 "https://api.openai.com/v1/chat/completions",
@@ -408,8 +258,7 @@ async def handle_custom_llm(request: Request):
             )
 
             if response.status_code == 200:
-                data = response.json()
-                return JSONResponse(data)
+                return JSONResponse(response.json())
             else:
                 print(f"OpenAI API error: {response.status_code} - {response.text}")
                 return JSONResponse({
@@ -443,10 +292,69 @@ async def handle_custom_llm(request: Request):
         })
 
 
-# Create the Vapi webhook app
+async def handle_vapi_events(request: Request) -> JSONResponse:
+    """
+    Handle server-side events from Vapi (status-update, end-of-call-report, etc.).
+    Also extracts voiceToken from metadata on early events (assistant-request, etc.)
+    and caches the user_id so the custom LLM handler can authenticate subsequent requests.
+    """
+    try:
+        body = await request.json()
+        message = body.get("message", {})
+        message_type = message.get("type", "unknown")
+
+        # Try to find call data and metadata at EVERY level of the event body
+        # VAPI nests metadata inside the assistant object, not at call_data root
+        call_data = (
+            message.get("call", {})
+            or body.get("call", {})
+            or {}
+        )
+        call_id = call_data.get("id")
+
+        # VAPI puts metadata at: call.assistant.metadata (NOT call.metadata)
+        assistant_data = call_data.get("assistant", {}) or message.get("assistant", {}) or {}
+        metadata = (
+            assistant_data.get("metadata")
+            or call_data.get("metadata")
+            or message.get("metadata")
+            or body.get("metadata")
+            or {}
+        )
+
+        has_token = bool(metadata.get("voiceToken")) if metadata else False
+        print(f"Vapi event: {message_type} | call_id={call_id} | has_metadata={bool(metadata)} | has_token={has_token}")
+
+        if call_id and metadata:
+            voice_token = metadata.get("voiceToken")
+            if voice_token and call_id not in _call_user_cache:
+                try:
+                    payload = pyjwt.decode(voice_token, JWT_SECRET_KEY, algorithms=["HS256"])
+                    if payload.get("type") == "voice_session":
+                        user_id = payload.get("sub")
+                        if user_id:
+                            _call_user_cache[call_id] = user_id
+                            print(f"[VAPI] ✅ Cached user_id={user_id} for call={call_id} from event={message_type}")
+                except Exception as e:
+                    print(f"[VAPI] Failed to decode token from event: {e}")
+
+        # If we still don't have this call cached, dump the full body for debugging
+        if call_id and call_id not in _call_user_cache and message_type in ("assistant-request", "assistant.started", "status-update"):
+            print(f"[VAPI] ⚠️ Could not find voiceToken in event. Full body keys: {list(body.keys())}")
+            print(f"[VAPI]    message keys: {list(message.keys())}")
+            print(f"[VAPI]    call_data keys: {list(call_data.keys())}")
+            if call_data:
+                print(f"[VAPI]    call_data: {json.dumps(call_data, default=str)[:500]}")
+    except Exception as e:
+        print(f"[VAPI] Event handler error: {e}")
+        pass
+    return JSONResponse({"status": "ok"})
+
+
+# Create the Vapi app
 vapi_routes = [
-    Route("/webhook", handle_vapi_webhook, methods=["POST"]),
     Route("/chat/completions", handle_custom_llm, methods=["POST"]),
+    Route("/events", handle_vapi_events, methods=["POST"]),
 ]
 
 vapi_app = Starlette(routes=vapi_routes)
