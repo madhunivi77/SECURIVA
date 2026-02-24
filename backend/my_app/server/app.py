@@ -9,7 +9,7 @@ import os
 import uuid
 import secrets
 import httpx
-from datetime import datetime
+from datetime import datetime, timedelta, timezone
 from pathlib import Path
 from .chat_handler import execute_chat_with_tools
 from .salesforce_app import salesforce_app
@@ -322,6 +322,103 @@ async def api_send_sms(request):
             status_code=500
         )
 
+    users_file = Path(__file__).parent / "users.json"
+    users = []
+    if users_file.exists():
+        with open(users_file, "r") as f:
+            users = json.load(f)
+
+    if any(u["email"] == email for u in users):
+        return JSONResponse({"error": "User already exists"}, status_code=400)
+
+    hashed = bcrypt.hashpw(password.encode(), bcrypt.gensalt()).decode()
+    users.append({"email": email, "password": hashed})
+    with open(users_file, "w") as f:
+        json.dump(users, f, indent=2)
+
+    return JSONResponse({"message": "Signup successful"})
+
+async def manual_login(request):
+    form = await request.form()
+    email = form.get("email")
+    password = form.get("password")
+
+    users_file = Path(__file__).parent / "users.json"
+    if not users_file.exists():
+        return JSONResponse({"error": "User not found"}, status_code=404)
+
+    with open(users_file, "r") as f:
+        users = json.load(f)
+
+    user = next((u for u in users if u["email"] == email), None)
+    if not user or not bcrypt.checkpw(password.encode(), user["password"].encode()):
+        return JSONResponse({"error": "Invalid credentials"}, status_code=401)
+
+    token = pyjwt.encode(
+        {"sub": email, "iat": datetime.now().timestamp()},
+        os.getenv("JWT_SECRET_KEY"),
+        # "dev-secret",
+        algorithm="HS256"
+    )
+
+    response = JSONResponse({
+        "message": "Login successful",
+        "redirect": f"{FRONTEND_URL}?auth=success&email={email}"
+    })
+    response.set_cookie(
+        key="auth_token",
+        value=token,
+        httponly=True,
+        secure=COOKIE_SECURE,
+        samesite=COOKIE_SAMESITE,
+        max_age=SESSION_COOKIE_MAX_AGE,
+        domain=None
+    )
+
+    return response
+
+# Voice token endpoint - returns the API key so the voice widget can pass it to VAPI
+# (The api_key cookie is httpOnly, so JavaScript can't read it directly)
+# DEPRECATED: Use /api/voice-session instead
+async def api_voice_token(request):
+    api_key = request.cookies.get("api_key")
+    if not api_key:
+        return JSONResponse({"error": "Not authenticated"}, status_code=401)
+
+    oauth_file = Path(__file__).parent / "oauth.json"
+    user_id = validate_api_key(api_key, oauth_file)
+    if not user_id:
+        return JSONResponse({"error": "Invalid API key"}, status_code=401)
+
+    return JSONResponse({"token": api_key})
+
+
+# Voice session endpoint - issues a short-lived JWT for voice auth
+# The raw API key never leaves the browser-to-backend channel
+async def api_voice_session(request):
+    api_key = request.cookies.get("api_key")
+    if not api_key:
+        return JSONResponse({"error": "Not authenticated"}, status_code=401)
+
+    oauth_file = Path(__file__).parent / "oauth.json"
+    user_id = validate_api_key(api_key, oauth_file)
+    if not user_id:
+        return JSONResponse({"error": "Invalid API key"}, status_code=401)
+
+    JWT_SECRET = os.getenv("JWT_SECRET_KEY")
+    voice_token = pyjwt.encode(
+        {
+            "sub": user_id,
+            "type": "voice_session",
+            "exp": datetime.now(timezone.utc) + timedelta(minutes=5),
+            "iat": datetime.now(timezone.utc),
+        },
+        JWT_SECRET,
+        algorithm="HS256",
+    )
+
+    return JSONResponse({"voice_token": voice_token})
+
 async def dashboard_refresh(request):
     """Fetch integration data to update dashboard"""
     # query database
@@ -377,6 +474,7 @@ async def dashboard_refresh(request):
       },
     ]
     return JSONResponse({"cards": data}, status_code=200)
+
 # ==================== APPLICATION SETUP ====================
 api_app = Starlette(
     routes=[
@@ -384,6 +482,8 @@ api_app = Starlette(
         Route("/api/status", api_status),
         Route("/api/chat", api_chat, methods=["POST"]),
         Route("/api/logout", api_logout, methods=["POST"]),
+        Route("/api/voice-token", api_voice_token, methods=["GET"]),
+        Route("/api/voice-session", api_voice_session, methods=["POST"]),
         Route("/login", login, methods=["GET"]),
         Route("/callback", callback),
         Route("/api/whatsapp/send-sms", api_send_sms, methods=["POST"]),
