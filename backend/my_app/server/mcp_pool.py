@@ -34,7 +34,9 @@ class MCPConnection:
     tools_loaded_at: float = 0.0
     token_issued_at: float = 0.0
     last_used: float = field(default_factory=time.monotonic)
-    _context_stack: object = None  # AsyncExitStack holding the transport
+    _context_stack: object = None  # AsyncExitStack — kept for ref, but NOT safe to aclose() cross-task
+    _read_stream: object = None   # anyio memory stream (safe to close from any task)
+    _write_stream: object = None  # anyio memory stream (safe to close from any task)
 
     def touch(self):
         self.last_used = time.monotonic()
@@ -92,7 +94,17 @@ class MCPClientPool:
 
             # Reuse existing connection if still valid
             if conn is not None:
+                # If JWT token is near expiry, recreate connection with fresh token
+                if conn.token_needs_refresh:
+                    print(f"[MCP_POOL] Token near expiry for user={user_id}, recreating connection")
+                    await self._close_connection(user_id)
+                    return await self._create_connection(user_id)
+
                 try:
+                    # Health-check: lightweight ping to verify session is alive
+                    await conn.session.list_tools()
+                    print(f"[MCP_POOL] Health check passed for user={user_id}")
+
                     # Refresh tools if cache expired
                     if conn.tools_expired:
                         conn.tools = await load_mcp_tools(conn.session)
@@ -101,8 +113,9 @@ class MCPClientPool:
 
                     conn.touch()
                     return conn
-                except Exception:
+                except Exception as e:
                     # Connection is dead, clean up and recreate
+                    print(f"[MCP_POOL] Health check failed for user={user_id}: {e}")
                     await self._close_connection(user_id)
 
             # Create new connection
@@ -143,6 +156,8 @@ class MCPClientPool:
                 token_issued_at=now,
                 last_used=now,
                 _context_stack=stack,
+                _read_stream=read,
+                _write_stream=write,
             )
 
             self._connections[user_id] = conn
@@ -155,18 +170,40 @@ class MCPClientPool:
             await stack.aclose()
             raise
 
+    async def invalidate(self, user_id: str):
+        """Invalidate a user's connection so the next get_connection() creates a fresh one."""
+        lock = self._get_lock(user_id)
+        async with lock:
+            if user_id in self._connections:
+                print(f"[MCP_POOL] Invalidating connection for user={user_id}")
+                await self._close_connection(user_id)
+
     async def _close_connection(self, user_id: str):
-        """Close and remove a connection."""
+        """Close and remove a connection.
+
+        Closes individual memory streams instead of the AsyncExitStack,
+        because the stack contains anyio CancelScopes that are task-bound
+        and cannot be closed from a different task (e.g. the cleanup loop).
+        anyio memory streams have no task affinity and are safe to close anywhere.
+        """
         conn = self._connections.pop(user_id, None)
-        if conn and conn._context_stack:
-            try:
-                await conn._context_stack.aclose()
-            except Exception as e:
-                print(f"[MCP_POOL] Error closing connection for user={user_id}: {e}")
+        if conn:
+            for stream in (conn._read_stream, conn._write_stream):
+                if stream:
+                    try:
+                        await stream.aclose()
+                    except Exception:
+                        pass
+            # Do NOT call conn._context_stack.aclose() — it's task-bound
         self._locks.pop(user_id, None)
 
     async def close_all(self):
-        """Close all connections. Call during app shutdown."""
+        """Close all connections. Call during app shutdown.
+
+        Uses the same stream-level cleanup as _close_connection() to avoid
+        cross-task AsyncExitStack issues. During shutdown, remaining resources
+        are reclaimed by the OS.
+        """
         if self._cleanup_task:
             self._cleanup_task.cancel()
             try:

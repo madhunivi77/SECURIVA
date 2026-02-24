@@ -55,16 +55,22 @@ def getGoogleCreds(ctx) -> Credentials:
                 if user.get("user_id") == user_id:
                     # NEW SCHEMA: Access google service from services object
                     google_service = user.get("services", {}).get("google")
-                    if google_service:
-                        credentials_json = google_service.get("credentials")
-                        if credentials_json:
-                            creds = Credentials.from_authorized_user_info(json.loads(credentials_json))
-                            print(f"⏱️  [MCP-TOOL] getGoogleCreds: {((time.time()-t0)*1000):.0f}ms")
-                            return creds
+                    if not google_service:
+                        print(f"⚠️  [MCP-TOOL] getGoogleCreds: No google service configured for user={user_id}")
+                        return None
+                    credentials_json = google_service.get("credentials")
+                    if not credentials_json:
+                        print(f"⚠️  [MCP-TOOL] getGoogleCreds: No credentials stored for user={user_id}")
+                        return None
+                    creds = Credentials.from_authorized_user_info(json.loads(credentials_json))
+                    print(f"⏱️  [MCP-TOOL] getGoogleCreds: {((time.time()-t0)*1000):.0f}ms")
+                    return creds
+
+            print(f"⚠️  [MCP-TOOL] getGoogleCreds: No user found in oauth.json for user_id={user_id}")
             return None
 
     except Exception as e:
-        print(f"Error getting Google credentials: {e}")
+        print(f"❌ [MCP-TOOL] getGoogleCreds exception: {type(e).__name__}: {e}")
         return None
 
 def extract_email_body(payload):
