@@ -150,12 +150,14 @@ export default function VapiVoiceWidget() {
         vapiRef.current = new Vapi(publicKey);
 
         vapiRef.current.on('call-start', () => {
+          console.log('[VAPI] call-start');
           setIsConnected(true);
           setIsConnecting(false);
           setIsListening(true);
         });
 
         vapiRef.current.on('call-end', () => {
+          console.log('[VAPI] call-end');
           setIsConnected(false);
           setIsListening(false);
           setIsSpeaking(false);
@@ -163,20 +165,47 @@ export default function VapiVoiceWidget() {
         });
 
         vapiRef.current.on('speech-start', () => {
+          console.log('[VAPI] speech-start (assistant is speaking)');
           setIsSpeaking(true);
           setIsListening(false);
         });
 
         vapiRef.current.on('speech-end', () => {
+          console.log('[VAPI] speech-end (assistant stopped speaking)');
           setIsSpeaking(false);
           setIsListening(true);
         });
 
-        vapiRef.current.on('volume-level', setVolumeLevel);
+        vapiRef.current.on('volume-level', (level) => {
+          if (level > 0.01) {
+            console.log('[VAPI] volume-level:', level.toFixed(3));
+          }
+          setVolumeLevel(level);
+        });
+
+        // Log every message from VAPI (transcripts, function calls, etc.)
+        vapiRef.current.on('message', (msg) => {
+          console.log('[VAPI] message:', msg.type, msg);
+          // Specifically highlight transcript messages
+          if (msg.type === 'transcript') {
+            console.log(`[VAPI] TRANSCRIPT (${msg.transcriptType}): "${msg.transcript}"`);
+          }
+          if (msg.type === 'conversation-update') {
+            console.log('[VAPI] conversation-update:', JSON.stringify(msg.conversation?.slice(-2), null, 2));
+          }
+        });
 
         vapiRef.current.on('error', (err) => {
-          console.error('Vapi error:', err);
-          setError(err.message || 'Error');
+          console.error('[VAPI] error:', err);
+          // Extract a string message — Vapi sometimes nests objects, so coerce safely
+          const raw = err?.error?.message ?? err?.message ?? '';
+          const errMsg = typeof raw === 'string' ? raw : JSON.stringify(raw);
+          // Ignore Daily/Krisp cleanup errors that fire after call ends
+          if (errMsg.includes('KrispInitError') || errMsg.includes('ejection')) {
+            console.warn('[VAPI] Ignoring cleanup error:', errMsg);
+            return;
+          }
+          setError(errMsg || 'Error');
           setIsConnecting(false);
         });
       } catch (err) {
@@ -216,6 +245,34 @@ export default function VapiVoiceWidget() {
     setError(null);
 
     try {
+      // Request microphone permission and find the real device
+      let selectedDeviceId = null;
+      try {
+        const stream = await navigator.mediaDevices.getUserMedia({ audio: true });
+        const audioTrack = stream.getAudioTracks()[0];
+        selectedDeviceId = audioTrack.getSettings().deviceId;
+        console.log('[MIC] Using:', audioTrack.label, 'deviceId:', selectedDeviceId);
+        stream.getTracks().forEach(track => track.stop());
+      } catch (micErr) {
+        setError('Microphone access denied');
+        setIsConnecting(false);
+        return;
+      }
+
+      // Explicitly set the input device on VAPI so Daily uses the right mic
+      if (selectedDeviceId && vapiRef.current.setInputDevicesAsync) {
+        try {
+          await vapiRef.current.setInputDevicesAsync(selectedDeviceId);
+          console.log('[MIC] Set VAPI input device to:', selectedDeviceId);
+        } catch (e) {
+          console.warn('[MIC] setInputDevicesAsync failed, trying setInputDevice:', e);
+          try {
+            vapiRef.current.setInputDevice?.(selectedDeviceId);
+          } catch (e2) {
+            console.warn('[MIC] setInputDevice also failed:', e2);
+          }
+        }
+      }
       const assistantId = import.meta.env.VITE_VAPI_ASSISTANT_ID;
       if (assistantId) {
         await vapiRef.current.start(assistantId);
@@ -281,17 +338,19 @@ export default function VapiVoiceWidget() {
             },
           },
           stopSpeakingPlan: {
-            numWords: 2,
-            voiceSeconds: 0.2,
-            backoffSeconds: 0.8,
+            numWords: 3,
+            voiceSeconds: 0.5,
+            backoffSeconds: 1.0,
           },
         };
 
         console.log('Starting VAPI with config:', JSON.stringify(assistantConfig, null, 2));
-        await vapiRef.current.start(assistantConfig);
+        const startResult = await vapiRef.current.start(assistantConfig);
+        console.log('[VAPI] start() returned:', startResult);
       }
     } catch (err) {
-      console.error('VAPI start error:', err);
+      console.error('[VAPI] start error:', err);
+      console.error('[VAPI] start error detail:', JSON.stringify(err, Object.getOwnPropertyNames(err)));
       setError(err.message || 'Failed to start');
       setIsConnecting(false);
     }
