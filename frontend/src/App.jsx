@@ -1,7 +1,7 @@
 import { useState, useEffect } from "react";
 import Footer from "./components/Footer";
 import NavOption from "./components/NavOption";
-import { Link, Outlet, useNavigate } from "react-router-dom";
+import { Link, Outlet, useNavigate, useLocation } from "react-router-dom";
 import { useAuth } from "./context/AuthContext";
 
 function App() {
@@ -21,11 +21,20 @@ function App() {
   const [isDarkMode, setIsDarkMode] = useState(
     window.matchMedia("(prefers-color-scheme: dark)").matches
   );
+  const { pathname } = useLocation();
 
   const handleAuthSuccess = (email) => {
     setUserEmail(email);
     navigate("/dashboard/chat")
   };
+
+  //Scroll to top on every subpage load
+  useEffect(() => {
+    if (location.hash) return; // ignore anchor navigation
+    window.scrollTo({
+      top: 0
+    });
+  }, [pathname]);
 
   useEffect(() => {
     const urlParams = new URLSearchParams(window.location.search);
@@ -35,7 +44,7 @@ function App() {
     if (authSuccess === "success") {
       if (emailParam) setUserEmail(emailParam);
       window.history.replaceState({}, document.title, window.location.pathname);
-      navigate("/dashboard/chat")
+      navigate("/dashboard")
     }
 
     if (urlParams.get("salesforce") === "connected") {
@@ -85,7 +94,7 @@ function App() {
   const theme = isDarkMode
     ? {
       bg: "#0a0f1f",
-      surface: "#ffffff",
+      surface: "#ddeeff",
       border: "#1c2a44",
       text: "#d9e6ff",
       subtext: "#8fa8d6",
@@ -114,6 +123,7 @@ function App() {
         minHeight: "100vh",
         backgroundColor: theme.bg,
         color: theme.text,
+        fontFamily: "monospace"
       }}
     >
       <nav style={{ position: "fixed", width: "100%", zIndex: 10}}>
@@ -137,26 +147,38 @@ function App() {
 
           {!isAuthenticated ? (
             // LOGGED OUT
-            <div className="flex justify-between flex-1 pl-[7.5%]">
+            <div className="flex justify-between flex-1 pl-14">
               <div style={{ display: "flex", gap: "10px" }}>
+                <NavOption label={"About"} target={"login"} theme={theme.text}/>
 
-                <NavOption label={"Sign In"} target={"login"} theme={theme.text} />
+                <NavOption label={"Features"} target={"security"} theme={theme.text}/>
 
-                <NavOption label={"Sign Up"} target={"login"} theme={theme.text} />
+                <NavOption label={"Solutions"} target={"agent"} theme={theme.text}/>
 
-                <NavOption label={"Support"} target={"login"} theme={theme.text} />
+                <NavOption label={"Pricing"} target={"pricing"} theme={theme.text}/>
 
-                <NavOption label={"Contact"} target={"login"} theme={theme.text} />
+                <NavOption label={"Contact"} target={"login"} theme={theme.text}/>
               </div>
-              <Link to="/login">
-                <button className="bg-red-500 text-white">Request a Demo</button>
-              </Link>
+
+              <div style={{ display: "flex", gap: "10px" }}>
+                <NavOption label={"Sign In"} target={"provider"} theme={theme.text} />
+
+                <NavOption label={"Sign Up"} target={"signup"} theme={theme.text} />
+
+                <NavOption label={"Support"} target={"login"} theme={theme.text}/>
+              </div>
             </div>
           ) : (
             /* LOGGED IN → show your status toggle */
             <div style={{ display: "flex", gap: "10px" }}>
 
-              <NavOption label={"Demo"} target={"login"} theme={theme.text}/>
+              <NavOption label={"About"} target={"login"} theme={theme.text}/>
+
+              <NavOption label={"Features"} target={"security"} theme={theme.text}/>
+
+              <NavOption label={"Solutions"} target={"agent"} theme={theme.text}/>
+
+              <NavOption label={"Pricing"} target={"pricing"} theme={theme.text}/>
 
               <NavOption label={"Support"} target={"login"} theme={theme.text}/>
 
@@ -192,11 +214,11 @@ function App() {
             flexWrap: "wrap",
             gap: "10px",
             boxSizing: "border-box",
-            fontSize: 25,
+            fontSize: 18
           }}
         >
           {/* Left: logo + SECURIVA */}
-          <div style={{ display: "flex", alignItems: "center", overflow: "hidden", paddingLeft: 23}}>
+          <div style={{ display: "flex", alignItems: "center", overflow: "hidden", paddingLeft: 23, justifyContent: "space-between", flexGrow: 1}}>
             <img
               src="/logo.png"
               alt="SECURIVA Logo"
@@ -207,35 +229,14 @@ function App() {
               }}
               onClick={() => navigate("/")}
             />
+
+            <button
+              className="w-50 h-13.5 bg-red-500"
+            >
+              Request a Demo
+            </button>
           </div>
 
-          {/* Right: Login buttons if not authenticated */}
-          {!isAuthenticated ? (
-            <div style={{ display: "flex", gap: "10px" }}>
-
-              <NavOption label={"Features"} target={"security"} theme={theme.navbutton}/>
-
-              <NavOption label={"Solutions"} target={"agent"} theme={theme.navbutton}/>
-
-              <NavOption label={"Pricing"} target={"pricing"} theme={theme.navbutton}/>
-              
-              <NavOption label={"About"} target={"login"} theme={theme.navbutton}/>
-
-
-            </div>
-          ) : (
-            /* If logged in → show your status toggle */
-            <div style={{ display: "flex", gap: "10px" }}>
-
-              <NavOption label={"Features"} target={"security"} theme={theme.navbutton}/>
-
-              <NavOption label={"Solutions"} target={"agent"} theme={theme.navbutton}/>
-
-              <NavOption label={"Pricing"} target={"pricing"} theme={theme.navbutton}/>
-
-              <NavOption label={"Dashboard"} target={"/dashboard"} theme={theme.navbutton}/>
-            </div>
-          )}
 
         </div>
 
@@ -346,7 +347,7 @@ function App() {
         }}
       >
         {/* Pass any context used by App.jsx subpages. If used across other routes, elevate to an AuthContext wrapper in main.jsx */}
-        <Outlet context={{handleAuthSuccess, handleGoogleLogin, handleSalesforceLogin, isAuthenticated}}/>
+        <Outlet context={{handleAuthSuccess, handleGoogleLogin, handleSalesforceLogin, isAuthenticated, theme}}/>
         
       </main>
 

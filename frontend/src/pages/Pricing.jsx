@@ -4,7 +4,7 @@ export default function Pricing() {
   const [annual, setAnnual] = useState(false);
 
   return (
-    <div className="min-h-screen flex flex-col gap-8 items-center pt-24 px-4">
+    <div className="min-h-screen flex flex-col gap-8 items-center py-24 px-4">
 
       {/* Title */}
       <div className="flex flex-col gap-2 text-center">

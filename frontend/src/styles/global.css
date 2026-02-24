@@ -16,6 +16,33 @@
   -moz-osx-font-smoothing: grayscale;
 }
 
+@keyframes scroll {
+  from {
+    transform: translateX(0);
+  }
+  to {
+    transform: translateX(-50%);
+  }
+}
+
+.glass-button{
+  @apply
+    relative
+    px-8 py-4
+    rounded-2xl
+    text-white text-lg
+    bg-gradient-to-r from-blue-900 to-blue-600
+    backdrop-blur-md
+    border border-white/10
+    shadow-[0_0_25px_rgba(59,130,246,0.6)]
+    hover:shadow-[0_0_40px_rgba(59,130,246,0.9)]
+    transition-all duration-300
+}
+
+.animate-scroll {
+  animation: scroll 20s linear infinite;
+}
+
 /* Dynamically Calculate how large a section must be to offset the nav bar */
 .section-min-height {
     min-height: calc(100vh - 167.5px); 

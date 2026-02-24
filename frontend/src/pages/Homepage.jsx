@@ -1,6 +1,7 @@
 // Homepage.jsx
 import Card from "../components/Card";
 import { ChevronRight} from "lucide-react";
+import { Link} from "react-router-dom";
 
 export default function Homepage() {
 
@@ -8,20 +9,22 @@ export default function Homepage() {
     <div id="homepage">
 
       {/* ---------- HERO ---------- */}
-      <header className="hero section-min-height">
+      <header className="hero">
 
-        <div className="hero-content flex justify-between">
+        <div className="pl-20 pr-20 pt-30 pb-30 flex justify-between">
           <div className="pb-5">
-            <h1 className="text-xl text-left pt-10 text-white">The AI Platform that Protects and Automates Your Business</h1>
-            <p className="text-[28px] text-left pt-7.5 pb-10 text-blue-600">
+            <h1 className="text-xl text-left pt-0 text-white font-mono">The AI Platform that Protects and Automates Your Business</h1>
+            <p className="text-[28px] text-left pt-7.5 pb-10 text-blue-600 font-mono">
               <span className="text-white text-bold">SecuriVA</span> unifies <span className="text-white text-bold">AI automation</span>, <span className="text-white text-bold">cybersecurity protection</span>, and <span className="text-white text-bold">secure communication </span>
               into <span className="text-white text-bold">one intelligent platform</span> designed for modern enterprises.
             </p>
-            <button
-              className="text-sm w-50 h-17.5 bg-red-500"
-            >
-              Start Free Trial
-            </button>
+            <Link to="/login">
+              <button
+                className="text-xl w-50 h-17.5 bg-red-500 text-white"
+              >
+                Start Free Trial
+              </button>
+            </Link>
           </div>
 
           <div>
@@ -41,42 +44,48 @@ export default function Homepage() {
       </header>
       
       {/* Video */}
-      <div className="w-full justify-center overflow-hidden max-h-25 bg-black">
+      <div className="relative w-full min-h-screen overflow-hidden bg-black">
         <video
           autoPlay
           loop
           muted
           playsInline
+          className="absolute top-0 left-0 w-full h-full object-cover"
         >
           <source src="/landing_page/banner.mp4" type="video/mp4" />
           Your browser does not support the video tag.
       </video>
+
+      <div className="absolute top-0 left-0 w-full h-64 bg-gradient-to-b from-[#0a0f1f] via-[#0a0f1f]/60 to-transparent pointer-events-none"></div>
+
+      <div className="absolute bottom-0 left-0 w-full h-64 bg-gradient-to-t from-black via-black/60 to-transparent pointer-events-none"></div>
+
+      <div id="feature-cards-wrapper" className="relative section-min-height text-center text-black">
+        <div className="mx-40 mt-20 bg-[#000020]/90 px-8 py-6 rounded-2xl text-white">
+          <h2 className="text-[35px] text-center text-white font-mono">Everything your business needs — automated, secured, and connected.</h2>
+          <p className="text-center pt-5 text-2xl text-white font-mono" >SecuriVA unifies AI automation, enterprise-grade cybersecurity, and secure AI VPN networking in one intelligent platform. Acting as a 24/7 digital team member, it manages calls, emails, texts, and chats while protecting your domain, website, and data. With built-in eBook creation and seamless integrations across leading business tools, SecuriVA helps organizations operate faster, stay secure, and deliver better customer experiences — all from a single platform.</p>
+        </div>
+        <div
+          id="feature-cards" className="flex flex-wrap justify-center gap-12.5 px-20 pb-20 pt-9 mx-0"
+        >
+          <Card className={"w-auto sm:w-[25%]"} image={"landing_page/AI_Virtual_assistant.png"} title={"AI Virtual Agent"} text={"Streamline workflows, scheduling, and communications with smart automation tools."}/>
+          <Card className={"w-auto sm:w-[25%]"} image={"landing_page/Cybersecurity_Protection.png"} title={"Cybersecurity Protection"} text={"Real-time AI defense for data, users, and digital assets."}/>
+          <Card className={"w-auto sm:w-[25%]"} image={"landing_page/AI_VPN.png"} title={"AI VPN"} text={"Secure every connection using adaptive, encrypted networking."}/>
+          <Card className={"w-auto sm:w-[25%]"} image={"landing_page/Customer_Interaction.png"} title={"Customer Interaction"} text={"Manage calls, chats, and emails through an intelligent AI avatar."}/>
+          <Card className={"w-auto sm:w-[25%]"} image={"landing_page/ebook.png"} title={"eBook Generator"} text={"Instantly create training manuals and awareness guides."}/>
+          <Card className={"w-auto sm:w-[25%]"} image={"landing_page/Integrations.png"} title={"Integrations"} text={"Connect with Gmail, Microsoft 365, Salesforce, OpenAI, and more."}/>
+        </div>
+      </div>
+
     </div>
 
       {/* Card Display */}
-      <div id="feature-cards-wrapper" className="section-min-height text-center text-black" style={{background: "#007bff"}}>
-        <h2 className="text-[40px] pt-7.5 text-center text-white">Everything your business needs — automated, secured, and connected.</h2>
-        <p className="text-center px-[20%] pt-5 text-2xl text-white" >SecuriVA unifies AI automation, enterprise-grade cybersecurity, and secure AI VPN networking in one intelligent platform. Acting as a 24/7 digital team member, it manages calls, emails, texts, and chats while protecting your domain, website, and data. With built-in eBook creation and seamless integrations across leading business tools, SecuriVA helps organizations operate faster, stay secure, and deliver better customer experiences — all from a single platform.</p>
-        <div
-          id="feature-cards" className="gap-12.5 px-20 pb-20 pt-9 mx-0 my-auto"
-          style={{
-            display: "grid",
-            gridTemplateColumns: "repeat(3, 1fr)"
-          }}
-        >
-          <Card image={"landing_page/AI_Virtual_assistant.png"} title={"AI Virtual Agent"} text={"Streamline workflows, scheduling, and communications with smart automation tools."}/>
-          <Card image={"landing_page/Cybersecurity_Protection.png"} title={"Cybersecurity Protection"} text={"Real-time AI defense for data, users, and digital assets."}/>
-          <Card image={"landing_page/AI_VPN.png"} title={"AI VPN"} text={"Secure every connection using adaptive, encrypted networking."}/>
-          <Card image={"landing_page/Customer_Interaction.png"} title={"Customer Interaction"} text={"Manage calls, chats, and emails through an intelligent AI avatar."}/>
-          <Card image={"landing_page/ebook.png"} title={"eBook Generator"} text={"Instantly create training manuals and awareness guides."}/>
-          <Card image={"landing_page/Integrations.png"} title={"Integrations"} text={"Connect with Gmail, Microsoft 365, Salesforce, OpenAI, and more."}/>
-        </div>
-      </div>
+      
       
       {/* Why Choose SECURIVA */}
       <div className="flex flex-col justify-center section-min-height px-20 pb-10 bg-black text-white">
-        <h2 className="text-[40px] pt-7.5 text-center">Why Choose SecuriVA?</h2>
-        <p className="text-center px-[20%] pt-5 pb-9 text-2xl">SecuriVA brings together AI automation, intelligent virtual assistance, and enterprise-grade cybersecurity in one powerful platform. Designed to integrate seamlessly with your existing tools, SecuriVA protects your business, streamlines operations, and enhances customer interactions through secure, human-like AI. Built with future-ready technologies such as AI-driven VPN and Digital Twin capabilities, SecuriVA helps organizations scale confidently, efficiently, and securely.</p>
+        <h2 className="text-[40px] pt-7.5 text-center font-mono">Why Choose Us?</h2>
+        <p className="text-center px-20 pt-5 pb-9 text-2xl font-mono">SecuriVA brings together AI automation, intelligent virtual assistance, and enterprise-grade cybersecurity in one powerful platform. Designed to integrate seamlessly with your existing tools, SecuriVA protects your business, streamlines operations, and enhances customer interactions through secure, human-like AI. Built with future-ready technologies such as AI-driven VPN and Digital Twin capabilities, SecuriVA helps organizations scale confidently, efficiently, and securely.</p>
 
         <div className="px-20 flex flex-col text-black">
           <div id="why-cards-wrapper" className="flex flex-1 flex-col justify-center">
@@ -164,16 +173,21 @@ export default function Homepage() {
       </div>
       
       {/* Video */}
-      <div className="flex flex-1 justify-center overflow-hidden bg-black rounded-2xl">
+      <div className="relative w-full min-h-screen overflow-hidden bg-black">
         <video
           autoPlay
           loop
           muted
           playsInline
+          className="absolute top-0 left-0 w-full h-full object-cover"
         >
           <source src="/landing_page/LandingVideo.mp4" type="video/mp4" />
           Your browser does not support the video tag.
       </video>
+
+      <div className="relative mx-40 mt-90 bg-black/50 px-8 py-6 rounded-2xl text-white">
+        <h2 className="text-[35px] text-center text-white font-mono">Secure virtual assistant and protection suite ensuring privacy, encrypted communication, and online safety.</h2>
+      </div>
     </div>
 
     </div>

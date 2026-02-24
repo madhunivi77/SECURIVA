@@ -10,11 +10,14 @@ import Agent from './pages/Agent.jsx';
 import Security from './pages/Security.jsx';
 import ChatBox from './pages/ChatBox.jsx';
 import Homepage from './pages/Homepage.jsx'
+import ProviderForm from './pages/ProviderForm.jsx';
 import LoginForm from './pages/LoginForm.jsx';
+import SignupForm from './pages/SignupForm.jsx';
 import VoiceTest from './pages/VoiceTest.jsx';
 import Pricing from "./pages/Pricing";
 import AutomationGrid from './components/AutomationGrid.jsx';
 import ProtectedRoute from './components/ProtectedRoute.jsx';
+import Industry from './pages/Industry.jsx';
 
 const router = createBrowserRouter([
   {
@@ -34,12 +37,24 @@ const router = createBrowserRouter([
         element: <Security />
       },
       {
-        path: '/login',
+        path: '/provider', // select a login provider
+        element: <ProviderForm />
+      },
+      {
+        path: '/login', // Local login
         element: <LoginForm />
       },
       {
+        path: '/signup', // create a new account
+        element: <SignupForm />
+      },
+{
         path: "pricing",
         element: <Pricing />,
+      },
+      {
+        path: "/industries",
+        element: <Industry />
       }
     ]
   },
