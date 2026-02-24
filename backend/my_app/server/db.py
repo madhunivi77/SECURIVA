@@ -12,7 +12,26 @@ import time
 from botocore.exceptions import ClientError
 from boto3.dynamodb.conditions import Key
 import traceback
+from pathlib import Path
+from .api_key_manager import validate_api_key
 
+
+def get_authenticated_user(request: Request):
+    api_key = request.cookies.get("api_key")
+
+    if not api_key:
+        print("No api_key cookie found")
+        return None
+
+    oauth_file = Path(__file__).parent / "oauth.json"
+
+    user_id = validate_api_key(api_key, oauth_file)
+
+    if not user_id:
+        print("Invalid api_key")
+        return None
+
+    return user_id
 
 class ChatMessage(BaseModel):
     role: str
@@ -184,10 +203,10 @@ db = DynamoDBConnector("SecuriVAChats") if USE_DYNAMO else SQLiteConnector()
 
 # Route Handlers
 async def save_chat(request: Request):
-    user_id = request.query_params.get("user_id")
+    user_id = get_authenticated_user(request)
     if not user_id:
-        return JSONResponse({"error": "user_id query param required"}, status_code=400)
-
+        return JSONResponse({"error": "Not authenticated"}, status_code=401)
+  
     try:
         body = await request.json()
         messages = [ChatMessage(**m) for m in body]
@@ -214,9 +233,9 @@ async def save_chat(request: Request):
 
 
 async def get_latest_chat(request: Request):
-    user_id = request.query_params.get("user_id")
+    user_id =get_authenticated_user(request)
     if not user_id:
-        return JSONResponse({"error": "user_id query param required"}, status_code=400)
+        return JSONResponse({"error": "Not authenticated"}, status_code=401)
 
     chat = await asyncio.to_thread(db.get_latest_chat, user_id)
     if not chat:
@@ -226,9 +245,9 @@ async def get_latest_chat(request: Request):
 
 
 async def delete_latest_chat(request: Request):
-    user_id = request.query_params.get("user_id")
+    user_id = get_authenticated_user(request)
     if not user_id:
-        return JSONResponse({"error": "user_id query param required"}, status_code=400)
+        return JSONResponse({"error": "Not authenticated"}, status_code=401)
 
     try:
         deleted = await asyncio.to_thread(db.delete_latest_chat, user_id)

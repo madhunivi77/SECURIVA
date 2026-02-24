@@ -4,7 +4,7 @@ import rehypeHighlight from "rehype-highlight";
 import "highlight.js/styles/github-dark.css";
 import "./ChatBox.css";
 
-const USER_ID = "user123"; // TEMP until auth
+
 
 function ChatBox() {
   const [messages, setMessages] = useState([
@@ -21,14 +21,18 @@ function ChatBox() {
 
   const messagesContainerRef = useRef(null);
 
-  /* ---------------------------------
-     LOAD CHAT HISTORY (BACKEND)
-  ---------------------------------- */
+
+
+// LOAD CHAT HISTORY (BACKEND)
+
   useEffect(() => {
     const loadChatHistory = async () => {
       try {
         const res = await fetch(
-          `http://localhost:8000/chat/latest?user_id=${USER_ID}`
+          "http://localhost:8000/chat/latest",
+          {
+            credentials: "include" 
+          }
         );
 
         if (!res.ok) return;
@@ -70,11 +74,13 @@ function ChatBox() {
     setIsLoading(true);
 
     try {
-      /* Existing LLM call (unchanged) */
+      /* Existing LLM call (unchanged except auth added) */
       const response = await fetch("http://localhost:8000/api/chat", {
         method: "POST",
-        headers: { "Content-Type": "application/json" },
-        credentials: "include",
+        credentials: "include", // send api_key cookie
+        headers: {
+          "Content-Type": "application/json"
+        },
         body: JSON.stringify({
           messages: newMessages,
           model: "gpt-3.5-turbo",
@@ -96,15 +102,15 @@ function ChatBox() {
       const updatedMessages = [...newMessages, assistantMessage];
       setMessages(updatedMessages);
 
-      /* SAVE CHAT TO BACKEND */
-      await fetch(
-        `http://localhost:8000/chat/save?user_id=${USER_ID}`,
-        {
+      /* Save chat history */
+      await fetch("http://localhost:8000/chat/save", {
           method: "POST",
-          headers: { "Content-Type": "application/json" },
+          credentials: "include",
+          headers: { "Content-Type": "application/json"},
           body: JSON.stringify(updatedMessages)
-        }
-      );
+            });
+      
+
     } catch (err) {
       console.error("Chat error:", err);
       setError(err.message || "Failed to get response");
@@ -125,10 +131,17 @@ function ChatBox() {
      CLEAR CHAT (BACKEND)
   ---------------------------------- */
   const handleClearChat = async () => {
-    await fetch(
-      `http://localhost:8000/chat/delete?user_id=${USER_ID}`,
-      { method: "DELETE" }
-    );
+    try {
+      await fetch(
+        `http://localhost:8000/chat/delete`,
+        {
+          method: "DELETE",
+          credentials : "include"
+        }
+      );
+    } catch (err) {
+      console.error("Failed to delete chat:", err);
+    }
 
     setMessages([
       {
