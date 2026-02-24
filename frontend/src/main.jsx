@@ -15,6 +15,9 @@ import SignupForm from './pages/SignupForm.jsx';
 import VoiceTest from './pages/VoiceTest.jsx';
 import Pricing from "./pages/Pricing";
 import Industry from './pages/Industry.jsx';
+import Support from "./pages/Support.jsx";
+import About from "./pages/About.jsx";
+import Contact from "./pages/Contact.jsx";
 
 const router = createBrowserRouter([
   {
@@ -56,6 +59,18 @@ const router = createBrowserRouter([
       {
         path: "/pricing",
         element: <Pricing />,
+      },
+      {
+        path: "/support",
+        element: <Support />,
+      },
+      {
+        path: "/about",
+        element: <About />,
+      },
+      {
+        path: "/contact",
+        element: <Contact />,
       },
       {
         path: "/industries",
