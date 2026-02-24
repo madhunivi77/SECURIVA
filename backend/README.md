@@ -313,3 +313,37 @@ return StreamingResponse(
 ```
 
 This enables faster voice responses as VAPI can start speaking before the full response is generated.
+Toggle logging with `ENABLE_TOOL_LOGGING="false"` in `.env`.
+
+---
+
+## Telesign SMS Integration
+
+### Current Capabilities ✅
+- ✅ Send SMS messages
+- ✅ Phone number verification (PhoneID)
+- ✅ 2FA verification codes
+- ✅ Fraud risk assessment
+- ✅ Message delivery status tracking
+- ✅ Transaction logging
+
+### Future Enhancements (Requires WhatsApp Business API) 🔜
+- 🔜 WhatsApp message delivery
+- 🔜 WhatsApp template messages
+- 🔜 WhatsApp media messages (images, videos, docs)
+- 🔜 WhatsApp interactive buttons
+
+### Testing
+Run the SMS test suite:
+
+### Tool Mappings
+
+The MCP server provides these Telesign SMS tools: (trial version restricted to verified numbers only)
+
+| Tool Name | Description | Example Usage |
+|-----------|-------------|---------------|
+| `sendSMS` | Send SMS message | "Send SMS to (___): Meeting at 3pm" |
+| `verifyPhoneNumber` | Verify phone details | "Verify phone number (____) |
+| `sendVerificationCode` | Send 2FA code | "Send verification code to (___) |
+| `checkPhoneRisk` | Assess fraud risk | "Check risk for phone 2623984079" |
+| `checkMessageStatus` | Check delivery status | "Check status of message ABC123" |
