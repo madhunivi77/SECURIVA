@@ -368,6 +368,10 @@ def send_whatsapp_buttons(phone_number: str, body_text: str, buttons: list) -> d
         "error": "WhatsApp buttons require WhatsApp Business API access. Contact Telesign to upgrade."
     }
 
+
+def get_detailed_message_status(reference_id: str) -> dict:
+    """
+    Get detailed message status including delivery timestamps and carrier info
     
     Returns:
         dict: Detailed status including timestamps, errors, and carrier feedback
