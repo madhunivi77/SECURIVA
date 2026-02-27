@@ -21,6 +21,7 @@ import Industry from './pages/Industry.jsx';
 import Support from "./pages/Support.jsx";
 import About from "./pages/About.jsx";
 import Contact from "./pages/Contact.jsx";
+import FAQ from "./pages/FAQ.jsx";
 
 const router = createBrowserRouter([
   {
@@ -70,6 +71,10 @@ const router = createBrowserRouter([
       {
         path: "/industries",
         element: <Industry />
+      },
+      {
+        path: "/faq",
+        element: <FAQ />
       }
     ]
   },
