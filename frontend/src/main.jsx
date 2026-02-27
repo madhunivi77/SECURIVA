@@ -18,6 +18,9 @@ import Pricing from "./pages/Pricing";
 import AutomationGrid from './components/AutomationGrid.jsx';
 import ProtectedRoute from './components/ProtectedRoute.jsx';
 import Industry from './pages/Industry.jsx';
+import Support from "./pages/Support.jsx";
+import About from "./pages/About.jsx";
+import Contact from "./pages/Contact.jsx";
 
 const router = createBrowserRouter([
   {
@@ -51,6 +54,18 @@ const router = createBrowserRouter([
 {
         path: "pricing",
         element: <Pricing />,
+      },
+      {
+        path: "/support",
+        element: <Support />,
+      },
+      {
+        path: "/about",
+        element: <About />,
+      },
+      {
+        path: "/contact",
+        element: <Contact />,
       },
       {
         path: "/industries",
