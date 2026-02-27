@@ -2,6 +2,7 @@
 import Card from "../components/Card";
 import { ChevronRight} from "lucide-react";
 import { Link} from "react-router-dom";
+import Sponsors from "../components/Sponsors";
 
 export default function Homepage() {
 
@@ -189,6 +190,70 @@ export default function Homepage() {
         <h2 className="text-[35px] text-center text-white font-mono">Secure virtual assistant and protection suite ensuring privacy, encrypted communication, and online safety.</h2>
       </div>
     </div>
+
+    <Sponsors className="bg-white pt-5 text-center text-black text-3xl"/>
+    {/* ---------- FAQ ---------- */}
+      <section className="px-20 pb-20 pt-10">
+        <h2 className="text-4xl font-mono text-center mb-12">
+          Frequently Asked Questions
+        </h2>
+
+        <div className="max-w-4xl mx-auto space-y-4">
+
+          <div className="collapse collapse-arrow bg-[#111633]">
+            <input type="checkbox" />
+            <div className="collapse-title text-lg font-medium">
+              What is SecuriVA?
+            </div>
+            <div className="collapse-content text-blue-200">
+              An AI platform that automates business tasks, enhances customer communication, and provides enterprise-grade cybersecurity.
+            </div>
+          </div>
+
+          <div className="collapse collapse-arrow bg-[#111633]">
+            <input type="checkbox" />
+            <div className="collapse-title text-lg font-medium">
+              Is SecuriVA secure?
+            </div>
+            <div className="collapse-content text-blue-200">
+              Yes—end-to-end encryption, threat detection, and compliance with GDPR, HIPAA, and PCI-DSS.
+            </div>
+          </div>
+
+          <div className="collapse collapse-arrow bg-[#111633]">
+            <input type="checkbox" />
+            <div className="collapse-title text-lg font-medium">
+              Can SecuriVA integrate with my tools?
+            </div>
+            <div className="collapse-content text-blue-200">
+              Yes. SecuriVA connects to Gmail, WhatsApp, Salesforce, APIs, and many more platforms.
+            </div>
+          </div>
+
+          <div className="collapse collapse-arrow bg-[#111633]">
+            <input type="checkbox" />
+            <div className="collapse-title text-lg font-medium">
+              Who can use SecuriVA?
+            </div>
+            <div className="collapse-content text-blue-200">
+              SMEs, enterprises, fintech, healthcare, education, e-commerce, and professionals needing automation.
+            </div>
+          </div>
+
+          <div className="collapse collapse-arrow bg-[#111633]">
+            <input type="checkbox" />
+            <div className="collapse-title text-lg font-medium">
+              Do you offer customer support?
+            </div>
+            <div className="collapse-content text-blue-200">
+              Yes—24/7 support, onboarding, and detailed documentation.
+            </div>
+          </div>
+        </div>
+        <div className="flex justify-center pt-5">
+          <Link to="/FAQ"><button className="text-lg w-50 h-12 bg-red-500 text-white">More FAQs</button></Link>
+        </div>
+      </section>
 
     </div>
   );
