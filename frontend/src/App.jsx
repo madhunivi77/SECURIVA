@@ -149,7 +149,7 @@ function App() {
             // LOGGED OUT
             <div className="flex justify-between flex-1 pl-14">
               <div style={{ display: "flex", gap: "10px" }}>
-                <NavOption label={"About"} target={"login"} theme={theme.text}/>
+                <NavOption label={"About"} target={"about"} theme={theme.text}/>
 
                 <NavOption label={"Features"} target={"security"} theme={theme.text}/>
 
@@ -157,7 +157,7 @@ function App() {
 
                 <NavOption label={"Pricing"} target={"pricing"} theme={theme.text}/>
 
-                <NavOption label={"Contact"} target={"login"} theme={theme.text}/>
+                <NavOption label={"Contact"} target={"contact"} theme={theme.text}/>
               </div>
 
               <div style={{ display: "flex", gap: "10px" }}>
@@ -165,14 +165,14 @@ function App() {
 
                 <NavOption label={"Sign Up"} target={"signup"} theme={theme.text} />
 
-                <NavOption label={"Support"} target={"login"} theme={theme.text}/>
+                <NavOption label={"Support"} target={"support"} theme={theme.text}/>
               </div>
             </div>
           ) : (
             /* LOGGED IN → show your status toggle */
             <div style={{ display: "flex", gap: "10px" }}>
 
-              <NavOption label={"About"} target={"login"} theme={theme.text}/>
+              <NavOption label={"About"} target={"about"} theme={theme.text}/>
 
               <NavOption label={"Features"} target={"security"} theme={theme.text}/>
 
@@ -180,9 +180,9 @@ function App() {
 
               <NavOption label={"Pricing"} target={"pricing"} theme={theme.text}/>
 
-              <NavOption label={"Support"} target={"login"} theme={theme.text}/>
+              <NavOption label={"Support"} target={"support"} theme={theme.text}/>
 
-              <NavOption label={"Contact"} target={"login"} theme={theme.text}/>
+              <NavOption label={"Contact"} target={"contact"} theme={theme.text}/>
             
               <button
                 onClick={() => setShowStatus((prev) => !prev)}
