@@ -1,7 +1,7 @@
 import { useState, useEffect } from "react";
 import Footer from "./components/Footer";
 import NavOption from "./components/NavOption";
-import { Link, Outlet, useNavigate, useLocation } from "react-router-dom";
+import { Outlet, useNavigate, useLocation } from "react-router-dom";
 import { useAuth } from "./context/AuthContext";
 
 function App() {
@@ -135,7 +135,7 @@ function App() {
             //borderBottom: `1px solid ${theme.border}`,
             background: theme.bg,
             display: "flex",
-            justifyContent: "space_between",
+            justifyContent: "space-between",
             alignItems: "right",
             width: "100%",
             flexWrap: "wrap",
