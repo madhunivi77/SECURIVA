@@ -1,5 +1,6 @@
 import { HashLink } from 'react-router-hash-link';
 import { Link } from 'react-router-dom';
+import Copyright from './Copyright';
 
 export default function Footer({ theme = {} }) {
   const textColor = "#ffffff";
@@ -65,23 +66,6 @@ export default function Footer({ theme = {} }) {
         .sec-footer-col a:hover {
           color: white;
         }
-
-        /* Bottom copyright bar */
-        .sec-footer-bottom {
-          background: #000;
-          color: #ccc;
-          padding: 14px 20px;
-          font-size: 0.85rem;
-        }
-
-        .sec-footer-bottom-inner {
-          max-width: 1200px;
-          margin: 0 auto;
-          display: flex;
-          justify-content: space-between;
-          flex-wrap: wrap;
-          gap: 10px;
-        }
       `}</style>
 
       {/* Main footer */}
@@ -132,18 +116,7 @@ export default function Footer({ theme = {} }) {
         </div>
       </div>
 
-      {/* Black copyright bar */}
-      <div className="sec-footer-bottom">
-        <div className="sec-footer-bottom-inner">
-          <div>
-            © 2025 SecuriVA — Powered by Kimuntu Power Inc.
-          </div>
-
-          <div>
-            Built on AWS Cloud
-          </div>
-        </div>
-      </div>
+      <Copyright />
     </footer>
     </div>
   );
