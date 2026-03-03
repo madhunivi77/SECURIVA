@@ -1,23 +1,14 @@
-import { useState, useEffect } from "react";
+import { useEffect } from "react";
 import Footer from "./components/Footer";
-import NavOption from "./components/NavOption";
 import { Outlet, useNavigate, useLocation } from "react-router-dom";
 import { useAuth } from "./context/AuthContext";
 import { useTheme } from "./context/ThemeContext";
+import Navbar from "./components/Navbar";
 
 function App() {
   const {
-    isAuthenticated,
-    userEmail,
-    isSalesforceConnected,
-    backendStatus,
-    fetchStatus,
-    logout,
     setUserEmail,
     setIsSalesforceConnected,
-    handleGoogleLogin,
-    handleSalesforceLogin,
-    handleSalesforceLogout
   } = useAuth();
 
   const {
@@ -28,7 +19,6 @@ function App() {
 
   const navigate = useNavigate();
   const { pathname } = useLocation();
-  const [showStatus, setShowStatus] = useState(false);
 
   //Scroll to top on every subpage load
   useEffect(() => {
@@ -56,238 +46,15 @@ function App() {
     }
   }, []);
 
-  const handleReconnect = () => fetchStatus();
-
-  const handleLogout = async () => {
-    await logout();
-    navigate("/");
-    setShowStatus(false);
-    fetchStatus();
-  };
-
   return (
-    <div
+    <div 
+      className="flex flex-col w-screen min-h-screen font-mono"
       style={{
-        display: "flex",
-        flexDirection: "column",
-        width: "100vw",
-        minHeight: "100vh",
-        backgroundColor: theme.bg,
-        color: theme.text,
-        fontFamily: "monospace"
-      }}
-    >
-      <nav style={{ position: "fixed", width: "100%", zIndex: 10}}>
-        {/* UPPER NAV BAR */}
-        <div
-          style={{
-            flexShrink: 0,
-            padding: "12px 20px",
-            //borderBottom: `1px solid ${theme.border}`,
-            background: theme.bg,
-            display: "flex",
-            justifyContent: "space-between",
-            alignItems: "right",
-            width: "100%",
-            flexWrap: "wrap",
-            //gap: "10px",
-            boxSizing: "border-box"
-          }}
-        >
+          backgroundColor: theme.bg,
+          color: theme.text,
+      }}>
 
-
-          {!isAuthenticated ? (
-            // LOGGED OUT
-            <div className="flex justify-between flex-1 pl-14">
-              <div style={{ display: "flex", gap: "10px" }}>
-                <NavOption label={"About"} target={"about"} theme={theme.text}/>
-
-                <NavOption label={"Features"} target={"security"} theme={theme.text}/>
-
-                <NavOption label={"Solutions"} target={"agent"} theme={theme.text}/>
-
-                <NavOption label={"Pricing"} target={"pricing"} theme={theme.text}/>
-
-                <NavOption label={"Contact"} target={"contact"} theme={theme.text}/>
-              </div>
-
-              <div style={{ display: "flex", gap: "10px" }}>
-                <NavOption label={"Sign In"} target={"provider"} theme={theme.text} />
-
-                <NavOption label={"Sign Up"} target={"signup"} theme={theme.text} />
-
-                <NavOption label={"Support"} target={"support"} theme={theme.text}/>
-              </div>
-            </div>
-          ) : (
-            /* LOGGED IN → show your status toggle */
-            <div style={{ display: "flex", gap: "10px" }}>
-
-              <NavOption label={"About"} target={"about"} theme={theme.text}/>
-
-              <NavOption label={"Features"} target={"security"} theme={theme.text}/>
-
-              <NavOption label={"Solutions"} target={"agent"} theme={theme.text}/>
-
-              <NavOption label={"Pricing"} target={"pricing"} theme={theme.text}/>
-
-              <NavOption label={"Support"} target={"support"} theme={theme.text}/>
-
-              <NavOption label={"Contact"} target={"contact"} theme={theme.text}/>
-            
-              <button
-                onClick={() => setShowStatus((prev) => !prev)}
-                style={{
-                  background: "none",
-                  //border: `1px solid ${theme.border}`,
-                  color: theme.border,
-                  borderRadius: "6px",
-                  padding: "4px 10px",
-                  cursor: "pointer",
-                }}
-              >
-                {showStatus ? "Hide Status" : "Show Status"}
-              </button>
-            </div>
-          )}
-        </div>
-        {/* LOWER NAV BAR */}
-        <div
-          style={{
-            flexShrink: 0,
-            padding: "12px 20px",
-            borderBottom: `1px solid ${theme.border}`,
-            background: theme.surface,
-            display: "flex",
-            justifyContent: "space-between",
-            alignItems: "center",
-            width: "100%",
-            flexWrap: "wrap",
-            gap: "10px",
-            boxSizing: "border-box",
-            fontSize: 18
-          }}
-        >
-          {/* Left: logo + SECURIVA */}
-          <div style={{ display: "flex", alignItems: "center", overflow: "hidden", paddingLeft: 23, justifyContent: "space-between", flexGrow: 1}}>
-            <img
-              src="/logo.png"
-              alt="SECURIVA Logo"
-              style={{
-                height: "auto",
-                width: "250px",
-                objectFit: "cover",
-              }}
-              onClick={() => navigate("/")}
-            />
-
-            <button
-              className="w-50 h-13.5 bg-red-500"
-            >
-              Request a Demo
-            </button>
-          </div>
-
-
-        </div>
-
-        {/* ---------- STATUS SECTION ---------- */}
-        {showStatus && (
-          <div
-            style={{
-              flexShrink: 0,
-              background: theme.surface,
-              padding: "10px 20px",
-              borderBottom: `1px solid ${theme.border}`,
-              fontSize: "0.9em",
-              color: theme.subtext,
-            }}
-          >
-            <p style={{ margin: "4px 0" }}>{backendStatus}</p>
-            <div style={{ display: "flex", flexWrap: "wrap", gap: "8px", marginTop: "8px" }}>
-              <button
-                onClick={handleReconnect}
-                style={{
-                  background: theme.buttonBg,
-                  border: "none",
-                  borderRadius: "6px",
-                  color: theme.buttonText,
-                  padding: "6px 12px",
-                  cursor: "pointer",
-                }}
-              >
-                Reconnect
-              </button>
-
-              {!isAuthenticated && (
-                <button
-                  onClick={handleGoogleLogin}
-                  style={{
-                    background: "#4285F4",
-                    border: "none",
-                    borderRadius: "6px",
-                    color: "white",
-                    padding: "6px 12px",
-                    cursor: "pointer",
-                  }}
-                >
-                  Login with Google
-                </button>
-              )}
-
-              {!isSalesforceConnected && isAuthenticated && (
-                <button
-                  onClick={handleSalesforceLogin}
-                  style={{
-                    background: "#00A1E0",
-                    border: "none",
-                    borderRadius: "6px",
-                    color: "white",
-                    padding: "6px 12px",
-                    cursor: "pointer",
-                  }}
-                >
-                  Connect Salesforce
-                </button>
-              )}
-
-              {
-                isSalesforceConnected && isAuthenticated && (
-                  <button
-                    onClick={handleSalesforceLogout}
-                    style={{
-                      background: "#d32f2f",
-                      border: "none",
-                      borderRadius: "6px",
-                      color: "white",
-                      padding: "6px 12px",
-                      cursor: "pointer",
-                      flexShrink: 0,
-                    }}
-                  >
-                    Disconnect Salesforce
-                  </button>
-                )
-              }
-              {isAuthenticated && (
-                <button
-                  onClick={handleLogout}
-                  style={{
-                    background: "#d32f2f",
-                    border: "none",
-                    borderRadius: "6px",
-                    color: "white",
-                    padding: "6px 12px",
-                    cursor: "pointer",
-                  }}
-                >
-                  Logout
-                </button>
-              )}
-            </div>
-          </div>
-        )}
-      </nav>
+      <Navbar />
 
       {/* ---------- MAIN CONTENT SWITCHER ---------- */}
       <main
