@@ -2,7 +2,7 @@ import { HashLink } from 'react-router-hash-link';
 import { Link } from 'react-router-dom';
 import Copyright from './Copyright';
 
-export default function Footer({ theme = {} }) {
+export default function Footer() {
   const textColor = "#ffffff";
 
   return (

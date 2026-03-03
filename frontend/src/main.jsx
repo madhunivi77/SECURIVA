@@ -4,6 +4,7 @@ import { createBrowserRouter, RouterProvider } from 'react-router-dom';
 
 import './styles/global.css';
 import { AuthProvider } from './context/AuthContext.jsx';
+import { ThemeProvider } from './context/ThemeContext.jsx';
 import App from './App.jsx';
 import Dashboard from './pages/Dashboard.jsx';
 import Agent from './pages/Agent.jsx';
@@ -41,18 +42,6 @@ const router = createBrowserRouter([
         element: <Security />
       },
       {
-        path: '/provider', // select a login provider
-        element: <ProviderForm />
-      },
-      {
-        path: '/login', // Local login
-        element: <LoginForm />
-      },
-      {
-        path: '/signup', // create a new account
-        element: <SignupForm />
-      },
-{
         path: "pricing",
         element: <Pricing />,
       },
@@ -77,6 +66,18 @@ const router = createBrowserRouter([
         element: <FAQ />
       }
     ]
+  },
+  {
+    path: '/provider', // select a login provider
+    element: <ProviderForm />
+  },
+  {
+    path: '/login', // Local login
+    element: <LoginForm />
+  },
+  {
+    path: '/signup', // create a new account
+    element: <SignupForm />
   },
   {
     path: '/dashboard',
@@ -106,7 +107,9 @@ const router = createBrowserRouter([
 createRoot(document.getElementById('root')).render(
   <StrictMode>
     <AuthProvider>
-      <RouterProvider router={router} />
+      <ThemeProvider>
+        <RouterProvider router={router} />
+      </ThemeProvider>
     </AuthProvider>
   </StrictMode>,
 )
