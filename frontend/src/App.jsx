@@ -3,9 +3,9 @@ import Footer from "./components/Footer";
 import NavOption from "./components/NavOption";
 import { Outlet, useNavigate, useLocation } from "react-router-dom";
 import { useAuth } from "./context/AuthContext";
+import { useTheme } from "./context/ThemeContext";
 
 function App() {
-  const navigate = useNavigate();
   const {
     isAuthenticated,
     userEmail,
@@ -15,18 +15,20 @@ function App() {
     logout,
     setUserEmail,
     setIsSalesforceConnected,
+    handleGoogleLogin,
+    handleSalesforceLogin,
+    handleSalesforceLogout
   } = useAuth();
 
-  const [showStatus, setShowStatus] = useState(false);
-  const [isDarkMode, setIsDarkMode] = useState(
-    window.matchMedia("(prefers-color-scheme: dark)").matches
-  );
-  const { pathname } = useLocation();
+  const {
+    theme,
+    isDarkMode,
+    setIsDarkMode,
+  } = useTheme();
 
-  const handleAuthSuccess = (email) => {
-    setUserEmail(email);
-    navigate("/dashboard/chat")
-  };
+  const navigate = useNavigate();
+  const { pathname } = useLocation();
+  const [showStatus, setShowStatus] = useState(false);
 
   //Scroll to top on every subpage load
   useEffect(() => {
@@ -38,81 +40,30 @@ function App() {
 
   useEffect(() => {
     const urlParams = new URLSearchParams(window.location.search);
-    const authSuccess = urlParams.get("auth");
+    const authStatus = urlParams.get("auth");
     const emailParam = urlParams.get("email");
+    const salesforceStatus = urlParams.get("salesforce");
 
-    if (authSuccess === "success") {
+    if (authStatus === "success") {
       if (emailParam) setUserEmail(emailParam);
       window.history.replaceState({}, document.title, window.location.pathname);
       navigate("/dashboard")
     }
 
-    if (urlParams.get("salesforce") === "connected") {
+    if (salesforceStatus === "connected") {
       setIsSalesforceConnected(true);
       window.history.replaceState({}, document.title, window.location.pathname);
     }
-
-    const mq = window.matchMedia("(prefers-color-scheme: dark)");
-    const handleThemeChange = (e) => setIsDarkMode(e.matches);
-    mq.addEventListener("change", handleThemeChange);
-    return () => mq.removeEventListener("change", handleThemeChange);
   }, []);
 
   const handleReconnect = () => fetchStatus();
+
   const handleLogout = async () => {
     await logout();
     navigate("/");
     setShowStatus(false);
     fetchStatus();
   };
-
-  const handleGoogleLogin = () => {
-    window.location.href = "http://localhost:8000/login";
-  };
-
-  const handleSalesforceLogin = () => {
-    if (!isAuthenticated) {
-      alert("Please login with Google first");
-      return;
-    }
-    window.location.href = "http://localhost:8000/salesforce/login";
-  };
-
-  const handleSalesforceLogout = async () => {
-    try {
-      await fetch("http://localhost:8000/salesforce/logout", {
-        method: "POST",
-        credentials: "include"
-      });
-      setIsSalesforceConnected(false);
-      fetchStatus();  // Refresh status
-    } catch (error) {
-      console.error("Logout error:", error);
-    }
-  }
-
-  const theme = isDarkMode
-    ? {
-      bg: "#0a0f1f",
-      surface: "#ddeeff",
-      border: "#1c2a44",
-      text: "#d9e6ff",
-      subtext: "#8fa8d6",
-      buttonBg: "#1f5fbf",
-      buttonText: "white",
-      navbutton: "#212854",
-    }
-    : {
-      bg: "#e7f1ff",
-      surface: "#ffffff",
-      border: "#b3cff5",
-      text: "#0d2b66",
-      subtext: "#3d5fa8",
-      buttonBg: "#d8e7ff",
-      buttonText: "#0a3aa8",
-      navbutton: "#061d42",
-
-    };
 
   return (
     <div
@@ -347,12 +298,12 @@ function App() {
         }}
       >
         {/* Pass any context used by App.jsx subpages. If used across other routes, elevate to an AuthContext wrapper in main.jsx */}
-        <Outlet context={{handleAuthSuccess, handleGoogleLogin, handleSalesforceLogin, isAuthenticated, theme}}/>
+        <Outlet context={{}}/>
         
       </main>
 
       {/* ---------- FOOTER ---------- */}
-      <Footer theme={theme} />
+      <Footer />
     </div>
   );
 }
