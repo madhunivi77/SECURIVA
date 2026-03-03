@@ -1,7 +1,7 @@
 import { Outlet } from "react-router-dom";
 import Sidebar from "../components/Sidebar";
-import Navbar from "../components/Navbar";
 import { useState, useEffect } from "react";
+import DashboardNav from "../components/DashboardNav";
 
 const Dashboard = () => {
 
@@ -39,7 +39,7 @@ const Dashboard = () => {
     <div className="flex h-screen w-screen bg-white text-black">
       <Sidebar />
       <div className="flex-1 flex flex-col overflow-hidden">
-        <Navbar onCreateAutomation={handleCreateAutomation} onRefresh={handleRefresh} />
+        <DashboardNav onCreateAutomation={handleCreateAutomation} onRefresh={handleRefresh} />
 
         <main className="flex-1 overflow-auto p-6 relative">
           <Outlet />
