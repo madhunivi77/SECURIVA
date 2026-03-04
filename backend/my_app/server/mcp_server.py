@@ -33,6 +33,16 @@ from .telesign_auth import (
     batch_verify_phones,
     batch_send_sms
 )
+from .compliance_tools import (
+    get_compliance_overview,
+    get_compliance_requirements,
+    get_compliance_checklist,
+    get_penalty_information,
+    get_breach_notification_requirements,
+    cross_reference_compliance_topic,
+    search_compliance_requirements,
+    generate_compliance_report
+)
 
 JWT_SECRET_KEY = os.getenv("JWT_SECRET_KEY")
 
@@ -2095,5 +2105,237 @@ def batchSendSMS(recipients_json: str) -> str:
         }, indent=2)
 
 # ==================== END TELESIGN TOOLS ====================
+
+
+# ==================== COMPLIANCE STANDARDS TOOLS ====================
+# Tools for querying GDPR, HIPAA, and PCI-DSS compliance standards
+
+@mcp.tool()
+def getComplianceOverview(standard: str) -> str:
+    """
+    Get an overview of a compliance standard (GDPR, HIPAA, or PCI-DSS)
+    
+    Args:
+        standard: Compliance standard name - must be one of: 'gdpr', 'hipaa', 'pci_dss'
+    
+    Returns:
+        JSON string with standard overview including name, region, effective date, and description
+    
+    Example:
+        getComplianceOverview('gdpr')
+    """
+    try:
+        result = get_compliance_overview(standard)
+        return json.dumps(result, indent=2)
+    except Exception as e:
+        return json.dumps({
+            "success": False,
+            "error": str(e)
+        }, indent=2)
+
+
+@mcp.tool()
+def getComplianceRequirements(standard: str, requirement_id: str = None) -> str:
+    """
+    Get detailed compliance requirements for a standard
+    
+    Args:
+        standard: Compliance standard name ('gdpr', 'hipaa', 'pci_dss')
+        requirement_id: Optional specific requirement ID to retrieve
+    
+    Returns:
+        JSON string with detailed requirements, articles/sections, and implementation guidance
+    
+    Example:
+        getComplianceRequirements('gdpr')
+        getComplianceRequirements('pci_dss', '3')
+    """
+    try:
+        # Convert requirement_id to int if it's a number
+        if requirement_id and requirement_id.isdigit():
+            requirement_id = int(requirement_id)
+        
+        result = get_compliance_requirements(standard, requirement_id)
+        return json.dumps(result, indent=2)
+    except Exception as e:
+        return json.dumps({
+            "success": False,
+            "error": str(e)
+        }, indent=2)
+
+
+@mcp.tool()
+def getComplianceChecklist(standard: str) -> str:
+    """
+    Get a compliance audit checklist for a standard
+    
+    Args:
+        standard: Compliance standard name ('gdpr', 'hipaa', 'pci_dss')
+    
+    Returns:
+        JSON string with checklist items grouped by category for audit preparation
+    
+    Example:
+        getComplianceChecklist('hipaa')
+    """
+    try:
+        result = get_compliance_checklist(standard)
+        return json.dumps(result, indent=2)
+    except Exception as e:
+        return json.dumps({
+            "success": False,
+            "error": str(e)
+        }, indent=2)
+
+
+@mcp.tool()
+def getPenaltyInformation(standard: str) -> str:
+    """
+    Get penalty and fine information for non-compliance
+    
+    Args:
+        standard: Compliance standard name ('gdpr', 'hipaa', 'pci_dss')
+    
+    Returns:
+        JSON string with penalty tiers, amounts, and violation types
+    
+    Example:
+        getPenaltyInformation('gdpr')
+    """
+    try:
+        result = get_penalty_information(standard)
+        return json.dumps(result, indent=2)
+    except Exception as e:
+        return json.dumps({
+            "success": False,
+            "error": str(e)
+        }, indent=2)
+
+
+@mcp.tool()
+def getBreachNotificationRequirements(standard: str) -> str:
+    """
+    Get breach notification requirements and timelines for a standard
+    
+    Args:
+        standard: Compliance standard name ('gdpr', 'hipaa', 'pci_dss')
+    
+    Returns:
+        JSON string with notification timelines and requirements
+    
+    Example:
+        getBreachNotificationRequirements('hipaa')
+    """
+    try:
+        result = get_breach_notification_requirements(standard)
+        return json.dumps(result, indent=2)
+    except Exception as e:
+        return json.dumps({
+            "success": False,
+            "error": str(e)
+        }, indent=2)
+
+
+@mcp.tool()
+def crossReferenceComplianceTopic(topic: str) -> str:
+    """
+    Cross-reference a compliance topic across GDPR, HIPAA, and PCI-DSS
+    Shows how each standard addresses the same topic
+    
+    Args:
+        topic: Compliance topic - must be one of:
+               'data_encryption', 'access_control', 'audit_logging', 
+               'breach_notification', 'data_retention'
+    
+    Returns:
+        JSON string with cross-referenced requirements from all three standards
+    
+    Example:
+        crossReferenceComplianceTopic('data_encryption')
+    """
+    try:
+        result = cross_reference_compliance_topic(topic)
+        return json.dumps(result, indent=2)
+    except Exception as e:
+        return json.dumps({
+            "success": False,
+            "error": str(e)
+        }, indent=2)
+
+
+@mcp.tool()
+def searchComplianceRequirements(query: str, standards_json: str = None) -> str:
+    """
+    Search for compliance requirements matching a query across standards
+    
+    Args:
+        query: Search query string
+        standards_json: Optional JSON array of standards to search.
+                       Example: '["gdpr","hipaa"]'
+                       If not provided, searches all standards
+    
+    Returns:
+        JSON string with matching requirements from specified standards
+    
+    Example:
+        searchComplianceRequirements('encryption')
+        searchComplianceRequirements('access control', '["gdpr","hipaa"]')
+    """
+    try:
+        standards = None
+        if standards_json:
+            standards = json.loads(standards_json)
+        
+        result = search_compliance_requirements(query, standards)
+        return json.dumps(result, indent=2)
+    except Exception as e:
+        return json.dumps({
+            "success": False,
+            "error": str(e)
+        }, indent=2)
+
+
+@mcp.tool()
+def generateComplianceReport(standards_json: str, include_checklist: bool = True, 
+                             include_penalties: bool = True, include_breach_info: bool = True) -> str:
+    """
+    Generate a comprehensive compliance report for specified standards
+    
+    Args:
+        standards_json: JSON array of standards to include.
+                       Example: '["gdpr","hipaa","pci_dss"]'
+        include_checklist: Include compliance checklists (default: True)
+        include_penalties: Include penalty information (default: True)
+        include_breach_info: Include breach notification requirements (default: True)
+    
+    Returns:
+        JSON string with comprehensive compliance report
+    
+    Example:
+        generateComplianceReport('["gdpr","hipaa"]')
+        generateComplianceReport('["pci_dss"]', True, True, False)
+    """
+    try:
+        standards = json.loads(standards_json)
+        
+        result = generate_compliance_report(
+            standards=standards,
+            include_checklist=include_checklist,
+            include_penalties=include_penalties,
+            include_breach_info=include_breach_info
+        )
+        return json.dumps(result, indent=2)
+    except json.JSONDecodeError:
+        return json.dumps({
+            "success": False,
+            "error": "Invalid JSON format. Expected array of standard names like ['gdpr','hipaa']"
+        }, indent=2)
+    except Exception as e:
+        return json.dumps({
+            "success": False,
+            "error": str(e)
+        }, indent=2)
+
+# ==================== END COMPLIANCE TOOLS ====================
 
 
