@@ -75,14 +75,11 @@ export default function Navbar(){
 
               <NavOption label={"Features"} target={"security"} theme={theme.text}/>
 
-              <NavOption label={"Solutions"} target={"agent"} theme={theme.text}/>
-
-              <NavOption label={"Pricing"} target={"pricing"} theme={theme.text}/>
-
               <NavOption label={"Support"} target={"support"} theme={theme.text}/>
 
               <NavOption label={"Contact"} target={"contact"} theme={theme.text}/>
             
+              <NavOption label={"Dashboard"} target={"dashboard"} theme={theme.text}/>
               <button
                 onClick={() => setShowStatus((prev) => !prev)}
                 style={{
