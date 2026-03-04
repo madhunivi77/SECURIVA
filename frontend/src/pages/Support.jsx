@@ -257,6 +257,7 @@ export default function Support() {
               <option>Account Help</option>
               <option>Integration Support</option>
               <option>Security Question</option>
+              <option>Partnership Inquiry</option>
               <option>Billing</option>
               <option>Other</option>
             </select>

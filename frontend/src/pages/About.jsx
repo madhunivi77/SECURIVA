@@ -1,4 +1,5 @@
 // About.jsx
+import Sponsors from "../components/Sponsors";
 
 export default function About() {
   return (
@@ -217,7 +218,7 @@ export default function About() {
 
         </div>
       </section>
-
+      <Sponsors className="bg-white pt-5 text-center text-black text-3xl"/>
     </div>
   );
 }
