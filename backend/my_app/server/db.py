@@ -72,13 +72,22 @@ class ChatRecord(BaseModel):
 # Abstract DB Interface
 
 class BaseConnector:
-    def save_chat(self, user_id: str, version: int, messages: List[Dict]):
+    def save_chat(self, user_id: str, version: int, title: str, messages: List[Dict]):
         raise NotImplementedError
 
     def get_latest_chat(self, user_id: str) -> Optional[ChatRecord]:
         raise NotImplementedError
 
     def delete_latest_chat(self, user_id: str) -> bool:
+        raise NotImplementedError
+    
+    def get_chat_by_version(self, user_id: str, version: int) -> Optional[ChatRecord]:
+        raise NotImplementedError
+    
+    def delete_by_version(self, user_id: str, version: int) -> bool:
+        raise NotImplementedError
+    
+    def list_user_chats(self, user_id: str) -> List[Dict]:
         raise NotImplementedError
 
 
@@ -151,7 +160,7 @@ class SQLiteConnector(BaseConnector):
         return True
     
 
-    def get_chat_by_version(self, user_id: str, version: int):
+    def get_chat_by_version(self, user_id: str, version: int) -> Optional[ChatRecord]:
         cur = self.conn.cursor()
         cur.execute("""
             SELECT title, messages FROM chats
@@ -168,6 +177,28 @@ class SQLiteConnector(BaseConnector):
             title=row[0],
             messages=[ChatMessage(**m) for m in json.loads(row[1])]
         )
+    
+    def delete_by_version(self, user_id: str, version: int) -> bool:
+        cur = self.conn.cursor()
+        cur.execute("""
+            DELETE FROM chats
+            WHERE user_id = ? AND version = ?
+        """, (user_id, version))
+        self.conn.commit()
+        return cur.rowcount > 0
+    
+    def list_user_chats(self, user_id: str) -> List[Dict]:
+        cur = self.conn.cursor()
+        cur.execute("""
+            SELECT version, title FROM chats
+            WHERE user_id = ?
+            ORDER BY version DESC
+        """, (user_id,))
+        rows = cur.fetchall()
+        return [
+            {"version": row[0], "title": row[1]}
+            for row in rows
+        ]
 
 
 # DynamoDB Connector (Production)
@@ -178,13 +209,14 @@ class DynamoDBConnector(BaseConnector):
             region_name=region
         ).Table(table_name)
 
-    def save_chat(self, user_id: str, version: int, messages: List[Dict]):
+    def save_chat(self, user_id: str, version: int, title: str, messages: List[Dict]):
         session_timestamp = str(int(time.time() * 1000))
         try:
             self.table.put_item(Item={
                 "user_id": user_id,
                 "session_timestamp": session_timestamp,
                 "version": version,
+                "title": title,
                 "messages": messages
             })
         except ClientError as e:
@@ -205,6 +237,7 @@ class DynamoDBConnector(BaseConnector):
             return ChatRecord(
                 user_id=user_id,
                 version=item["version"],
+                title=item.get("title", f"Chat {item['version']}"),
                 messages=[ChatMessage(**m) for m in item["messages"]]
             )
         except ClientError as e:
@@ -229,6 +262,68 @@ class DynamoDBConnector(BaseConnector):
                 }
             )
             return True
+        except ClientError as e:
+            raise RuntimeError(str(e))
+    
+    def get_chat_by_version(self, user_id: str, version: int) -> Optional[ChatRecord]:
+        try:
+            response = self.table.query(
+                KeyConditionExpression=Key("user_id").eq(user_id),
+                FilterExpression="version = :v",
+                ExpressionAttributeValues={
+                    ":v": version
+                }
+            )
+            items = response.get("Items", [])
+            if not items:
+                return None
+            
+            item = items[0]
+            return ChatRecord(
+                user_id=user_id,
+                version=item["version"],
+                title=item.get("title", f"Chat {version}"),
+                messages=[ChatMessage(**m) for m in item["messages"]]
+            )
+        except ClientError as e:
+            raise RuntimeError(str(e))
+    
+    def delete_by_version(self, user_id: str, version: int) -> bool:
+        try:
+            response = self.table.query(
+                KeyConditionExpression=Key("user_id").eq(user_id),
+                FilterExpression="version = :v",
+                ExpressionAttributeValues={
+                    ":v": version
+                }
+            )
+            items = response.get("Items", [])
+            if not items:
+                return False
+            
+            item = items[0]
+            self.table.delete_item(
+                Key={
+                    "user_id": item["user_id"],
+                    "session_timestamp": item["session_timestamp"]
+                }
+            )
+            return True
+        except ClientError as e:
+            raise RuntimeError(str(e))
+    
+    def list_user_chats(self, user_id: str) -> List[Dict]:
+        try:
+            response = self.table.query(
+                KeyConditionExpression=Key("user_id").eq(user_id),
+                ProjectionExpression="version, title",
+                ScanIndexForward=False  # Descending order
+            )
+            items = response.get("Items", [])
+            return [
+                {"version": item["version"], "title": item.get("title", f"Chat {item['version']}")} 
+                for item in items
+            ]
         except ClientError as e:
             raise RuntimeError(str(e))
 
@@ -309,36 +404,39 @@ async def delete_chat_by_version(request: Request):
     if not version:
         return JSONResponse({"error": "Version required"}, status_code=400)
 
-    cur = db.conn.cursor()
-    cur.execute("""
-        DELETE FROM chats
-        WHERE user_id = ? AND version = ?
-    """, (user_id, int(version)))
-
-    db.conn.commit()
-
-    return JSONResponse({"status": "deleted"})
+    try:
+        success = await asyncio.to_thread(
+            db.delete_by_version,
+            user_id,
+            int(version)
+        )
+        
+        if success:
+            return JSONResponse({"status": "deleted"})
+        else:
+            return JSONResponse({"error": "Chat not found"}, status_code=404)
+    except Exception as e:
+        return JSONResponse(
+            {"error": str(e), "traceback": traceback.format_exc()},
+            status_code=500
+        )
 
 async def list_chats(request: Request):
     user_id = get_authenticated_user(request)
     if not user_id:
         return JSONResponse({"error": "Not authenticated"}, status_code=401)
 
-    cur = db.conn.cursor()
-    cur.execute("""
-        SELECT version, title FROM chats
-        WHERE user_id = ?
-        ORDER BY version DESC
-    """, (user_id,))
-
-    rows = cur.fetchall()
-
-    conversations = [
-        {"version": row[0], "title": row[1]}
-        for row in rows
-    ]
-
-    return JSONResponse({"conversations": conversations})
+    try:
+        conversations = await asyncio.to_thread(
+            db.list_user_chats,
+            user_id
+        )
+        return JSONResponse({"conversations": conversations})
+    except Exception as e:
+        return JSONResponse(
+            {"error": str(e), "traceback": traceback.format_exc()},
+            status_code=500
+        )
 async def get_chat_by_version(request: Request):
     user_id = get_authenticated_user(request)
     if not user_id:
@@ -349,21 +447,26 @@ async def get_chat_by_version(request: Request):
     if not version:
         return JSONResponse({"error": "Version required"}, status_code=400)
 
-    cur = db.conn.cursor()
-    cur.execute("""
-        SELECT messages FROM chats
-        WHERE user_id = ? AND version = ?
-    """, (user_id, int(version)))
+    try:
+        chat = await asyncio.to_thread(
+            db.get_chat_by_version,
+            user_id,
+            int(version)
+        )
+        
+        if not chat:
+            return JSONResponse({"error": "Chat not found"}, status_code=404)
 
-    row = cur.fetchone()
-
-    if not row:
-        return JSONResponse({"error": "Chat not found"}, status_code=404)
-
-    return JSONResponse({
-        "version": int(version),
-        "messages": json.loads(row[0])
-    })
+        return JSONResponse({
+            "version": chat.version,
+            "title": chat.title,
+            "messages": [msg.dict() for msg in chat.messages]
+        })
+    except Exception as e:
+        return JSONResponse(
+            {"error": str(e), "traceback": traceback.format_exc()},
+            status_code=500
+        )
 
 
 # Starlette App

@@ -21,15 +21,20 @@ import requests
 import base64
 from concurrent.futures import ThreadPoolExecutor
 from groq import Groq
-from .salesforce_utils import get_fresh_salesforce_credentials, load_oauth_data
+from .salesforce_utils import get_fresh_salesforce_credentials, load_oauth_data, salesforce_api_request
 from ..config.settings import settings
 from .telesign_auth import (
     send_sms,
+    send_voice_call,
     verify_phone_number,
     send_verification_code,
     verify_code,
     assess_phone_risk,
-    get_message_status
+    get_message_status,
+    get_detailed_message_status,
+    poll_message_until_complete,
+    batch_verify_phones,
+    batch_send_sms
 )
 
 JWT_SECRET_KEY = os.getenv("JWT_SECRET_KEY")
@@ -888,27 +893,858 @@ def listSalesforceCases(context: Context, limit: int = 10):
     except Exception as e:
         return {"success": False, "error": str(e)}
 
-# Add these tools after your existing MCP tools (after Salesforce tools)
+
+# ==================== CONTACTS & ACCOUNTS ====================
 
 @mcp.tool()
-def sendSMS(phone_number: str, message: str) -> str:
+def createSalesforceContact(context: Context, last_name: str, first_name: str = "", 
+                           email: str = "", phone: str = "", account_id: str = ""):
     """
-    Send an SMS message using Telesign
+    Create a new Salesforce Contact.
     
     Args:
-        phone_number: Target phone number (e.g., "2623984079" without + prefix)
-        message: SMS message text to send
+        last_name: Contact's last name (required)
+        first_name: Contact's first name (optional)
+        email: Contact's email address (optional)
+        phone: Contact's phone number (optional)
+        account_id: Salesforce Account ID to link this contact to (optional)
+        
+    Returns:
+        dict with success flag and contact_id or error details
+    """
+    creds = getSalesforceCreds(context)
+    if not creds:
+        return {"success": False, "error": "User not authenticated with Salesforce."}
+    
+    payload = {"LastName": last_name}
+    if first_name:
+        payload["FirstName"] = first_name
+    if email:
+        payload["Email"] = email
+    if phone:
+        payload["Phone"] = phone
+    if account_id:
+        payload["AccountId"] = account_id
+    
+    result = salesforce_api_request(
+        creds["instance_url"],
+        creds["access_token"],
+        "POST",
+        "/services/data/v60.0/sobjects/Contact",
+        data=payload
+    )
+    
+    if result["success"] and "data" in result:
+        return {
+            "success": True,
+            "contact_id": result["data"].get("id"),
+            "errors": result["data"].get("errors", [])
+        }
+    return result
+
+
+@mcp.tool()
+def listSalesforceContacts(context: Context, limit: int = 10, account_id: str = ""):
+    """
+    List Salesforce Contacts with optional filtering by Account.
+    
+    Args:
+        limit: Maximum number of contacts to return (default 10)
+        account_id: Optional Account ID to filter contacts
+        
+    Returns:
+        dict with success flag and list of contacts
+    """
+    creds = getSalesforceCreds(context)
+    if not creds:
+        return {"success": False, "error": "User not authenticated with Salesforce."}
+    
+    query = f"SELECT Id, FirstName, LastName, Email, Phone, AccountId FROM Contact"
+    if account_id:
+        query += f" WHERE AccountId = '{account_id}'"
+    query += f" ORDER BY CreatedDate DESC LIMIT {limit}"
+    
+    result = salesforce_api_request(
+        creds["instance_url"],
+        creds["access_token"],
+        "GET",
+        "/services/data/v60.0/query",
+        params={"q": query}
+    )
+    
+    if result["success"] and "data" in result:
+        return {"success": True, "contacts": result["data"].get("records", [])}
+    return result
+
+
+@mcp.tool()
+def createSalesforceAccount(context: Context, name: str, industry: str = "", 
+                           phone: str = "", website: str = ""):
+    """
+    Create a new Salesforce Account (company/organization).
+    
+    Args:
+        name: Account name (required)
+        industry: Industry type (optional)
+        phone: Account phone number (optional)
+        website: Company website (optional)
+        
+    Returns:
+        dict with success flag and account_id or error details
+    """
+    creds = getSalesforceCreds(context)
+    if not creds:
+        return {"success": False, "error": "User not authenticated with Salesforce."}
+    
+    payload = {"Name": name}
+    if industry:
+        payload["Industry"] = industry
+    if phone:
+        payload["Phone"] = phone
+    if website:
+        payload["Website"] = website
+    
+    result = salesforce_api_request(
+        creds["instance_url"],
+        creds["access_token"],
+        "POST",
+        "/services/data/v60.0/sobjects/Account",
+        data=payload
+    )
+    
+    if result["success"] and "data" in result:
+        return {
+            "success": True,
+            "account_id": result["data"].get("id"),
+            "errors": result["data"].get("errors", [])
+        }
+    return result
+
+
+@mcp.tool()
+def listSalesforceAccounts(context: Context, limit: int = 10):
+    """
+    List Salesforce Accounts (companies/organizations).
+    
+    Args:
+        limit: Maximum number of accounts to return (default 10)
+        
+    Returns:
+        dict with success flag and list of accounts
+    """
+    creds = getSalesforceCreds(context)
+    if not creds:
+        return {"success": False, "error": "User not authenticated with Salesforce."}
+    
+    query = f"SELECT Id, Name, Industry, Phone, Website FROM Account ORDER BY CreatedDate DESC LIMIT {limit}"
+    
+    result = salesforce_api_request(
+        creds["instance_url"],
+        creds["access_token"],
+        "GET",
+        "/services/data/v60.0/query",
+        params={"q": query}
+    )
+    
+    if result["success"] and "data" in result:
+        return {"success": True, "accounts": result["data"].get("records", [])}
+    return result
+
+
+# ==================== OPPORTUNITIES ====================
+
+@mcp.tool()
+def createSalesforceOpportunity(context: Context, name: str, stage: str, close_date: str,
+                                amount: float = 0, account_id: str = ""):
+    """
+    Create a new Salesforce Opportunity (sales deal).
+    
+    Args:
+        name: Opportunity name (required)
+        stage: Sales stage (e.g., "Prospecting", "Qualification", "Closed Won") (required)
+        close_date: Expected close date in YYYY-MM-DD format (required)
+        amount: Deal amount in dollars (optional)
+        account_id: Associated Account ID (optional)
+        
+    Returns:
+        dict with success flag and opportunity_id or error details
+    """
+    creds = getSalesforceCreds(context)
+    if not creds:
+        return {"success": False, "error": "User not authenticated with Salesforce."}
+    
+    payload = {
+        "Name": name,
+        "StageName": stage,
+        "CloseDate": close_date
+    }
+    if amount > 0:
+        payload["Amount"] = amount
+    if account_id:
+        payload["AccountId"] = account_id
+    
+    result = salesforce_api_request(
+        creds["instance_url"],
+        creds["access_token"],
+        "POST",
+        "/services/data/v60.0/sobjects/Opportunity",
+        data=payload
+    )
+    
+    if result["success"] and "data" in result:
+        return {
+            "success": True,
+            "opportunity_id": result["data"].get("id"),
+            "errors": result["data"].get("errors", [])
+        }
+    return result
+
+
+@mcp.tool()
+def listSalesforceOpportunities(context: Context, limit: int = 10, stage: str = ""):
+    """
+    List Salesforce Opportunities with optional stage filtering.
+    
+    Args:
+        limit: Maximum number of opportunities to return (default 10)
+        stage: Optional stage name to filter by (e.g., "Prospecting", "Closed Won")
+        
+    Returns:
+        dict with success flag and list of opportunities
+    """
+    creds = getSalesforceCreds(context)
+    if not creds:
+        return {"success": False, "error": "User not authenticated with Salesforce."}
+    
+    query = f"SELECT Id, Name, StageName, Amount, CloseDate, AccountId FROM Opportunity"
+    if stage:
+        query += f" WHERE StageName = '{stage}'"
+    query += f" ORDER BY CreatedDate DESC LIMIT {limit}"
+    
+    result = salesforce_api_request(
+        creds["instance_url"],
+        creds["access_token"],
+        "GET",
+        "/services/data/v60.0/query",
+        params={"q": query}
+    )
+    
+    if result["success"] and "data" in result:
+        return {"success": True, "opportunities": result["data"].get("records", [])}
+    return result
+
+
+@mcp.tool()
+def updateSalesforceOpportunity(context: Context, opportunity_id: str, stage: str = "",
+                                amount: float = None, close_date: str = ""):
+    """
+    Update an existing Salesforce Opportunity.
+    
+    Args:
+        opportunity_id: Opportunity ID to update (required)
+        stage: New sales stage (optional)
+        amount: New deal amount (optional)
+        close_date: New close date in YYYY-MM-DD format (optional)
+        
+    Returns:
+        dict with success flag or error details
+    """
+    creds = getSalesforceCreds(context)
+    if not creds:
+        return {"success": False, "error": "User not authenticated with Salesforce."}
+    
+    payload = {}
+    if stage:
+        payload["StageName"] = stage
+    if amount is not None:
+        payload["Amount"] = amount
+    if close_date:
+        payload["CloseDate"] = close_date
+    
+    if not payload:
+        return {"success": False, "error": "No fields provided to update"}
+    
+    result = salesforce_api_request(
+        creds["instance_url"],
+        creds["access_token"],
+        "PATCH",
+        f"/services/data/v60.0/sobjects/Opportunity/{opportunity_id}",
+        data=payload
+    )
+    
+    return result
+
+
+# ==================== SEARCH (SOQL/SOSL) ====================
+
+@mcp.tool()
+def salesforceSOQLQuery(context: Context, query: str):
+    """
+    Execute a custom SOQL (Salesforce Object Query Language) query.
+    
+    Args:
+        query: SOQL query string (e.g., "SELECT Id, Name FROM Account WHERE Industry = 'Technology'")
+        
+    Returns:
+        dict with success flag and query results
+        
+    Example queries:
+        - "SELECT Id, Name, Email FROM Contact WHERE LastName = 'Smith'"
+        - "SELECT Id, Subject, Status FROM Case WHERE Status = 'New'"
+        - "SELECT COUNT() FROM Opportunity WHERE StageName = 'Closed Won'"
+    """
+    creds = getSalesforceCreds(context)
+    if not creds:
+        return {"success": False, "error": "User not authenticated with Salesforce."}
+    
+    result = salesforce_api_request(
+        creds["instance_url"],
+        creds["access_token"],
+        "GET",
+        "/services/data/v60.0/query",
+        params={"q": query}
+    )
+    
+    if result["success"] and "data" in result:
+        return {
+            "success": True,
+            "records": result["data"].get("records", []),
+            "total_size": result["data"].get("totalSize", 0)
+        }
+    return result
+
+
+@mcp.tool()
+def salesforceSOSLSearch(context: Context, search_text: str, objects: str = "Contact,Account,Lead"):
+    """
+    Execute a SOSL (Salesforce Object Search Language) full-text search across multiple objects.
+    
+    Args:
+        search_text: Text to search for (e.g., "John Smith")
+        objects: Comma-separated list of objects to search (default: "Contact,Account,Lead")
+        
+    Returns:
+        dict with success flag and search results grouped by object type
+        
+    Example:
+        salesforceSOSLSearch("john.doe@example.com", "Contact,Lead")
+    """
+    creds = getSalesforceCreds(context)
+    if not creds:
+        return {"success": False, "error": "User not authenticated with Salesforce."}
+    
+    # Build SOSL query
+    sosl_query = f"FIND {{{search_text}}} IN ALL FIELDS RETURNING {objects}"
+    
+    result = salesforce_api_request(
+        creds["instance_url"],
+        creds["access_token"],
+        "GET",
+        "/services/data/v60.0/search",
+        params={"q": sosl_query}
+    )
+    
+    if result["success"] and "data" in result:
+        return {"success": True, "search_records": result["data"].get("searchRecords", [])}
+    return result
+
+
+# ==================== EMAIL ====================
+
+@mcp.tool()
+def sendSalesforceEmail(context: Context, to_addresses: str, subject: str, body: str,
+                        html_body: str = "", cc_addresses: str = ""):
+    """
+    Send an email through Salesforce.
+    
+    Args:
+        to_addresses: Comma-separated email addresses (e.g., "user@example.com,other@example.com")
+        subject: Email subject line
+        body: Plain text email body
+        html_body: Optional HTML email body
+        cc_addresses: Optional comma-separated CC email addresses
+        
+    Returns:
+        dict with success flag or error details
+    """
+    creds = getSalesforceCreds(context)
+    if not creds:
+        return {"success": False, "error": "User not authenticated with Salesforce."}
+    
+    to_list = [addr.strip() for addr in to_addresses.split(",")]
+    cc_list = [addr.strip() for addr in cc_addresses.split(",")] if cc_addresses else []
+    
+    payload = {
+        "inputs": [{
+            "toAddress": ";".join(to_list),
+            "subject": subject,
+            "plainTextBody": body
+        }]
+    }
+    
+    if html_body:
+        payload["inputs"][0]["htmlBody"] = html_body
+    if cc_list:
+        payload["inputs"][0]["ccAddress"] = ";".join(cc_list)
+    
+    result = salesforce_api_request(
+        creds["instance_url"],
+        creds["access_token"],
+        "POST",
+        "/services/data/v60.0/actions/standard/emailSimple",
+        data=payload
+    )
+    
+    return result
+
+
+# ==================== USER INFO & LIMITS ====================
+
+@mcp.tool()
+def getSalesforceUserInfo(context: Context):
+    """
+    Get information about the currently authenticated Salesforce user.
+    
+    Returns:
+        dict with user details including name, email, username, org info, permissions
+    """
+    creds = getSalesforceCreds(context)
+    if not creds:
+        return {"success": False, "error": "User not authenticated with Salesforce."}
+    
+    # Get user ID from credentials
+    sf_id = creds.get("id", "")
+    
+    result = salesforce_api_request(
+        creds["instance_url"],
+        creds["access_token"],
+        "GET",
+        sf_id  # The ID URL contains user info endpoint
+    )
+    
+    return result
+
+
+@mcp.tool()
+def getSalesforceOrgLimits(context: Context):
+    """
+    Get Salesforce organization limits including API calls, data storage, and other quotas.
+    
+    Returns:
+        dict with all org limits showing max, remaining, and usage for each resource
+    """
+    creds = getSalesforceCreds(context)
+    if not creds:
+        return {"success": False, "error": "User not authenticated with Salesforce."}
+    
+    result = salesforce_api_request(
+        creds["instance_url"],
+        creds["access_token"],
+        "GET",
+        "/services/data/v60.0/limits"
+    )
+    
+    return result
+
+
+# ==================== CHATTER ====================
+
+@mcp.tool()
+def postSalesforceChatter(context: Context, message: str, mention_user_id: str = ""):
+    """
+    Post a message to Salesforce Chatter feed.
+    
+    Args:
+        message: Message text to post
+        mention_user_id: Optional Salesforce User ID to @mention in the post
+        
+    Returns:
+        dict with success flag and post details
+    """
+    creds = getSalesforceCreds(context)
+    if not creds:
+        return {"success": False, "error": "User not authenticated with Salesforce."}
+    
+    # Build message segments
+    segments = []
+    if mention_user_id:
+        segments.append({
+            "type": "Mention",
+            "id": mention_user_id
+        })
+        segments.append({
+            "type": "Text",
+            "text": f" {message}"
+        })
+    else:
+        segments.append({
+            "type": "Text",
+            "text": message
+        })
+    
+    payload = {
+        "body": {
+            "messageSegments": segments
+        }
+    }
+    
+    result = salesforce_api_request(
+        creds["instance_url"],
+        creds["access_token"],
+        "POST",
+        "/services/data/v60.0/chatter/feed-elements",
+        data=payload
+    )
+    
+    return result
+
+
+@mcp.tool()
+def getSalesforceChatterFeed(context: Context, limit: int = 10):
+    """
+    Get recent Chatter feed posts.
+    
+    Args:
+        limit: Maximum number of posts to retrieve (default 10, max 100)
+        
+    Returns:
+        dict with success flag and list of feed items
+    """
+    creds = getSalesforceCreds(context)
+    if not creds:
+        return {"success": False, "error": "User not authenticated with Salesforce."}
+    
+    # Limit to max 100
+    limit = min(limit, 100)
+    
+    result = salesforce_api_request(
+        creds["instance_url"],
+        creds["access_token"],
+        "GET",
+        f"/services/data/v60.0/chatter/feeds/news/me/feed-elements",
+        params={"pageSize": limit}
+    )
+    
+    if result["success"] and "data" in result:
+        return {"success": True, "feed_items": result["data"].get("elements", [])}
+    return result
+
+
+# ==================== TASKS & EVENTS ====================
+
+@mcp.tool()
+def createSalesforceTask(context: Context, subject: str, priority: str = "Normal",
+                         status: str = "Not Started", due_date: str = "",
+                         related_to_id: str = ""):
+    """
+    Create a new Salesforce Task (to-do item).
+    
+    Args:
+        subject: Task subject/description (required)
+        priority: Priority level - "High", "Normal", or "Low" (default: "Normal")
+        status: Task status - "Not Started", "In Progress", "Completed" (default: "Not Started")
+        due_date: Due date in YYYY-MM-DD format (optional)
+        related_to_id: ID of related record (Account, Contact, Opportunity, etc.) (optional)
+        
+    Returns:
+        dict with success flag and task_id or error details
+    """
+    creds = getSalesforceCreds(context)
+    if not creds:
+        return {"success": False, "error": "User not authenticated with Salesforce."}
+    
+    payload = {
+        "Subject": subject,
+        "Priority": priority,
+        "Status": status
+    }
+    if due_date:
+        payload["ActivityDate"] = due_date
+    if related_to_id:
+        payload["WhatId"] = related_to_id
+    
+    result = salesforce_api_request(
+        creds["instance_url"],
+        creds["access_token"],
+        "POST",
+        "/services/data/v60.0/sobjects/Task",
+        data=payload
+    )
+    
+    if result["success"] and "data" in result:
+        return {
+            "success": True,
+            "task_id": result["data"].get("id"),
+            "errors": result["data"].get("errors", [])
+        }
+    return result
+
+
+@mcp.tool()
+def listSalesforceTasks(context: Context, limit: int = 10, status: str = ""):
+    """
+    List Salesforce Tasks with optional status filtering.
+    
+    Args:
+        limit: Maximum number of tasks to return (default 10)
+        status: Optional status filter ("Not Started", "In Progress", "Completed")
+        
+    Returns:
+        dict with success flag and list of tasks
+    """
+    creds = getSalesforceCreds(context)
+    if not creds:
+        return {"success": False, "error": "User not authenticated with Salesforce."}
+    
+    query = f"SELECT Id, Subject, Status, Priority, ActivityDate FROM Task"
+    if status:
+        query += f" WHERE Status = '{status}'"
+    query += f" ORDER BY CreatedDate DESC LIMIT {limit}"
+    
+    result = salesforce_api_request(
+        creds["instance_url"],
+        creds["access_token"],
+        "GET",
+        "/services/data/v60.0/query",
+        params={"q": query}
+    )
+    
+    if result["success"] and "data" in result:
+        return {"success": True, "tasks": result["data"].get("records", [])}
+    return result
+
+
+@mcp.tool()
+def createSalesforceEvent(context: Context, subject: str, start_datetime: str,
+                          end_datetime: str, location: str = "", description: str = ""):
+    """
+    Create a new Salesforce Event (calendar appointment).
+    
+    Args:
+        subject: Event subject/title (required)
+        start_datetime: Start date/time in ISO format (e.g., "2026-03-15T14:00:00Z") (required)
+        end_datetime: End date/time in ISO format (required)
+        location: Event location (optional)
+        description: Event description (optional)
+        
+    Returns:
+        dict with success flag and event_id or error details
+    """
+    creds = getSalesforceCreds(context)
+    if not creds:
+        return {"success": False, "error": "User not authenticated with Salesforce."}
+    
+    payload = {
+        "Subject": subject,
+        "StartDateTime": start_datetime,
+        "EndDateTime": end_datetime
+    }
+    if location:
+        payload["Location"] = location
+    if description:
+        payload["Description"] = description
+    
+    result = salesforce_api_request(
+        creds["instance_url"],
+        creds["access_token"],
+        "POST",
+        "/services/data/v60.0/sobjects/Event",
+        data=payload
+    )
+    
+    if result["success"] and "data" in result:
+        return {
+            "success": True,
+            "event_id": result["data"].get("id"),
+            "errors": result["data"].get("errors", [])
+        }
+    return result
+
+
+@mcp.tool()
+def listSalesforceEvents(context: Context, limit: int = 10, from_date: str = ""):
+    """
+    List Salesforce Events (calendar appointments).
+    
+    Args:
+        limit: Maximum number of events to return (default 10)
+        from_date: Optional filter for events starting from this date (YYYY-MM-DD format)
+        
+    Returns:
+        dict with success flag and list of events
+    """
+    creds = getSalesforceCreds(context)
+    if not creds:
+        return {"success": False, "error": "User not authenticated with Salesforce."}
+    
+    query = f"SELECT Id, Subject, StartDateTime, EndDateTime, Location FROM Event"
+    if from_date:
+        query += f" WHERE StartDateTime >= {from_date}T00:00:00Z"
+    query += f" ORDER BY StartDateTime DESC LIMIT {limit}"
+    
+    result = salesforce_api_request(
+        creds["instance_url"],
+        creds["access_token"],
+        "GET",
+        "/services/data/v60.0/query",
+        params={"q": query}
+    )
+    
+    if result["success"] and "data" in result:
+        return {"success": True, "events": result["data"].get("records", [])}
+    return result
+
+
+# ==================== FILES & CONTENT ====================
+
+@mcp.tool()
+def uploadSalesforceFile(context: Context, title: str, file_data: str, 
+                        file_extension: str = "txt", related_record_id: str = ""):
+    """
+    Upload a file to Salesforce Files (ContentVersion).
+    
+    Args:
+        title: File title/name without extension
+        file_data: Base64-encoded file content
+        file_extension: File extension (e.g., "txt", "pdf", "jpg") (default: "txt")
+        related_record_id: Optional ID of record to associate file with
+        
+    Returns:
+        dict with success flag and file details (ContentVersion ID and ContentDocument ID)
+        
+    Note: file_data should be base64-encoded. For text files, you can use:
+          import base64; base64.b64encode(b"your text content").decode()
+    """
+    creds = getSalesforceCreds(context)
+    if not creds:
+        return {"success": False, "error": "User not authenticated with Salesforce."}
+    
+    payload = {
+        "Title": title,
+        "PathOnClient": f"{title}.{file_extension}",
+        "VersionData": file_data
+    }
+    
+    result = salesforce_api_request(
+        creds["instance_url"],
+        creds["access_token"],
+        "POST",
+        "/services/data/v60.0/sobjects/ContentVersion",
+        data=payload
+    )
+    
+    if result["success"] and "data" in result and related_record_id:
+        # Link file to record using ContentDocumentLink
+        version_id = result["data"].get("id")
+        
+        # Get ContentDocument ID from ContentVersion
+        doc_query = f"SELECT ContentDocumentId FROM ContentVersion WHERE Id = '{version_id}'"
+        doc_result = salesforce_api_request(
+            creds["instance_url"],
+            creds["access_token"],
+            "GET",
+            "/services/data/v60.0/query",
+            params={"q": doc_query}
+        )
+        
+        if doc_result["success"] and doc_result.get("data", {}).get("records"):
+            doc_id = doc_result["data"]["records"][0]["ContentDocumentId"]
+            
+            # Create ContentDocumentLink
+            link_payload = {
+                "ContentDocumentId": doc_id,
+                "LinkedEntityId": related_record_id,
+                "ShareType": "V"
+            }
+            salesforce_api_request(
+                creds["instance_url"],
+                creds["access_token"],
+                "POST",
+                "/services/data/v60.0/sobjects/ContentDocumentLink",
+                data=link_payload
+            )
+    
+    return result
+
+
+@mcp.tool()
+def listSalesforceFiles(context: Context, limit: int = 10):
+    """
+    List recently uploaded Salesforce Files.
+    
+    Args:
+        limit: Maximum number of files to return (default 10)
+        
+    Returns:
+        dict with success flag and list of files with metadata
+    """
+    creds = getSalesforceCreds(context)
+    if not creds:
+        return {"success": False, "error": "User not authenticated with Salesforce."}
+    
+    query = f"SELECT Id, Title, FileExtension, ContentSize, CreatedDate FROM ContentDocument ORDER BY CreatedDate DESC LIMIT {limit}"
+    
+    result = salesforce_api_request(
+        creds["instance_url"],
+        creds["access_token"],
+        "GET",
+        "/services/data/v60.0/query",
+        params={"q": query}
+    )
+    
+    if result["success"] and "data" in result:
+        return {"success": True, "files": result["data"].get("records", [])}
+    return result
+
+
+@mcp.tool()
+def downloadSalesforceFile(context: Context, content_version_id: str):
+    """
+    Download a file from Salesforce Files by ContentVersion ID.
+    
+    Args:
+        content_version_id: The ContentVersion ID of the file to download
+        
+    Returns:
+        dict with success flag and base64-encoded file data
+    """
+    creds = getSalesforceCreds(context)
+    if not creds:
+        return {"success": False, "error": "User not authenticated with Salesforce."}
+    
+    result = salesforce_api_request(
+        creds["instance_url"],
+        creds["access_token"],
+        "GET",
+        f"/services/data/v60.0/sobjects/ContentVersion/{content_version_id}/VersionData"
+    )
+    
+    return result
+
+
+# ==================== TELESIGN MCP TOOLS ====================
+# Comprehensive TeleSign tools for self-service accounts
+
+@mcp.tool()
+def sendSMS(phone_number: str, message: str, message_type: str = "OTP") -> str:
+    """
+    Send an SMS message using TeleSign
+    
+    Args:
+        phone_number: Target phone number (e.g., "2623984079" or "+12623984079")
+        message: SMS message text to send (max 160 chars for single message)
+        message_type: Message type - OTP (default), ARN (alerts), or MKT (marketing)
     
     Returns:
         JSON string with status, reference_id, and delivery status
+    
+    Example:
+        sendSMS("2623984079", "Your code is 12345", "OTP")
     """
     try:
-        # Remove + prefix if present
-        phone_number = phone_number.lstrip('+')
+        result = send_sms(phone_number, message, message_type)
         
-        result = send_sms(phone_number, message)
-        
-        if result.get('status_code') == 200:
+        if result.get('success'):
             return json.dumps({
                 "success": True,
                 "message": "SMS sent successfully",
@@ -931,31 +1767,76 @@ def sendSMS(phone_number: str, message: str) -> str:
 
 
 @mcp.tool()
+def sendVoiceCall(phone_number: str, message: str, voice_name: str = "female") -> str:
+    """
+    Send a voice call with text-to-speech message
+    
+    Args:
+        phone_number: Target phone number
+        message: Message to speak (text-to-speech)
+        voice_name: Voice type - "female" or "male" (default: "female")
+    
+    Returns:
+        JSON string with status and reference_id
+    
+    Example:
+        sendVoiceCall("2623984079", "Your verification code is 1 2 3 4 5")
+    """
+    try:
+        result = send_voice_call(phone_number, message, voice_name)
+        
+        if result.get('success'):
+            return json.dumps({
+                "success": True,
+                "message": "Voice call initiated",
+                "reference_id": result.get('reference_id'),
+                "phone_number": phone_number
+            }, indent=2)
+        else:
+            return json.dumps({
+                "success": False,
+                "error": result.get('error', 'Voice call failed'),
+                "status_code": result.get('status_code')
+            }, indent=2)
+            
+    except Exception as e:
+        return json.dumps({
+            "success": False,
+            "error": str(e)
+        }, indent=2)
+
+
+@mcp.tool()
 def verifyPhoneNumber(phone_number: str) -> str:
     """
-    Verify a phone number and get detailed information
+    Verify a phone number and get detailed information including carrier, location, and type
     
     Args:
         phone_number: Phone number to verify (e.g., "2623984079")
     
     Returns:
-        JSON string with phone type, carrier, location, and contact info
+        JSON string with phone type, carrier, location, contact info, and whether it's blocked
+    
+    Example:
+        verifyPhoneNumber("2623984079")
     """
     try:
-        phone_number = phone_number.lstrip('+')
         result = verify_phone_number(phone_number)
         
-        if result.get('status_code') == 200:
+        if result.get('success'):
             return json.dumps({
                 "success": True,
                 "phone_number": result.get('formatted_number'),
                 "phone_type": result.get('phone_type'),
                 "carrier": result.get('carrier'),
                 "country": result.get('country'),
+                "country_code": result.get('country_code'),
                 "city": result.get('city'),
                 "state": result.get('state'),
+                "time_zone": result.get('time_zone'),
                 "blocked": result.get('blocked'),
-                "contact_info": result.get('contact_info')
+                "contact_info": result.get('contact_info'),
+                "reference_id": result.get('reference_id')
             }, indent=2)
         else:
             return json.dumps({
@@ -977,21 +1858,24 @@ def sendVerificationCode(phone_number: str, code_length: int = 5) -> str:
     
     Args:
         phone_number: Target phone number (e.g., "2623984079")
-        code_length: Length of verification code (default: 5)
+        code_length: Length of verification code (3-10, default: 5)
     
     Returns:
-        JSON string with reference_id and verification code (for testing)
+        JSON string with reference_id and verification code
+        Store the reference_id and verify_code to validate user input later
+    
+    Example:
+        sendVerificationCode("2623984079", 6)
     """
     try:
-        phone_number = phone_number.lstrip('+')
         result = send_verification_code(phone_number, code_length)
         
-        if result.get('status_code') == 200:
+        if result.get('success'):
             return json.dumps({
                 "success": True,
                 "message": "Verification code sent",
                 "reference_id": result.get('reference_id'),
-                "verify_code": result.get('verify_code'),  # For testing only
+                "verify_code": result.get('verify_code'),  # Store this to verify user input
                 "phone_number": phone_number
             }, indent=2)
         else:
@@ -1008,22 +1892,62 @@ def sendVerificationCode(phone_number: str, code_length: int = 5) -> str:
 
 
 @mcp.tool()
+def verifyUserCode(reference_id: str, user_code: str, original_code: str) -> str:
+    """
+    Verify a code entered by the user against the original code
+    
+    Args:
+        reference_id: Reference ID from sendVerificationCode
+        user_code: Code entered by the user
+        original_code: Original verify_code from sendVerificationCode result
+    
+    Returns:
+        JSON string with validation result
+    
+    Example:
+        verifyUserCode("ref123", "12345", "12345")
+    """
+    try:
+        result = verify_code(reference_id, user_code, original_code)
+        
+        return json.dumps({
+            "success": True,
+            "valid": result.get('valid'),
+            "message": result.get('message'),
+            "reference_id": reference_id
+        }, indent=2)
+            
+    except Exception as e:
+        return json.dumps({
+            "success": False,
+            "error": str(e)
+        }, indent=2)
+
+
+@mcp.tool()
 def checkPhoneRisk(phone_number: str, lifecycle_event: str = "create") -> str:
     """
-    Assess fraud risk for a phone number
+    Assess fraud risk for a phone number using TeleSign Intelligence
     
     Args:
         phone_number: Phone number to assess (e.g., "2623984079")
-        lifecycle_event: Account lifecycle stage (create, sign-in, transact, update)
+        lifecycle_event: Account lifecycle stage:
+            - "create": New account creation (default)
+            - "sign-in": User login
+            - "transact": Financial transaction
+            - "update": Account update
     
     Returns:
-        JSON string with risk level, score, and recommendation
+        JSON string with risk level (low/medium/high), risk score (0-1000), 
+        recommendation (allow/flag/block), and phone details
+    
+    Example:
+        checkPhoneRisk("2623984079", "create")
     """
     try:
-        phone_number = phone_number.lstrip('+')
         result = assess_phone_risk(phone_number, lifecycle_event)
         
-        if result.get('status_code') == 200:
+        if result.get('success'):
             return json.dumps({
                 "success": True,
                 "phone_number": phone_number,
@@ -1031,7 +1955,8 @@ def checkPhoneRisk(phone_number: str, lifecycle_event: str = "create") -> str:
                 "risk_score": result.get('risk_score'),
                 "recommendation": result.get('recommendation'),
                 "phone_type": result.get('phone_type'),
-                "carrier": result.get('carrier')
+                "carrier": result.get('carrier'),
+                "reference_id": result.get('reference_id')
             }, indent=2)
         else:
             return json.dumps({
@@ -1049,22 +1974,78 @@ def checkPhoneRisk(phone_number: str, lifecycle_event: str = "create") -> str:
 @mcp.tool()
 def checkMessageStatus(reference_id: str) -> str:
     """
-    Check the delivery status of a sent message
+    Check the delivery status of a sent message (SMS or voice)
     
     Args:
-        reference_id: Reference ID from sendSMS or sendVerificationCode
+        reference_id: Reference ID from sendSMS, sendVoiceCall, or sendVerificationCode
     
     Returns:
-        JSON string with delivery status and timestamps
+        JSON string with delivery status, timestamps, and any errors
+    
+    Status codes:
+        - 200-299: Delivered successfully
+        - 400-499: Failed (invalid number, blocked, etc.)
+        - 500-599: TeleSign error
+    
+    Example:
+        checkMessageStatus("ref_abc123xyz")
     """
     try:
         result = get_message_status(reference_id)
         
+        if result.get('success'):
+            return json.dumps({
+                "success": True,
+                "reference_id": reference_id,
+                "status": result.get('status'),
+                "delivered": result.get('status', {}).get('code') in [200, 203, 207, 290, 291, 295]
+            }, indent=2)
+        else:
+            return json.dumps({
+                "success": False,
+                "error": result.get('error', 'Status check failed')
+            }, indent=2)
+            
+    except Exception as e:
         return json.dumps({
-            "success": True,
+            "success": False,
+            "error": str(e)
+        }, indent=2)
+
+
+@mcp.tool()
+def getDetailedMessageStatus(reference_id: str) -> str:
+    """
+    Get detailed delivery status including timestamps, carrier feedback, and pricing
+    
+    Args:
+        reference_id: Reference ID from a sent message
+    
+    Returns:
+        JSON string with detailed status including:
+        - Delivery timestamps (submitted_at, completed_on, updated_on)
+        - Carrier error codes and descriptions
+        - Message price and currency
+        - Recipient details
+    
+    Example:
+        getDetailedMessageStatus("ref_abc123xyz")
+    """
+    try:
+        result = get_detailed_message_status(reference_id)
+        
+        return json.dumps({
+            "success": result.get('status_code') == 200,
             "reference_id": reference_id,
-            "status": result.get('status'),
-            "full_response": result.get('full_response')
+            "status_code": result.get('message_status_code'),
+            "status_description": result.get('status_description'),
+            "submitted_at": result.get('submitted_at'),
+            "completed_on": result.get('completed_on'),
+            "updated_on": result.get('updated_on'),
+            "recipient": result.get('recipient'),
+            "price": result.get('price'),
+            "currency": result.get('currency'),
+            "errors": result.get('errors', [])
         }, indent=2)
             
     except Exception as e:
@@ -1072,5 +2053,115 @@ def checkMessageStatus(reference_id: str) -> str:
             "success": False,
             "error": str(e)
         }, indent=2)
+
+
+@mcp.tool()
+def pollMessageStatusUntilComplete(reference_id: str, max_attempts: int = 10) -> str:
+    """
+    Poll message status repeatedly until delivered or failed (useful for testing)
+    
+    Args:
+        reference_id: Reference ID from a sent message
+        max_attempts: Maximum polling attempts (default: 10, waits 2 sec between)
+    
+    Returns:
+        JSON string with final delivery status
+    
+    Note: This tool blocks until the message is delivered or fails.
+    For production, use checkMessageStatus with webhooks instead.
+    
+    Example:
+        pollMessageStatusUntilComplete("ref_abc123xyz", 5)
+    """
+    try:
+        result = poll_message_until_complete(reference_id, max_attempts)
+        
+        return json.dumps({
+            "success": result.get('polling_complete', False),
+            "reference_id": reference_id,
+            "status": result.get('status_description'),
+            "delivered": not result.get('failed', False),
+            "attempts": result.get('attempts'),
+            "timeout": result.get('timeout', False)
+        }, indent=2)
+            
+    except Exception as e:
+        return json.dumps({
+            "success": False,
+            "error": str(e)
+        }, indent=2)
+
+
+@mcp.tool()
+def batchVerifyPhoneNumbers(phone_numbers: str) -> str:
+    """
+    Verify multiple phone numbers in batch
+    
+    Args:
+        phone_numbers: Comma-separated phone numbers (e.g., "2623984079,3105551234,4155551234")
+    
+    Returns:
+        JSON string with verification results for each number
+    
+    Example:
+        batchVerifyPhoneNumbers("2623984079,3105551234")
+    """
+    try:
+        # Parse comma-separated numbers
+        numbers = [n.strip() for n in phone_numbers.split(',')]
+        
+        results = batch_verify_phones(numbers)
+        
+        return json.dumps({
+            "success": True,
+            "total_numbers": len(numbers),
+            "results": results
+        }, indent=2)
+            
+    except Exception as e:
+        return json.dumps({
+            "success": False,
+            "error": str(e)
+        }, indent=2)
+
+
+@mcp.tool()
+def batchSendSMS(recipients_json: str) -> str:
+    """
+    Send SMS to multiple recipients
+    
+    Args:
+        recipients_json: JSON array of recipients with phone_number and message
+            Example: '[{"phone_number":"2623984079","message":"Hello"},{"phone_number":"3105551234","message":"Hi"}]'
+    
+    Returns:
+        JSON string with send results for each recipient
+    
+    Example:
+        batchSendSMS('[{"phone_number":"2623984079","message":"Test 1"}]')
+    """
+    try:
+        recipients = json.loads(recipients_json)
+        
+        results = batch_send_sms(recipients)
+        
+        return json.dumps({
+            "success": True,
+            "total_recipients": len(recipients),
+            "results": results
+        }, indent=2)
+            
+    except json.JSONDecodeError:
+        return json.dumps({
+            "success": False,
+            "error": "Invalid JSON format. Expected array of {phone_number, message} objects"
+        }, indent=2)
+    except Exception as e:
+        return json.dumps({
+            "success": False,
+            "error": str(e)
+        }, indent=2)
+
+# ==================== END TELESIGN TOOLS ====================
 
 
