@@ -1,0 +1,184 @@
+<!DOCTYPE html>
+<html>
+<head>
+    <title>Set Test API Key Cookie</title>
+    <style>
+        body {
+            font-family: Arial, sans-serif;
+            max-width: 800px;
+            margin: 50px auto;
+            padding: 20px;
+            background: #f5f5f5;
+        }
+        .container {
+            background: white;
+            padding: 30px;
+            border-radius: 8px;
+            box-shadow: 0 2px 4px rgba(0,0,0,0.1);
+        }
+        h1 {
+            color: #333;
+        }
+        .status {
+            padding: 15px;
+            margin: 20px 0;
+            border-radius: 4px;
+        }
+        .success {
+            background: #d4edda;
+            color: #155724;
+            border: 1px solid #c3e6cb;
+        }
+        .info {
+            background: #d1ecf1;
+            color: #0c5460;
+            border: 1px solid #bee5eb;
+        }
+        button {
+            background: #007bff;
+            color: white;
+            padding: 12px 24px;
+            border: none;
+            border-radius: 4px;
+            cursor: pointer;
+            font-size: 16px;
+            margin: 10px 5px;
+        }
+        button:hover {
+            background: #0056b3;
+        }
+        .secondary {
+            background: #6c757d;
+        }
+        .secondary:hover {
+            background: #545b62;
+        }
+        code {
+            background: #f4f4f4;
+            padding: 2px 6px;
+            border-radius: 3px;
+            font-family: monospace;
+        }
+        .steps {
+            background: #f8f9fa;
+            padding: 15px;
+            border-left: 4px solid #007bff;
+            margin: 20px 0;
+        }
+        .steps li {
+            margin: 10px 0;
+        }
+    </style>
+</head>
+<body>
+    <div class="container">
+        <h1>🔐 Set Test API Key Cookie</h1>
+        
+        <div class="info">
+            <strong>Purpose:</strong> This page sets a test API key cookie in your browser,
+            allowing you to test Salesforce authentication without going through Google OAuth.
+        </div>
+
+        <div id="status"></div>
+
+        <div class="steps">
+            <h3>Steps:</h3>
+            <ol>
+                <li>Run: <code>uv run python tests/create_test_user_for_salesforce.py</code></li>
+                <li>Click "Set Test Cookie" button below</li>
+                <li>Click "Test Salesforce Login" to authenticate with Salesforce</li>
+                <li>Run your test scripts</li>
+            </ol>
+        </div>
+
+        <button onclick="setCookie()">Set Test Cookie</button>
+        <button onclick="checkCookie()" class="secondary">Check Cookie Status</button>
+        <button onclick="testSalesforceAuth()">Test Salesforce Login</button>
+        <button onclick="clearCookie()" class="secondary">Clear Cookie</button>
+
+        <div style="margin-top: 30px;">
+            <h3>After Setting Cookie:</h3>
+            <ul>
+                <li><a href="http://localhost:8000/salesforce/login" target="_blank">Authenticate Salesforce</a></li>
+                <li>Then run: <code>uv run python tests/test_salesforce_mcp.py</code></li>
+            </ul>
+        </div>
+    </div>
+
+    <script>
+        function setCookie() {
+            // Set the test API key cookie
+            const apiKey = "test_api_key_abc123";
+            const maxAge = 30 * 24 * 60 * 60; // 30 days in seconds
+            
+            // Set cookie with proper attributes
+            document.cookie = `api_key=${apiKey}; max-age=${maxAge}; path=/; SameSite=Lax`;
+            
+            // Show success message
+            document.getElementById('status').innerHTML = `
+                <div class="success">
+                    ✅ <strong>Success!</strong> Test API key cookie has been set.<br>
+                    Cookie: <code>api_key=test_api_key_abc123</code><br>
+                    You can now authenticate with Salesforce.
+                </div>
+            `;
+            
+            console.log('Cookie set:', document.cookie);
+        }
+
+        function checkCookie() {
+            const cookies = document.cookie.split(';').map(c => c.trim());
+            const apiKeyCookie = cookies.find(c => c.startsWith('api_key='));
+            
+            if (apiKeyCookie) {
+                const value = apiKeyCookie.split('=')[1];
+                document.getElementById('status').innerHTML = `
+                    <div class="success">
+                        ✅ <strong>Cookie Found!</strong><br>
+                        <code>${apiKeyCookie}</code>
+                    </div>
+                `;
+            } else {
+                document.getElementById('status').innerHTML = `
+                    <div class="info">
+                        ⚠️  <strong>No API key cookie found.</strong><br>
+                        Click "Set Test Cookie" to create one.
+                    </div>
+                `;
+            }
+        }
+
+        function clearCookie() {
+            document.cookie = "api_key=; max-age=0; path=/";
+            document.getElementById('status').innerHTML = `
+                <div class="info">
+                    🗑️ Cookie cleared.
+                </div>
+            `;
+        }
+
+        function testSalesforceAuth() {
+            const cookies = document.cookie.split(';').map(c => c.trim());
+            const apiKeyCookie = cookies.find(c => c.startsWith('api_key='));
+            
+            if (!apiKeyCookie) {
+                document.getElementById('status').innerHTML = `
+                    <div class="info">
+                        ⚠️  <strong>Please set the cookie first!</strong><br>
+                        Click "Set Test Cookie" before testing Salesforce login.
+                    </div>
+                `;
+                return;
+            }
+            
+            // Open Salesforce login in new tab
+            window.open('http://localhost:8000/salesforce/login', '_blank');
+        }
+
+        // Check cookie status on page load
+        window.onload = function() {
+            checkCookie();
+        };
+    </script>
+</body>
+</html>
