@@ -7,7 +7,7 @@ export default function LoginForm() {
 
   return (
     <div className="bg-[#000020] w-screen min-h-screen flex flex-col relative">
-      
+
       {/* Back Button */}
       <button
         onClick={() => navigate(-1)}
@@ -19,7 +19,7 @@ export default function LoginForm() {
       {/* Center Section */}
       <div className="flex-1 flex flex-col justify-center">
         <div className="flex flex-col-reverse md:flex-row justify-center items-center gap-10 text-center px-6">
-          
+
           {/* Video Section */}
           <div className="flex flex-col justify-center w-auto md:w-[40%]">
             <video
