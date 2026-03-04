@@ -1,4 +1,4 @@
-import { MessageSquarePlus, Mic, Settings, User } from "lucide-react";
+import { MessageSquarePlus, Mic, Settings, User, Workflow } from "lucide-react";
 import { Link } from "react-router-dom";
 
 
@@ -22,6 +22,13 @@ const Sidebar = () => {
             <button className=" inline-flex justify-normal w-full items-center text-black bg-gray-200 border-gray-300 gap-4 ">
                 <Mic className="w-4 h-4" />
                 Voice Agent
+            </button>
+        </Link>
+      {/* Automations Button */}
+        <Link to="/dashboard" className="m-2">
+            <button className=" inline-flex justify-normal w-full items-center text-black bg-gray-200 border-gray-300 gap-4 ">
+                <Workflow className="w-4 h-4" />
+                Automations
             </button>
         </Link>
 
