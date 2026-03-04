@@ -7,7 +7,7 @@ const Sidebar = () => {
     <aside className="flex flex-col h-full w-64 border-r border-gray-300">
       {/* Logo area */}
         <div className="p-4 border-b border-border border-gray-300">
-            <h2 className="text-2xl font-semibold">Automate Flow</h2>
+          <img src="logo.png" />
         </div>
 
       {/* New Chat Button */}
