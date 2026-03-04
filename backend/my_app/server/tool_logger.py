@@ -199,3 +199,34 @@ def get_tool_logger() -> ToolCallLogger:
         enabled = os.getenv("ENABLE_TOOL_LOGGING", "true").lower() == "true"
         _logger_instance = ToolCallLogger(enabled=enabled)
     return _logger_instance
+
+
+def log_tool_call(
+    tool_name: str,
+    input_data: Optional[Dict[str, Any]] = None,
+    output_data: Optional[Any] = None,
+    success: bool = True,
+    error: Optional[str] = None,
+    metadata: Optional[Dict[str, Any]] = None
+):
+    """
+    Simplified wrapper for logging tool calls without requiring session_id.
+    
+    Args:
+        tool_name: Name of the tool being called
+        input_data: Input parameters/arguments
+        output_data: Output result
+        success: Whether the call was successful
+        error: Error message if failed
+        metadata: Additional metadata
+    """
+    logger = get_tool_logger()
+    logger.log_tool_call(
+        session_id="background",  # Use default for non-session calls
+        tool_name=tool_name,
+        arguments=input_data or {},
+        result=output_data,
+        error=error,
+        metadata=metadata
+    )
+
