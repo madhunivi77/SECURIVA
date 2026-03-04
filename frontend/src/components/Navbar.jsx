@@ -57,6 +57,8 @@ export default function Navbar(){
                 <NavOption label={"Pricing"} target={"pricing"} theme={theme.text}/>
 
                 <NavOption label={"Contact"} target={"contact"} theme={theme.text}/>
+
+                <NavOption label={"FAQ"} target={"FAQ"} theme={theme.text}/>
               </div>
 
               <div style={{ display: "flex", gap: "10px" }}>
@@ -78,6 +80,8 @@ export default function Navbar(){
               <NavOption label={"Support"} target={"support"} theme={theme.text}/>
 
               <NavOption label={"Contact"} target={"contact"} theme={theme.text}/>
+
+              <NavOption label={"FAQ"} target={"FAQ"} theme={theme.text}/>
             
               <NavOption label={"Dashboard"} target={"dashboard"} theme={theme.text}/>
               <button
