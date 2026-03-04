@@ -1,10 +1,26 @@
 """
 Compliance Standards Data Repository
 Contains structured information about GDPR, HIPAA, and PCI-DSS compliance standards
+
+NEW: Now supports modular loading of compliance standards from compliance_modules/
+To add a new standard: Create a new file in compliance_modules/ with a STANDARD constant
 """
 
 from typing import Dict, List, Any
 from datetime import datetime
+
+# NEW: Import modular compliance system
+try:
+    from .compliance_modules import (
+        load_compliance_module,
+        get_available_modules,
+        load_all_modules,
+        get_module_info
+    )
+    MODULAR_SYSTEM_AVAILABLE = True
+except ImportError:
+    MODULAR_SYSTEM_AVAILABLE = False
+    print("Warning: Modular compliance system not available. Using legacy data only.")
 
 # GDPR Compliance Standards
 GDPR_STANDARDS = {
@@ -485,16 +501,52 @@ COMPLIANCE_CROSS_REFERENCE = {
 
 
 def get_all_standards() -> Dict[str, Any]:
-    """Get all compliance standards"""
-    return {
+    """
+    Get all compliance standards (both legacy and modular)
+    
+    Returns:
+        dict: All available compliance standards
+    """
+    # Start with legacy standards
+    standards = {
         "gdpr": GDPR_STANDARDS,
         "hipaa": HIPAA_STANDARDS,
         "pci_dss": PCI_DSS_STANDARDS
     }
+    
+    # Add modular standards if available
+    if MODULAR_SYSTEM_AVAILABLE:
+        try:
+            modular_standards = load_all_modules()
+            # Modular standards override legacy if same name
+            standards.update(modular_standards)
+        except Exception as e:
+            print(f"Warning: Could not load modular standards: {e}")
+    
+    return standards
 
 
 def get_standard(standard_name: str) -> Dict[str, Any]:
-    """Get a specific compliance standard"""
+    """
+    Get a specific compliance standard
+    
+    Args:
+        standard_name: Name of the standard (e.g., 'gdpr', 'email_compliance')
+    
+    Returns:
+        dict: Standard data or None if not found
+    """
+    standard_lower = standard_name.lower().replace("-", "_")
+    
+    # Try modular system first (if available)
+    if MODULAR_SYSTEM_AVAILABLE:
+        try:
+            return load_compliance_module(standard_lower)
+        except (ImportError, AttributeError):
+            # Fall back to legacy
+            pass
+    
+    # Use legacy system
     standards = {
         "gdpr": GDPR_STANDARDS,
         "hipaa": HIPAA_STANDARDS,
@@ -505,9 +557,61 @@ def get_standard(standard_name: str) -> Dict[str, Any]:
 
 def get_checklist(standard_name: str) -> List[Dict[str, str]]:
     """Get compliance checklist for a standard"""
-    return COMPLIANCE_CHECKLISTS.get(standard_name.lower(), [])
+    standard_lower = standard_name.lower().replace("-", "_")
+    
+    # Try to get checklist from modular system first
+    if MODULAR_SYSTEM_AVAILABLE:
+        try:
+            standard = load_compliance_module(standard_lower)
+            if "checklist" in standard:
+                return standard["checklist"]
+        except:
+            pass
+    
+    # Fall back to legacy checklists
+    return COMPLIANCE_CHECKLISTS.get(standard_lower, [])
 
 
 def get_cross_reference(topic: str) -> Dict[str, List[str]]:
     """Get cross-references for a specific compliance topic"""
     return COMPLIANCE_CROSS_REFERENCE.get(topic.lower(), {})
+
+
+def list_available_standards() -> List[Dict[str, str]]:
+    """
+    List all available compliance standards (legacy + modular)
+    
+    Returns:
+        list: List of dicts with standard metadata
+    """
+    standards_list = []
+    
+    # Add legacy standards
+    for name in ["gdpr", "hipaa", "pci_dss"]:
+        standard = get_standard(name)
+        if standard:
+            standards_list.append({
+                "id": name,
+                "name": standard.get("name", name.upper()),
+                "region": standard.get("region", "Unknown"),
+                "type": "legacy"
+            })
+    
+    # Add modular standards
+    if MODULAR_SYSTEM_AVAILABLE:
+        try:
+            for module_name in get_available_modules():
+                # Skip if already added as legacy
+                if module_name not in ["gdpr", "hipaa", "pci_dss"]:
+                    info = get_module_info(module_name)
+                    if "error" not in info:
+                        standards_list.append({
+                            "id": module_name,
+                            "name": info.get("name", module_name),
+                            "region": info.get("region", "Unknown"),
+                            "type": "modular"
+                        })
+        except Exception as e:
+            print(f"Warning: Could not list modular standards: {e}")
+    
+    return standards_list

@@ -43,6 +43,11 @@ from .compliance_tools import (
     search_compliance_requirements,
     generate_compliance_report
 )
+from .compliance_module_generator import (
+    create_compliance_module_dry_run,
+    create_compliance_module,
+    list_compliance_modules
+)
 
 JWT_SECRET_KEY = os.getenv("JWT_SECRET_KEY")
 
@@ -2337,5 +2342,131 @@ def generateComplianceReport(standards_json: str, include_checklist: bool = True
         }, indent=2)
 
 # ==================== END COMPLIANCE TOOLS ====================
+
+
+# ==================== COMPLIANCE MODULE GENERATOR TOOLS ====================
+# Secure tools for AI to generate new compliance modules
+
+@mcp.tool()
+def listComplianceModules() -> str:
+    """
+    List all available compliance modules in the system
+    
+    Returns:
+        JSON string with list of all compliance module files and their metadata
+    
+    Example:
+        listComplianceModules()
+    """
+    try:
+        result = list_compliance_modules()
+        return json.dumps(result, indent=2)
+    except Exception as e:
+        return json.dumps({
+            "success": False,
+            "error": str(e)
+        }, indent=2)
+
+
+@mcp.tool()
+def validateComplianceModule(filename: str, content: str) -> str:
+    """
+    Validate a compliance module WITHOUT creating the file (dry-run)
+    
+    ⚠️ ALWAYS CALL THIS FIRST before createComplianceModule()!
+    
+    This performs comprehensive security validation:
+    - Validates filename and path safety (prevents path traversal)
+    - Checks Python syntax
+    - Scans for dangerous code (eval, exec, os.system, etc.)
+    - Validates STANDARD structure
+    - Checks required fields
+    
+    Args:
+        filename: Module filename (e.g., 'sox.py', 'iso_27001.py')
+                  - Only lowercase letters, numbers, and underscores allowed
+                  - Automatically adds .py extension if missing
+        content: Complete Python module content with STANDARD constant
+                 - Must include: name, region, overview fields
+                 - Should follow the same structure as existing modules
+    
+    Returns:
+        JSON string with validation results and preview (no file created)
+    
+    Example:
+        content = ""\"
+        '''SOX Compliance Module'''
+        
+        STANDARD = {
+            "name": "Sarbanes-Oxley Act",
+            "region": "United States",
+            "overview": "Financial reporting compliance",
+            "key_requirements": [...]
+        }
+        \"\"\"
+        validateComplianceModule('sox.py', content)
+    """
+    try:
+        result = create_compliance_module_dry_run(filename, content)
+        return json.dumps(result, indent=2)
+    except Exception as e:
+        return json.dumps({
+            "success": False,
+            "error": str(e)
+        }, indent=2)
+
+
+@mcp.tool()
+def createComplianceModule(filename: str, content: str, allow_overwrite: bool = False) -> str:
+    """
+    Create a new compliance module file (WRITES TO DISK)
+    
+    ⚠️ CRITICAL: ALWAYS call validateComplianceModule() first and review results!
+    
+    This creates an actual .py file in the compliance_modules/ directory.
+    The file will be automatically discovered and available for compliance queries.
+    
+    Security Features:
+    - Restricted to compliance_modules/ directory only
+    - Automatic backup of existing files (if overwriting)
+    - Multiple validation layers
+    - Code safety scanning
+    - File size limits (500KB max)
+    
+    Args:
+        filename: Module filename (e.g., 'sox.py')
+                  Must pass security validation
+        content: Complete Python module content with STANDARD constant
+                 Must pass syntax and structure validation
+        allow_overwrite: If True, allows overwriting existing files
+                         (creates backup first)
+                         Default: False (prevents accidental overwrites)
+    
+    Returns:
+        JSON string with creation status, file path, and validation results
+    
+    Workflow:
+        1. Call validateComplianceModule() first
+        2. Review validation results
+        3. If valid, call createComplianceModule()
+        4. Verify file was created with listComplianceModules()
+    
+    Example:
+        # Step 1: Validate
+        result = validateComplianceModule('sox.py', content)
+        # Step 2: Review and confirm validation passed
+        # Step 3: Create
+        result = createComplianceModule('sox.py', content, False)
+    """
+    try:
+        result = create_compliance_module(filename, content, allow_overwrite)
+        return json.dumps(result, indent=2)
+    except Exception as e:
+        return json.dumps({
+            "success": False,
+            "error": str(e)
+        }, indent=2)
+
+# ==================== END COMPLIANCE MODULE GENERATOR TOOLS ====================
 
 
