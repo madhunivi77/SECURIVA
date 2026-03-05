@@ -3,6 +3,11 @@ import { createContext, useContext, useState, useEffect, useCallback } from "rea
 const AuthContext = createContext(null);
 
 export function AuthProvider({ children }) {
+  const LOGOUT_ENDPOINT = "http://localhost:8000/api/logout";
+  const STATUS_ENDPOINT = "http://localhost:8000/api/status";
+  const GOOGLE_LOGIN_ENDPOINT = "http://localhost:8000/login";
+  const SALESFORCE_LOGIN_ENDPOINT = "http://localhost:8000/salesforce/login";
+  const SALESFORCE_LOGOUT_ENDPOINT = "http://localhost:8000/salesforce/logout";
   const [isAuthenticated, setIsAuthenticated] = useState(false);
   const [userEmail, setUserEmail] = useState(null);
   const [isSalesforceConnected, setIsSalesforceConnected] = useState(false);
@@ -11,7 +16,7 @@ export function AuthProvider({ children }) {
 
   const fetchStatus = useCallback(() => {
     setBackendStatus("Connecting...");
-    return fetch("http://localhost:8000/api/status", {
+    return fetch(STATUS_ENDPOINT, {
       credentials: "include",
     })
       .then((res) => res.json())
@@ -37,7 +42,7 @@ export function AuthProvider({ children }) {
 
   const logout = useCallback(async () => {
     try {
-      await fetch("http://localhost:8000/api/logout", {
+      await fetch(LOGOUT_ENDPOINT, {
         method: "POST",
         credentials: "include",
       });
@@ -49,6 +54,31 @@ export function AuthProvider({ children }) {
     }
   }, []);
 
+  const logoutSalesforce = async () => {
+    try {
+      await fetch(SALESFORCE_LOGOUT_ENDPOINT, {
+        method: "POST",
+        credentials: "include"
+      });
+      setIsSalesforceConnected(false);
+      fetchStatus();
+    } catch (error) {
+      console.error("Logout error:", error);
+    }
+  }
+
+  const loginSalesforce = () => {
+    if (!isAuthenticated) {
+      alert("Please login with Google first");
+      return;
+    }
+    window.location.href = SALESFORCE_LOGIN_ENDPOINT;
+  };
+
+  const loginGoogle = () => {
+    window.location.href = GOOGLE_LOGIN_ENDPOINT;
+  };
+
   const value = {
     isAuthenticated,
     userEmail,
@@ -59,6 +89,9 @@ export function AuthProvider({ children }) {
     logout,
     setUserEmail,
     setIsSalesforceConnected,
+    loginGoogle,
+    loginSalesforce,
+    logoutSalesforce
   };
 
   return <AuthContext.Provider value={value}>{children}</AuthContext.Provider>;
