@@ -1,7 +1,7 @@
 import { Outlet } from "react-router-dom";
 import Sidebar from "../components/Sidebar";
-import Navbar from "../components/Navbar";
-import { useState, useEffect } from "react";
+import { useEffect, useState } from "react";
+import DashboardNav from "../components/DashboardNav";
 
 const Dashboard = () => {
 
@@ -24,25 +24,14 @@ const Dashboard = () => {
     return;
   };
 
-  useEffect(() => {
-    // Fetch immediately
-    handleRefresh();
-
-    // Then poll every 30 seconds
-    const interval = setInterval(handleRefresh, 30000);
-
-    // Cleanup when component unmounts
-    return () => clearInterval(interval);
-  }, [handleRefresh]);
-
   return (
     <div className="flex h-screen w-screen bg-white text-black">
       <Sidebar />
       <div className="flex-1 flex flex-col overflow-hidden">
-        <Navbar onCreateAutomation={handleCreateAutomation} onRefresh={handleRefresh} />
+        <DashboardNav onCreateAutomation={handleCreateAutomation} onRefresh={handleRefresh} />
 
         <main className="flex-1 overflow-auto p-6 relative">
-          <Outlet />
+          <Outlet context={{handleRefresh, cards:[cards]}}/>
         </main>
 
       </div>

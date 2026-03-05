@@ -1,3 +1,5 @@
+import faqData from "../data/faqData.json";
+
 export default function FAQ() {
   return (
     <div className="min-h-screen bg-gray-100 dark:bg-gray-900">
@@ -7,68 +9,35 @@ export default function FAQ() {
                 Frequently Asked Questions
             </h2>
 
-            <div className="max-w-4xl mx-auto space-y-4">
+            <div className="max-w-4xl mx-auto space-y-12">
+                {faqData.map((categoryBlock) => (
+                <div key={categoryBlock.category}>
+                    
+                    {/* Category Subheading */}
+                    <h3 className="text-2xl font-semibold mb-6 text-blue-300">
+                    {categoryBlock.category}
+                    </h3>
 
-                <div className="collapse collapse-arrow bg-[#111633]">
-                <input type="checkbox" defaultChecked />
-                <div className="collapse-title text-lg font-medium">
-                    What is SecuriVA?
-                </div>
-                <div className="collapse-content text-blue-200">
-                    SecuriVA is an AI-powered virtual assistant platform designed to automate business processes, enhance customer interactions, and provide enterprise-grade cybersecurity. It integrates with tools such as email, CRM systems, WhatsApp, payment APIs, and productivity suites.
-                </div>
-                </div>
+                    {/* Questions */}
+                    <div className="space-y-4">
+                    {categoryBlock.items.map((faq, index) => (
+                        <div
+                        key={faq.id}
+                        className="collapse collapse-arrow bg-[#111633]"
+                        >
+                        <input type="checkbox" />
+                        <div className="collapse-title text-lg font-medium">
+                            {faq.question}
+                        </div>
+                        <div className="collapse-content text-blue-200">
+                            {faq.answer}
+                        </div>
+                        </div>
+                    ))}
+                    </div>
 
-                <div className="collapse collapse-arrow bg-[#111633]">
-                <input type="checkbox" defaultChecked/>
-                <div className="collapse-title text-lg font-medium">
-                    What can SecuriVA do for my business?
                 </div>
-                <div className="collapse-content text-blue-200">
-                    SecuriVA can automate administrative tasks, manage communication (email, calls, video), process workflows, detect cyber threats, secure sensitive data, and integrate seamlessly with your existing tools.
-                </div>
-                </div>
-
-                <div className="collapse collapse-arrow bg-[#111633]">
-                <input type="checkbox" defaultChecked/>
-                <div className="collapse-title text-lg font-medium">
-                    Who is SecuriVA designed for?
-                </div>
-                <div className="collapse-content text-blue-200">
-                    SecuriVA is designed for small businesses, enterprises, e-commerce platforms, fintech companies, healthcare organizations, educational institutions, and professionals seeking automation and secure AI workflows.
-                </div>
-                </div>
-
-                <div className="collapse collapse-arrow bg-[#111633]">
-                <input type="checkbox" defaultChecked/>
-                <div className="collapse-title text-lg font-medium">
-                    Does SecuriVA support multiple languages?
-                </div>
-                <div className="collapse-content text-blue-200">
-                    Yes. SecuriVA operates in multilingual environments and supports AI-based translation layers.
-                </div>
-                </div>
-
-                <div className="collapse collapse-arrow bg-[#111633]">
-                <input type="checkbox" defaultChecked/>
-                <div className="collapse-title text-lg font-medium">
-                    Is SecuriVA cloud-based or on-premise?
-                </div>
-                <div className="collapse-content text-blue-200">
-                    SecuriVA is cloud-based with optional enterprise on-premise or hybrid deployments available.
-                </div>
-                </div>
-
-                <div className="collapse collapse-arrow bg-[#111633]">
-                <input type="checkbox" defaultChecked/>
-                <div className="collapse-title text-lg font-medium">
-                    How secure is SecuriVA?
-                </div>
-                <div className="collapse-content text-blue-200">
-                    SecuriVA follows enterprise-grade security standards, including encryption, role-based access control, continuous monitoring, and compliance with GDPR, HIPAA, and PCI-DSS.
-                </div>
-                </div>
-
+                ))}
             </div>
         </section>
     </div>
