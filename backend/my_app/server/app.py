@@ -14,6 +14,7 @@ from pathlib import Path
 from .chat_handler import execute_chat_with_tools
 from .salesforce_app import salesforce_app
 from .api_key_manager import generate_api_key, store_api_key, validate_api_key
+from .salesforce_utils import load_oauth_data, save_oauth_data
 from .telesign_auth import (
     send_whatsapp_message,
     send_sms,
@@ -66,7 +67,10 @@ SESSION_COOKIE_MAX_AGE = 30 * 24 * 3600  # 30 days
 import logging
 from logging.handlers import RotatingFileHandler
 
-log_path = Path(__file__).parent / "ai_calls.log"
+if ENVIRONMENT == "production":
+    log_path = Path("/tmp") / "ai_calls.log"
+else:
+    log_path = Path(__file__).parent / "ai_calls.log"
 handler = RotatingFileHandler(log_path, maxBytes=5_000_000, backupCount=5, encoding="utf-8")
 
 logging.basicConfig(
@@ -121,19 +125,17 @@ async def api_status(request):
     salesforce_connected = False
 
     if api_key:
-        oauth_file = Path(__file__).parent / "oauth.json"
-        user_id = validate_api_key(api_key, oauth_file)
+        user_id = validate_api_key(api_key)
 
         if user_id:
             authenticated = True
             try:
-                with open(oauth_file, "r") as f:
-                    data = json.load(f)
-                    for user in data.get("users", []):
-                        if user.get("user_id") == user_id:
-                            user_email = user.get("email")
-                            salesforce_connected = "salesforce" in user.get("services", {})
-                            break
+                data = load_oauth_data()
+                for user in data.get("users", []):
+                    if user.get("user_id") == user_id:
+                        user_email = user.get("email")
+                        salesforce_connected = "salesforce" in user.get("services", {})
+                        break
             except:
                 pass
 
@@ -172,12 +174,7 @@ async def callback(request):
         except:
             pass
 
-        oauth_file = Path(__file__).parent / "oauth.json"
-        if oauth_file.exists():
-            with open(oauth_file, "r") as f:
-                data = json.load(f)
-        else:
-            data = {"users": []}
+        data = load_oauth_data()
 
         users = data.get("users", [])
         user_entry = None
@@ -208,12 +205,10 @@ async def callback(request):
         }
 
         data["users"] = users
-
-        with open(oauth_file, "w") as f:
-            json.dump(data, f, indent=2)
+        save_oauth_data(data)
 
         api_key = generate_api_key()
-        store_api_key(user_id, api_key, oauth_file)
+        store_api_key(user_id, api_key)
 
         response = RedirectResponse(
             url=f"{FRONTEND_URL}?auth=success&email={user_email}",
@@ -262,8 +257,7 @@ async def api_chat(request):
                 status_code=401
             )
 
-        oauth_file = Path(__file__).parent / "oauth.json"
-        user_id = validate_api_key(api_key, oauth_file)
+        user_id = validate_api_key(api_key)
 
         if not user_id:
             return JSONResponse(
@@ -385,8 +379,7 @@ async def api_voice_token(request):
     if not api_key:
         return JSONResponse({"error": "Not authenticated"}, status_code=401)
 
-    oauth_file = Path(__file__).parent / "oauth.json"
-    user_id = validate_api_key(api_key, oauth_file)
+    user_id = validate_api_key(api_key)
     if not user_id:
         return JSONResponse({"error": "Invalid API key"}, status_code=401)
 
@@ -400,8 +393,7 @@ async def api_voice_session(request):
     if not api_key:
         return JSONResponse({"error": "Not authenticated"}, status_code=401)
 
-    oauth_file = Path(__file__).parent / "oauth.json"
-    user_id = validate_api_key(api_key, oauth_file)
+    user_id = validate_api_key(api_key)
     if not user_id:
         return JSONResponse({"error": "Invalid API key"}, status_code=401)
 

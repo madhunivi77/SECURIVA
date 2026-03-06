@@ -17,9 +17,12 @@ class ToolCallLogger:
 
         # Set up log directory
         if log_dir is None:
-            # Default to backend/logs/
-            backend_dir = Path(__file__).parent.parent.parent
-            log_dir = backend_dir / "logs"
+            if os.getenv("ENVIRONMENT") == "production":
+                log_dir = Path("/tmp/logs")
+            else:
+                # Default to backend/logs/
+                backend_dir = Path(__file__).parent.parent.parent
+                log_dir = backend_dir / "logs"
         else:
             log_dir = Path(log_dir)
 

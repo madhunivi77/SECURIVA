@@ -13,7 +13,8 @@ from mcp.client.streamable_http import streamablehttp_client
 from langchain_mcp_adapters.tools import load_mcp_tools
 from .chat_handler import get_mcp_auth_token
 
-MCP_SERVER_URL = "http://localhost:8000/mcp/"
+from ..config.settings import settings
+MCP_SERVER_URL = settings.MCP_SERVER_URL
 
 # How long before we refresh cached tools (seconds)
 TOOL_CACHE_TTL = 300  # 5 minutes
