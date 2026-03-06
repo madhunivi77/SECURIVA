@@ -12,11 +12,9 @@ Security:
 
 import secrets
 import hashlib
-import json
 import time
-from pathlib import Path
 from datetime import datetime
-from typing import Optional, Dict, Any
+from typing import Optional
 
 
 def generate_api_key() -> str:
@@ -61,28 +59,26 @@ def get_key_prefix(api_key: str, length: int = 12) -> str:
     return api_key[:length] + "..."
 
 
-def validate_api_key(api_key: str, oauth_file_path: Path) -> Optional[str]:
+def validate_api_key(api_key: str) -> Optional[str]:
     """
     Validate an API key and return the associated user_id
 
     Args:
         api_key: Plaintext API key from request
-        oauth_file_path: Path to oauth.json file
 
     Returns:
         Optional[str]: user_id if valid, None if invalid
     """
+    from .salesforce_utils import load_oauth_data, save_oauth_data
+
     t0 = time.perf_counter()
-    if not oauth_file_path.exists():
-        return None
 
     # Hash the provided key
     key_hash = hash_api_key(api_key)
     t1 = time.perf_counter()
 
-    # Load oauth.json
-    with open(oauth_file_path, "r") as f:
-        data = json.load(f)
+    # Load oauth data
+    data = load_oauth_data()
     t2 = time.perf_counter()
 
     # Search for matching hash
@@ -91,30 +87,26 @@ def validate_api_key(api_key: str, oauth_file_path: Path) -> Optional[str]:
         api_key_data = user.get("api_key")
         if api_key_data and api_key_data.get("key_hash") == key_hash:
             # Update last_used timestamp
-            update_last_used(user.get("user_id"), oauth_file_path)
+            api_key_data["last_used"] = datetime.now().isoformat()
+            save_oauth_data(data)
             t3 = time.perf_counter()
-            print(f"⏱️  [AUTH]   validate_key: hash={(.0 if not t1 else (t1-t0)*1000):.0f}ms | read={((t2-t1)*1000):.0f}ms | write={((t3-t2)*1000):.0f}ms | total={((t3-t0)*1000):.0f}ms")
+            print(f"\u23f1\ufe0f  [AUTH]   validate_key: hash={(.0 if not t1 else (t1-t0)*1000):.0f}ms | read={((t2-t1)*1000):.0f}ms | write={((t3-t2)*1000):.0f}ms | total={((t3-t0)*1000):.0f}ms")
             return user.get("user_id")
 
     return None
 
 
-def update_last_used(user_id: str, oauth_file_path: Path) -> None:
+def update_last_used(user_id: str) -> None:
     """
     Update the last_used timestamp for a user's API key
 
     Args:
         user_id: User's unique identifier
-        oauth_file_path: Path to oauth.json file
     """
-    if not oauth_file_path.exists():
-        return
+    from .salesforce_utils import load_oauth_data, save_oauth_data
 
-    # Load oauth.json
-    with open(oauth_file_path, "r") as f:
-        data = json.load(f)
+    data = load_oauth_data()
 
-    # Find and update user
     users = data.get("users", [])
     for user in users:
         if user.get("user_id") == user_id:
@@ -122,28 +114,21 @@ def update_last_used(user_id: str, oauth_file_path: Path) -> None:
                 user["api_key"]["last_used"] = datetime.now().isoformat()
                 break
 
-    # Write back
-    with open(oauth_file_path, "w") as f:
-        json.dump(data, f, indent=2)
+    save_oauth_data(data)
 
 
-def store_api_key(user_id: str, api_key: str, oauth_file_path: Path) -> None:
+def store_api_key(user_id: str, api_key: str) -> None:
     """
     Store a new API key for a user (hashed)
 
     Args:
         user_id: User's unique identifier
         api_key: Plaintext API key to store (will be hashed)
-        oauth_file_path: Path to oauth.json file
     """
-    if not oauth_file_path.exists():
-        return
+    from .salesforce_utils import load_oauth_data, save_oauth_data
 
-    # Load oauth.json
-    with open(oauth_file_path, "r") as f:
-        data = json.load(f)
+    data = load_oauth_data()
 
-    # Find and update user
     users = data.get("users", [])
     for user in users:
         if user.get("user_id") == user_id:
@@ -155,37 +140,28 @@ def store_api_key(user_id: str, api_key: str, oauth_file_path: Path) -> None:
             }
             break
 
-    # Write back
-    with open(oauth_file_path, "w") as f:
-        json.dump(data, f, indent=2)
+    save_oauth_data(data)
 
 
-def revoke_api_key(user_id: str, oauth_file_path: Path) -> bool:
+def revoke_api_key(user_id: str) -> bool:
     """
     Revoke (delete) a user's API key
 
     Args:
         user_id: User's unique identifier
-        oauth_file_path: Path to oauth.json file
 
     Returns:
         bool: True if key was revoked, False if user not found
     """
-    if not oauth_file_path.exists():
-        return False
+    from .salesforce_utils import load_oauth_data, save_oauth_data
 
-    # Load oauth.json
-    with open(oauth_file_path, "r") as f:
-        data = json.load(f)
+    data = load_oauth_data()
 
-    # Find and update user
     users = data.get("users", [])
     for user in users:
         if user.get("user_id") == user_id:
             user["api_key"] = None
-            # Write back
-            with open(oauth_file_path, "w") as f:
-                json.dump(data, f, indent=2)
+            save_oauth_data(data)
             return True
 
     return False
