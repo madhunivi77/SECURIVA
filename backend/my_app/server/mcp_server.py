@@ -19,7 +19,8 @@ from pathlib import Path
 import time
 import requests
 import base64
-from .salesforce_utils import get_fresh_salesforce_credentials
+from .salesforce_utils import get_fresh_salesforce_credentials, load_oauth_data
+from ..config.settings import settings
 from .telesign_auth import (
     send_sms,
     verify_phone_number,
@@ -38,9 +39,9 @@ mcp = FastMCP(
     token_verifier=SimpleTokenVerifier(),
     auth=AuthSettings(
         # The issuer URL should point to where the auth server lives.
-        issuer_url=AnyHttpUrl("http://localhost:8000/auth"),
+        issuer_url=AnyHttpUrl(f"{settings.BACKEND_URL}/auth"),
         # The resource server URL is the URL of this MCP server.
-        resource_server_url=AnyHttpUrl("http://localhost:8000/mcp"),
+        resource_server_url=AnyHttpUrl(f"{settings.BACKEND_URL}/mcp"),
     ),
 )
 
@@ -56,26 +57,25 @@ def getGoogleCreds(ctx) -> Credentials:
         user_id = payload.get('sub')
 
         # fetch google tokens for the user
-        with open(Path(__file__).parent / "oauth.json", "r") as f:
-            data = json.load(f)
-            users = data.get("users", [])
-            for user in users:
-                if user.get("user_id") == user_id:
-                    # NEW SCHEMA: Access google service from services object
-                    google_service = user.get("services", {}).get("google")
-                    if not google_service:
-                        print(f"⚠️  [MCP-TOOL] getGoogleCreds: No google service configured for user={user_id}")
-                        return None
-                    credentials_json = google_service.get("credentials")
-                    if not credentials_json:
-                        print(f"⚠️  [MCP-TOOL] getGoogleCreds: No credentials stored for user={user_id}")
-                        return None
-                    creds = Credentials.from_authorized_user_info(json.loads(credentials_json))
-                    print(f"⏱️  [MCP-TOOL] getGoogleCreds: {((time.time()-t0)*1000):.0f}ms")
-                    return creds
+        data = load_oauth_data()
+        users = data.get("users", [])
+        for user in users:
+            if user.get("user_id") == user_id:
+                # NEW SCHEMA: Access google service from services object
+                google_service = user.get("services", {}).get("google")
+                if not google_service:
+                    print(f"⚠️  [MCP-TOOL] getGoogleCreds: No google service configured for user={user_id}")
+                    return None
+                credentials_json = google_service.get("credentials")
+                if not credentials_json:
+                    print(f"⚠️  [MCP-TOOL] getGoogleCreds: No credentials stored for user={user_id}")
+                    return None
+                creds = Credentials.from_authorized_user_info(json.loads(credentials_json))
+                print(f"⏱️  [MCP-TOOL] getGoogleCreds: {((time.time()-t0)*1000):.0f}ms")
+                return creds
 
-            print(f"⚠️  [MCP-TOOL] getGoogleCreds: No user found in oauth.json for user_id={user_id}")
-            return None
+        print(f"⚠️  [MCP-TOOL] getGoogleCreds: No user found in oauth.json for user_id={user_id}")
+        return None
 
     except Exception as e:
         print(f"❌ [MCP-TOOL] getGoogleCreds exception: {type(e).__name__}: {e}")
@@ -576,17 +576,16 @@ def getSalesforceCreds(ctx):
         payload = jwt.decode(encoded_token, JWT_SECRET_KEY, algorithms=["HS256"])
         user_id = payload.get('sub')
 
-        with open(Path(__file__).parent / "oauth.json", "r") as f:
-            data = json.load(f)
-            for user in data.get("users", []):
-                if user["user_id"] == user_id:
-                    # NEW SCHEMA: Access salesforce service from services object
-                    sf_service = user.get("services", {}).get("salesforce")
-                    if sf_service:
-                        current_creds = sf_service.get("credentials")
-                        # Get fresh credentials (will refresh if needed)
-                        fresh_creds = get_fresh_salesforce_credentials(user_id, current_creds)
-                        return fresh_creds
+        data = load_oauth_data()
+        for user in data.get("users", []):
+            if user["user_id"] == user_id:
+                # NEW SCHEMA: Access salesforce service from services object
+                sf_service = user.get("services", {}).get("salesforce")
+                if sf_service:
+                    current_creds = sf_service.get("credentials")
+                    # Get fresh credentials (will refresh if needed)
+                    fresh_creds = get_fresh_salesforce_credentials(user_id, current_creds)
+                    return fresh_creds
         return None
 
     except Exception as e:
