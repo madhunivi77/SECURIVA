@@ -1,13 +1,14 @@
 // About.jsx
+import { Link } from "react-router-dom";
 import Sponsors from "../components/Sponsors";
 import { useTheme } from "../context/ThemeContext";
-import { Check, Phone, Calendar, MessageCircle, Zap, Activity, Lock, ShieldCheck, Server, Mail, MessageSquare, FileText, Workflow, MousePointerClick, ShieldAlert, Network, KeyRound } from "lucide-react";
+import { Check, Phone, Calendar, MessageCircle, Zap, Activity, Lock, ShieldCheck, Server, Mail, MessageSquare, FileText, Workflow, MousePointerClick, ShieldAlert, Network, KeyRound, Layers, Globe, Settings, SlidersHorizontal, BadgeCheck, Play, BookOpen } from "lucide-react";
 
 export default function Features() {
   const { theme } = useTheme();
 
-  const CapabilityCard = ({ icon: Icon, label, description }) => (
-    <div className="flex items-start gap-3.5 rounded-xl border border-gray-100 bg-gray-50 p-4 transition-colors hover:border-gray-200 dark:border-gray-800 dark:bg-gray-900 dark:hover:border-gray-700 flex-1 sm:min-w-[35%] min-w-[70%]">
+  const CapabilityCard = ({ className = "", icon: Icon, label, description }) => (
+    <div className={`flex items-start gap-3.5 rounded-xl border border-gray-100 bg-gray-50 p-4 transition-colors hover:border-gray-200 dark:border-gray-800 dark:bg-gray-900 dark:hover:border-gray-700 flex-1 ${className}`}>
       <div className="flex h-9 w-9 shrink-0 items-center justify-center rounded-lg bg-blue-50 dark:bg-blue-950">
         <Icon className="h-4 w-4 stroke-blue-600 dark:stroke-blue-400" strokeWidth={1.5} />
       </div>
@@ -21,7 +22,7 @@ export default function Features() {
   const CapabilityCards = ({ cards }) => (
     <div className="flex flex-wrap gap-3 mb-6 mx-[15%]">
       {cards.map((card) => (
-        <CapabilityCard key={card.label} {...card} />
+        <CapabilityCard className="sm:min-w-[35%] min-w-[70%]" key={card.label} {...card} />
       ))}
     </div>
   );
@@ -230,6 +231,56 @@ export default function Features() {
         ]}/>
       </section>
 
+      {/* Recap */}
+      <section className="relative overflow-hidden px-8 py-12 mx-[15%]">
+        <h2 className="text-4xl font-normal text-center text-gray-900 mb-2 dark:text-white">
+          Why <span className="italic text-blue-600 dark:text-blue-400">SecuriVA</span> Features Stand Out
+        </h2>
+
+        <div className="flex flex-wrap justify-center gap-3 mb-6">
+          {[
+            { icon: Layers,            label: "All-in-One Platform",         description: "Virtual agents, text AI, VPN, and cybersecurity integrated seamlessly." },
+            { icon: Globe,             label: "Cross-Industry Applicability", description: "Healthcare, finance, e-commerce, SMBs, education, government, nonprofits, agriculture, and more." },
+            { icon: Settings,          label: "Automation + Security",        description: "Designed to both optimize workflows and protect data simultaneously." },
+            { icon: SlidersHorizontal, label: "Customizable and Scalable",    description: "Tailor features for any business size or workflow complexity." },
+            { icon: BadgeCheck,        label: "Compliance and Peace of Mind", description: "Built-in protection ensures legal and regulatory requirements are always met." },
+          ].map((card) => (
+            <CapabilityCard
+              key={card.label}
+              {...card}
+              className="sm:min-w-[35%] min-w-[70%] max-w-[50%]"
+            />
+          ))}
+        </div>
+      </section>
+
+      {/* Call to Action */}
+      <section className="px-8 py-16 text-center">
+        <h2 className="text-4xl font-normal text-gray-900 mb-3 dark:text-white">
+          Experience the <span className="italic text-blue-600 dark:text-blue-400">Power</span> of SecuriVA Features
+        </h2>
+        <p className="text-[15px] font-light text-gray-500 mb-10 max-w-lg mx-auto dark:text-gray-400">
+          Empower your business with secure AI-driven automation and customer interaction.
+        </p>
+        <div className="flex flex-wrap justify-center gap-3">
+          <Link to={"/contact"}>
+            <button className="flex items-center gap-2 rounded-xl bg-red-500 px-6 py-3 text-[14px] font-medium text-white transition-colors hover:bg-red-400">
+              <Play className="h-4 w-4 fill-white stroke-none" />
+              Request a Demo
+            </button>
+          </Link>
+          <button onClick={() => window.scrollTo({ top: 0, behavior: "smooth" })} className="flex items-center gap-2 rounded-xl border border-gray-200 bg-white px-6 py-3 text-[14px] font-medium text-gray-800 transition-colors hover:border-gray-300 hover:bg-gray-50 dark:border-gray-700 dark:bg-gray-900 dark:text-white dark:hover:border-gray-600 dark:hover:bg-gray-800">
+            <BookOpen className="h-4 w-4 stroke-gray-500 dark:stroke-gray-400" strokeWidth={1.5} />
+            Learn More About Each Feature
+          </button>
+          <Link to={"/contact"}>
+            <button className="flex items-center gap-2 rounded-xl border border-gray-200 bg-white px-6 py-3 text-[14px] font-medium text-gray-800 transition-colors hover:border-gray-300 hover:bg-gray-50 dark:border-gray-700 dark:bg-gray-900 dark:text-white dark:hover:border-gray-600 dark:hover:bg-gray-800">
+              <Mail className="h-4 w-4 stroke-gray-500 dark:stroke-gray-400" strokeWidth={1.5} />
+              Contact Our Team
+            </button>
+          </Link>
+        </div>
+      </section>
 
       <Sponsors className="bg-white mt-10 pt-5 text-center text-black text-3xl"/>
     </div>

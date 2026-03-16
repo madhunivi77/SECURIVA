@@ -2,7 +2,7 @@ import { useAuth } from "../context/AuthContext";
 import { useTheme } from "../context/ThemeContext";
 import { useState } from "react";
 import NavOption from "./NavOption";
-import { useNavigate } from "react-router-dom";
+import { Link, useNavigate } from "react-router-dom";
 
 export default function Navbar(){
     const [showStatus, setShowStatus] = useState(false);
@@ -122,11 +122,13 @@ export default function Navbar(){
               onClick={() => navigate("/")}
             />
 
-            <button
-              className="w-50 h-13.5 bg-red-500"
-            >
-              Request a Demo
-            </button>
+            <Link to={"/contact"}>
+              <button
+                className="w-50 h-13.5 bg-red-500 text-white"
+              >
+                Request a Demo
+              </button>
+            </Link>
           </div>
 
 
