@@ -6,7 +6,7 @@ export default function About() {
     <div className="min-h-screen bg-gray-100 dark:bg-gray-900">
 
       {/* ---------- HERO ---------- */}
-      <section className="hero py-24 bg-gradient-to-br from-blue-900 to-black text-white">
+      <section className="hero py-24 bg-linear-to-br from-blue-900 to-black text-white">
         <div className="hero-content text-center max-w-4xl">
           <div>
             <h1 className="text-5xl font-bold mb-6">About SecuriVA</h1>
