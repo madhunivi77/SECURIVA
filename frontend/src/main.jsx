@@ -23,6 +23,7 @@ import Support from "./pages/Support.jsx";
 import About from "./pages/About.jsx";
 import Contact from "./pages/Contact.jsx";
 import FAQ from "./pages/FAQ.jsx";
+import Solutions from './pages/Solutions.jsx';
 
 const router = createBrowserRouter([
   {
@@ -36,6 +37,10 @@ const router = createBrowserRouter([
       {
         path: '/agent',
         element: <Agent />
+      },
+      {
+        path: '/solutions',
+        element: <Solutions />
       },
       {
         path: '/features',

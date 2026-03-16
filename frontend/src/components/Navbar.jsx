@@ -52,7 +52,7 @@ export default function Navbar(){
 
                 <NavOption label={"Features"} target={"features"} theme={theme.text}/>
 
-                <NavOption label={"Solutions"} target={"agent"} theme={theme.text}/>
+                <NavOption label={"Solutions"} target={"solutions"} theme={theme.text}/>
 
                 <NavOption label={"Pricing"} target={"pricing"} theme={theme.text}/>
 
