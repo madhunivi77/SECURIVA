@@ -50,7 +50,7 @@ export default function Navbar(){
               <div style={{ display: "flex", gap: "10px" }}>
                 <NavOption label={"About"} target={"about"} theme={theme.text}/>
 
-                <NavOption label={"Features"} target={"security"} theme={theme.text}/>
+                <NavOption label={"Features"} target={"features"} theme={theme.text}/>
 
                 <NavOption label={"Solutions"} target={"agent"} theme={theme.text}/>
 
