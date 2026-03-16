@@ -1,4 +1,3 @@
-import "./Agent.css";
 import { ChevronRight} from "lucide-react";
 import { useTheme } from "../context/ThemeContext";
 function Agent() {
