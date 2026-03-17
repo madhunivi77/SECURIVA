@@ -2344,6 +2344,225 @@ def generateComplianceReport(standards_json: str, include_checklist: bool = True
 # ==================== END COMPLIANCE TOOLS ====================
 
 
+# ==================== COMPLIANCE CONFIRMATION TOOLS ====================
+# Tools for AI to confirm understanding before taking actions
+
+@mcp.tool()
+def confirmComplianceUnderstanding(
+    user_request: str,
+    my_understanding: str,
+    planned_action: str,
+    standards_involved: str = ""
+) -> str:
+    """
+    Confirm understanding with the user before generating compliance documents or reports.
+    
+    USE THIS TOOL when a user asks you to create, generate, or analyze compliance information.
+    This ensures accuracy and allows the user to correct any misunderstandings.
+    
+    Args:
+        user_request: The exact request from the user (e.g., "Create a HIPAA compliance report")
+        my_understanding: Your interpretation of what the user wants
+        planned_action: What you plan to do next (e.g., "Generate comprehensive HIPAA report with checklist")
+        standards_involved: Compliance standards you'll use (e.g., "HIPAA, GDPR")
+    
+    Returns:
+        JSON string formatted as a confirmation prompt for the user
+    
+    Example:
+        confirmComplianceUnderstanding(
+            user_request="I need GDPR and HIPAA compliance docs",
+            my_understanding="You need comprehensive compliance documentation for both GDPR and HIPAA standards",
+            planned_action="Generate full compliance reports including requirements, checklists, and penalties",
+            standards_involved="GDPR, HIPAA"
+        )
+    
+    The user will respond with confirmation or corrections, and you should proceed accordingly.
+    """
+    try:
+        confirmation = {
+            "message_type": "confirmation_request",
+            "original_request": user_request,
+            "my_understanding": my_understanding,
+            "planned_action": planned_action,
+            "standards_involved": standards_involved,
+            "confirmation_prompt": f"""
+📋 **Let me confirm I understood correctly:**
+
+**Your Request:** {user_request}
+
+**My Understanding:** {my_understanding}
+
+**What I'll Do:** {planned_action}
+{f'**Standards:** {standards_involved}' if standards_involved else ''}
+
+✅ **Is this correct?** 
+- Reply "yes" or "confirm" to proceed
+- Reply with corrections if I misunderstood something
+
+""",
+            "next_steps": [
+                "If confirmed: Proceed with planned action",
+                "If corrected: Adjust understanding and re-confirm",
+                "If unclear: Ask clarifying questions"
+            ]
+        }
+        
+        return json.dumps(confirmation, indent=2)
+        
+    except Exception as e:
+        return json.dumps({
+            "success": False,
+            "error": str(e)
+        }, indent=2)
+
+
+@mcp.tool()
+def summarizeComplianceRequest(
+    standards: str,
+    information_needed: str,
+    output_format: str = "report"
+) -> str:
+    """
+    Summarize what compliance information will be gathered before retrieving it.
+    
+    Use this to show the user what data you'll collect and in what format.
+    
+    Args:
+        standards: Comma-separated list of standards (e.g., "GDPR, HIPAA, PCI-DSS")
+        information_needed: What information to retrieve (e.g., "requirements, penalties, checklists")
+        output_format: How the data will be presented (e.g., "report", "checklist", "comparison table")
+    
+    Returns:
+        JSON string with summary of what will be retrieved
+    
+    Example:
+        summarizeComplianceRequest(
+            standards="GDPR, HIPAA",
+            information_needed="breach notification requirements, penalties",
+            output_format="comparison table"
+        )
+    """
+    try:
+        standards_list = [s.strip() for s in standards.split(",")]
+        info_list = [i.strip() for i in information_needed.split(",")]
+        
+        summary = {
+            "message_type": "request_summary",
+            "summary": f"""
+📊 **Compliance Information Summary**
+
+**Standards to Query:** {len(standards_list)}
+{chr(10).join([f"  • {std}" for std in standards_list])}
+
+**Information to Retrieve:**
+{chr(10).join([f"  • {info}" for info in info_list])}
+
+**Output Format:** {output_format}
+
+**Estimated Details:** This will provide comprehensive {', '.join(info_list)} for {len(standards_list)} compliance standard(s).
+
+**Ready to proceed?** I'll gather this information for you.
+""",
+            "standards_count": len(standards_list),
+            "standards": standards_list,
+            "information_types": info_list,
+            "output_format": output_format
+        }
+        
+        return json.dumps(summary, indent=2)
+        
+    except Exception as e:
+        return json.dumps({
+            "success": False,
+            "error": str(e)
+        }, indent=2)
+
+
+@mcp.tool()
+def validateComplianceParameters(
+    standards: str,
+    include_checklist: str = "true",
+    include_penalties: str = "true",
+    include_breach_info: str = "true"
+) -> str:
+    """
+    Validate parameters before generating a compliance report and show what will be included.
+    
+    Use this before calling generateComplianceReport to confirm scope with the user.
+    
+    Args:
+        standards: Comma-separated standards (e.g., "gdpr, hipaa, pci_dss")
+        include_checklist: Whether to include audit checklists ("true" or "false")
+        include_penalties: Whether to include penalty information ("true" or "false")
+        include_breach_info: Whether to include breach notification requirements ("true" or "false")
+    
+    Returns:
+        JSON string with validation results and what will be included
+    
+    Example:
+        validateComplianceParameters(
+            standards="gdpr, hipaa",
+            include_checklist="true",
+            include_penalties="true",
+            include_breach_info="false"
+        )
+    """
+    try:
+        standards_list = [s.strip().lower() for s in standards.split(",")]
+        valid_standards = ["gdpr", "hipaa", "pci_dss", "sox"]
+        
+        # Validate standards
+        invalid = [s for s in standards_list if s not in valid_standards]
+        
+        checklist_bool = include_checklist.lower() == "true"
+        penalties_bool = include_penalties.lower() == "true"
+        breach_bool = include_breach_info.lower() == "true"
+        
+        validation = {
+            "valid": len(invalid) == 0,
+            "standards": {
+                "requested": standards_list,
+                "valid": [s for s in standards_list if s in valid_standards],
+                "invalid": invalid
+            },
+            "report_scope": {
+                "checklist_included": checklist_bool,
+                "penalties_included": penalties_bool,
+                "breach_notification_included": breach_bool
+            },
+            "preview": f"""
+🔍 **Report Configuration Preview**
+
+**Standards to Include:** {', '.join([s.upper() for s in standards_list if s in valid_standards])}
+
+**Report Will Include:**
+{'✅' if checklist_bool else '❌'} Compliance Checklists
+{'✅' if penalties_bool else '❌'} Penalty Information
+{'✅' if breach_bool else '❌'} Breach Notification Requirements
+
+**Status:** {'✅ Ready to generate' if len(invalid) == 0 else f'❌ Invalid standards: {", ".join(invalid)}'}
+
+{f'**Note:** Invalid standards will be skipped: {", ".join(invalid)}' if invalid else ''}
+"""
+        }
+        
+        if invalid:
+            validation["message"] = f"Warning: These standards are not recognized: {', '.join(invalid)}"
+            validation["available_standards"] = valid_standards
+        
+        return json.dumps(validation, indent=2)
+        
+    except Exception as e:
+        return json.dumps({
+            "success": False,
+            "error": str(e)
+        }, indent=2)
+
+
+# ==================== END COMPLIANCE CONFIRMATION TOOLS ====================
+
+
 # ==================== COMPLIANCE MODULE GENERATOR TOOLS ====================
 # Secure tools for AI to generate new compliance modules
 
@@ -2468,5 +2687,4 @@ def createComplianceModule(filename: str, content: str, allow_overwrite: bool = 
         }, indent=2)
 
 # ==================== END COMPLIANCE MODULE GENERATOR TOOLS ====================
-
 
