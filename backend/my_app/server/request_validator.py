@@ -16,9 +16,10 @@ MISALIGNMENT_PATTERNS = [
     (r'(?:from now on|starting now),?\s+you\s+(?:are|will be)', "identity override"),
     
     # Accent/language style changes
-    (r'(?:in|with|using)\s+(?:a\s+)?(?:pirate|scottish|british|southern|valley girl|surfer|brooklyn|cowboy|robot|yoda|shakespeare)\s+(?:accent|voice|style)', "accent request"),
-    (r'(?:pirate|scottish|british|southern|valley girl|surfer|brooklyn|cowboy)\s+accent', "accent request"),
-    (r'(?:but|and|or)\s+(?:in|with|using)\s+(?:a\s+)?(?:pirate|scottish|british|southern|cowboy)\s+(?:accent|voice|style|tone)', "accent request"),
+    (r'(?:in|with|using)\s+(?:a\s+)?(?:pirate|scottish|british|southern|valley girl|surfer|brooklyn|cowboy|robot|yoda|shakespeare|country girl)\s+(?:accent|voice|style)', "accent request"),
+    (r'(?:pirate|scottish|british|southern|valley girl|surfer|brooklyn|cowboy|country girl)\s+accent', "accent request"),
+    (r'(?:but|and|or)\s+(?:\w+\s+){0,3}(?:in|with|using)\s+(?:a\s+)?(?:pirate|scottish|british|southern|cowboy|country girl)\s+(?:accent|voice|style|tone)', "accent request"),
+    (r'say\s+it\s+(?:in|with|using)\s+(?:a\s+)?(?:pirate|scottish|british|southern|valley girl|surfer|brooklyn|cowboy|country girl)\s+(?:accent|voice|style)', "accent request"),
     (r'speak\s+in\s+(?:all\s+)?(?:caps|uppercase|lowercase)', "formatting manipulation"),
     (r'use\s+(?:only\s+)?emojis', "emoji spam"),
     
@@ -86,16 +87,16 @@ def validate_user_request(message: str) -> Tuple[bool, str, str]:
     if not message or len(message.strip()) < 3:
         return True, "legitimate", "Valid request"
     
-    # Check for legitimate patterns first (whitelist)
-    for pattern in COMPILED_LEGITIMATE:
-        if pattern.search(message):
-            return True, "legitimate", "Compliance-related request"
-    
-    # Check for misalignment patterns
+    # Check for misalignment patterns FIRST (blacklist takes priority)
     for pattern, category in COMPILED_PATTERNS:
         match = pattern.search(message)
         if match:
             return False, category, f"Detected {category} attempt: '{match.group()}'"
+    
+    # Then check for legitimate patterns (whitelist)
+    for pattern in COMPILED_LEGITIMATE:
+        if pattern.search(message):
+            return True, "legitimate", "Compliance-related request"
     
     # If neither whitelist nor blacklist match, assume legitimate
     # (We don't want to block too aggressively)
@@ -108,14 +109,23 @@ def validate_conversation(messages: List[Dict[str, str]]) -> Tuple[bool, str, st
     
     Args:
         messages: List of message dicts with 'role' and 'content'
+                  Can also handle Pydantic ChatCompletionMessage objects
     
     Returns:
         Tuple of (is_valid, category, message)
     """
     # Only validate user messages (not system/assistant messages)
     for msg in messages:
-        if msg.get('role') == 'user':
+        # Handle both dict and Pydantic objects
+        if isinstance(msg, dict):
+            role = msg.get('role')
             content = msg.get('content', '')
+        else:
+            # Pydantic object (ChatCompletionMessage, etc.)
+            role = getattr(msg, 'role', None)
+            content = getattr(msg, 'content', '')
+        
+        if role == 'user':
             is_valid, category, message = validate_user_request(content)
             if not is_valid:
                 return False, category, message
