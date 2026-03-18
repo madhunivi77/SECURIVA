@@ -16,7 +16,9 @@ MISALIGNMENT_PATTERNS = [
     (r'(?:from now on|starting now),?\s+you\s+(?:are|will be)', "identity override"),
     
     # Accent/language style changes
-    (r'(?:pirate|scottish|british|southern|valley girl|surfer|brooklyn)\s+accent', "accent request"),
+    (r'(?:in|with|using)\s+(?:a\s+)?(?:pirate|scottish|british|southern|valley girl|surfer|brooklyn|cowboy|robot|yoda|shakespeare)\s+(?:accent|voice|style)', "accent request"),
+    (r'(?:pirate|scottish|british|southern|valley girl|surfer|brooklyn|cowboy)\s+accent', "accent request"),
+    (r'(?:but|and|or)\s+(?:in|with|using)\s+(?:a\s+)?(?:pirate|scottish|british|southern|cowboy)\s+(?:accent|voice|style|tone)', "accent request"),
     (r'speak\s+in\s+(?:all\s+)?(?:caps|uppercase|lowercase)', "formatting manipulation"),
     (r'use\s+(?:only\s+)?emojis', "emoji spam"),
     
