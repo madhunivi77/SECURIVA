@@ -2172,7 +2172,7 @@ def getComplianceRequirements(standard: str, requirement_id: str = None) -> str:
 @mcp.tool()
 def getComplianceChecklist(standard: str) -> str:
     """
-    Get a compliance audit checklist for a standard
+    Get a compliance audit checklist for the specified standard
     
     Args:
         standard: Compliance standard name ('gdpr', 'hipaa', 'pci_dss')
@@ -2622,7 +2622,7 @@ def validateComplianceModule(filename: str, content: str) -> str:
             "overview": "Financial reporting compliance",
             "key_requirements": [...]
         }
-        \"\"\"
+        \"""
         validateComplianceModule('sox.py', content)
     """
     try:
@@ -2687,4 +2687,120 @@ def createComplianceModule(filename: str, content: str, allow_overwrite: bool = 
         }, indent=2)
 
 # ==================== END COMPLIANCE MODULE GENERATOR TOOLS ====================
+
+# Even better: Use FastMCP's native tool listing if available
+
+@mcp.tool()
+def listAvailableTools(context: Context, category: str = "all") -> str:
+    """
+    List all available MCP tools using FastMCP's native tool registry
+    
+    Args:
+        category: Filter by category (all, gmail, calendar, salesforce, telesign, compliance)
+    
+    Returns:
+        JSON string with all registered tools and their metadata
+    """
+    try:
+        import inspect
+        import json
+        
+        # FastMCP stores tools in mcp.tools or similar
+        # Let's access the tool registry directly
+        tools_dict = {}
+        
+        # Get the current module to find all decorated functions
+        current_module = inspect.getmodule(inspect.currentframe())
+        
+        # Find all functions decorated with @mcp.tool()
+        for name, obj in inspect.getmembers(current_module):
+            if callable(obj) and hasattr(obj, '__name__'):
+                # Check if it's a tool by looking for context parameter
+                sig = None
+                try:
+                    sig = inspect.signature(obj)
+                    params = list(sig.parameters.keys())
+                    
+                    # MCP tools have 'context' as first parameter
+                    if params and params[0] == 'context':
+                        # This is an MCP tool!
+                        tool_name = obj.__name__
+                        
+                        # Extract metadata
+                        tool_info = {
+                            "name": tool_name,
+                            "parameters": []
+                        }
+                        
+                        # Get parameters (skip context)
+                        for param_name, param in list(sig.parameters.items())[1:]:
+                            param_info = {
+                                "name": param_name,
+                                "type": str(param.annotation).replace("<class '", "").replace("'>", "") if param.annotation != inspect.Parameter.empty else "Any",
+                                "required": param.default == inspect.Parameter.empty
+                            }
+                            if param.default != inspect.Parameter.empty:
+                                param_info["default"] = str(param.default)
+                            tool_info["parameters"].append(param_info)
+                        
+                        # Extract docstring
+                        docstring = inspect.getdoc(obj)
+                        if docstring:
+                            # Get first line as short description
+                            lines = docstring.strip().split('\n')
+                            tool_info["description"] = lines[0] if lines else ""
+                            tool_info["full_docs"] = docstring
+                        
+                        # Categorize
+                        name_lower = tool_name.lower()
+                        if any(x in name_lower for x in ['email', 'gmail', 'draft']):
+                            cat = 'gmail'
+                        elif any(x in name_lower for x in ['calendar', 'event', 'attendee']):
+                            cat = 'calendar'
+                        elif any(x in name_lower for x in ['salesforce', 'case', 'account', 'contact', 'opportunity', 'soql', 'sosl', 'chatter', 'task']):
+                            cat = 'salesforce'
+                        elif any(x in name_lower for x in ['sms', 'phone', 'voice', 'verification', 'telesign', 'message', 'batch']):
+                            cat = 'telesign'
+                        elif any(x in name_lower for x in ['compliance', 'gdpr', 'hipaa', 'pci', 'penalty', 'breach', 'sox']):
+                            cat = 'compliance'
+                        else:
+                            cat = 'utility'
+                        
+                        if cat not in tools_dict:
+                            tools_dict[cat] = []
+                        tools_dict[cat].append(tool_info)
+                        
+                except (ValueError, TypeError):
+                    # Not a valid function signature
+                    continue
+        
+        # Filter by category
+        if category.lower() != "all":
+            if category.lower() in tools_dict:
+                tools_dict = {category.lower(): tools_dict[category.lower()]}
+            else:
+                return json.dumps({
+                    "success": False,
+                    "error": f"Category '{category}' not found",
+                    "available_categories": list(tools_dict.keys())
+                }, indent=2)
+        
+        # Calculate totals
+        total = sum(len(v) for v in tools_dict.values())
+        
+        return json.dumps({
+            "success": True,
+            "total_tools": total,
+            "categories": list(tools_dict.keys()),
+            "tools": tools_dict,
+            "note": "Tools discovered dynamically at runtime"
+        }, indent=2)
+        
+    except Exception as e:
+        import traceback
+        return json.dumps({
+            "success": False,
+            "error": str(e),
+            "traceback": traceback.format_exc()
+        }, indent=2)
 
