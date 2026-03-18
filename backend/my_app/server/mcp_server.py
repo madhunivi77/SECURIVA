@@ -49,6 +49,10 @@ from .compliance_module_generator import (
     list_compliance_modules
 )
 
+# Import procedural guidance resources
+from pathlib import Path as PathlibPath
+import json as json_lib
+
 JWT_SECRET_KEY = os.getenv("JWT_SECRET_KEY")
 
 # 1. Create the MCP server instance with the token verifier and auth settings
@@ -2687,4 +2691,289 @@ def createComplianceModule(filename: str, content: str, allow_overwrite: bool = 
         }, indent=2)
 
 # ==================== END COMPLIANCE MODULE GENERATOR TOOLS ====================
+
+
+# ==================== COMPLIANCE PROCEDURAL GUIDANCE TOOLS ====================
+# Tools for accessing step-by-step procedures, decision trees, and real-world examples
+
+@mcp.tool()
+def getComplianceProcedure(procedure_type: str, regulation: str = None) -> str:
+    """
+    Get step-by-step compliance procedures for handling data.
+    
+    Returns detailed, actionable procedures with regulation references,
+    compliant/non-compliant examples, and implementation checklists.
+    
+    🎯 USE THIS WHEN: User asks "How do I...", "What's the process for...", "Steps to..."
+    
+    Available Procedures:
+    - data_collection: How to collect user data compliantly
+    - data_storage: How to store data securely  
+    - data_sharing: How to share data with third parties
+    - data_deletion: How to handle deletion requests
+    - breach_response: How to respond to data breaches
+    
+    Args:
+        procedure_type: Type of procedure - one of:
+                       'data_collection', 'data_storage', 'data_sharing',
+                       'data_deletion', 'breach_response'
+        regulation: Optional filter by regulation (e.g., 'GDPR', 'CCPA', 'HIPAA')
+                   If provided, highlights requirements for that specific regulation
+    
+    Returns:
+        JSON string with step-by-step procedure including:
+        - Title and description
+        - Applicable regulations
+        - Detailed steps with actions
+        - Regulation references for each step
+        - Compliant vs non-compliant examples
+        - Implementation checklists
+    
+    Example:
+        getComplianceProcedure('data_deletion')
+        getComplianceProcedure('data_collection', 'GDPR')
+    """
+    try:
+        # Import procedures from the procedures module
+        from .compliance_modules.procedures.data_handling_procedures import PROCEDURES
+        
+        # Validate procedure type
+        valid_procedures = list(PROCEDURES.keys())
+        if procedure_type not in valid_procedures:
+            return json.dumps({
+                "success": False,
+                "error": f"Invalid procedure_type. Must be one of: {', '.join(valid_procedures)}",
+                "available_procedures": valid_procedures
+            }, indent=2)
+        
+        # Get the procedure
+        procedure = PROCEDURES[procedure_type]
+        
+        # If regulation filter is provided, add note
+        result = {
+            "success": True,
+            "procedure_type": procedure_type,
+            "procedure": procedure
+        }
+        
+        if regulation:
+            result["regulation_filter"] = regulation.upper()
+            result["note"] = f"Showing procedure with focus on {regulation.upper()} requirements. All regulations are listed, but {regulation.upper()} is highlighted."
+        
+        return json.dumps(result, indent=2)
+        
+    except ImportError as e:
+        return json.dumps({
+            "success": False,
+            "error": f"Could not load procedures module: {str(e)}. The procedures file may not exist."
+        }, indent=2)
+    except Exception as e:
+        return json.dumps({
+            "success": False,
+            "error": str(e)
+        }, indent=2)
+
+
+@mcp.tool()
+def getComplianceDecisionTree(scenario: str) -> str:
+    """
+    Get an interactive decision tree flowchart for making compliance decisions.
+    
+    Returns a tree structure with yes/no decision points that guide users
+    to the correct action. Perfect for real-time decision-making.
+    
+    🎯 USE THIS WHEN: User asks "Can I...", "Should I...", "Is it ok to..."
+    
+    Available Decision Trees:
+    - email_compliance: "Can I email customer data to this vendor?"
+    - data_sharing: "Should I share data with this third party?"
+    - data_deletion: "How do I handle this deletion request?"
+    - vendor_access: "Should I give this vendor access to our systems?"
+    
+    Args:
+        scenario: Decision tree scenario - one of:
+                 'email_compliance', 'data_sharing', 'data_deletion', 'vendor_access'
+    
+    Returns:
+        JSON string with interactive decision tree including:
+        - Tree title and description
+        - Start node to begin decision process
+        - Decision nodes with questions and guidance
+        - Possible actions with required steps
+        - Quick reference for common scenarios
+    
+    How to Use the Tree:
+        1. Start at the start_node
+        2. Answer the question at each node
+        3. Follow 'next_node' based on answer  
+        4. When you reach an action, follow the steps provided
+    
+    Example:
+        getComplianceDecisionTree('email_compliance')
+        # Returns tree with nodes: check requester identity → check authorization → 
+        # check data minimization → actions (approve, deny, report phishing, etc.)
+    """
+    try:
+        # Load decision trees from JSON file
+        procedures_dir = PathlibPath(__file__).parent / "compliance_modules" / "procedures"
+        trees_file = procedures_dir / "decision_trees.json"
+        
+        if not trees_file.exists():
+            return json.dumps({
+                "success": False,
+                "error": "Decision trees file not found. The file may not have been created yet."
+            }, indent=2)
+        
+        with open(trees_file, 'r', encoding='utf-8') as f:
+            trees = json_lib.load(f)
+        
+        # Map scenario names to tree keys
+        tree_map = {
+            'email_compliance': 'email_compliance_decision',
+            'data_sharing': 'data_sharing_decision',
+            'data_deletion': 'data_deletion_decision',
+            'vendor_access': 'vendor_access_decision'
+        }
+        
+        if scenario not in tree_map:
+            return json.dumps({
+                "success": False,
+                "error": f"Invalid scenario. Must be one of: {', '.join(tree_map.keys())}",
+                "available_scenarios": list(tree_map.keys())
+            }, indent=2)
+        
+        tree_key = tree_map[scenario]
+        
+        if tree_key not in trees:
+            return json.dumps({
+                "success": False,
+                "error": f"Decision tree '{tree_key}' not found in file"
+            }, indent=2)
+        
+        tree = trees[tree_key]
+        
+        result = {
+            "success": True,
+            "scenario": scenario,
+            "decision_tree": tree,
+            "usage_instructions": {
+                "step_1": "Start at the node indicated by 'start_node'",
+                "step_2": "Read the question and guidance at each node",
+                "step_3": "Based on your situation, follow the appropriate 'next_node' path",
+                "step_4": "When you reach an action (no next_node), follow the steps provided",
+                "tip": "Use the quick_reference if available for instant answers to common questions"
+            }
+        }
+        
+        return json.dumps(result, indent=2)
+        
+    except FileNotFoundError:
+        return json.dumps({
+            "success": False,
+            "error": "Decision trees file not found"
+        }, indent=2)
+    except json_lib.JSONDecodeError as e:
+        return json.dumps({
+            "success": False,
+            "error": f"Invalid JSON in decision trees file: {str(e)}"
+        }, indent=2)
+    except Exception as e:
+        return json.dumps({
+            "success": False,
+            "error": str(e)
+        }, indent=2)
+
+
+@mcp.tool()
+def getComplianceExamples(topic: str, show_non_compliant: bool = True) -> str:
+    """
+    Get real-world examples of compliant vs non-compliant actions.
+    
+    Returns concrete scenarios with code examples, explanations, and consequences.
+    Perfect for training, learning, and understanding what to do (and what NOT to do).
+    
+    🎯 USE THIS WHEN: User asks "Can you give me an example of...", "Show me how to...",
+                      "What's the right way to..."
+    
+    Available Topics:
+    - email_scenarios: Handling customer data requests, marketing emails, vendor requests
+    - technical_scenarios: Password storage, logging, API auth, database encryption  
+    - process_scenarios: Employee onboarding/termination, consent management
+    - data_breach_scenarios: Discovering and responding to breaches
+    
+    Args:
+        topic: Example topic - one of:
+              'email_scenarios', 'technical_scenarios', 'process_scenarios', 
+              'data_breach_scenarios'
+        show_non_compliant: If True (default), includes non-compliant examples
+                           If False, shows only compliant examples
+                           (Showing both helps users understand contrast)
+    
+    Returns:
+        JSON string with array of scenarios, each including:
+        - Scenario description and situation
+        - Applicable regulations (GDPR, CCPA, HIPAA, etc.)
+        - Compliant response with steps, code examples, and explanation
+        - Non-compliant response with examples and consequences (if show_non_compliant=True)
+    
+    Example:
+        getComplianceExamples('technical_scenarios')
+        # Returns examples: password hashing (bcrypt vs plaintext),
+        # logging (user IDs vs PII), API auth (JWT vs no auth)
+        
+        getComplianceExamples('email_scenarios', False)
+        # Returns only compliant examples without non-compliant counterparts
+    """
+    try:
+        # Import examples from the examples library
+        from .compliance_modules.procedures.examples_library import EXAMPLES
+        
+        # Validate topic
+        valid_topics = list(EXAMPLES.keys())
+        if topic not in valid_topics:
+            return json.dumps({
+                "success": False,
+                "error": f"Invalid topic. Must be one of: {', '.join(valid_topics)}",
+                "available_topics": valid_topics
+            }, indent=2)
+        
+        # Get examples for the topic
+        examples = EXAMPLES[topic]
+        
+        # Optionally filter out non-compliant examples
+        if not show_non_compliant:
+            filtered_examples = []
+            for example in examples:
+                filtered_example = example.copy()
+                if 'non_compliant' in filtered_example or 'non_compliant_response' in filtered_example:
+                    # Remove non-compliant parts
+                    filtered_example.pop('non_compliant', None)
+                    filtered_example.pop('non_compliant_response', None)
+                    filtered_example['note'] = "Non-compliant examples hidden (show_non_compliant=False)"
+                filtered_examples.append(filtered_example)
+            examples = filtered_examples
+        
+        result = {
+            "success": True,
+            "topic": topic,
+            "examples_count": len(examples),
+            "showing_non_compliant": show_non_compliant,
+            "examples": examples,
+            "usage_tip": "Study both compliant and non-compliant examples to understand the contrast. Code examples are provided where applicable."
+        }
+        
+        return json.dumps(result, indent=2)
+        
+    except ImportError as e:
+        return json.dumps({
+            "success": False,
+            "error": f"Could not load examples library: {str(e)}. The examples file may not exist."
+        }, indent=2)
+    except Exception as e:
+        return json.dumps({
+            "success": False,
+            "error": str(e)
+        }, indent=2)
+
+# ==================== END COMPLIANCE PROCEDURAL GUIDANCE TOOLS ====================
 
