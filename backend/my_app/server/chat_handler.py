@@ -13,6 +13,7 @@ from langchain_core.messages import AIMessage, ToolMessage
 from langchain.agents import create_agent
 from langchain_openai import ChatOpenAI
 from langchain_groq import ChatGroq
+from .request_validator import should_block_request
 
 
 # --- Configuration ---
@@ -100,6 +101,15 @@ async def execute_chat_with_tools(messages: list, model: str = None, api: str = 
         model = DEFAULT_MODEL
     if not api:
         api = DEFAULT_API
+
+    # Validate request for misalignment attempts
+    should_block, rejection_message = should_block_request(messages)
+    if should_block:
+        return {
+            "response": rejection_message,
+            "tool_calls": [],
+            "blocked": True
+        }
 
     # Initialize logger and generate session ID
     logger = get_tool_logger()
