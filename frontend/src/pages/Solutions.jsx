@@ -235,7 +235,7 @@ export default function Solutions(){
         {/* Header */}
         <div className="text-center mb-10">
         <h2 className="text-4xl font-normal text-gray-900 mb-3 dark:text-white">
-            Why Choose <span className="italic text-blue-600 dark:text-blue-400">SecuriVA</span>
+            Why Choose SecuriVA
         </h2>
         <p className="text-[15px] font-light text-gray-500 max-w-xl mx-auto leading-relaxed dark:text-gray-400">
             SecuriVA isn't just another virtual assistant — it's your AI-powered business partner for automation, security, and growth.
