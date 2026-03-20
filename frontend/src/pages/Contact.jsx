@@ -47,8 +47,23 @@ export default function Contact() {
       </section>
 
       {/* ---------- CONTACT SERVICES ---------- */}
-      <section className="py-20 px-10">
-        <div className="max-w-6xl mx-auto">
+      <section className="relative py-20 px-10 overflow-hidden">
+
+        {/* 🔵 Background Image */}
+        <img
+          src="/Cybersecurity_Protection.png"
+          alt="Cybersecurity Protection"
+          className="absolute inset-0 w-full h-full object-cover opacity-60"
+        />
+
+        {/* 🎨 Horizontal gradient fade */}
+        <div className="absolute inset-0 bg-gradient-to-r from-white via-transparent to-white dark:from-gray-900 dark:via-transparent dark:to-gray-900"></div>
+
+        {/* 🎨 Vertical gradient fade */}
+        <div className="absolute inset-0 bg-gradient-to-b from-white via-transparent to-white dark:from-gray-900 dark:via-transparent dark:to-gray-900"></div>
+
+        {/* 🧠 Content */}
+        <div className="relative max-w-6xl mx-auto">
 
           <h2 className="text-3xl font-bold text-center text-gray-900 dark:text-white mb-12">
             Contact Services
@@ -56,7 +71,7 @@ export default function Contact() {
 
           <div className="grid md:grid-cols-3 gap-8">
 
-            <div className="card bg-white dark:bg-gray-800 shadow-lg">
+            <div className="card bg-white/90 backdrop-blur dark:bg-gray-800/90 shadow-lg">
               <div className="card-body">
                 <h3 className="card-title">Sales & Enterprise Solutions</h3>
                 <p>
@@ -74,7 +89,7 @@ export default function Contact() {
               </div>
             </div>
 
-            <div className="card bg-white dark:bg-gray-800 shadow-lg">
+            <div className="card bg-white/90 backdrop-blur dark:bg-gray-800/90 shadow-lg">
               <div className="card-body">
                 <h3 className="card-title">Technical Support</h3>
                 <p>
@@ -92,7 +107,7 @@ export default function Contact() {
               </div>
             </div>
 
-            <div className="card bg-white dark:bg-gray-800 shadow-lg">
+            <div className="card bg-white/90 backdrop-blur dark:bg-gray-800/90 shadow-lg">
               <div className="card-body">
                 <h3 className="card-title">Partnership & Collaboration</h3>
                 <p>
@@ -112,6 +127,7 @@ export default function Contact() {
 
           </div>
         </div>
+
       </section>
 
       {/* ---------- CONTACT FORM ---------- */}
@@ -246,7 +262,7 @@ export default function Contact() {
 
             <div className="stat">
               <div className="stat-title">Headquarters</div>
-              <div className="stat-value text-lg">United States</div>
+              <div className="stat-value text-lg">Canada</div>
               <div className="stat-desc">Global infrastructure</div>
             </div>
 
