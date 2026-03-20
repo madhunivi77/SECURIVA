@@ -21,8 +21,23 @@ export default function About() {
       </section>
 
       {/* ---------- COMPANY STORY ---------- */}
-      <section className="py-20 px-10 max-w-6xl mx-auto">
-        <div className="grid md:grid-cols-2 gap-12 items-center">
+      <section className="relative py-20 px-10 max-w-6xl mx-auto overflow-hidden">
+
+        {/* 🔵 Background Image */}
+        <img
+          src="/aboutUs.png"
+          alt="About SecuriVA Message"
+          className="absolute inset-0 w-full h-full object-cover opacity-50"
+        />
+
+        {/* 🎨 Gradient Overlay (fades edges) */}
+        <div className="absolute inset-0 bg-gradient-to-r from-white via-transparent to-white dark:from-gray-900 dark:via-transparent dark:to-gray-900"></div>
+
+        {/* Optional vertical fade */}
+        <div className="absolute inset-0 bg-gradient-to-b from-white via-transparent to-white dark:from-gray-900 dark:via-transparent dark:to-gray-900"></div>
+
+        {/* 🧠 Content (must be above background) */}
+        <div className="relative grid md:grid-cols-2 gap-12 items-center">
 
           <div>
             <h2 className="text-3xl font-bold text-gray-900 dark:text-white mb-6">
@@ -49,7 +64,7 @@ export default function About() {
             </p>
           </div>
 
-          <div className="card shadow-xl bg-white dark:bg-gray-800">
+          <div className="card shadow-xl bg-white/90 backdrop-blur dark:bg-gray-800/90">
             <div className="card-body">
               <h3 className="card-title">Built for Modern Enterprises</h3>
               <ul className="space-y-3 text-gray-600 dark:text-gray-300">
@@ -63,6 +78,7 @@ export default function About() {
           </div>
 
         </div>
+
       </section>
 
       {/* ---------- MISSION / VISION / VALUES ---------- */}
@@ -218,7 +234,7 @@ export default function About() {
 
         </div>
       </section>
-      <Sponsors className="bg-white pt-5 text-center text-black text-3xl"/>
+      <Sponsors className="bg-white pt-5 text-center text-black text-3xl" />
     </div>
   );
 }
