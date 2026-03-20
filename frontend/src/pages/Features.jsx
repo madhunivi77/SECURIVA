@@ -70,11 +70,11 @@ export default function Features() {
       <section class="relative overflow-hidden px-8 py-12">
 
         <h2 class="text-4xl font-normal text-center text-gray-900 mb-2 dark:text-white">
-          AI-Powered Voice Assistant <br/> for <span class="italic text-blue-600 dark:text-blue-400">Smarter Business</span> Communication
+          Virtual AI Agent
         </h2>
 
         <p class="text-[15px] font-light text-gray-500 mb-8 text-center dark:text-gray-400 mx-[15%]">
-          SecuriVA's AI-driven voice assistant that automates calls, manages schedules, and connects seamlessly across your entire communication stack.
+          AI-Powered Voice Assistant for Smarter Business Communication
         </p>
 
         <div class="border-t border-gray-100 mb-8 dark:border-gray-800"></div>
@@ -117,10 +117,10 @@ export default function Features() {
         {/* Cybersecurity */}
       <section className="relative overflow-hidden px-8 py-12">
         <h2 className="text-4xl font-normal text-center text-gray-900 mb-2 dark:text-white">
-          Protect Your Data, Workflows, <br/> and <span className="italic text-blue-600 dark:text-blue-400">Communications</span>
+          Cybersecurity
         </h2>
         <p className="text-[15px] font-light text-gray-500 mb-8 text-center dark:text-gray-400 mx-[15%]">
-          SecuriVA's cybersecurity module delivers real-time threat detection, encryption, and regulatory compliance.
+          Protect Your Data, Workflows, and Communications
         </p>
         <div className="border-t border-gray-100 mb-8 dark:border-gray-800"></div>
         <CapabilityCards cards={[
@@ -156,10 +156,10 @@ export default function Features() {
       {/* Text AI Agent */}
       <section className="relative overflow-hidden px-8 py-12">
         <h2 className="text-4xl font-normal text-center text-gray-900 mb-2 dark:text-white">
-          Intelligent Automation for Email, <br/> Chat, and <span className="italic text-blue-600 dark:text-blue-400">Messaging</span>
+          Text AI Agent
         </h2>
         <p className="text-[15px] font-light text-gray-500 mb-8 text-center dark:text-gray-400 mx-[15%]">
-          The Text AI Agent enhances business communication by automating key workflows across your entire messaging stack.
+          Intelligent Automation for Email, Chat, and Messaging
         </p>
         <div className="border-t border-gray-100 mb-8 dark:border-gray-800"></div>
         <CapabilityCards cards={[
@@ -195,10 +195,10 @@ export default function Features() {
       {/* VPN */}
       <section className="relative overflow-hidden px-8 py-12">
         <h2 className="text-4xl font-normal text-center text-gray-900 mb-2 dark:text-white">
-          Secure, Encrypted, and <br/> <span className="italic text-blue-600 dark:text-blue-400">Compliance-Ready</span> Network Access
+          VPN
         </h2>
         <p className="text-[15px] font-light text-gray-500 mb-8 text-center dark:text-gray-400 mx-[15%]">
-          SecuriVA's VPN Secure Access ensures all business communication and automation occurs in a protected, encrypted tunnel.
+          Secure, Encrypted, and Compliance-Ready Network Access
         </p>
         <div className="border-t border-gray-100 mb-8 dark:border-gray-800"></div>
         <CapabilityCards cards={[
@@ -234,7 +234,7 @@ export default function Features() {
       {/* Recap */}
       <section className="relative overflow-hidden px-8 py-12 mx-[15%]">
         <h2 className="text-4xl font-normal text-center text-gray-900 mb-2 dark:text-white">
-          Why <span className="italic text-blue-600 dark:text-blue-400">SecuriVA</span> Features Stand Out
+          Why SecuriVA Features Stand Out
         </h2>
 
         <div className="flex flex-wrap justify-center gap-3 mb-6">
@@ -257,7 +257,7 @@ export default function Features() {
       {/* Call to Action */}
       <section className="px-8 py-16 text-center">
         <h2 className="text-4xl font-normal text-gray-900 mb-3 dark:text-white">
-          Experience the <span className="italic text-blue-600 dark:text-blue-400">Power</span> of SecuriVA Features
+          Experience the Power of SecuriVA Features
         </h2>
         <p className="text-[15px] font-light text-gray-500 mb-10 max-w-lg mx-auto dark:text-gray-400">
           Empower your business with secure AI-driven automation and customer interaction.
