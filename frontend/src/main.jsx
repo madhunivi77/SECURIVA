@@ -8,7 +8,7 @@ import { ThemeProvider } from './context/ThemeContext.jsx';
 import App from './App.jsx';
 import Dashboard from './pages/Dashboard.jsx';
 import Agent from './pages/Agent.jsx';
-import Security from './pages/Security.jsx';
+import Features from './pages/Features.jsx';
 import ChatBox from './pages/ChatBox.jsx';
 import Homepage from './pages/Homepage.jsx'
 import ProviderForm from './pages/ProviderForm.jsx';
@@ -23,6 +23,7 @@ import Support from "./pages/Support.jsx";
 import About from "./pages/About.jsx";
 import Contact from "./pages/Contact.jsx";
 import FAQ from "./pages/FAQ.jsx";
+import Solutions from './pages/Solutions.jsx';
 
 const router = createBrowserRouter([
   {
@@ -38,8 +39,12 @@ const router = createBrowserRouter([
         element: <Agent />
       },
       {
-        path: '/security',
-        element: <Security />
+        path: '/solutions',
+        element: <Solutions />
+      },
+      {
+        path: '/features',
+        element: <Features />
       },
       {
         path: "pricing",

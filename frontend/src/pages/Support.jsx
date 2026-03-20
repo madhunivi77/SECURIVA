@@ -26,21 +26,23 @@ export default function Support() {
   return (
     <div className="bg-[#0a0f1f] text-white">
 
-      {/* ---------- HERO ---------- */}
-      <section className="pt-32 pb-24 px-20 text-center">
-        <h1 className="text-5xl font-mono font-bold mb-6">
-          SecuriVA Support Center
-        </h1>
-        <p className="text-2xl text-blue-200 max-w-4xl mx-auto">
-          Professional assistance for platform usage, integrations,
-          cybersecurity configuration, and enterprise operations.
-          Our support team ensures reliability, security, and seamless
-          automation across your workflows.
-        </p>
+       {/* ---------- HERO ---------- */}
+      <section className="hero py-24 bg-linear-to-br from-blue-900 to-black text-white">
+        <div className="hero-content text-center max-w-4xl">
+          <div>
+            <h1 className="text-5xl font-bold mb-6">SecuriVA Support Center</h1>
+            <p className="text-xl opacity-90">
+             Professional assistance for platform usage, integrations,
+              cybersecurity configuration, and enterprise operations.
+              Our support team ensures reliability, security, and seamless
+              automation across your workflows.
+            </p>
+          </div>
+        </div>
       </section>
 
       {/* ---------- SUPPORT AREAS ---------- */}
-      <section className="px-20 pb-20">
+      <section className="px-20 pt-12 pb-20">
         <h2 className="text-4xl font-mono text-center mb-12">
           Support Areas
         </h2>
