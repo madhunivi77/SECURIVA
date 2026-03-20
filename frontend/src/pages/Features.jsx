@@ -79,6 +79,8 @@ export default function Features() {
 
         <div class="border-t border-gray-100 mb-8 dark:border-gray-800"></div>
 
+        <div className="mx-[15%] pb-5">The Virtual Agent is SecuriVA’s AI-driven voice assistant, capable of:</div>
+
         <CapabilityCards cards={
           [
             {
@@ -123,6 +125,7 @@ export default function Features() {
           Protect Your Data, Workflows, and Communications
         </p>
         <div className="border-t border-gray-100 mb-8 dark:border-gray-800"></div>
+        <div className="mx-[15%] pb-5">SecuriVA’s cybersecurity module delivers real-time threat detection, encryption, and regulatory compliance.</div>
         <CapabilityCards cards={[
           {
             icon: Activity,
@@ -162,6 +165,9 @@ export default function Features() {
           Intelligent Automation for Email, Chat, and Messaging
         </p>
         <div className="border-t border-gray-100 mb-8 dark:border-gray-800"></div>
+
+        <div className="mx-[15%] pb-5">The Text AI Agent enhances business communication by automating:</div>
+
         <CapabilityCards cards={[
           {
             icon: Mail,
@@ -201,6 +207,9 @@ export default function Features() {
           Secure, Encrypted, and Compliance-Ready Network Access
         </p>
         <div className="border-t border-gray-100 mb-8 dark:border-gray-800"></div>
+
+        <div className="mx-[15%] pb-5">SecuriVA’s VPN Secure Access ensures all business communication and automation occurs in a protected, encrypted tunnel.</div>
+
         <CapabilityCards cards={[
           {
             icon: MousePointerClick,
