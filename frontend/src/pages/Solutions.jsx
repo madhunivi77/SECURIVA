@@ -17,6 +17,8 @@ const solutions = [
       "Integration with CRMs, project tools, and fintech platforms",
       "Auto-generated reports and business summaries",
     ],
+    imageLink: "solutions/AI Business Automation.png",
+    altText: "AI Business Automation Icon"
   },
   {
     number: "02",
@@ -29,6 +31,8 @@ const solutions = [
       "Identity and access management with biometric analysis",
       "Real-time alerts for suspicious behavior or phishing activity",
     ],
+    imageLink: "solutions/Cybersecurity & Data Protection.png",
+    altText: "Cybersecurity & Data Protection Icon"
   },
   {
     number: "03",
@@ -41,6 +45,8 @@ const solutions = [
       "Built-in threat analysis within the VPN layer",
       "Compliance with GDPR, HIPAA, and PCI-DSS",
     ],
+    imageLink: "solutions/AI-Managed VPN (Secure Connectivity).png",
+    altText: "AI-Managed VPN Icon"
   },
   {
     number: "04",
@@ -53,6 +59,8 @@ const solutions = [
       "Personalized follow-ups and smart responses",
       "CRM integration for seamless client tracking",
     ],
+    imageLink: "solutions/Customer Interaction & Communication.png",
+    altText: "Customer Interaction & Communication"
   },
   {
     number: "05",
@@ -68,6 +76,8 @@ const solutions = [
       "Cybersecurity for Beginners: Staying Safe Online",
       "Data Protection Handbook for Small Businesses",
     ],
+    imageLink: "solutions/eBook & Training Content Generation.png",
+    altText: "eBook & Training Content Generation Icon"
   },
   {
     number: "06",
@@ -79,6 +89,8 @@ const solutions = [
       "Financial systems and fintech APIs",
       "HTTP request builder for custom integrations",
     ],
+    imageLink: "solutions/Cross-Platform Integrations.png",
+    altText: "Cross-Platform Integrations Icon"
   },
   {
     number: "07",
@@ -92,6 +104,8 @@ const solutions = [
       "Enable predictive decision-making and automated corrections",
     ],
     isFuture: true,
+    imageLink: "solutions/AI-Powered Business Digital Twin.png",
+    altText: "AI Powered Business Digital Twin Icon"
   },
 ];
 
@@ -144,46 +158,55 @@ const reasons = [
 ];
 
 
-const SolutionCard = ({ number, icon: Icon, label, description, points, examples, isFuture }) => (
+const SolutionCard = ({ number, icon: Icon, label, description, points, examples, isFuture, imageLink, altText }) => (
   <div className="flex gap-6 rounded-2xl border border-gray-100 bg-white p-6 hover:border-gray-200 transition-colors dark:border-gray-800 dark:bg-inherit dark:hover:border-gray-700">
 
-    {/* Left: number + icon */}
+    {/* Number + icon */}
     <div className="flex flex-col items-center gap-3 pt-1">
       <div className="flex h-10 w-10 shrink-0 items-center justify-center rounded-xl bg-blue-50 dark:bg-blue-950">
         <Icon className="h-5 w-5 stroke-blue-600 dark:stroke-blue-400" strokeWidth={1.5} />
       </div>
       <span className="text-lg font-medium tabular-nums text-gray-300 dark:text-gray-700">{number}</span>
     </div>
-
-    {/* Right: content */}
-    <div className="flex-1 min-w-0">
-      <div className="flex flex-wrap items-center gap-2 mb-1">
-        <h3 className="text-xl font-medium text-gray-900 dark:text-white">{label}</h3>
-        {isFuture && (
-          <span className="inline-flex items-center gap-1 rounded-full border border-purple-200 bg-purple-50 px-2 py-0.5 text-[10px] font-medium uppercase tracking-wider text-purple-600 dark:border-purple-800 dark:bg-purple-950 dark:text-purple-400">
-            <Zap className="h-2.5 w-2.5 fill-purple-500 stroke-none" />
-            Coming Soon
-          </span>
+    <div className="flex sm:flex-row flex-col justify-between flex-1">
+      {/* Content */}
+      <div className="flex-1 min-w-0">
+        <div className="flex flex-wrap items-center gap-2 mb-1">
+          <h3 className="text-xl font-medium text-gray-900 dark:text-white">{label}</h3>
+          {isFuture && (
+            <span className="inline-flex items-center gap-1 rounded-full border border-purple-200 bg-purple-50 px-2 py-0.5 text-[10px] font-medium uppercase tracking-wider text-purple-600 dark:border-purple-800 dark:bg-purple-950 dark:text-purple-400">
+              <Zap className="h-2.5 w-2.5 fill-purple-500 stroke-none" />
+              Coming Soon
+            </span>
+          )}
+        </div>
+        <p className="text-lg text-gray-500 mb-3 leading-relaxed dark:text-gray-400">{description}</p>
+        <ul className="flex flex-col gap-1.5">
+          {points.map((point) => (
+            <li key={point} className="flex items-start gap-2 text-lg text-gray-700 dark:text-gray-300">
+              <CheckCircle2 className="mt-0.5 h-5 w-5 shrink-0 stroke-blue-500 dark:stroke-blue-400" strokeWidth={2} />
+              {point}
+            </li>
+          ))}
+        </ul>
+        {examples && (
+          <div className="mt-3 flex flex-wrap gap-2">
+            {examples.map((ex) => (
+              <span key={ex} className="rounded-lg border border-gray-100 bg-gray-50 px-3 py-1 text-[12px] italic text-gray-500 dark:border-gray-800 dark:bg-gray-900 dark:text-gray-400">
+                "{ex}"
+              </span>
+            ))}
+          </div>
         )}
       </div>
-      <p className="text-lg text-gray-500 mb-3 leading-relaxed dark:text-gray-400">{description}</p>
-      <ul className="flex flex-col gap-1.5">
-        {points.map((point) => (
-          <li key={point} className="flex items-start gap-2 text-lg text-gray-700 dark:text-gray-300">
-            <CheckCircle2 className="mt-0.5 h-5 w-5 shrink-0 stroke-blue-500 dark:stroke-blue-400" strokeWidth={2} />
-            {point}
-          </li>
-        ))}
-      </ul>
-      {examples && (
-        <div className="mt-3 flex flex-wrap gap-2">
-          {examples.map((ex) => (
-            <span key={ex} className="rounded-lg border border-gray-100 bg-gray-50 px-3 py-1 text-[12px] italic text-gray-500 dark:border-gray-800 dark:bg-gray-900 dark:text-gray-400">
-              "{ex}"
-            </span>
-          ))}
-        </div>
-      )}
+
+      {/* Image */}
+      <figure>
+        <img
+          src={imageLink}
+          alt={altText}
+          className="w-50" />
+      </figure>
     </div>
 
   </div>
@@ -193,7 +216,7 @@ const SolutionCard = ({ number, icon: Icon, label, description, points, examples
 const ReasonCard = ({ icon: Icon, label, description }) => {
     const {theme} = useTheme();
     return (
-        <div className={`flex flex-col gap-3 rounded-2xl border border-gray-100 p-5 hover:border-gray-200 transition-colors dark:border-gray-800 bg-[${theme.bg}] dark:hover:border-gray-700 flex-1 min-w-65 max-w-1/3`}>
+        <div className={`flex flex-col gap-3 rounded-2xl border border-gray-100 p-5 hover:border-gray-200 transition-colors dark:border-gray-800 bg-[${theme.bg}] dark:hover:border-gray-700 flex-1 min-w-80 max-w-1/3`}>
             <div className="flex h-9 w-9 shrink-0 items-center justify-center rounded-xl bg-blue-50 dark:bg-blue-950">
             <Icon className="h-4 w-4 stroke-blue-600 dark:stroke-blue-400" strokeWidth={1.5} />
             </div>
@@ -230,7 +253,7 @@ export default function Solutions(){
     ))}
     </section>
 
-    <section className="px-8 py-16 max-w-4xl mx-auto">
+    <section className="px-8 py-16 max-w-6xl mx-auto">
 
         {/* Header */}
         <div className="text-center mb-10">

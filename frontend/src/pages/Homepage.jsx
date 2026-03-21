@@ -3,8 +3,32 @@ import Card from "../components/Card";
 import { ChevronRight} from "lucide-react";
 import { Link} from "react-router-dom";
 import Sponsors from "../components/Sponsors";
+import { useState } from "react";
 
 export default function Homepage() {
+
+  const [formData, setFormData] = useState({
+      name: "",
+      email: "",
+      company: "",
+      type: "general",
+      message: "",
+    });
+
+  const handleChange = (e) => {
+    setFormData({
+      ...formData,
+      [e.target.name]: e.target.value,
+    });
+  };
+
+  const handleSubmit = (e) => {
+    e.preventDefault();
+    alert("Thank you for subscribing!");
+    setFormData({
+      email: "",
+    });
+  };
 
   return (
     <div id="homepage">
@@ -21,7 +45,7 @@ export default function Homepage() {
             </p>
             <Link to="/login">
               <button
-                className="text-xl w-50 h-17.5 bg-red-500 text-white"
+                className="text-xl w-60 h-17.5 bg-red-500 text-white"
               >
                 Start Free Trial
               </button>
@@ -255,6 +279,42 @@ export default function Homepage() {
         </div>
       </section>
 
+      {/* ---------- CONTACT FORM ---------- */}
+      <section className="py-20 px-10 bg-white dark:bg-gray-800">
+        <div className="max-w-4xl mx-auto">
+
+          <h2 className="text-3xl font-bold text-center">
+            Subscribe to Our Newsletter
+          </h2>
+
+          <p className="text-xl text-center mb-4 mt-8">Enter your email to receive smarter security insights directly in your inbox.</p>
+
+          {/* <p className="text-center opacity-80 mb-10">
+            Provide details about your request and our team will respond with
+            personalized guidance.
+          </p> */}
+
+          <form onSubmit={handleSubmit} className="space-y-6">
+
+            <div className="flex flex-col items-center gap-6">
+
+              <input
+                name="email"
+                value={formData.email}
+                onChange={handleChange}
+                type="email"
+                placeholder="Email Address"
+                className="input input-bordered w-150"
+                required
+              />
+
+              <button className="btn btn-primary w-50">Subscribe</button>
+
+            </div>
+
+          </form>
+        </div>
+      </section>
     </div>
   );
 }
