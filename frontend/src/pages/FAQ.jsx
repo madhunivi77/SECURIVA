@@ -9,7 +9,7 @@ export default function FAQ() {
     .map(section => ({
       ...section,
       items: section.items.filter(item =>
-        item.question.toLowerCase().includes(query.toLowerCase()) || item.answer.toLowerCase().includes(query.toLowerCase())
+        section.category.toLowerCase().includes(query.toLowerCase()) || item.question.toLowerCase().includes(query.toLowerCase()) || item.answer.toLowerCase().includes(query.toLowerCase())
       ),
     }))
     .filter(section => section.items.length > 0);
