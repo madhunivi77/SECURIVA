@@ -279,7 +279,7 @@ export default function Homepage() {
         </div>
       </section>
 
-      {/* ---------- CONTACT FORM ---------- */}
+      {/* ---------- NEWSLETTER SUBSCRIPTION ---------- */}
       <section className="py-20 px-10 bg-white dark:bg-gray-800">
         <div className="max-w-4xl mx-auto">
 
@@ -288,11 +288,6 @@ export default function Homepage() {
           </h2>
 
           <p className="text-xl text-center mb-4 mt-8">Enter your email to receive smarter security insights directly in your inbox.</p>
-
-          {/* <p className="text-center opacity-80 mb-10">
-            Provide details about your request and our team will respond with
-            personalized guidance.
-          </p> */}
 
           <form onSubmit={handleSubmit} className="space-y-6">
 
