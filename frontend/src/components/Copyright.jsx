@@ -11,7 +11,7 @@ export default function Copyright() {
 
         <div className="flex items-center gap-5">
           <p>Follow Us</p>
-          <a href="" target="_blank"><FaInstagram size={25} className="hover:text-blue-600 hover:cursor-pointer text-white"/></a>
+          <a href="https://www.instagram.com/securiva" target="_blank"><FaInstagram size={25} className="hover:text-blue-600 hover:cursor-pointer text-white"/></a>
           <a href="https://www.facebook.com/securiva/" target="_blank"><FaFacebookSquare size={25} className="hover:text-blue-600 hover:cursor-pointer text-white"/></a>
           <a href="https://www.linkedin.com/company/securiva/" target="_blank"><FaLinkedin size={25} className="hover:text-blue-600 hover:cursor-pointer text-white"/></a>
           <a href="" target="_blank"><FaYoutube size={25} className="hover:text-blue-600 hover:cursor-pointer text-white"/></a>

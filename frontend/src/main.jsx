@@ -24,6 +24,7 @@ import About from "./pages/About.jsx";
 import Contact from "./pages/Contact.jsx";
 import FAQ from "./pages/FAQ.jsx";
 import Solutions from './pages/Solutions.jsx';
+import Platform from './pages/Platform.jsx';
 
 const router = createBrowserRouter([
   {
@@ -47,7 +48,7 @@ const router = createBrowserRouter([
         element: <Features />
       },
       {
-        path: "pricing",
+        path: "/pricing",
         element: <Pricing />,
       },
       {
@@ -69,6 +70,10 @@ const router = createBrowserRouter([
       {
         path: "/faq",
         element: <FAQ />
+      },
+      {
+        path: "/platform",
+        element: <Platform />
       }
     ]
   },
