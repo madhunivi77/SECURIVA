@@ -25,6 +25,7 @@ import Contact from "./pages/Contact.jsx";
 import FAQ from "./pages/FAQ.jsx";
 import Solutions from './pages/Solutions.jsx';
 import Platform from './pages/Platform.jsx';
+import AgentVoice from './pages/AgentVoice.jsx';
 
 const router = createBrowserRouter([
   {
@@ -74,6 +75,10 @@ const router = createBrowserRouter([
       {
         path: "/platform",
         element: <Platform />
+      },
+      {
+        path: "/agent-voice",
+        element: <AgentVoice />
       }
     ]
   },

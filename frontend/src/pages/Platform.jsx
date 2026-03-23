@@ -6,6 +6,7 @@ import {
     LayoutDashboard, Zap, Phone
 } from "lucide-react";
 import { useTheme } from "../context/ThemeContext";
+import Checklist from "../components/Checklist";
 const platforms = [
     {
         number: "01",
@@ -36,6 +37,7 @@ const platforms = [
             "Maintain consistent, high-quality service",
             "Scale operations instantly",
         ],
+        link: "/agent-voice"
     },
     {
         number: "02",
@@ -135,72 +137,67 @@ const advantages = [
     "Scalable for SMBs, enterprises, and governments",
 ];
 
-const PlatformCard = ({ number, icon: Icon, label, tagline, description, capabilities, idealFor, value }) => {
+const PlatformCard = ({ number, icon: Icon, label, tagline, description, capabilities, idealFor, value, link }) => {
     const { theme } = useTheme();
     return (
-        <div className={`rounded-2xl border border-gray-100 ${theme.bg} p-6 hover:border-gray-200 transition-colors dark:border-gray-800 dark:hover:border-gray-700`}>
+        <Link to={link}>
+            <div className={`rounded-2xl border border-gray-100 ${theme.bg} p-6 hover:border-gray-200 transition-colors dark:border-gray-800 dark:hover:border-gray-700`}>
 
-            {/* Card Header */}
-            <div className="flex gap-4 mb-5">
-                <div className="flex flex-col items-center gap-2 pt-1">
-                    <div className="flex h-10 w-10 shrink-0 items-center justify-center rounded-xl bg-blue-50 dark:bg-blue-950">
-                        <Icon className="h-5 w-5 stroke-blue-600 dark:stroke-blue-400" strokeWidth={1.5} />
+                {/* Card Header */}
+                <div className="flex gap-4 mb-5">
+                    <div className="flex flex-col items-center gap-2 pt-1">
+                        <div className="flex h-10 w-10 shrink-0 items-center justify-center rounded-xl bg-blue-50 dark:bg-blue-950">
+                            <Icon className="h-5 w-5 stroke-blue-600 dark:stroke-blue-400" strokeWidth={1.5} />
+                        </div>
+                        <span className="text-xl font-medium tabular-nums text-gray-300 dark:text-gray-700">{number}</span>
                     </div>
-                    <span className="text-xl font-medium tabular-nums text-gray-300 dark:text-gray-700">{number}</span>
+                    <div>
+                        <h3 className="text-xl font-medium text-gray-900 dark:text-white mb-0.5">{label}</h3>
+                        <p className="text-[19px] italic text-blue-600 dark:text-blue-400 mb-2">{tagline}</p>
+                        <p className="text-lg text-gray-500 leading-relaxed dark:text-gray-400">{description}</p>
+                    </div>
                 </div>
-                <div>
-                    <h3 className="text-xl font-medium text-gray-900 dark:text-white mb-0.5">{label}</h3>
-                    <p className="text-[19px] italic text-blue-600 dark:text-blue-400 mb-2">{tagline}</p>
-                    <p className="text-lg text-gray-500 leading-relaxed dark:text-gray-400">{description}</p>
+
+                <div className="border-t border-gray-100 dark:border-gray-800 mb-5" />
+
+                {/* Three Columns */}
+                <div className="flex flex-wrap gap-6">
+
+                    {/* Capabilities */}
+                    <div className="flex-1 min-w-[180px]">
+                        <p className="text-xl font-medium uppercase tracking-widest text-gray-400 mb-3">Capabilities</p>
+                        <Checklist items={capabilities} size={"3.5"} />
+                    </div>
+
+                    {/* Ideal For */}
+                    <div className="flex-1 min-w-[140px]">
+                        <p className="text-xl font-medium uppercase tracking-widest text-gray-400 mb-3">Ideal For</p>
+                        <ul className="flex flex-col gap-1.5">
+                            {idealFor.map((item) => (
+                                <li key={item} className="flex items-start gap-2 text-lg text-gray-700 dark:text-gray-300">
+                                    <Users className="mt-0.5 h-3.5 w-3.5 shrink-0 stroke-gray-400 dark:stroke-gray-600" strokeWidth={2} />
+                                    {item}
+                                </li>
+                            ))}
+                        </ul>
+                    </div>
+
+                    {/* Value */}
+                    <div className="flex-1 min-w-[140px]">
+                        <p className="text-xl font-medium uppercase tracking-widest text-gray-400 mb-3">Value</p>
+                        <ul className="flex flex-col gap-1.5">
+                            {value.map((item) => (
+                                <li key={item} className="flex items-start gap-2 text-lg text-gray-700 dark:text-gray-300">
+                                    <Zap className="mt-0.5 h-3.5 w-3.5 shrink-0 stroke-amber-500 dark:stroke-amber-400" strokeWidth={2} />
+                                    {item}
+                                </li>
+                            ))}
+                        </ul>
+                    </div>
+
                 </div>
             </div>
-
-            <div className="border-t border-gray-100 dark:border-gray-800 mb-5" />
-
-            {/* Three Columns */}
-            <div className="flex flex-wrap gap-6">
-
-                {/* Capabilities */}
-                <div className="flex-1 min-w-[180px]">
-                    <p className="text-xl font-medium uppercase tracking-widest text-gray-400 mb-3">Capabilities</p>
-                    <ul className="flex flex-col gap-1.5">
-                        {capabilities.map((item) => (
-                            <li key={item} className="flex items-start gap-2 text-lg text-gray-700 dark:text-gray-300">
-                                <CheckCircle2 className="mt-0.5 h-3.5 w-3.5 shrink-0 stroke-blue-500 dark:stroke-blue-400" strokeWidth={2} />
-                                {item}
-                            </li>
-                        ))}
-                    </ul>
-                </div>
-
-                {/* Ideal For */}
-                <div className="flex-1 min-w-[140px]">
-                    <p className="text-xl font-medium uppercase tracking-widest text-gray-400 mb-3">Ideal For</p>
-                    <ul className="flex flex-col gap-1.5">
-                        {idealFor.map((item) => (
-                            <li key={item} className="flex items-start gap-2 text-lg text-gray-700 dark:text-gray-300">
-                                <Users className="mt-0.5 h-3.5 w-3.5 shrink-0 stroke-gray-400 dark:stroke-gray-600" strokeWidth={2} />
-                                {item}
-                            </li>
-                        ))}
-                    </ul>
-                </div>
-
-                {/* Value */}
-                <div className="flex-1 min-w-[140px]">
-                    <p className="text-xl font-medium uppercase tracking-widest text-gray-400 mb-3">Value</p>
-                    <ul className="flex flex-col gap-1.5">
-                        {value.map((item) => (
-                            <li key={item} className="flex items-start gap-2 text-lg text-gray-700 dark:text-gray-300">
-                                <Zap className="mt-0.5 h-3.5 w-3.5 shrink-0 stroke-amber-500 dark:stroke-amber-400" strokeWidth={2} />
-                                {item}
-                            </li>
-                        ))}
-                    </ul>
-                </div>
-
-            </div>
-        </div>
+        </Link>
     );
 }
 
@@ -259,32 +256,18 @@ export default function Platform() {
                             </p>
                         </div>
                     </div>
-                    <ul className="flex flex-col gap-2 pl-12">
-                        {[
-                            "AI Agent Voice and Text Agent work simultaneously to handle voice and text interactions across all channels.",
-                            "Cybersecurity provides continuous protection for every automation, conversation, and workflow.",
-                            "VPN Secure Access ensures all internal operations and external connections are fully encrypted.",
-                        ].map((item) => (
-                            <li key={item} className="flex items-start gap-2 text-lg text-gray-600 dark:text-gray-400">
-                                <CheckCircle2 className="mt-0.5 h-3.5 w-3.5 shrink-0 stroke-blue-500 dark:stroke-blue-400" strokeWidth={2} />
-                                {item}
-                            </li>
-                        ))}
-                    </ul>
+                    <Checklist className="pl-12" size="3.5" items={[
+                        "AI Agent Voice and Text Agent work simultaneously to handle voice and text interactions across all channels.",
+                        "Cybersecurity provides continuous protection for every automation, conversation, and workflow.",
+                        "VPN Secure Access ensures all internal operations and external connections are fully encrypted.",
+                    ]} />
                 </div>
 
                 {/* Why Organizations Choose Securiva */}
                 <div className="rounded-2xl border border-blue-100 bg-blue-50 p-6 dark:border-blue-900 dark:bg-blue-950">
                     <h3 className="text-xl font-medium text-gray-900 dark:text-white mb-1">Why Organizations Choose Securiva Platform</h3>
                     <p className="text-[19px] text-gray-500 dark:text-blue-300 mb-4">One platform, four capabilities, infinite applications:</p>
-                    <ul className="flex flex-col gap-x-8 gap-y-2">
-                        {advantages.map((item) => (
-                            <li key={item} className="flex items-center gap-2 text-lg text-gray-700 dark:text-blue-200">
-                                <CheckCircle2 className="h-3.5 w-3.5 shrink-0 stroke-blue-500 dark:stroke-blue-400" strokeWidth={2} />
-                                {item}
-                            </li>
-                        ))}
-                    </ul>
+                    <Checklist items={advantages} size={"3.5"} />
                 </div>
 
             </section>
