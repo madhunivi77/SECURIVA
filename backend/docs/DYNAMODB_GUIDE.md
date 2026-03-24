@@ -6,6 +6,8 @@ SecuriVA uses a dual-database architecture that supports both SQLite (developmen
 
 It now also supports an optional DynamoDB-backed guidance catalog for grounded compliance and cybersecurity responses.
 
+For compliance report persistence commands, see [COMPLIANCE_REPORTS_DYNAMODB_TESTING.md](COMPLIANCE_REPORTS_DYNAMODB_TESTING.md).
+
 ---
 
 ## Table of Contents
