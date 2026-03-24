@@ -57,6 +57,10 @@ AWS_REGION="us-east-2"
 # Optional: guidance catalog backend
 USE_DYNAMODB_GUIDANCE="false"
 GUIDANCE_CATALOG_DYNAMODB_TABLE="SecuriVAGuidanceCatalog"
+
+# Optional: compliance report persistence backend
+USE_DYNAMODB_COMPLIANCE_REPORTS="false"
+COMPLIANCE_REPORTS_DYNAMODB_TABLE="SecuriVAComplianceReports"
 ```
 
 ⚠️ **Security Note**: Never commit AWS credentials to version control. Use IAM roles when deploying to AWS.
@@ -84,6 +88,24 @@ Supported `content_type` values:
 - `procedure`
 - `decision_tree`
 - `example`
+
+### Compliance Reports Table
+
+- **Table Name**: `SecuriVAComplianceReports`
+- **Region**: `us-east-2`
+- **Billing Mode**: Pay-per-request
+- **Primary Key**:
+    - Partition Key: `report_id` (String)
+    - Sort Key: `generated_at` (String)
+
+Stored item fields include:
+
+- `report_id`
+- `generated_at`
+- `saved_at`
+- `standards`
+- `options`
+- `report`
 
 ---
 
@@ -175,6 +197,23 @@ To run create + seed + verify in one fail-fast command:
 ```bash
 cd backend
 python tests/bootstrap_guidance_catalog.py --clear-first
+```
+
+To create the compliance reports table:
+
+```bash
+cd backend
+python tests/create_compliance_reports_table.py
+```
+
+To enable compliance report persistence and verify writes:
+
+```bash
+cd backend
+export USE_DYNAMODB_COMPLIANCE_REPORTS=true
+export COMPLIANCE_REPORTS_DYNAMODB_TABLE=SecuriVAComplianceReports
+python tests/test_compliance_tools.py
+grep -n "save_compliance_report" logs/tool_calls.json | tail -n 5
 ```
 
 ### Using AWS CLI

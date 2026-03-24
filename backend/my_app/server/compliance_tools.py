@@ -4,6 +4,8 @@ Provides tool functions for querying compliance standards (GDPR, HIPAA, PCI-DSS)
 """
 
 import json
+import os
+import uuid
 from typing import Dict, List, Any, Optional
 from datetime import datetime
 from .compliance_data import (
@@ -18,6 +20,73 @@ from .compliance_data import (
     get_cross_reference
 )
 from .tool_logger import log_tool_call
+
+
+def _persist_compliance_report_to_dynamodb(
+    report: Dict[str, Any],
+    standards: List[str],
+    include_checklist: bool,
+    include_penalties: bool,
+    include_breach_info: bool,
+    table: Any = None,
+) -> bool:
+    """Persist generated compliance report to DynamoDB when feature flag is enabled."""
+    use_dynamodb_reports = os.getenv("USE_DYNAMODB_COMPLIANCE_REPORTS", "false").lower() == "true"
+    if not use_dynamodb_reports:
+        return False
+
+    table_name = os.getenv("COMPLIANCE_REPORTS_DYNAMODB_TABLE", "SecuriVAComplianceReports")
+    region = os.getenv("AWS_REGION", "us-east-2")
+
+    try:
+        dynamodb_table = table
+        if dynamodb_table is None:
+            import boto3
+
+            dynamodb_table = boto3.resource("dynamodb", region_name=region).Table(table_name)
+
+        report_id = str(uuid.uuid4())
+        saved_at = datetime.utcnow().isoformat() + "Z"
+        item = {
+            "report_id": report_id,
+            "generated_at": report.get("generated_at", saved_at),
+            "saved_at": saved_at,
+            "standards": [s.lower().replace("-", "_") for s in standards],
+            "options": {
+                "include_checklist": include_checklist,
+                "include_penalties": include_penalties,
+                "include_breach_info": include_breach_info,
+            },
+            "report": report,
+        }
+
+        dynamodb_table.put_item(Item=item)
+        log_tool_call(
+            tool_name="save_compliance_report",
+            input_data={
+                "table_name": table_name,
+                "standards": standards,
+            },
+            output_data={
+                "success": True,
+                "report_id": report_id,
+            },
+            success=True,
+        )
+        return True
+    except Exception as e:
+        # Do not fail report generation when persistence fails.
+        log_tool_call(
+            tool_name="save_compliance_report",
+            input_data={
+                "table_name": table_name,
+                "standards": standards,
+            },
+            output_data={"error": str(e)},
+            success=False,
+            error=str(e),
+        )
+        return False
 
 
 def get_compliance_overview(standard: str) -> Dict[str, Any]:
@@ -581,6 +650,14 @@ def generate_compliance_report(
             "success": True,
             "report": report
         }
+
+        _persist_compliance_report_to_dynamodb(
+            report=report,
+            standards=standards,
+            include_checklist=include_checklist,
+            include_penalties=include_penalties,
+            include_breach_info=include_breach_info,
+        )
         
         log_tool_call(
             tool_name="generate_compliance_report",
