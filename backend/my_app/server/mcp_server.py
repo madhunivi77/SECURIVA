@@ -48,12 +48,17 @@ from .compliance_module_generator import (
     create_compliance_module,
     list_compliance_modules
 )
-
-# Import procedural guidance resources
-from pathlib import Path as PathlibPath
-import json as json_lib
+from .guidance_catalog import GuidanceCatalog
 
 JWT_SECRET_KEY = os.getenv("JWT_SECRET_KEY")
+guidance_catalog = GuidanceCatalog()
+
+LEGACY_DECISION_TREE_MAP = {
+    "email_compliance": "email_compliance_decision",
+    "data_sharing": "data_sharing_decision",
+    "data_deletion": "data_deletion_decision",
+    "vendor_access": "vendor_access_decision",
+}
 
 # 1. Create the MCP server instance with the token verifier and auth settings
 mcp = FastMCP(
@@ -2813,6 +2818,40 @@ def listAvailableTools(context: Context, category: str = "all") -> str:
 # Tools for accessing step-by-step procedures, decision trees, and real-world examples
 
 @mcp.tool()
+def getGroundedSecurityGuidance(
+    user_question: str,
+    regulation: str = None,
+    guidance_type: str = None,
+) -> str:
+    """
+    Retrieve curated cybersecurity and compliance guidance from local source files.
+
+    Use this tool first when the user asks for guidance, process explanations,
+    decision support, or implementation examples. The result is grounded in
+    curated files so the model can summarize without inventing policy details.
+
+    Args:
+        user_question: User's original question in natural language
+        regulation: Optional regulation filter such as GDPR, HIPAA, CCPA, PCI-DSS, or SOX
+        guidance_type: Optional hint: procedure, decision_tree, or example
+
+    Returns:
+        JSON string containing matched source metadata, response rules, and guidance content
+    """
+    try:
+        result = guidance_catalog.get_guidance(
+            user_question=user_question,
+            regulation=regulation,
+            guidance_type=guidance_type,
+        )
+        return json.dumps(result, indent=2)
+    except Exception as e:
+        return json.dumps({
+            "success": False,
+            "error": str(e)
+        }, indent=2)
+
+@mcp.tool()
 def getComplianceProcedure(procedure_type: str, regulation: str = None) -> str:
     """
     Get step-by-step compliance procedures for handling data.
@@ -2850,11 +2889,8 @@ def getComplianceProcedure(procedure_type: str, regulation: str = None) -> str:
         getComplianceProcedure('data_collection', 'GDPR')
     """
     try:
-        # Import procedures from the procedures module
-        from .compliance_modules.procedures.data_handling_procedures import PROCEDURES
-        
-        # Validate procedure type
-        valid_procedures = list(PROCEDURES.keys())
+        procedures = guidance_catalog.store.get_procedures()
+        valid_procedures = list(procedures.keys())
         if procedure_type not in valid_procedures:
             return json.dumps({
                 "success": False,
@@ -2863,7 +2899,7 @@ def getComplianceProcedure(procedure_type: str, regulation: str = None) -> str:
             }, indent=2)
         
         # Get the procedure
-        procedure = PROCEDURES[procedure_type]
+        procedure = procedures[procedure_type]
         
         # If regulation filter is provided, add note
         result = {
@@ -2878,11 +2914,6 @@ def getComplianceProcedure(procedure_type: str, regulation: str = None) -> str:
         
         return json.dumps(result, indent=2)
         
-    except ImportError as e:
-        return json.dumps({
-            "success": False,
-            "error": f"Could not load procedures module: {str(e)}. The procedures file may not exist."
-        }, indent=2)
     except Exception as e:
         return json.dumps({
             "success": False,
@@ -2930,35 +2961,16 @@ def getComplianceDecisionTree(scenario: str) -> str:
         # check data minimization → actions (approve, deny, report phishing, etc.)
     """
     try:
-        # Load decision trees from JSON file
-        procedures_dir = PathlibPath(__file__).parent / "compliance_modules" / "procedures"
-        trees_file = procedures_dir / "decision_trees.json"
-        
-        if not trees_file.exists():
+        trees = guidance_catalog.store.get_decision_trees()
+
+        if scenario not in LEGACY_DECISION_TREE_MAP:
             return json.dumps({
                 "success": False,
-                "error": "Decision trees file not found. The file may not have been created yet."
+                "error": f"Invalid scenario. Must be one of: {', '.join(LEGACY_DECISION_TREE_MAP.keys())}",
+                "available_scenarios": list(LEGACY_DECISION_TREE_MAP.keys())
             }, indent=2)
         
-        with open(trees_file, 'r', encoding='utf-8') as f:
-            trees = json_lib.load(f)
-        
-        # Map scenario names to tree keys
-        tree_map = {
-            'email_compliance': 'email_compliance_decision',
-            'data_sharing': 'data_sharing_decision',
-            'data_deletion': 'data_deletion_decision',
-            'vendor_access': 'vendor_access_decision'
-        }
-        
-        if scenario not in tree_map:
-            return json.dumps({
-                "success": False,
-                "error": f"Invalid scenario. Must be one of: {', '.join(tree_map.keys())}",
-                "available_scenarios": list(tree_map.keys())
-            }, indent=2)
-        
-        tree_key = tree_map[scenario]
+        tree_key = LEGACY_DECISION_TREE_MAP[scenario]
         
         if tree_key not in trees:
             return json.dumps({
@@ -2982,17 +2994,7 @@ def getComplianceDecisionTree(scenario: str) -> str:
         }
         
         return json.dumps(result, indent=2)
-        
-    except FileNotFoundError:
-        return json.dumps({
-            "success": False,
-            "error": "Decision trees file not found"
-        }, indent=2)
-    except json_lib.JSONDecodeError as e:
-        return json.dumps({
-            "success": False,
-            "error": f"Invalid JSON in decision trees file: {str(e)}"
-        }, indent=2)
+
     except Exception as e:
         return json.dumps({
             "success": False,
@@ -3041,11 +3043,9 @@ def getComplianceExamples(topic: str, show_non_compliant: bool = True) -> str:
         # Returns only compliant examples without non-compliant counterparts
     """
     try:
-        # Import examples from the examples library
-        from .compliance_modules.procedures.examples_library import EXAMPLES
-        
         # Validate topic
-        valid_topics = list(EXAMPLES.keys())
+        examples_by_topic = guidance_catalog.store.get_examples()
+        valid_topics = list(examples_by_topic.keys())
         if topic not in valid_topics:
             return json.dumps({
                 "success": False,
@@ -3054,7 +3054,7 @@ def getComplianceExamples(topic: str, show_non_compliant: bool = True) -> str:
             }, indent=2)
         
         # Get examples for the topic
-        examples = EXAMPLES[topic]
+        examples = examples_by_topic[topic]
         
         # Optionally filter out non-compliant examples
         if not show_non_compliant:
@@ -3079,12 +3079,7 @@ def getComplianceExamples(topic: str, show_non_compliant: bool = True) -> str:
         }
         
         return json.dumps(result, indent=2)
-        
-    except ImportError as e:
-        return json.dumps({
-            "success": False,
-            "error": f"Could not load examples library: {str(e)}. The examples file may not exist."
-        }, indent=2)
+
     except Exception as e:
         return json.dumps({
             "success": False,

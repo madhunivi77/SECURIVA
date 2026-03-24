@@ -4,6 +4,8 @@
 
 SecuriVA uses a dual-database architecture that supports both SQLite (development) and DynamoDB (production). This guide explains how to check, configure, and manage DynamoDB.
 
+It now also supports an optional DynamoDB-backed guidance catalog for grounded compliance and cybersecurity responses.
+
 ---
 
 ## Table of Contents
@@ -51,6 +53,10 @@ Ensure these are set in `backend/.env`:
 AWS_ACCESS_KEY_ID="your_access_key_id"
 AWS_SECRET_ACCESS_KEY="your_secret_access_key"
 AWS_REGION="us-east-2"
+
+# Optional: guidance catalog backend
+USE_DYNAMODB_GUIDANCE="false"
+GUIDANCE_CATALOG_DYNAMODB_TABLE="SecuriVAGuidanceCatalog"
 ```
 
 ⚠️ **Security Note**: Never commit AWS credentials to version control. Use IAM roles when deploying to AWS.
@@ -63,6 +69,21 @@ AWS_REGION="us-east-2"
 - **Primary Key**:
   - Partition Key: `user_id` (String)
   - Sort Key: `session_timestamp` (String)
+
+### Guidance Catalog Table
+
+- **Table Name**: `SecuriVAGuidanceCatalog`
+- **Region**: `us-east-2`
+- **Billing Mode**: Pay-per-request
+- **Primary Key**:
+    - Partition Key: `content_type` (String)
+    - Sort Key: `content_id` (String)
+
+Supported `content_type` values:
+
+- `procedure`
+- `decision_tree`
+- `example`
 
 ---
 
@@ -119,6 +140,41 @@ Table Schema:
 ```bash
 cd backend
 python tests/create_dynamodb_table.py
+```
+
+To create the guidance catalog table:
+
+```bash
+cd backend
+python tests/create_guidance_catalog_table.py
+```
+
+To seed the guidance catalog table from local curated files:
+
+```bash
+cd backend
+python tests/seed_guidance_catalog_table.py
+```
+
+To replace existing catalog records before seeding:
+
+```bash
+cd backend
+python tests/seed_guidance_catalog_table.py --clear-first
+```
+
+To verify DynamoDB counts match local curated content before switching traffic:
+
+```bash
+cd backend
+python tests/verify_guidance_catalog_table.py --strict
+```
+
+To run create + seed + verify in one fail-fast command:
+
+```bash
+cd backend
+python tests/bootstrap_guidance_catalog.py --clear-first
 ```
 
 ### Using AWS CLI
