@@ -8,8 +8,8 @@ export default function ReasonCard({ icon: Icon, label, description }){
             <Icon className="h-4 w-4 stroke-blue-600 dark:stroke-blue-400" strokeWidth={1.5} />
             </div>
             <div>
-            <p className="text-lg font-medium text-gray-900 mb-1 dark:text-white">{label}</p>
-            <p className="text-md text-gray-500 leading-relaxed dark:text-gray-400">{description}</p>
+            <p className="text-xl font-medium text-gray-900 mb-1 dark:text-white">{label}</p>
+            <p className="text-lg text-gray-500 leading-relaxed dark:text-gray-400">{description}</p>
             </div>
         </div>
     );

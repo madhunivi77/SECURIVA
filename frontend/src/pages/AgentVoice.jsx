@@ -1,6 +1,5 @@
 import CapabilityCard from "../components/CapabilityCard";
 import { AudioLines, AudioWaveform, BadgeCheck, Languages, NotepadTextDashed, Send, Videotape } from "lucide-react";
-import Checklist from "../components/Checklist";
 import SymmetricalChecklist from "../components/SymmetricalChecklist";
 
 export default function AgentVoice({ }) {
@@ -11,7 +10,7 @@ export default function AgentVoice({ }) {
             <section className="hero py-24 bg-linear-to-br from-blue-900 to-black text-white">
                 <div className="hero-content text-center max-w-4xl">
                     <div>
-                        <h1 className="text-5xl font-bold mb-6">AI Agent Voice : Intelligent Voice-to-Action Engine </h1>
+                        <h1 className="text-5xl font-bold mb-6">AI Agent Voice: Intelligent Voice-to-Action Engine </h1>
                         <p className="text-xl opacity-90">
                             AI Voice is SecuriVA’s advanced vocal intelligence module that converts speech into smart text, contextualized messages, translations, and automated actions.
                             Users simply speak, and SecuriVA understands, reformulates, translates, analyzes, and executes.

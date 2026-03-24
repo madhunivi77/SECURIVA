@@ -26,6 +26,7 @@ import FAQ from "./pages/FAQ.jsx";
 import Solutions from './pages/Solutions.jsx';
 import Platform from './pages/Platform.jsx';
 import AgentVoice from './pages/AgentVoice.jsx';
+import AgentText from './pages/AgentText.jsx';
 
 const router = createBrowserRouter([
   {
@@ -79,6 +80,10 @@ const router = createBrowserRouter([
       {
         path: "/agent-voice",
         element: <AgentVoice />
+      },
+      {
+        path: "/agent-text",
+        element: <AgentText />
       }
     ]
   },

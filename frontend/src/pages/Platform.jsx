@@ -98,6 +98,7 @@ const platforms = [
             "Improved customer satisfaction",
             "Faster data collection and process automation",
         ],
+        link: "/agent-text"
     },
     {
         number: "04",
@@ -301,8 +302,6 @@ export default function Platform() {
                     </Link>
                 </div>
             </section>
-
-            <Sponsors className="bg-white mt-10 pt-5 text-center text-black text-3xl" />
         </div>
     );
 }
