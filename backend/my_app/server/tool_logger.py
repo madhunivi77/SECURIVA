@@ -113,13 +113,13 @@ class ToolCallLogger:
         # Write to JSON log (one JSON object per line for easy parsing)
         try:
             with open(self.json_log_path, "a") as f:
-                f.write(json.dumps(log_entry) + "\n")
+                f.write(json.dumps(log_entry, default=str) + "\n")
         except Exception as e:
             self.logger.error(f"Failed to write JSON log: {e}")
 
         # Write human-readable log
         duration_str = f"{duration_ms:.2f}ms" if duration_ms else "N/A"
-        args_str = json.dumps(arguments, indent=2) if arguments else "{}"
+        args_str = json.dumps(arguments, indent=2, default=str) if arguments else "{}"
 
         if error:
             self.logger.error(

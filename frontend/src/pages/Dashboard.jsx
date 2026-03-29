@@ -24,6 +24,9 @@ const Dashboard = () => {
     return;
   };
 
+  useEffect(() => {
+    handleRefresh();
+  }, []);
   return (
     <div className="flex h-screen w-screen bg-white text-black">
       <Sidebar />
