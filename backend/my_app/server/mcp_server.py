@@ -19,6 +19,8 @@ from pathlib import Path
 import time
 import requests
 import base64
+from concurrent.futures import ThreadPoolExecutor
+from groq import Groq
 from .salesforce_utils import get_fresh_salesforce_credentials, load_oauth_data
 from ..config.settings import settings
 from .telesign_auth import (
@@ -165,18 +167,30 @@ def listEmails(context: Context, max_results: int = 10) -> str:
         if not messages:
             return "No messages found in inbox."
 
-        # Format the messages into a string
+        # Batch fetch all message metadata in a single HTTP request
+        fetched = {}
+        def metadata_callback(request_id, response, exception):
+            if exception is None:
+                fetched[request_id] = response
+
+        batch = service.new_batch_http_request(callback=metadata_callback)
+        for message in messages:
+            batch.add(
+                service.users().messages().get(
+                    userId="me",
+                    id=message["id"],
+                    format="metadata",
+                    metadataHeaders=["From", "Subject", "Date"]
+                ),
+                request_id=message["id"],
+            )
+        batch.execute()
+
+        # Format the messages into a string (preserve original order)
         res = f"Found {len(messages)} recent emails:\n\n"
 
         for i, message in enumerate(messages, 1):
-            msg = service.users().messages().get(
-                userId="me",
-                id=message["id"],
-                format="metadata",
-                metadataHeaders=["From", "Subject", "Date"]
-            ).execute()
-
-            # Extract headers
+            msg = fetched.get(message["id"], {})
             headers = {h["name"]: h["value"] for h in msg.get("payload", {}).get("headers", [])}
             from_addr = headers.get("From", "Unknown")
             subject = headers.get("Subject", "(No subject)")
@@ -187,7 +201,7 @@ def listEmails(context: Context, max_results: int = 10) -> str:
             res += f"   Date: {date}\n"
             res += f"   ID: {message['id']}\n\n"
 
-        print(f"Found and formatted {len(messages)} emails")
+        print(f"Found and formatted {len(messages)} emails (batched)")
         return res
 
 
@@ -264,15 +278,23 @@ def listGmailDrafts(context: Context, max_results: int = 10):
         if not drafts:
             return "No drafts found."
 
+        # Batch fetch all draft details in a single HTTP request
+        fetched_drafts = {}
+        def draft_callback(request_id, response, exception):
+            if exception is None:
+                fetched_drafts[request_id] = response
+
+        batch = service.new_batch_http_request(callback=draft_callback)
+        for d in drafts:
+            batch.add(
+                service.users().drafts().get(userId="me", id=d["id"]),
+                request_id=d["id"],
+            )
+        batch.execute()
+
         result_lines = []
         for d in drafts:
-            # Fetch draft details to get subject, recipients, etc.
-            draft_detail = (
-                service.users()
-                .drafts()
-                .get(userId="me", id=d["id"])
-                .execute()
-            )
+            draft_detail = fetched_drafts.get(d["id"], {})
             message = draft_detail.get("message", {})
             headers = message.get("payload", {}).get("headers", [])
 
@@ -387,15 +409,28 @@ def getEmailBodies(context: Context, email_ids: list[str]) -> str:
 
         service = build("gmail", "v1", credentials=creds)
 
+        # Batch fetch all email bodies in a single HTTP request
+        fetched = {}
+        def body_callback(request_id, response, exception):
+            if exception is None:
+                fetched[request_id] = response
+
+        batch = service.new_batch_http_request(callback=body_callback)
+        for email_id in email_ids:
+            batch.add(
+                service.users().messages().get(
+                    userId="me",
+                    id=email_id,
+                    format="full"
+                ),
+                request_id=email_id,
+            )
+        batch.execute()
+
         result = f"Fetched {len(email_ids)} email(s):\n\n"
 
         for i, email_id in enumerate(email_ids, 1):
-            # Fetch full message with complete MIME structure
-            msg = service.users().messages().get(
-                userId="me",
-                id=email_id,
-                format="full"
-            ).execute()
+            msg = fetched.get(email_id, {})
 
             # Extract headers for metadata
             headers = {h["name"]: h["value"]
@@ -425,7 +460,7 @@ def getEmailBodies(context: Context, email_ids: list[str]) -> str:
             result += f"Message ID: {email_id}\n\n"
             result += f"Body:\n{body}\n\n"
 
-        print(f"Successfully fetched {len(email_ids)} email bodies")
+        print(f"Successfully fetched {len(email_ids)} email bodies (batched)")
         return result
 
     except HttpError as error:
@@ -630,6 +665,26 @@ Summary:"""
     # The LLM agent will see this prompt and generate the summary
     return summarization_prompt
 
+def _summarize_one_email(client: Groq, from_addr: str, subject: str, date: str, body: str) -> str:
+    """Summarize a single email via Groq. Called in parallel from a thread pool."""
+    try:
+        response = client.chat.completions.create(
+            model="llama-3.3-70b-versatile",
+            messages=[{
+                "role": "user",
+                "content": (
+                    f"Summarize this email in 1-2 sentences. Be concise.\n"
+                    f"From: {from_addr}\nSubject: {subject}\nDate: {date}\n\n{body[:1000]}"
+                ),
+            }],
+            max_tokens=80,
+            temperature=0.3,
+        )
+        return response.choices[0].message.content.strip()
+    except Exception as e:
+        return f"(Could not summarize: {e})"
+
+
 @mcp.tool()
 def summarizeRecentEmails(context: Context, num_emails: int = 5) -> str:
     """
@@ -642,7 +697,7 @@ def summarizeRecentEmails(context: Context, num_emails: int = 5) -> str:
         num_emails: Number of recent emails to summarize (default: 5, max: 20)
 
     Returns:
-        Formatted summaries of the requested number of emails with structured information
+        Pre-summarized email summaries ready to read aloud
     """
     creds = getGoogleCreds(context)
     if creds == None:
@@ -650,7 +705,6 @@ def summarizeRecentEmails(context: Context, num_emails: int = 5) -> str:
 
     try:
         t0 = time.time()
-        # Limit num_emails to reasonable bounds
         num_emails = min(max(1, num_emails), 20)
 
         # Step 1: List recent emails to get IDs
@@ -667,66 +721,64 @@ def summarizeRecentEmails(context: Context, num_emails: int = 5) -> str:
         if not messages:
             return "No messages found in inbox."
 
-        # Step 2: Fetch full email bodies for all emails
-        summaries = f"Summaries of your {len(messages)} most recent emails:\n\n"
+        # Step 2: Batch fetch all email bodies in a single HTTP request
+        fetched = {}
+        def fetch_callback(request_id, response, exception):
+            if exception is None:
+                fetched[request_id] = response
 
-        for i, message in enumerate(messages, 1):
-            tf0 = time.time()
-            # Fetch full message
-            msg = service.users().messages().get(
-                userId="me",
-                id=message["id"],
-                format="full"
-            ).execute()
-            tf1 = time.time()
-            print(f"⏱️  [MCP-TOOL] summarizeRecentEmails: fetch_email_{i}={((tf1-tf0)*1000):.0f}ms")
+        batch = service.new_batch_http_request(callback=fetch_callback)
+        for message in messages:
+            batch.add(
+                service.users().messages().get(
+                    userId="me",
+                    id=message["id"],
+                    format="full"
+                ),
+                request_id=message["id"],
+            )
+        batch.execute()
+        t_batch = time.time()
+        print(f"⏱️  [MCP-TOOL] summarizeRecentEmails: batch_fetch={((t_batch-t1)*1000):.0f}ms ({len(messages)} emails)")
 
-            # Extract headers
+        # Step 3: Extract email data for summarization
+        emails_to_summarize = []
+        for message in messages:
+            msg = fetched.get(message["id"], {})
             headers = {h["name"]: h["value"]
                       for h in msg.get("payload", {}).get("headers", [])}
             from_addr = headers.get("From", "Unknown")
             subject = headers.get("Subject", "(No subject)")
             date = headers.get("Date", "Unknown date")
+            body = extract_email_body(msg.get("payload", {})) or "(No content)"
+            emails_to_summarize.append((from_addr, subject, date, body))
 
-            # Extract body
-            payload = msg.get("payload", {})
-            body = extract_email_body(payload)
-            if not body:
-                body = "(No content or unsupported format)"
+        # Step 4: Parallel Groq summarization — all emails at once
+        groq_client = Groq(api_key=os.getenv("GROQ_API_KEY"))
+        summaries_list = [None] * len(emails_to_summarize)
 
-            # Truncate very long emails
-            if len(body) > 3000:
-                body = body[:3000] + "\n...(truncated)"
+        with ThreadPoolExecutor(max_workers=len(emails_to_summarize)) as executor:
+            futures = {}
+            for i, (from_addr, subject, date, body) in enumerate(emails_to_summarize):
+                future = executor.submit(_summarize_one_email, groq_client, from_addr, subject, date, body)
+                futures[future] = i
+            for future in futures:
+                idx = futures[future]
+                summaries_list[idx] = future.result()
 
-            # Format the summary prompt for this email
-            summaries += f"{'='*70}\n"
-            summaries += f"EMAIL {i}/{len(messages)}\n"
-            summaries += f"{'='*70}\n"
-            summaries += f"From: {from_addr}\n"
-            summaries += f"Subject: {subject}\n"
-            summaries += f"Date: {date}\n\n"
+        t_summarize = time.time()
+        print(f"⏱️  [MCP-TOOL] summarizeRecentEmails: parallel_summarize={((t_summarize-t_batch)*1000):.0f}ms ({len(messages)} emails)")
 
-            # Add the summarization instruction
-            summaries += f"""Please analyze and summarize this email:
+        # Step 5: Format pre-summarized results
+        result = f"Here are your {len(messages)} most recent emails:\n\n"
+        for i, (from_addr, subject, date, body) in enumerate(emails_to_summarize, 1):
+            result += f"{i}. From: {from_addr}\n"
+            result += f"   Subject: {subject}\n"
+            result += f"   Summary: {summaries_list[i-1]}\n\n"
 
-**Subject/Purpose:** What is this email about?
-**Key Points:** Main information or topics discussed
-**Action Items:** Any tasks or requests
-**Deadlines/Dates:** Important dates
-**Sentiment/Urgency:** Tone and priority
-
-Email body:
-{body}
-
----
-
-"""
-
-        summaries += f"\nPlease provide concise summaries for all {len(messages)} emails above."
         t2 = time.time()
-        print(f"⏱️  [MCP-TOOL] summarizeRecentEmails: TOTAL={((t2-t0)*1000):.0f}ms ({len(messages)} emails fetched)")
-
-        return summaries
+        print(f"⏱️  [MCP-TOOL] summarizeRecentEmails: TOTAL={((t2-t0)*1000):.0f}ms ({len(messages)} emails)")
+        return result
 
     except HttpError as error:
         print(f"An error occurred: {error}")
