@@ -25,15 +25,8 @@ const Dashboard = () => {
   };
 
   useEffect(() => {
-    // Fetch immediately
     handleRefresh();
-
-    // Then poll every 30 seconds
-    const interval = setInterval(handleRefresh, 30000);
-
-    // Cleanup when component unmounts
-    return () => clearInterval(interval);
-  }, [handleRefresh]);
+  }, []);
 
   return (
     <div className="flex h-screen w-screen bg-white text-black">
