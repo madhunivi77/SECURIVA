@@ -4,10 +4,11 @@ import { createBrowserRouter, RouterProvider } from 'react-router-dom';
 
 import './styles/global.css';
 import { AuthProvider } from './context/AuthContext.jsx';
+import { ThemeProvider } from './context/ThemeContext.jsx';
 import App from './App.jsx';
 import Dashboard from './pages/Dashboard.jsx';
 import Agent from './pages/Agent.jsx';
-import Security from './pages/Security.jsx';
+import Features from './pages/Features.jsx';
 import ChatBox from './pages/ChatBox.jsx';
 import Homepage from './pages/Homepage.jsx'
 import ProviderForm from './pages/ProviderForm.jsx';
@@ -22,6 +23,7 @@ import Support from "./pages/Support.jsx";
 import About from "./pages/About.jsx";
 import Contact from "./pages/Contact.jsx";
 import FAQ from "./pages/FAQ.jsx";
+import Solutions from './pages/Solutions.jsx';
 
 const router = createBrowserRouter([
   {
@@ -37,22 +39,14 @@ const router = createBrowserRouter([
         element: <Agent />
       },
       {
-        path: '/security',
-        element: <Security />
+        path: '/solutions',
+        element: <Solutions />
       },
       {
-        path: '/provider', // select a login provider
-        element: <ProviderForm />
+        path: '/features',
+        element: <Features />
       },
       {
-        path: '/login', // Local login
-        element: <LoginForm />
-      },
-      {
-        path: '/signup', // create a new account
-        element: <SignupForm />
-      },
-{
         path: "pricing",
         element: <Pricing />,
       },
@@ -77,6 +71,18 @@ const router = createBrowserRouter([
         element: <FAQ />
       }
     ]
+  },
+  {
+    path: '/provider', // select a login provider
+    element: <ProviderForm />
+  },
+  {
+    path: '/login', // Local login
+    element: <LoginForm />
+  },
+  {
+    path: '/signup', // create a new account
+    element: <SignupForm />
   },
   {
     path: '/dashboard',
@@ -106,7 +112,9 @@ const router = createBrowserRouter([
 createRoot(document.getElementById('root')).render(
   <StrictMode>
     <AuthProvider>
-      <RouterProvider router={router} />
+      <ThemeProvider>
+        <RouterProvider router={router} />
+      </ThemeProvider>
     </AuthProvider>
   </StrictMode>,
 )
