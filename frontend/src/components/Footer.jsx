@@ -17,7 +17,7 @@ export default function Footer() {
     >
       <div className="flex justify-center pt-10">
         <img
-          src="/LOGO_FOOTER_0000.png"
+          src="/LOGO_SECURIVA_FINAL.png"
           alt="Footer Logo"
           className="h-20 object-contain"
         />

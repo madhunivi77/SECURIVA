@@ -102,17 +102,15 @@ export default function Navbar(){
         </div>
         {/* LOWER NAV BAR */}
         <div
-            className="shrink-0 py-3 px-5 flex justify-between items-center w-full flex-wrap gap-2.5 box-border"
+            className="shrink-0 py-3 pb-5 pl-16 px-5 flex justify-between items-center w-full flex-wrap gap-2.5 box-border bg-black border-b-1 border-[#e5e7ff]"
           style={{
-            borderBottom: `1px solid ${theme.border}`,
-            background: theme.surface,
             fontSize: 18
           }}
         >
           {/* Left: logo + SECURIVA */}
           <div style={{ display: "flex", alignItems: "center", overflow: "hidden", paddingLeft: 23, justifyContent: "space-between", flexGrow: 1}}>
             <img
-              src="/logo.png"
+              src="/LOGO_SECURIVA_FINAL_2.png"
               alt="SECURIVA Logo"
               style={{
                 height: "auto",
