@@ -1,8 +1,7 @@
-import "./Agent.css";
-import { useOutletContext } from "react-router-dom";
 import { ChevronRight} from "lucide-react";
+import { useTheme } from "../context/ThemeContext";
 function Agent() {
-    const {theme=theme} = useOutletContext();
+    const {theme} = useTheme();
     return (
         <div>
             <header className="hero section-min-height">

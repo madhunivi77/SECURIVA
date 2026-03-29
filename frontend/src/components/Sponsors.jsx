@@ -6,11 +6,11 @@ function Sponsors({ className}) {
   return (
     <div className={combinedClasses}>
         <h2>Our partners play a key role in advancing the SecuriVA ecosystem.</h2>
-        <div className="flex overflow-hidden py-6 justify-between">
-            <img src={"/LOGOS(46).png"} className="h-auto w-50" />
-            <img src={"/LOGOS(47).png"} className="w-50" />
-            <img src={"/LOGOS(48).png"} className="w-50" />
-            <img src={"/LOGOS(49).png"} className="w-50" />
+        <div className="flex p-6 max-w-full justify-between items-center">
+            <img src={"/LOGOS(46).png"} className="flex-1 h-auto object-contain max-h-25" />
+            <img src={"/LOGOS(47).png"} className="flex-1 h-auto object-contain max-h-50" />
+            <img src={"/LOGOS(48).png"} className="flex-1 h-auto object-contain max-h-50" />
+            <img src={"/LOGOS(49).png"} className="flex-1 h-auto object-contain max-h-50" />
         </div>
     </div>
 );
