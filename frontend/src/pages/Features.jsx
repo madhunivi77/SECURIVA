@@ -201,7 +201,7 @@ export default function Features() {
       {/* VPN */}
       <section className="relative overflow-hidden px-8 py-12">
         <h2 className="text-4xl font-normal text-center text-gray-900 mb-2 dark:text-white">
-          VPN
+          VPN Secure Access
         </h2>
         <p className="text-[15px] font-light text-gray-500 mb-8 text-center dark:text-gray-400 mx-[15%]">
           Secure, Encrypted, and Compliance-Ready Network Access
