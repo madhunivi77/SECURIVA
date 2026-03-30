@@ -6,6 +6,53 @@ Your TeleSign integration has been completely upgraded for **self-service accoun
 
 ---
 
+## Self-Service vs Enterprise for This Application
+
+This project currently runs in a **self-service-first** mode for most TeleSign features, with one mixed piece:
+
+- SMS, Voice, PhoneID, and Score use the standard `telesign` SDK
+- Verify code flows currently use `telesignenterprise.verify.VerifyClient`
+
+In practice, that means your app supports both account models, but the default setup and docs are optimized for self-service onboarding.
+
+### Quick Comparison
+
+| Area | Self-Service Account (Current Default) | Enterprise Account (When You Upgrade) |
+|------|----------------------------------------|---------------------------------------|
+| **Best fit in this app** | Fast setup, dev/testing, small-to-medium traffic | Production scale, advanced deliverability, regional expansion |
+| **Current code path** | Primary path for `send_sms`, `send_voice_call`, `verify_phone_number`, `check_phone_risk` | Optional/expanded path, especially for dedicated sender and advanced routing |
+| **Verify / OTP flow** | Works, but this repo currently uses enterprise Verify client class for token validation endpoints | Native fit for Verify-heavy flows and higher-volume OTP |
+| **Sender ID control** | Often limited/shared defaults; `TELESIGN_SENDER_ID` may be empty | Dedicated numbers, toll-free, or registered brand sender IDs |
+| **Regional deliverability controls** | Basic controls; country restrictions can be stricter | Better support for country onboarding and compliance registration workflows |
+| **WhatsApp / premium channels** | Typically not available | Available with account enablement and provisioning |
+| **Operational support** | Self-service dashboard support | Higher-touch support and account-level provisioning assistance |
+
+### What Changes in This App When You Move to Enterprise
+
+1. **Environment/config mostly stays the same**
+  - `TELESIGN_CUSTOMER_ID`
+  - `TELESIGN_API_KEY`
+  - `TELESIGN_SENDER_ID` (more useful with enterprise)
+
+2. **Your biggest behavior change is usually deliverability and sender identity**
+  - Fewer country blocks once sender IDs/countries are provisioned
+  - Better consistency for OTP and alert traffic
+
+3. **No frontend contract change is required**
+  - MCP tool names and response shapes can remain the same
+  - Changes are mostly account provisioning and backend credential setup
+
+### Recommendation for This Repo
+
+- Stay on **self-service** if you are validating flows, demos, and low/medium volume messaging.
+- Move to **enterprise** when you need:
+  - dedicated sender IDs/toll-free strategy,
+  - broader international coverage with fewer regional blocks,
+  - advanced channel support (for example WhatsApp),
+  - stronger operational/compliance support for production traffic.
+
+---
+
 ## Changes Made
 
 ### 1. **[telesign_auth.py](my_app/server/telesign_auth.py)** - Core Functions
@@ -364,6 +411,36 @@ Your TeleSign self-service account supports:
 
 ❌ **WhatsApp** (Requires enterprise upgrade)  
 ❌ **Premium features** (Contact TeleSign for upgrade)
+
+### WhatsApp Limitation in This Application (Important)
+
+For this codebase, WhatsApp is not just "disabled by default" on self-service; it is effectively **not supported** until enterprise provisioning is complete.
+
+What this means today:
+
+1. **No WhatsApp MCP tool is exposed** in the current server tool set.
+2. **No WhatsApp send path is wired** in the active messaging helpers used by the app.
+3. Requests like "send this via WhatsApp" should be handled as unsupported and redirected to SMS/Voice.
+
+Why this matters:
+
+- Self-service accounts typically do not include WhatsApp Business channel enablement.
+- WhatsApp delivery requires additional TeleSign-side provisioning and approval (enterprise workflow).
+- Even if credentials are valid for SMS/Voice, WhatsApp will not work until channel access is explicitly enabled.
+
+Recommended behavior in product flows:
+
+- Show a clear fallback message: "WhatsApp is not available on the current TeleSign plan; using SMS instead."
+- Keep OTP and notification defaults on `sendSMS` and `sendVoiceCall`.
+- Do not advertise WhatsApp in UI copy until enterprise provisioning is complete.
+
+What changes after enterprise upgrade:
+
+1. TeleSign enables WhatsApp channel for your account.
+2. Backend adds an explicit WhatsApp send function/tool path.
+3. UI/workflow can safely offer WhatsApp as a channel option.
+
+Until those three are done, treat WhatsApp as unavailable in this application.
 
 ---
 

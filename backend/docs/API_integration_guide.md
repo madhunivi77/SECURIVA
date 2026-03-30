@@ -185,7 +185,7 @@ User Login → Google OAuth → Backend → JWT Generation → HttpOnly Cookie
                               CSRF Token (React State)
 ```
 
-**See:** [AUTHENTICATION_FLOWS.md](./AUTHENTICATION_FLOWS.md)
+**See:** [Authentication_Flows.md](./Authentication_Flows.md)
 
 ### 2. Service Authentication
 
@@ -207,7 +207,7 @@ User Login → Google OAuth → Backend → JWT Generation → HttpOnly Cookie
 - ✅ Calendar read/create events
 - ✅ User profile access
 
-**Documentation:** [GOOGLE_OAUTH_INTEGRATION.md](./GOOGLE_OAUTH_INTEGRATION.md)
+**Documentation:** [Authentication_Flows.md](./Authentication_Flows.md)
 
 **Quick Example:**
 ```python
@@ -229,7 +229,7 @@ messages = service.users().messages().list(userId='me').execute()
 - ✅ Case management
 - ✅ Opportunity tracking
 
-**Documentation:** [SALESFORCE_INTEGRATION.md](./SALESFORCE_INTEGRATION.md)
+**Documentation:** [../tests/README_SALESFORCE_TESTING.md](../tests/README_SALESFORCE_TESTING.md)
 
 **Quick Example:**
 ```python
@@ -255,7 +255,7 @@ response = requests.get(
 - ✅ Fraud risk assessment
 - 🔜 WhatsApp messaging (premium)
 
-**Documentation:** [TELESIGN_WHATSAPP_INTEGRATION.md](./TELESIGN_WHATSAPP_INTEGRATION.md)
+**Documentation:** [TELESIGN_UPGRADE_GUIDE.md](./TELESIGN_UPGRADE_GUIDE.md)
 
 **Quick Example:**
 ```python
@@ -371,11 +371,11 @@ with open("tokens.json", "w") as f:
 
 | Document | Description |
 |----------|-------------|
-| [AUTHENTICATION_FLOWS.md](./AUTHENTICATION_FLOWS.md) | Detailed authentication flow diagrams |
-| [ERROR_HANDLING.md](./ERROR_HANDLING.md) | Error codes and handling strategies |
-| [TROUBLESHOOTING.md](./TROUBLESHOOTING.md) | Common issues and solutions |
-| [API_REFERENCE.md](./API_REFERENCE.md) | Complete endpoint reference |
-| [MCP_TOOLS_INTEGRATION.md](./MCP_TOOLS_INTEGRATION.md) | MCP server and tools documentation |
+| [Authentication_Flows.md](./Authentication_Flows.md) | Detailed authentication flow diagrams |
+| [COMPLIANCE_TOOLS_GUIDE.md](./COMPLIANCE_TOOLS_GUIDE.md) | Compliance tool usage and behavior |
+| [DYNAMODB_GUIDE.md](./DYNAMODB_GUIDE.md) | Operational setup and troubleshooting for DynamoDB |
+| [README_COMPLIANCE_FEATURE.md](./README_COMPLIANCE_FEATURE.md) | Compliance feature overview and examples |
+| [API_integration_guide.md](./API_integration_guide.md) | API architecture and integration patterns |
 
 ---
 

@@ -416,7 +416,7 @@ Compliance standards data compiled from official sources:
 
 ## Questions?
 
-See the comprehensive guide: `backend/my_app/server/docs/COMPLIANCE_TOOLS_GUIDE.md`
+See the comprehensive guide: `backend/docs/COMPLIANCE_TOOLS_GUIDE.md`
 
 ---
 

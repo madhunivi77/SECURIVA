@@ -30,7 +30,7 @@ A **multi-layer security system** that allows AI to safely generate compliance m
    - Safe workflow guide
    - AI usage examples
 
-4. **[HIPAA_MODULE_WALKTHROUGH.md](./HIPAA_MODULE_WALKTHROUGH.md)** (300+ lines)
+4. **[compliance_modules/README.md](../my_app/server/compliance_modules/README.md)**
    - Step-by-step process for adding compliance modules
    - How modular system works
    - Benefits vs legacy system
@@ -371,7 +371,7 @@ You can now ask:
 ## 📚 Documentation Index
 
 - **[COMPLIANCE_MODULE_GENERATOR_SECURITY.md](./COMPLIANCE_MODULE_GENERATOR_SECURITY.md)** - Complete security guide
-- **[HIPAA_MODULE_WALKTHROUGH.md](./HIPAA_MODULE_WALKTHROUGH.md)** - How to add modules manually
+- **[compliance_modules/README.md](../my_app/server/compliance_modules/README.md)** - How to add modules manually
 - **[compliance_modules/README.md](../my_app/server/compliance_modules/README.md)** - Module structure guide
 
 ---

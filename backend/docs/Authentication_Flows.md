@@ -419,7 +419,7 @@ User → /salesforce/login → Backend → Salesforce Auth → Callback → Stor
 
 ### Implementation
 
-See [SALESFORCE_INTEGRATION.md](./SALESFORCE_INTEGRATION.md) for complete details.
+See [../tests/README_SALESFORCE_TESTING.md](../tests/README_SALESFORCE_TESTING.md) for complete details.
 
 **Key Differences from Google:**
 - Uses Salesforce-specific endpoints
@@ -548,7 +548,7 @@ def listEmails(context: Context, max_results: int = 10) -> str:
 
 ### Common Issues
 
-See [TROUBLESHOOTING.md](./TROUBLESHOOTING.md) for detailed solutions.
+See [DYNAMODB_GUIDE.md](./DYNAMODB_GUIDE.md) and [API_integration_guide.md](./API_integration_guide.md) for detailed solutions.
 
 **Quick Fixes:**
 
