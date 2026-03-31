@@ -19,7 +19,7 @@ export default function AgentVoice({ }) {
                 </div>
             </section>
 
-            <section className="flex flex-col gap-5 my-5 mx-[15%]">
+            <section className="flex flex-col gap-5 py-5 mx-[15%]">
                 <CapabilityCard icon={AudioLines} label={"High-Accuracy Voice-to-Text"} description={"Instant conversion of speech into structured text, regardless of speed, accent, or language."} />
                 <CapabilityCard icon={NotepadTextDashed} label={"Intelligent Rewriting by Tone"} description={"From the dictated text, the agent generates optimized versions in different tones"} />
                 <CapabilityCard icon={Languages} label={"Automatic Multilingual Translation"} description={"Seamless translation into any language: EN, FR, ES, AR, Lingala, Swahili, Mandarin, Portuguese, etc."} />

@@ -27,6 +27,7 @@ import Solutions from './pages/Solutions.jsx';
 import Platform from './pages/Platform.jsx';
 import AgentVoice from './pages/AgentVoice.jsx';
 import AgentText from './pages/AgentText.jsx';
+import Cybersecurity from './pages/Cybersecurity.jsx';
 
 const router = createBrowserRouter([
   {
@@ -84,6 +85,10 @@ const router = createBrowserRouter([
       {
         path: "/agent-text",
         element: <AgentText />
+      },
+      {
+        path: "/cybersecurity",
+        element: <Cybersecurity />
       }
     ]
   },

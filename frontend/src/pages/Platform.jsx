@@ -68,6 +68,7 @@ const platforms = [
             "Compliance-ready environment",
             "Reduced risk and operational exposure",
         ],
+        link: "/cybersecurity"
     },
     {
         number: "03",

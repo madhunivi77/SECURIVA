@@ -1,7 +1,7 @@
 import {Zap} from "lucide-react";
 import Checklist from "./Checklist";
 
-export default function SolutionCard({ number, icon: Icon, label, description, points, examples, isFuture, imageLink, altText }) {
+export default function SolutionCard({ number, icon: Icon, label, description, content, points, footer, examples, isFuture, imageLink, altText }) {
     return (
         <div className="flex gap-6 rounded-2xl border border-gray-100 bg-white p-6 hover:border-gray-200 transition-colors dark:border-gray-800 dark:bg-inherit dark:hover:border-gray-700">
 
@@ -24,8 +24,9 @@ export default function SolutionCard({ number, icon: Icon, label, description, p
                             </span>
                         )}
                     </div>
-                    <p className="text-lg text-gray-500 mb-3 leading-relaxed dark:text-gray-400">{description}</p>
-                    <Checklist items={points} size={"3.5"} />
+                    {description && (<p className="text-lg text-gray-500 mb-3 leading-relaxed dark:text-gray-400">{description}</p>)}
+                    {content}
+                    {points && (<Checklist items={points} size={"3.5"} />)}
                     {examples && (
                         <div className="mt-3 flex flex-wrap gap-2">
                             {examples.map((ex) => (
@@ -35,15 +36,19 @@ export default function SolutionCard({ number, icon: Icon, label, description, p
                             ))}
                         </div>
                     )}
+                    {footer && (<p className="text-lg text-gray-500 my-3 leading-relaxed dark:text-gray-400">{footer}</p>)}
                 </div>
 
-                {/* Image */}
-                <figure>
-                    <img
-                        src={imageLink}
-                        alt={altText}
-                        className="w-50" />
-                </figure>
+                {imageLink && 
+                    (
+                        <figure>
+                            <img
+                                src={imageLink}
+                                alt={altText}
+                                className="w-50" />
+                        </figure>
+                    )
+                }
             </div>
 
         </div>

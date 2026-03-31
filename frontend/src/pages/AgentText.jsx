@@ -50,7 +50,7 @@ export default function AgentText({ }) {
                 </div>
             </section>
 
-            <h2 className="text-4xl font-normal text-center text-gray-900 my-10 dark:text-white">
+            <h2 className="subheading">
                 Automation Capabilities
             </h2>
 
@@ -72,7 +72,7 @@ export default function AgentText({ }) {
                 } />
             </section>
 
-            <h2 className="text-4xl font-normal text-center text-gray-900 my-10 dark:text-white">
+            <h2 className="subheading">
                 Why Choose Text AI Agent
             </h2>
 
