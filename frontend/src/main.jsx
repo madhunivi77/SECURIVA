@@ -28,6 +28,7 @@ import Platform from './pages/Platform.jsx';
 import AgentVoice from './pages/AgentVoice.jsx';
 import AgentText from './pages/AgentText.jsx';
 import Cybersecurity from './pages/Cybersecurity.jsx';
+import VPN from './pages/VPN.jsx';
 
 const router = createBrowserRouter([
   {
@@ -89,6 +90,10 @@ const router = createBrowserRouter([
       {
         path: "/cybersecurity",
         element: <Cybersecurity />
+      },
+      {
+        path: "/vpn",
+        element: <VPN />
       }
     ]
   },

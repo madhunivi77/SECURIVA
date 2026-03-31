@@ -127,7 +127,7 @@ export default function Cybersecurity() {
                     "Encryption protocols for data in transit and at rest", 
                     "Regular vulnerability testing and reporting", 
                     "Training materials and documentation for compliance and incident response"
-                    ]} />
+                    ]} footer={"With these resources, organizations can build internal security competence while relying on SecuriVA’s advanced protection."}/>
             </section>
 
             {/* Why */}

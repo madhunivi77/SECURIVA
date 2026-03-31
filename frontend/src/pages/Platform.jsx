@@ -127,6 +127,7 @@ const platforms = [
             "Enable safe remote work",
             "Guarantee compliance for all connected users",
         ],
+        link: "/VPN"
     },
 ];
 
