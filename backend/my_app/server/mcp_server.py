@@ -78,6 +78,10 @@ mcp.settings.streamable_http_path = "/"
     
 def getGoogleCreds(ctx) -> Credentials:
     try:
+        if not JWT_SECRET_KEY:
+            print("JWT_SECRET_KEY not configured")
+            return None
+
         # extract the jwt from the request to get the subject
         encoded_token = ctx.request_context.request.headers.get('Authorization').split(" ")[1]
         payload = jwt.decode(encoded_token, JWT_SECRET_KEY, algorithms=["HS256"])
@@ -592,6 +596,10 @@ def getSalesforceCreds(ctx):
     """Retrieve Salesforce credentials for the logged-in user, refreshing if needed"""
     try:
         JWT_SECRET_KEY = os.getenv("JWT_SECRET_KEY")
+        if not JWT_SECRET_KEY:
+            print("JWT_SECRET_KEY not configured")
+            return None
+
         encoded_token = ctx.request_context.request.headers.get('Authorization').split(" ")[1]
         payload = jwt.decode(encoded_token, JWT_SECRET_KEY, algorithms=["HS256"])
         user_id = payload.get('sub')

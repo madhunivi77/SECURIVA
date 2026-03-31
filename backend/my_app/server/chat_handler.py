@@ -142,12 +142,12 @@ async def get_mcp_auth_token(user_id: str | None = None) -> str | None:
         return None
 
 
-def get_llm_client(api: str):
+def get_llm_client(api: str, model: str):
     """Initialize the appropriate LLM client based on API choice."""
     if api == "openai":
-        return ChatOpenAI(api_key=os.getenv("OPENAI_API_KEY"))
+        return ChatOpenAI(model=model, api_key=os.getenv("OPENAI_API_KEY"))
     elif api == "groq":
-        return ChatGroq(api_key=os.getenv("GROQ_API_KEY"))
+        return ChatGroq(model=model, api_key=os.getenv("GROQ_API_KEY"))
     else:
         raise ValueError(f"Unsupported API: {api}")
 
@@ -249,7 +249,7 @@ async def execute_chat_with_tools(
                     return {"error": f"MCP tool response failed: {e}"}
 
                 # Initialize LLM client
-                llm_client = get_llm_client(resolved_api)
+                llm_client = get_llm_client(resolved_api, resolved_model)
 
                 # Initialize the langgraph agent
                 graph = create_agent(

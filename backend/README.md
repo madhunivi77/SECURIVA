@@ -3,11 +3,12 @@
 - will install all libraries
 ` uv sync `
 - start the server
-`python run.py (or uv run.py)`
+`python run.py (or uv run run.py)`
 - start the agent
 ` code uv run --active my_app/client/agent.py `
 
 Compliance report DynamoDB testing: see [docs/COMPLIANCE_REPORTS_DYNAMODB_TESTING.md](docs/COMPLIANCE_REPORTS_DYNAMODB_TESTING.md).
+Compliance feature/module improvements: see [docs/COMPLIANCE_IMPROVEMENT_GUIDE.md](docs/COMPLIANCE_IMPROVEMENT_GUIDE.md).
 
 ---
 

@@ -13,6 +13,7 @@ This guide explains how to extend SECURIVA with new Google Workspace tools, Sale
 3. [Adding Salesforce Tools](#adding-salesforce-tools)
 4. [Adding a New OAuth Service](#adding-a-new-oauth-service)
 5. [Testing Your Tools](#testing-your-tools)
+6. [Improving Compliance Features](#improving-compliance-features)
 
 ---
 
@@ -586,6 +587,21 @@ def yourTool(context: Context):
 
 **Check MCP server logs**:
 Look at terminal output when running the backend.
+
+---
+
+## Improving Compliance Features
+
+For compliance-focused development workflows, see:
+
+- `docs/COMPLIANCE_IMPROVEMENT_GUIDE.md`
+
+This companion guide covers:
+
+1. Improving standards/modules safely
+2. Guidance catalog and routing improvements
+3. DynamoDB integration points for guidance and reports
+4. Recommended pre-merge test bundles
 
 ---
 
