@@ -54,6 +54,8 @@ export default function Navbar(){
 
                 <NavOption label={"Solutions"} target={"solutions"} theme={theme.text}/>
 
+                <NavOption label={"Platform"} target={"platform"} theme={theme.text}/>
+
                 <NavOption label={"Pricing"} target={"pricing"} theme={theme.text}/>
 
                 <NavOption label={"Contact"} target={"contact"} theme={theme.text}/>
