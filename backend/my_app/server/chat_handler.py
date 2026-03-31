@@ -1,6 +1,7 @@
 import os
 import json
 import httpx
+import re
 import time
 import uuid
 from mcp import ClientSession
@@ -14,6 +15,8 @@ from langchain_core.callbacks import BaseCallbackHandler
 from langchain.agents import create_agent
 from langchain_openai import ChatOpenAI
 from langchain_groq import ChatGroq
+from .grounded_chat_policy import prepare_messages_for_agent, should_use_grounded_guidance
+from .request_validator import should_block_request
 
 
 class TimingCallbackHandler(BaseCallbackHandler):
@@ -63,8 +66,105 @@ with open(config_path, "r") as f:
 DEFAULT_API = config.get("api", "openai")
 DEFAULT_MODEL = config.get("model", "gpt-3.5-turbo")
 
+GROUNDED_GUIDANCE_TOOL_NAMES = frozenset({
+    "getGroundedSecurityGuidance",
+    "getComplianceOverview",
+    "getComplianceRequirements",
+    "getComplianceChecklist",
+    "getPenaltyInformation",
+    "getBreachNotificationRequirements",
+    "crossReferenceComplianceTopic",
+    "searchComplianceRequirements",
+})
 
-async def get_mcp_auth_token(user_id: str = None) -> str | None:
+COMPLIANCE_REFERENCE_TOOL_NAMES = frozenset({
+    "getComplianceOverview",
+    "getComplianceRequirements",
+    "getComplianceChecklist",
+    "getPenaltyInformation",
+    "getBreachNotificationRequirements",
+    "crossReferenceComplianceTopic",
+    "searchComplianceRequirements",
+})
+
+COMPLIANCE_REPORT_TOOL_NAMES = frozenset({
+    "confirmComplianceUnderstanding",
+    "summarizeComplianceRequest",
+    "validateComplianceParameters",
+    "generateComplianceReport",
+})
+
+COMPLIANCE_REFERENCE_REQUEST_PATTERN = re.compile(
+    r"\b(requirements?|checklist|penalt(?:y|ies)|fine|fines|breach notification|overview|"
+    r"compare|comparison|cross[- ]reference|search|standard|standards)\b",
+    re.IGNORECASE,
+)
+
+COMPLIANCE_REPORT_REQUEST_PATTERN = re.compile(
+    r"\b(generate|create|build|draft|prepare)\b.*\b(report|checklist|assessment|summary)\b|"
+    r"\bcompliance report\b",
+    re.IGNORECASE,
+)
+
+COMPLIANCE_REGULATION_PATTERN = re.compile(
+    r"\b(gdpr|hipaa|pci[ -]?dss|ccpa|sox)\b",
+    re.IGNORECASE,
+)
+
+
+def get_latest_user_message_content(messages: list) -> str:
+    """Return the latest user message content, or an empty string when unavailable."""
+    for message in reversed(messages):
+        if isinstance(message, dict):
+            role = message.get("role")
+            content = message.get("content", "")
+        else:
+            role = getattr(message, "role", None)
+            content = getattr(message, "content", "")
+
+        if role == "user":
+            return content or ""
+
+    return ""
+
+
+def classify_tool_route(messages: list) -> str:
+    """Classify the request so chat only exposes tools relevant to the current intent."""
+    latest_user_message = get_latest_user_message_content(messages)
+    if not latest_user_message:
+        return "default"
+
+    if should_use_grounded_guidance(messages):
+        return "grounded_guidance"
+
+    if COMPLIANCE_REPORT_REQUEST_PATTERN.search(latest_user_message):
+        return "compliance_report"
+
+    has_regulation_reference = bool(COMPLIANCE_REGULATION_PATTERN.search(latest_user_message))
+    has_reference_intent = bool(COMPLIANCE_REFERENCE_REQUEST_PATTERN.search(latest_user_message))
+    if has_regulation_reference and has_reference_intent:
+        return "compliance_reference"
+
+    return "default"
+
+
+def filter_mcp_tools_for_route(mcp_tools: list, route_name: str) -> list:
+    """Reduce the tool surface for compliance requests while preserving fallback behavior."""
+    route_allowlists = {
+        "grounded_guidance": GROUNDED_GUIDANCE_TOOL_NAMES,
+        "compliance_reference": COMPLIANCE_REFERENCE_TOOL_NAMES,
+        "compliance_report": COMPLIANCE_REFERENCE_TOOL_NAMES | COMPLIANCE_REPORT_TOOL_NAMES,
+    }
+
+    allowed_names = route_allowlists.get(route_name)
+    if not allowed_names:
+        return mcp_tools
+
+    filtered_tools = [tool for tool in mcp_tools if getattr(tool, "name", None) in allowed_names]
+    return filtered_tools or mcp_tools
+
+
+async def get_mcp_auth_token(user_id: str | None = None) -> str | None:
     """Fetches an authentication token from the authorization server."""
     try:
         async with httpx.AsyncClient() as client:
@@ -121,7 +221,12 @@ async def handle_tool_errors(request, handler):
             duration_ms = None
         )
     
-async def execute_chat_with_tools(messages: list, model: str = None, api: str = None, user_id: str = None) -> dict:
+async def execute_chat_with_tools(
+    messages: list,
+    model: str | None = None,
+    api: str | None = None,
+    user_id: str | None = None,
+) -> dict:
     """
     Execute a chat request with MCP tool-calling capabilities.
 
@@ -142,6 +247,21 @@ async def execute_chat_with_tools(messages: list, model: str = None, api: str = 
         model = DEFAULT_MODEL
     if not api:
         api = DEFAULT_API
+
+    resolved_model = model
+    resolved_api = api
+
+    # Validate request for misalignment attempts
+    should_block, rejection_message = should_block_request(messages)
+    if should_block:
+        return {
+            "response": rejection_message,
+            "tool_calls": [],
+            "blocked": True
+        }
+
+    tool_route = classify_tool_route(messages)
+    messages = prepare_messages_for_agent(messages)
 
     # Initialize logger and generate session ID
     logger = get_tool_logger()
@@ -173,6 +293,7 @@ async def execute_chat_with_tools(messages: list, model: str = None, api: str = 
                 # Discover available tools
                 try:
                     mcp_tools_response = await load_mcp_tools(session)
+                    mcp_tools_response = filter_mcp_tools_for_route(mcp_tools_response, tool_route)
                 except Exception as e:
                     return {"error": f"MCP tool response failed: {e}"}
 
@@ -180,7 +301,7 @@ async def execute_chat_with_tools(messages: list, model: str = None, api: str = 
                 print(f"⏱️  [CHAT]   load_tools: {(t3-t2)*1000:.0f}ms ({len(mcp_tools_response)} tools)")
 
                 # Initialize LLM client
-                llm_client = get_llm_client(api, model)
+                llm_client = get_llm_client(resolved_api, resolved_model)
 
                 # Initialize the langgraph agent
                 graph = create_agent(
@@ -245,8 +366,8 @@ async def execute_chat_with_tools(messages: list, model: str = None, api: str = 
                             error = tool_call['error'],
                             duration_ms=tool_call['duration_ms'],
                             metadata={
-                                    "model": model,
-                                    "api": api,
+                                    "model": resolved_model,
+                                    "api": resolved_api,
                                     "tool_call_id": tool_call['id']
                                 }
                         )

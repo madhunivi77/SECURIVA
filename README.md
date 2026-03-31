@@ -23,7 +23,8 @@ User hears  ← VAPI (Deepgram TTS) ← Response ←─────────�
 When authenticated, the voice assistant has access to:
 - **Gmail**: List emails, read content, create drafts, summarize
 - **Google Calendar**: List events, create events, manage attendees
-- **Salesforce**: List accounts, create/list cases
+- **Salesforce**: Create/list contacts, accounts, opportunities, cases; SOQL/SOSL search; send emails; Chatter posts; tasks/events; file management (26 tools)
+- **TeleSign**: Send SMS/voice calls, phone verification, 2FA codes, fraud risk assessment, message status tracking, batch operations (13 tools)
 
 ### 3D Voice Interface
 - Animated WebGL orb using Three.js and React Three Fiber
