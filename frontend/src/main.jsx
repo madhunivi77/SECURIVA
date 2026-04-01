@@ -24,6 +24,11 @@ import About from "./pages/About.jsx";
 import Contact from "./pages/Contact.jsx";
 import FAQ from "./pages/FAQ.jsx";
 import Solutions from './pages/Solutions.jsx';
+import Platform from './pages/Platform.jsx';
+import AgentVoice from './pages/AgentVoice.jsx';
+import AgentText from './pages/AgentText.jsx';
+import Cybersecurity from './pages/Cybersecurity.jsx';
+import VPN from './pages/VPN.jsx';
 
 const router = createBrowserRouter([
   {
@@ -47,7 +52,7 @@ const router = createBrowserRouter([
         element: <Features />
       },
       {
-        path: "pricing",
+        path: "/pricing",
         element: <Pricing />,
       },
       {
@@ -69,6 +74,26 @@ const router = createBrowserRouter([
       {
         path: "/faq",
         element: <FAQ />
+      },
+      {
+        path: "/platform",
+        element: <Platform />
+      },
+      {
+        path: "/agent-voice",
+        element: <AgentVoice />
+      },
+      {
+        path: "/agent-text",
+        element: <AgentText />
+      },
+      {
+        path: "/cybersecurity",
+        element: <Cybersecurity />
+      },
+      {
+        path: "/vpn",
+        element: <VPN />
       }
     ]
   },
