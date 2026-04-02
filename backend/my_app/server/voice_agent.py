@@ -117,6 +117,11 @@ async def _run_voice_agent_inner(
     t1 = time.perf_counter()
     print(f"⏱️  [VOICE_AGENT]  pool_connect: {(t1-t0)*1000:.0f}ms ({len(conn.tools)} tools) [attempt={attempt}]")
 
+    # Filter to only voice-relevant tools (demo: email only)
+    VOICE_TOOL_WHITELIST = {"summarizeRecentEmails", "listEmails", "getEmailBodies"}
+    voice_tools = [t for t in conn.tools if t.name in VOICE_TOOL_WHITELIST]
+    print(f"⏱️  [VOICE_AGENT]  filtered tools: {len(voice_tools)}/{len(conn.tools)} ({[t.name for t in voice_tools]})")
+
     # Ensure system message is present
     if not messages or messages[0].get("role") != "system":
         messages.insert(0, {"role": "system", "content": VOICE_SYSTEM_PROMPT})
@@ -125,7 +130,7 @@ async def _run_voice_agent_inner(
 
     # Step 1: Groq picks the tool (fast, ~200ms)
     groq_llm = _get_groq_client()
-    groq_with_tools = groq_llm.bind_tools(conn.tools)
+    groq_with_tools = groq_llm.bind_tools(voice_tools)
 
     t2 = time.perf_counter()
     print(f"⏱️  [VOICE_AGENT]  setup: {(t2-t1)*1000:.0f}ms")
