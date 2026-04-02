@@ -81,7 +81,7 @@ export default function Footer() {
               <li><HashLink smooth scroll={scrollWithOffset} to='/industries/#ecommerce'>E-commerce</HashLink></li>
               <li><HashLink smooth scroll={scrollWithOffset} to='/industries/#smb'>SMBs</HashLink></li>
               <li><HashLink smooth scroll={scrollWithOffset} to='/industries/#agriculture'>Agriculture</HashLink></li>
-              <li><HashLink smooth scroll={scrollWithOffset} to='/industries/#technology'>Technology</HashLink></li>
+              <li><HashLink smooth scroll={scrollWithOffset} to='/industries/#education'>Education</HashLink></li>
               <li><HashLink smooth scroll={scrollWithOffset} to='/industries/#nonprofit'>Non Profit</HashLink></li>
               <li><HashLink smooth scroll={scrollWithOffset} to='/industries/#government'>Government</HashLink></li>
             </ul>
@@ -124,7 +124,7 @@ export default function Footer() {
 
 // function passed to hash-link scroll prop to offset navbar
 export const scrollWithOffset = (el) => {
-  const yOffset = -167.5;
+  const yOffset = -200;
   const y =
     el.getBoundingClientRect().top +
     window.pageYOffset +
