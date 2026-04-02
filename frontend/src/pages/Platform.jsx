@@ -223,7 +223,6 @@ export default function Platform() {
                 </div>
             </section>
 
-            {/* ---------- CONTACT SERVICES ---------- */}
             <section className="relative overflow-hidden">
                 <div className="relative w-full min-h-screen overflow-hidden bg-black mx-auto">
                     <video
