@@ -5,23 +5,23 @@
 SECURIVA uses a **dual-storage architecture** for maximum security and compliance:
 
 ```
-┌─────────────────────────────────────────────────────────┐
-│                   SECURIVA Application                  │
-├─────────────────────────────────────────────────────────┤
-│                                                         │
+┌───────────────────────────────────────────────────────┐
+│                   SECURIVA Application                │
+├───────────────────────────────────────────────────────┤
+│                                                       │
 │  ┌──────────────────┐        ┌──────────────────┐     │
 │  │   Salesforce     │        │    DynamoDB      │     │
 │  │   (CRM Data)     │        │  (Encrypted      │     │
 │  │                  │        │   Credentials)   │     │
 │  └──────────────────┘        └──────────────────┘     │
-│         │                             │                │
+│         │                             │               │
 │         ├─ Contacts                   ├─ API Keys     │
 │         ├─ Accounts                   ├─ OAuth Tokens │
-│         ├─ Opportunities               ├─ Encrypted    │
-│         ├─ Cases                       │   Customer    │
-│         └─ Business Data               │   Data        │
-│                                        └─ Audit Logs   │
-└─────────────────────────────────────────────────────────┘
+│         ├─ Opportunities               ├─ Encrypted   │
+│         ├─ Cases                       │   Customer   │
+│         └─ Business Data               │   Data       │
+│                                        └─ Audit Logs  │
+└───────────────────────────────────────────────────────┘
 ```
 
 ---
