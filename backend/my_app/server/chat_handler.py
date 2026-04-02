@@ -1,6 +1,7 @@
 import os
 import json
 import httpx
+import re
 import time
 import uuid
 from mcp import ClientSession
@@ -10,44 +11,11 @@ from .tool_logger import get_tool_logger
 from langchain_mcp_adapters.tools import load_mcp_tools
 from langchain.agents.middleware import wrap_tool_call
 from langchain_core.messages import AIMessage, ToolMessage
-from langchain_core.callbacks import BaseCallbackHandler
 from langchain.agents import create_agent
 from langchain_openai import ChatOpenAI
 from langchain_groq import ChatGroq
-
-
-class TimingCallbackHandler(BaseCallbackHandler):
-    """Logs timing for every LLM call and tool call in the agent loop."""
-
-    def __init__(self):
-        self.llm_starts = {}
-        self.tool_starts = {}
-        self.llm_call_count = 0
-        self.agent_start = time.perf_counter()
-
-    def on_llm_start(self, serialized, prompts, *, run_id, **kwargs):
-        self.llm_call_count += 1
-        self.llm_starts[run_id] = time.perf_counter()
-        elapsed = (time.perf_counter() - self.agent_start) * 1000
-        print(f"⏱️  [AGENT]  +{elapsed:.0f}ms | LLM call #{self.llm_call_count} started")
-
-    def on_llm_end(self, response, *, run_id, **kwargs):
-        if run_id in self.llm_starts:
-            duration = (time.perf_counter() - self.llm_starts[run_id]) * 1000
-            elapsed = (time.perf_counter() - self.agent_start) * 1000
-            print(f"⏱️  [AGENT]  +{elapsed:.0f}ms | LLM call #{self.llm_call_count} done: {duration:.0f}ms")
-
-    def on_tool_start(self, serialized, input_str, *, run_id, **kwargs):
-        self.tool_starts[run_id] = time.perf_counter()
-        name = serialized.get("name", "unknown")
-        elapsed = (time.perf_counter() - self.agent_start) * 1000
-        print(f"⏱️  [AGENT]  +{elapsed:.0f}ms | Tool '{name}' started")
-
-    def on_tool_end(self, output, *, run_id, **kwargs):
-        if run_id in self.tool_starts:
-            duration = (time.perf_counter() - self.tool_starts[run_id]) * 1000
-            elapsed = (time.perf_counter() - self.agent_start) * 1000
-            print(f"⏱️  [AGENT]  +{elapsed:.0f}ms | Tool done: {duration:.0f}ms")
+from .grounded_chat_policy import prepare_messages_for_agent, should_use_grounded_guidance
+from .request_validator import should_block_request
 
 
 # --- Configuration ---
@@ -62,8 +30,105 @@ with open(config_path, "r") as f:
 DEFAULT_API = config.get("api", "openai")
 DEFAULT_MODEL = config.get("model", "gpt-3.5-turbo")
 
+GROUNDED_GUIDANCE_TOOL_NAMES = frozenset({
+    "getGroundedSecurityGuidance",
+    "getComplianceOverview",
+    "getComplianceRequirements",
+    "getComplianceChecklist",
+    "getPenaltyInformation",
+    "getBreachNotificationRequirements",
+    "crossReferenceComplianceTopic",
+    "searchComplianceRequirements",
+})
 
-async def get_mcp_auth_token(user_id: str = None) -> str | None:
+COMPLIANCE_REFERENCE_TOOL_NAMES = frozenset({
+    "getComplianceOverview",
+    "getComplianceRequirements",
+    "getComplianceChecklist",
+    "getPenaltyInformation",
+    "getBreachNotificationRequirements",
+    "crossReferenceComplianceTopic",
+    "searchComplianceRequirements",
+})
+
+COMPLIANCE_REPORT_TOOL_NAMES = frozenset({
+    "confirmComplianceUnderstanding",
+    "summarizeComplianceRequest",
+    "validateComplianceParameters",
+    "generateComplianceReport",
+})
+
+COMPLIANCE_REFERENCE_REQUEST_PATTERN = re.compile(
+    r"\b(requirements?|checklist|penalt(?:y|ies)|fine|fines|breach notification|overview|"
+    r"compare|comparison|cross[- ]reference|search|standard|standards)\b",
+    re.IGNORECASE,
+)
+
+COMPLIANCE_REPORT_REQUEST_PATTERN = re.compile(
+    r"\b(generate|create|build|draft|prepare)\b.*\b(report|checklist|assessment|summary)\b|"
+    r"\bcompliance report\b",
+    re.IGNORECASE,
+)
+
+COMPLIANCE_REGULATION_PATTERN = re.compile(
+    r"\b(gdpr|hipaa|pci[ -]?dss|ccpa|sox)\b",
+    re.IGNORECASE,
+)
+
+
+def get_latest_user_message_content(messages: list) -> str:
+    """Return the latest user message content, or an empty string when unavailable."""
+    for message in reversed(messages):
+        if isinstance(message, dict):
+            role = message.get("role")
+            content = message.get("content", "")
+        else:
+            role = getattr(message, "role", None)
+            content = getattr(message, "content", "")
+
+        if role == "user":
+            return content or ""
+
+    return ""
+
+
+def classify_tool_route(messages: list) -> str:
+    """Classify the request so chat only exposes tools relevant to the current intent."""
+    latest_user_message = get_latest_user_message_content(messages)
+    if not latest_user_message:
+        return "default"
+
+    if should_use_grounded_guidance(messages):
+        return "grounded_guidance"
+
+    if COMPLIANCE_REPORT_REQUEST_PATTERN.search(latest_user_message):
+        return "compliance_report"
+
+    has_regulation_reference = bool(COMPLIANCE_REGULATION_PATTERN.search(latest_user_message))
+    has_reference_intent = bool(COMPLIANCE_REFERENCE_REQUEST_PATTERN.search(latest_user_message))
+    if has_regulation_reference and has_reference_intent:
+        return "compliance_reference"
+
+    return "default"
+
+
+def filter_mcp_tools_for_route(mcp_tools: list, route_name: str) -> list:
+    """Reduce the tool surface for compliance requests while preserving fallback behavior."""
+    route_allowlists = {
+        "grounded_guidance": GROUNDED_GUIDANCE_TOOL_NAMES,
+        "compliance_reference": COMPLIANCE_REFERENCE_TOOL_NAMES,
+        "compliance_report": COMPLIANCE_REFERENCE_TOOL_NAMES | COMPLIANCE_REPORT_TOOL_NAMES,
+    }
+
+    allowed_names = route_allowlists.get(route_name)
+    if not allowed_names:
+        return mcp_tools
+
+    filtered_tools = [tool for tool in mcp_tools if getattr(tool, "name", None) in allowed_names]
+    return filtered_tools or mcp_tools
+
+
+async def get_mcp_auth_token(user_id: str | None = None) -> str | None:
     """Fetches an authentication token from the authorization server."""
     try:
         async with httpx.AsyncClient() as client:
@@ -77,18 +142,12 @@ async def get_mcp_auth_token(user_id: str = None) -> str | None:
         return None
 
 
-def get_llm_client(api: str, model: str = None):
+def get_llm_client(api: str, model: str):
     """Initialize the appropriate LLM client based on API choice."""
     if api == "openai":
-        return ChatOpenAI(
-            api_key=os.getenv("OPENAI_API_KEY"),
-            model=model or "gpt-4o-mini",
-        )
+        return ChatOpenAI(model=model, api_key=os.getenv("OPENAI_API_KEY"))
     elif api == "groq":
-        return ChatGroq(
-            api_key=os.getenv("GROQ_API_KEY"),
-            model=model or "meta-llama/llama-4-maverick-17b-128e-instruct",
-        )
+        return ChatGroq(model=model, api_key=os.getenv("GROQ_API_KEY"))
     else:
         raise ValueError(f"Unsupported API: {api}")
 
@@ -120,7 +179,12 @@ async def handle_tool_errors(request, handler):
             duration_ms = None
         )
     
-async def execute_chat_with_tools(messages: list, model: str = None, api: str = None, user_id: str = None) -> dict:
+async def execute_chat_with_tools(
+    messages: list,
+    model: str | None = None,
+    api: str | None = None,
+    user_id: str | None = None,
+) -> dict:
     """
     Execute a chat request with MCP tool-calling capabilities.
 
@@ -142,17 +206,28 @@ async def execute_chat_with_tools(messages: list, model: str = None, api: str = 
     if not api:
         api = DEFAULT_API
 
+    resolved_model = model
+    resolved_api = api
+
+    # Validate request for misalignment attempts
+    should_block, rejection_message = should_block_request(messages)
+    if should_block:
+        return {
+            "response": rejection_message,
+            "tool_calls": [],
+            "blocked": True
+        }
+
+    tool_route = classify_tool_route(messages)
+    messages = prepare_messages_for_agent(messages)
+
     # Initialize logger and generate session ID
     logger = get_tool_logger()
     session_id = str(uuid.uuid4())[:8]  # Short session ID for readability
 
     try:
-        t0 = time.perf_counter()
-
         # Get MCP authentication token with user_id
         token = await get_mcp_auth_token(user_id)
-        t1 = time.perf_counter()
-        print(f"⏱️  [CHAT]   get_auth_token: {(t1-t0)*1000:.0f}ms")
         if not token:
             return {"error": "Could not retrieve MCP auth token"}
 
@@ -166,43 +241,26 @@ async def execute_chat_with_tools(messages: list, model: str = None, api: str = 
                 except Exception as e:
                     return {"error": f"MCP session initialization failed: {e}"}
 
-                t2 = time.perf_counter()
-                print(f"⏱️  [CHAT]   mcp_connect+init: {(t2-t1)*1000:.0f}ms")
-
                 # Discover available tools
                 try:
                     mcp_tools_response = await load_mcp_tools(session)
+                    mcp_tools_response = filter_mcp_tools_for_route(mcp_tools_response, tool_route)
                 except Exception as e:
                     return {"error": f"MCP tool response failed: {e}"}
 
-                t3 = time.perf_counter()
-                print(f"⏱️  [CHAT]   load_tools: {(t3-t2)*1000:.0f}ms ({len(mcp_tools_response)} tools)")
-
                 # Initialize LLM client
-                llm_client = get_llm_client(api, model)
+                llm_client = get_llm_client(resolved_api, resolved_model)
 
                 # Initialize the langgraph agent
                 graph = create_agent(
-                    model = llm_client,
+                    model = llm_client, 
                     tools = mcp_tools_response,
                     middleware = [handle_tool_errors])
-
-                t4 = time.perf_counter()
-                print(f"⏱️  [CHAT]   create_agent: {(t4-t3)*1000:.0f}ms")
-
-                timing_cb = TimingCallbackHandler()
                 try:
                     # make llm query
-                    agent_response = await graph.ainvoke(
-                        {"messages": messages},
-                        config={"callbacks": [timing_cb]},
-                    )
+                    agent_response = await graph.ainvoke({"messages": messages})
                 except Exception as e:
                     return {"error": f"Agent response failed: {e}"}
-
-                t5 = time.perf_counter()
-                print(f"⏱️  [CHAT]   agent_invoke: {(t5-t4)*1000:.0f}ms ({timing_cb.llm_call_count} LLM calls)")
-                print(f"⏱️  [CHAT]   TOTAL: {(t5-t0)*1000:.0f}ms")
                 
                 tool_calls = []
                 # store the starting index of the new messages appended to the conversation
@@ -244,8 +302,8 @@ async def execute_chat_with_tools(messages: list, model: str = None, api: str = 
                             error = tool_call['error'],
                             duration_ms=tool_call['duration_ms'],
                             metadata={
-                                    "model": model,
-                                    "api": api,
+                                    "model": resolved_model,
+                                    "api": resolved_api,
                                     "tool_call_id": tool_call['id']
                                 }
                         )
@@ -258,5 +316,3 @@ async def execute_chat_with_tools(messages: list, model: str = None, api: str = 
 
     except Exception as e:
         return {"error": f"Chat execution failed: {str(e)}"}
-
-

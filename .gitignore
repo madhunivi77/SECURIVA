@@ -98,6 +98,7 @@ cert.csr
 
 # OAuth Testing Database
 backend/my_app/server/oauth.json
+backend/local.db
 
 # Security & Credentials
 secure_creds.txt

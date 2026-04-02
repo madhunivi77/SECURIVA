@@ -13,6 +13,7 @@ from datetime import datetime, timedelta, timezone
 from pathlib import Path
 from .chat_handler import execute_chat_with_tools
 from .salesforce_app import salesforce_app
+from .db import db_app
 from .api_key_manager import generate_api_key, store_api_key, validate_api_key
 from .telesign_auth import (
     send_whatsapp_message,
@@ -493,3 +494,4 @@ api_app = Starlette(
 )
 
 api_app.mount("/salesforce", salesforce_app)
+api_app.mount("/chat",db_app)

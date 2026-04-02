@@ -170,3 +170,60 @@ def get_fresh_salesforce_credentials(user_id, current_creds):
         return refreshed_creds if refreshed_creds else current_creds
 
     return current_creds
+
+
+def salesforce_api_request(instance_url, access_token, method, endpoint, data=None, params=None):
+    """
+    Make a Salesforce REST API request.
+    
+    Args:
+        instance_url: Salesforce instance URL
+        access_token: OAuth access token
+        method: HTTP method (GET, POST, PATCH, DELETE)
+        endpoint: API endpoint (e.g., '/services/data/v60.0/sobjects/Account')
+        data: Optional JSON data for POST/PATCH requests
+        params: Optional query parameters
+        
+    Returns:
+        dict: Response data with success flag and result/error
+    """
+    url = f"{instance_url}{endpoint}"
+    headers = {
+        "Authorization": f"Bearer {access_token}",
+        "Content-Type": "application/json"
+    }
+    
+    try:
+        if method.upper() == "GET":
+            response = requests.get(url, headers=headers, params=params)
+        elif method.upper() == "POST":
+            response = requests.post(url, headers=headers, json=data)
+        elif method.upper() == "PATCH":
+            response = requests.patch(url, headers=headers, json=data)
+        elif method.upper() == "DELETE":
+            response = requests.delete(url, headers=headers)
+        else:
+            return {"success": False, "error": f"Unsupported HTTP method: {method}"}
+        
+        response.raise_for_status()
+        
+        # Some endpoints return empty response (like DELETE)
+        if response.status_code == 204 or not response.text:
+            return {"success": True, "message": "Operation completed successfully"}
+            
+        return {"success": True, "data": response.json()}
+        
+    except requests.exceptions.HTTPError as e:
+        error_data = {}
+        try:
+            error_data = response.json()
+        except:
+            error_data = {"message": response.text}
+        return {
+            "success": False,
+            "error": str(e),
+            "status_code": response.status_code,
+            "details": error_data
+        }
+    except Exception as e:
+        return {"success": False, "error": str(e)}
