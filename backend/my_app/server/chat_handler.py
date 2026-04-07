@@ -16,6 +16,8 @@ from langchain_openai import ChatOpenAI
 from langchain_groq import ChatGroq
 from .grounded_chat_policy import prepare_messages_for_agent, should_use_grounded_guidance
 from .request_validator import should_block_request
+from .tool_confirmation_handler import get_confirmation_handler
+from .tool_confirmation_config import requires_confirmation
 
 
 # --- Configuration ---
@@ -224,6 +226,43 @@ async def execute_chat_with_tools(
     # Initialize logger and generate session ID
     logger = get_tool_logger()
     session_id = str(uuid.uuid4())[:8]  # Short session ID for readability
+    
+    # Check if user is responding to a pending confirmation
+    confirmation_handler = get_confirmation_handler()
+    latest_user_message = get_latest_user_message_content(messages)
+    
+    if latest_user_message:
+        response_type, tool_info = confirmation_handler.process_user_response(
+            latest_user_message, 
+            session_id=user_id or session_id
+        )
+        
+        if response_type == "approved" and tool_info:
+            tool_name, tool_args = tool_info
+            return {
+                "response": f"✅ Confirmation approved! Executing {tool_name}...\n\nNote: Tool execution after confirmation is not yet implemented in this version. The tool would execute: {tool_name} with args: {tool_args}",
+                "tool_calls": [tool_name],
+                "confirmation_approved": True,
+                "pending_execution": {"tool_name": tool_name, "tool_args": tool_args}
+            }
+        elif response_type == "denied":
+            return {
+                "response": "❌ Action cancelled. How else can I help you?",
+                "tool_calls": [],
+                "confirmation_denied": True
+            }
+        elif response_type == "expired":
+            return {
+                "response": "⏱️ The previous confirmation request has expired. Please make your request again if you'd like to proceed.",
+                "tool_calls": [],
+                "confirmation_expired": True
+            }
+        elif response_type == "modify_requested":
+            return {
+                "response": "🔧 To modify the request, please describe what you'd like to change, and I'll create a new request with the updated parameters.",
+                "tool_calls": [],
+                "modification_requested": True
+            }
 
     try:
         # Get MCP authentication token with user_id
@@ -267,13 +306,21 @@ async def execute_chat_with_tools(
                 new_index = len(messages)
                 # store the final response provided by the agent
                 final_response = agent_response['messages'][-1].content
+                
+                # Check if any tool calls require confirmation
+                tools_requiring_confirmation_list = []
+                
                 try:
                     # extract logging information from new messages
                     for msg in agent_response['messages'][new_index:]:
                         
                         # AIMessages will contain tool name, args and id
                         if isinstance(msg, AIMessage) and getattr(msg, 'tool_calls', None):
-                            tool_calls.extend(msg.tool_calls)
+                            for tc in msg.tool_calls:
+                                tool_calls.append(tc)
+                                # Check if this tool requires confirmation
+                                if requires_confirmation(tc['name']):
+                                    tools_requiring_confirmation_list.append(tc)
                         pass
 
                         # Tool messages will contain result as well as injected duration and error status info
@@ -291,6 +338,26 @@ async def execute_chat_with_tools(
                             pass
                 except Exception as e:
                     return {"error": f"Extracting tool information failed: {e}"}
+                
+                # If tools require confirmation, create confirmation requests instead of executing
+                if tools_requiring_confirmation_list:
+                    # For now, handle the first tool requiring confirmation
+                    # In a more sophisticated implementation, we could batch confirmations
+                    first_tool = tools_requiring_confirmation_list[0]
+                    confirmation_id, confirmation_message = confirmation_handler.create_confirmation_request(
+                        tool_name=first_tool['name'],
+                        tool_args=first_tool['args'],
+                        user_id=user_id,
+                        session_id=user_id or session_id
+                    )
+                    
+                    return {
+                        "response": confirmation_message,
+                        "tool_calls": [],
+                        "confirmation_required": True,
+                        "confirmation_id": confirmation_id,
+                        "tool_name": first_tool['name']
+                    }
                 try:
                     # log each tool call
                     for tool_call in tool_calls:
