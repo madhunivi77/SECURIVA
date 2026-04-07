@@ -25,15 +25,21 @@ const Dashboard = () => {
   };
 
   useEffect(() => {
-    // Fetch immediately
-    handleRefresh();
-
-    // Then poll every 30 seconds
-    const interval = setInterval(handleRefresh, 30000);
-
-    // Cleanup when component unmounts
+    const fetchData = async () => {
+      const res = await fetch("http://localhost:8000/api/dashboard/refresh");
+  
+      if (res.status === 200) {
+        const data = await res.json();
+        setCards(data["cards"]);
+      }
+    };
+  
+    fetchData();
+  
+    const interval = setInterval(fetchData, 30000);
+  
     return () => clearInterval(interval);
-  }, [handleRefresh]);
+  }, []);   
 
   return (
     <div className="flex h-screen w-screen bg-white text-black">

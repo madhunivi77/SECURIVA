@@ -3,6 +3,7 @@ from starlette.responses import JSONResponse
 from starlette.requests import Request
 from starlette.routing import Route
 from pydantic import BaseModel
+from pathlib import Path
 import asyncio
 from typing import List, Dict, Optional
 import sqlite3
@@ -13,25 +14,38 @@ from botocore.exceptions import ClientError
 from boto3.dynamodb.conditions import Key
 import traceback
 from .api_key_manager import validate_api_key
-import openai
+from openai import OpenAI
+from dotenv import load_dotenv
 import os
+load_dotenv()
 
-openai.api_key = os.getenv("OPENAI_API_KEY")
+client = OpenAI(api_key=os.getenv("OPENAI_API_KEY"))
+
 
 async def generate_title_from_ai(prompt: str):
     try:
-        response = await openai.ChatCompletion.acreate(
+        promt = prompt[:500]
+        response = client.chat.completions.create(
             model="gpt-3.5-turbo",
             messages=[
-                {"role": "system", "content": "Generate short conversation titles."},
+                {"role": "system", "content": "Return ONLY one short title (3-4 words). No explanations. No numbering. No prefixes."},
                 {"role": "user", "content": prompt}
             ],
             max_tokens=10,
             temperature=0.3
         )
-
         title = response.choices[0].message.content.strip()
+        title = title.split("\n")[0]          
+        title = title.replace("Chat title ideas:", "")
+        title = title.replace("Title:", "")
+        title = title.strip()
 
+        # remove numbering like "1."
+        if title[:2].isdigit():
+            title = title[2:].strip()
+
+        # final cleanup
+        title = title[:40]
         return title
 
     except Exception as e:
@@ -45,7 +59,9 @@ def get_authenticated_user(request: Request):
         print("No api_key cookie found")
         return None
 
-    user_id = validate_api_key(api_key)
+    oauth_file = Path(__file__).parent / "oauth.json"
+
+    user_id = validate_api_key(api_key, oauth_file)
 
     if not user_id:
         print("Invalid api_key")
@@ -353,7 +369,16 @@ async def save_chat(request: Request):
             latest = await asyncio.to_thread(db.get_latest_chat, user_id)
             version = 1 if not latest else latest.version + 1
 
-            title = f"Chat {version}"
+            #
+            assistant_messages = [
+            m["content"] for m in messages 
+            if m["role"] == "assistant" and len(m["content"].strip()) > 20
+        ]
+
+            first_assistant_message = assistant_messages[0] if assistant_messages else "New Chat"
+
+            # 
+            title = await generate_title_from_ai(first_assistant_message)
 
         else:
             existing = await asyncio.to_thread(
@@ -379,6 +404,7 @@ async def save_chat(request: Request):
         )
 
     return JSONResponse({"status": "saved", "version": version})
+
 
 async def get_latest_chat(request: Request):
     user_id =get_authenticated_user(request)
