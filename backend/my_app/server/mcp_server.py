@@ -36,7 +36,6 @@ from .telesign_auth import (
     batch_verify_phones,
     batch_send_sms
 )
-<<<<<<<<< Temporary merge branch 1
 from .compliance_tools import (
     get_compliance_overview,
     get_compliance_requirements,
@@ -63,10 +62,6 @@ LEGACY_DECISION_TREE_MAP = {
     "data_deletion": "data_deletion_decision",
     "vendor_access": "vendor_access_decision",
 }
-=========
-
-JWT_SECRET_KEY = os.getenv("JWT_SECRET_KEY")
->>>>>>>>> Temporary merge branch 2
 
 # 1. Create the MCP server instance with the token verifier and auth settings
 mcp = FastMCP(
@@ -75,15 +70,9 @@ mcp = FastMCP(
     token_verifier=SimpleTokenVerifier(),
     auth=AuthSettings(
         # The issuer URL should point to where the auth server lives.
-<<<<<<<<< Temporary merge branch 1
-        issuer_url=AnyHttpUrl("http://localhost:8000/auth"),
-        # The resource server URL is the URL of this MCP server.
-        resource_server_url=AnyHttpUrl("http://localhost:8000/mcp"),
-=========
         issuer_url=AnyHttpUrl(f"{settings.BACKEND_URL}/auth"),
         # The resource server URL is the URL of this MCP server.
         resource_server_url=AnyHttpUrl(f"{settings.BACKEND_URL}/mcp"),
->>>>>>>>> Temporary merge branch 2
     ),
 )
 
@@ -92,37 +81,17 @@ mcp.settings.streamable_http_path = "/"
     
 def getGoogleCreds(ctx) -> Credentials:
     try:
-<<<<<<<<< Temporary merge branch 1
         if not JWT_SECRET_KEY:
             print("JWT_SECRET_KEY not configured")
             return None
 
-=========
         t0 = time.time()
->>>>>>>>> Temporary merge branch 2
         # extract the jwt from the request to get the subject
         encoded_token = ctx.request_context.request.headers.get('Authorization').split(" ")[1]
         payload = jwt.decode(encoded_token, JWT_SECRET_KEY, algorithms=["HS256"])
         user_id = payload.get('sub')
 
         # fetch google tokens for the user
-<<<<<<<<< Temporary merge branch 1
-        with open(Path(__file__).parent / "oauth.json", "r") as f:
-            data = json.load(f)
-            users = data.get("users", [])
-            for user in users:
-                if user.get("user_id") == user_id:
-                    # NEW SCHEMA: Access google service from services object
-                    google_service = user.get("services", {}).get("google")
-                    if google_service:
-                        credentials_json = google_service.get("credentials")
-                        if credentials_json:
-                            return Credentials.from_authorized_user_info(json.loads(credentials_json))
-            return None
-
-    except Exception as e:
-        print(f"Error getting Google credentials: {e}")
-=========
         data = load_oauth_data()
         users = data.get("users", [])
         for user in users:
@@ -145,7 +114,6 @@ def getGoogleCreds(ctx) -> Credentials:
 
     except Exception as e:
         print(f"❌ [MCP-TOOL] getGoogleCreds exception: {type(e).__name__}: {e}")
->>>>>>>>> Temporary merge branch 2
         return None
 
 def extract_email_body(payload):
@@ -232,20 +200,6 @@ def listEmails(context: Context, max_results: int = 10) -> str:
         if not messages:
             return "No messages found in inbox."
 
-<<<<<<<<< Temporary merge branch 1
-        # Format the messages into a string
-        res = f"Found {len(messages)} recent emails:\n\n"
-
-        for i, message in enumerate(messages, 1):
-            msg = service.users().messages().get(
-                userId="me",
-                id=message["id"],
-                format="metadata",
-                metadataHeaders=["From", "Subject", "Date"]
-            ).execute()
-
-            # Extract headers
-=========
         # Batch fetch all message metadata in a single HTTP request
         fetched = {}
         def metadata_callback(request_id, response, exception):
@@ -270,7 +224,6 @@ def listEmails(context: Context, max_results: int = 10) -> str:
 
         for i, message in enumerate(messages, 1):
             msg = fetched.get(message["id"], {})
->>>>>>>>> Temporary merge branch 2
             headers = {h["name"]: h["value"] for h in msg.get("payload", {}).get("headers", [])}
             from_addr = headers.get("From", "Unknown")
             subject = headers.get("Subject", "(No subject)")
@@ -281,11 +234,7 @@ def listEmails(context: Context, max_results: int = 10) -> str:
             res += f"   Date: {date}\n"
             res += f"   ID: {message['id']}\n\n"
 
-<<<<<<<<< Temporary merge branch 1
-        print(f"Found and formatted {len(messages)} emails")
-=========
         print(f"Found and formatted {len(messages)} emails (batched)")
->>>>>>>>> Temporary merge branch 2
         return res
 
 
@@ -362,17 +311,6 @@ def listGmailDrafts(context: Context, max_results: int = 10):
         if not drafts:
             return "No drafts found."
 
-<<<<<<<<< Temporary merge branch 1
-        result_lines = []
-        for d in drafts:
-            # Fetch draft details to get subject, recipients, etc.
-            draft_detail = (
-                service.users()
-                .drafts()
-                .get(userId="me", id=d["id"])
-                .execute()
-            )
-=========
         # Batch fetch all draft details in a single HTTP request
         fetched_drafts = {}
         def draft_callback(request_id, response, exception):
@@ -390,7 +328,6 @@ def listGmailDrafts(context: Context, max_results: int = 10):
         result_lines = []
         for d in drafts:
             draft_detail = fetched_drafts.get(d["id"], {})
->>>>>>>>> Temporary merge branch 2
             message = draft_detail.get("message", {})
             headers = message.get("payload", {}).get("headers", [])
 
@@ -505,17 +442,6 @@ def getEmailBodies(context: Context, email_ids: list[str]) -> str:
 
         service = build("gmail", "v1", credentials=creds)
 
-<<<<<<<<< Temporary merge branch 1
-        result = f"Fetched {len(email_ids)} email(s):\n\n"
-
-        for i, email_id in enumerate(email_ids, 1):
-            # Fetch full message with complete MIME structure
-            msg = service.users().messages().get(
-                userId="me",
-                id=email_id,
-                format="full"
-            ).execute()
-=========
         # Batch fetch all email bodies in a single HTTP request
         fetched = {}
         def body_callback(request_id, response, exception):
@@ -538,7 +464,6 @@ def getEmailBodies(context: Context, email_ids: list[str]) -> str:
 
         for i, email_id in enumerate(email_ids, 1):
             msg = fetched.get(email_id, {})
->>>>>>>>> Temporary merge branch 2
 
             # Extract headers for metadata
             headers = {h["name"]: h["value"]
@@ -568,11 +493,7 @@ def getEmailBodies(context: Context, email_ids: list[str]) -> str:
             result += f"Message ID: {email_id}\n\n"
             result += f"Body:\n{body}\n\n"
 
-<<<<<<<<< Temporary merge branch 1
-        print(f"Successfully fetched {len(email_ids)} email bodies")
-=========
         print(f"Successfully fetched {len(email_ids)} email bodies (batched)")
->>>>>>>>> Temporary merge branch 2
         return result
 
     except HttpError as error:
@@ -584,11 +505,7 @@ def getEmailBodies(context: Context, email_ids: list[str]) -> str:
 
 # list upcoming events from google calendar
 @mcp.tool()
-<<<<<<<<< Temporary merge branch 1
-def listUpcomingEvents(context: Context, numEvents=5):
-=========
 def listUpcomingEvents(context: Context, numEvents: int = 5):
->>>>>>>>> Temporary merge branch 2
     """List upcoming events from my calendar"""
     creds = getGoogleCreds(context)
     if creds == None:
@@ -723,30 +640,14 @@ def getSalesforceCreds(ctx):
     """Retrieve Salesforce credentials for the logged-in user, refreshing if needed"""
     try:
         JWT_SECRET_KEY = os.getenv("JWT_SECRET_KEY")
-<<<<<<<<< Temporary merge branch 1
         if not JWT_SECRET_KEY:
             print("JWT_SECRET_KEY not configured")
             return None
 
-=========
->>>>>>>>> Temporary merge branch 2
         encoded_token = ctx.request_context.request.headers.get('Authorization').split(" ")[1]
         payload = jwt.decode(encoded_token, JWT_SECRET_KEY, algorithms=["HS256"])
         user_id = payload.get('sub')
 
-<<<<<<<<< Temporary merge branch 1
-        with open(Path(__file__).parent / "oauth.json", "r") as f:
-            data = json.load(f)
-            for user in data.get("users", []):
-                if user["user_id"] == user_id:
-                    # NEW SCHEMA: Access salesforce service from services object
-                    sf_service = user.get("services", {}).get("salesforce")
-                    if sf_service:
-                        current_creds = sf_service.get("credentials")
-                        # Get fresh credentials (will refresh if needed)
-                        fresh_creds = get_fresh_salesforce_credentials(user_id, current_creds)
-                        return fresh_creds
-=========
         data = load_oauth_data()
         for user in data.get("users", []):
             if user["user_id"] == user_id:
@@ -757,7 +658,6 @@ def getSalesforceCreds(ctx):
                     # Get fresh credentials (will refresh if needed)
                     fresh_creds = get_fresh_salesforce_credentials(user_id, current_creds)
                     return fresh_creds
->>>>>>>>> Temporary merge branch 2
         return None
 
     except Exception as e:
@@ -802,8 +702,6 @@ Summary:"""
     # The LLM agent will see this prompt and generate the summary
     return summarization_prompt
 
-<<<<<<<<< Temporary merge branch 1
-=========
 def _summarize_one_email(client: Groq, from_addr: str, subject: str, date: str, body: str) -> str:
     """Summarize a single email via Groq. Called in parallel from a thread pool."""
     try:
@@ -822,9 +720,6 @@ def _summarize_one_email(client: Groq, from_addr: str, subject: str, date: str, 
         return response.choices[0].message.content.strip()
     except Exception as e:
         return f"(Could not summarize: {e})"
-
-
->>>>>>>>> Temporary merge branch 2
 @mcp.tool()
 def summarizeRecentEmails(context: Context, num_emails: int = 5) -> str:
     """
@@ -837,22 +732,14 @@ def summarizeRecentEmails(context: Context, num_emails: int = 5) -> str:
         num_emails: Number of recent emails to summarize (default: 5, max: 20)
 
     Returns:
-<<<<<<<<< Temporary merge branch 1
-        Formatted summaries of the requested number of emails with structured information
-=========
         Pre-summarized email summaries ready to read aloud
->>>>>>>>> Temporary merge branch 2
     """
     creds = getGoogleCreds(context)
     if creds == None:
         return "User not authenticated with Google OAuth"
 
     try:
-<<<<<<<<< Temporary merge branch 1
-        # Limit num_emails to reasonable bounds
-=========
         t0 = time.time()
->>>>>>>>> Temporary merge branch 2
         num_emails = min(max(1, num_emails), 20)
 
         # Step 1: List recent emails to get IDs
@@ -862,30 +749,13 @@ def summarizeRecentEmails(context: Context, num_emails: int = 5) -> str:
             labelIds=["INBOX"],
             maxResults=num_emails
         ).execute()
-<<<<<<<<< Temporary merge branch 1
-=========
         t1 = time.time()
         print(f"⏱️  [MCP-TOOL] summarizeRecentEmails: gmail_list={((t1-t0)*1000):.0f}ms")
->>>>>>>>> Temporary merge branch 2
 
         messages = results.get("messages", [])
         if not messages:
             return "No messages found in inbox."
 
-<<<<<<<<< Temporary merge branch 1
-        # Step 2: Fetch full email bodies for all emails
-        summaries = f"Summaries of your {len(messages)} most recent emails:\n\n"
-
-        for i, message in enumerate(messages, 1):
-            # Fetch full message
-            msg = service.users().messages().get(
-                userId="me",
-                id=message["id"],
-                format="full"
-            ).execute()
-
-            # Extract headers
-=========
         # Step 2: Batch fetch all email bodies in a single HTTP request
         fetched = {}
         def fetch_callback(request_id, response, exception):
@@ -910,52 +780,11 @@ def summarizeRecentEmails(context: Context, num_emails: int = 5) -> str:
         emails_to_summarize = []
         for message in messages:
             msg = fetched.get(message["id"], {})
->>>>>>>>> Temporary merge branch 2
             headers = {h["name"]: h["value"]
                       for h in msg.get("payload", {}).get("headers", [])}
             from_addr = headers.get("From", "Unknown")
             subject = headers.get("Subject", "(No subject)")
             date = headers.get("Date", "Unknown date")
-<<<<<<<<< Temporary merge branch 1
-
-            # Extract body
-            payload = msg.get("payload", {})
-            body = extract_email_body(payload)
-            if not body:
-                body = "(No content or unsupported format)"
-
-            # Truncate very long emails
-            if len(body) > 3000:
-                body = body[:3000] + "\n...(truncated)"
-
-            # Format the summary prompt for this email
-            summaries += f"{'='*70}\n"
-            summaries += f"EMAIL {i}/{len(messages)}\n"
-            summaries += f"{'='*70}\n"
-            summaries += f"From: {from_addr}\n"
-            summaries += f"Subject: {subject}\n"
-            summaries += f"Date: {date}\n\n"
-
-            # Add the summarization instruction
-            summaries += f"""Please analyze and summarize this email:
-
-**Subject/Purpose:** What is this email about?
-**Key Points:** Main information or topics discussed
-**Action Items:** Any tasks or requests
-**Deadlines/Dates:** Important dates
-**Sentiment/Urgency:** Tone and priority
-
-Email body:
-{body}
-
----
-
-"""
-
-        summaries += f"\nPlease provide concise summaries for all {len(messages)} emails above."
-
-        return summaries
-=========
             body = extract_email_body(msg.get("payload", {})) or "(No content)"
             emails_to_summarize.append((from_addr, subject, date, body))
 
@@ -985,7 +814,6 @@ Email body:
         t2 = time.time()
         print(f"⏱️  [MCP-TOOL] summarizeRecentEmails: TOTAL={((t2-t0)*1000):.0f}ms ({len(messages)} emails)")
         return result
->>>>>>>>> Temporary merge branch 2
 
     except HttpError as error:
         print(f"An error occurred: {error}")
@@ -2367,7 +2195,6 @@ def batchSendSMS(recipients_json: str) -> str:
 # ==================== END TELESIGN TOOLS ====================
 
 
-<<<<<<<<< Temporary merge branch 1
 # ==================== COMPLIANCE STANDARDS TOOLS ====================
 # Tools for querying GDPR, HIPAA, and PCI-DSS compliance standards
 
@@ -3334,6 +3161,3 @@ def getComplianceExamples(topic: str, show_non_compliant: bool = True) -> str:
         }, indent=2)
 
 # ==================== END COMPLIANCE PROCEDURAL GUIDANCE TOOLS ====================
-
-=========
->>>>>>>>> Temporary merge branch 2
