@@ -1,0 +1,18 @@
+[Unit]
+Description=Suricata EVE JSON Forwarder Agent
+After=network.target suricata.service
+Wants=suricata.service
+
+[Service]
+Type=simple
+User=root
+ExecStart=/usr/bin/python3 /opt/suricata-agent/agent.py
+Restart=always
+RestartSec=5
+Environment=AGENT_CONFIG=/etc/suricata-agent/config.yaml
+StandardOutput=journal
+StandardError=journal
+SyslogIdentifier=suricata-agent
+
+[Install]
+WantedBy=multi-user.target
