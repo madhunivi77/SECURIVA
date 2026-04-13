@@ -85,6 +85,7 @@ def getGoogleCreds(ctx) -> Credentials:
             print("JWT_SECRET_KEY not configured")
             return None
 
+        t0 = time.time()
         # extract the jwt from the request to get the subject
         encoded_token = ctx.request_context.request.headers.get('Authorization').split(" ")[1]
         payload = jwt.decode(encoded_token, JWT_SECRET_KEY, algorithms=["HS256"])
@@ -112,7 +113,7 @@ def getGoogleCreds(ctx) -> Credentials:
         return None
 
     except Exception as e:
-        print(f"Error getting Google credentials: {e}")
+        print(f"❌ [MCP-TOOL] getGoogleCreds exception: {type(e).__name__}: {e}")
         return None
 
 def extract_email_body(payload):
@@ -504,7 +505,7 @@ def getEmailBodies(context: Context, email_ids: list[str]) -> str:
 
 # list upcoming events from google calendar
 @mcp.tool()
-def listUpcomingEvents(context: Context, numEvents=5):
+def listUpcomingEvents(context: Context, numEvents: int = 5):
     """List upcoming events from my calendar"""
     creds = getGoogleCreds(context)
     if creds == None:
@@ -719,8 +720,6 @@ def _summarize_one_email(client: Groq, from_addr: str, subject: str, date: str, 
         return response.choices[0].message.content.strip()
     except Exception as e:
         return f"(Could not summarize: {e})"
-
-
 @mcp.tool()
 def summarizeRecentEmails(context: Context, num_emails: int = 5) -> str:
     """
@@ -750,6 +749,8 @@ def summarizeRecentEmails(context: Context, num_emails: int = 5) -> str:
             labelIds=["INBOX"],
             maxResults=num_emails
         ).execute()
+        t1 = time.time()
+        print(f"⏱️  [MCP-TOOL] summarizeRecentEmails: gmail_list={((t1-t0)*1000):.0f}ms")
 
         messages = results.get("messages", [])
         if not messages:
@@ -773,7 +774,7 @@ def summarizeRecentEmails(context: Context, num_emails: int = 5) -> str:
             )
         batch.execute()
         t_batch = time.time()
-        print(f"⏱️  [MCP-TOOL] summarizeRecentEmails: batch_fetch={((t_batch-t0)*1000):.0f}ms ({len(messages)} emails)")
+        print(f"⏱️  [MCP-TOOL] summarizeRecentEmails: batch_fetch={((t_batch-t1)*1000):.0f}ms ({len(messages)} emails)")
 
         # Step 3: Extract email data for summarization
         emails_to_summarize = []
@@ -3160,4 +3161,3 @@ def getComplianceExamples(topic: str, show_non_compliant: bool = True) -> str:
         }, indent=2)
 
 # ==================== END COMPLIANCE PROCEDURAL GUIDANCE TOOLS ====================
-
