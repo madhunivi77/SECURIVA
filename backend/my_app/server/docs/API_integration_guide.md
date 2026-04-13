@@ -85,6 +85,18 @@ SECURIVA is an AI-assisted platform that integrates multiple business operation 
           └─────────────┘      └──────────────┘
 ```
 
+Hierarchy of nested Starlette apps:
+app.py
+    Main.py
+        MCP
+        Auth
+        Securiva API
+        Vapi (voice)
+
+    Salesforce_app.py
+
+    Db.py
+
 ### Request Flow
 
 1. **User Authentication:**
