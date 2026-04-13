@@ -113,7 +113,7 @@ async def execute_chat_with_tools(messages: list, model: str = None, api: str = 
     graph = create_agent(
         model = llm_client, 
         tools = all_tools,  # Use combined tools instead of just mcp_tools_response
-        middleware = [handle_tool_errors]
+        middleware = [check_tool_confirmation, handle_tool_errors]
     )
     
     # ... rest of existing code ...

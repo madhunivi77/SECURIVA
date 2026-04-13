@@ -153,6 +153,30 @@ def get_llm_client(api: str, model: str):
     else:
         raise ValueError(f"Unsupported API: {api}")
 
+# this wrapper is used as middleware for the langgraph agent. It blocks tools that require confirmation
+@wrap_tool_call
+async def check_tool_confirmation(request, handler):
+    """Block tool execution if confirmation is required."""
+    # Debug logging
+    print(f"[DEBUG] check_tool_confirmation called for tool: {request.tool_call}")
+    
+    tool_name = request.tool_call.get("name", "")
+    
+    # If this tool requires confirmation, block it and return a message
+    if requires_confirmation(tool_name):
+        print(f"[DEBUG] Tool {tool_name} REQUIRES CONFIRMATION - blocking execution")
+        return ToolMessage(
+            content=f"⚠️ BLOCKED: This tool ({tool_name}) requires user confirmation before execution. You must ask the user for explicit permission before using this tool.",
+            tool_call_id=request.tool_call["id"],
+            error=1,
+            duration_ms=0
+        )
+    
+    print(f"[DEBUG] Tool {tool_name} does NOT require confirmation - proceeding")
+    # Otherwise, proceed with normal execution
+    return await handler(request)
+
+
 # this wrapper is used as middleware for the langgraph agent. It is used so that we can collect metrics and handle errors for individual tool calls
 @wrap_tool_call
 async def handle_tool_errors(request, handler):
@@ -290,11 +314,11 @@ async def execute_chat_with_tools(
                 # Initialize LLM client
                 llm_client = get_llm_client(resolved_api, resolved_model)
 
-                # Initialize the langgraph agent
+                # Initialize the langgraph agent with confirmation check middleware first, then error handling
                 graph = create_agent(
                     model = llm_client, 
                     tools = mcp_tools_response,
-                    middleware = [handle_tool_errors])
+                    middleware = [check_tool_confirmation, handle_tool_errors])
                 try:
                     # make llm query
                     agent_response = await graph.ainvoke({"messages": messages})

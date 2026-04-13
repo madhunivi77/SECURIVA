@@ -27,8 +27,18 @@ TOOLS_REQUIRING_CONFIRMATION: Dict[str, ToolConfirmationRule] = {
         confirmation_message_template="⚠️ **Confirmation Required**\n\nCreate a new Salesforce case:\n- **Subject**: {subject}\n- **Description**: {description}\n\nProceed with creation?",
         risk_level="high"
     ),
+    "create_salesforce_case": ToolConfirmationRule(  # MCP tools use snake_case
+        tool_name="create_salesforce_case",
+        confirmation_message_template="⚠️ **Confirmation Required**\n\nCreate a new Salesforce case:\n- **Subject**: {subject}\n- **Description**: {description}\n\nProceed with creation?",
+        risk_level="high"
+    ),
     "createSalesforceContact": ToolConfirmationRule(
         tool_name="createSalesforceContact",
+        confirmation_message_template="⚠️ **Confirmation Required**\n\nCreate new Salesforce contact:\n- **Name**: {first_name} {last_name}\n- **Email**: {email}\n\nProceed?",
+        risk_level="high"
+    ),
+    "create_salesforce_contact": ToolConfirmationRule(  # MCP tools use snake_case
+        tool_name="create_salesforce_contact",
         confirmation_message_template="⚠️ **Confirmation Required**\n\nCreate new Salesforce contact:\n- **Name**: {first_name} {last_name}\n- **Email**: {email}\n\nProceed?",
         risk_level="high"
     ),
@@ -37,13 +47,28 @@ TOOLS_REQUIRING_CONFIRMATION: Dict[str, ToolConfirmationRule] = {
         confirmation_message_template="⚠️ **Confirmation Required**\n\nCreate new Salesforce account:\n- **Name**: {name}\n- **Industry**: {industry}\n\nProceed?",
         risk_level="high"
     ),
+    "create_salesforce_account": ToolConfirmationRule(  # MCP tools use snake_case
+        tool_name="create_salesforce_account",
+        confirmation_message_template="⚠️ **Confirmation Required**\n\nCreate new Salesforce account:\n- **Name**: {name}\n- **Industry**: {industry}\n\nProceed?",
+        risk_level="high"
+    ),
     "createSalesforceOpportunity": ToolConfirmationRule(
         tool_name="createSalesforceOpportunity",
         confirmation_message_template="⚠️ **Confirmation Required**\n\nCreate new Salesforce opportunity:\n- **Name**: {name}\n- **Stage**: {stage}\n- **Close Date**: {close_date}\n- **Amount**: {amount}\n\nProceed?",
         risk_level="high"
     ),
+    "create_salesforce_opportunity": ToolConfirmationRule(  # MCP tools use snake_case
+        tool_name="create_salesforce_opportunity",
+        confirmation_message_template="⚠️ **Confirmation Required**\n\nCreate new Salesforce opportunity:\n- **Name**: {name}\n- **Stage**: {stage}\n- **Close Date**: {close_date}\n- **Amount**: {amount}\n\nProceed?",
+        risk_level="high"
+    ),
     "updateSalesforceOpportunity": ToolConfirmationRule(
         tool_name="updateSalesforceOpportunity",
+        confirmation_message_template="⚠️ **Confirmation Required**\n\nUpdate Salesforce opportunity:\n- **ID**: {opportunity_id}\n- **New Stage**: {stage}\n\nProceed with update?",
+        risk_level="high"
+    ),
+    "update_salesforce_opportunity": ToolConfirmationRule(  # MCP tools use snake_case
+        tool_name="update_salesforce_opportunity",
         confirmation_message_template="⚠️ **Confirmation Required**\n\nUpdate Salesforce opportunity:\n- **ID**: {opportunity_id}\n- **New Stage**: {stage}\n\nProceed with update?",
         risk_level="high"
     ),
@@ -54,8 +79,18 @@ TOOLS_REQUIRING_CONFIRMATION: Dict[str, ToolConfirmationRule] = {
         confirmation_message_template="📱 **Confirmation Required**\n\nSend SMS:\n- **To**: {phone_number}\n- **Message**: {message}\n\nSend this message?",
         risk_level="medium"
     ),
+    "send_sms": ToolConfirmationRule(  # MCP tools use snake_case
+        tool_name="send_sms",
+        confirmation_message_template="📱 **Confirmation Required**\n\nSend SMS:\n- **To**: {phone_number}\n- **Message**: {message}\n\nSend this message?",
+        risk_level="medium"
+    ),
     "sendVoiceCall": ToolConfirmationRule(
         tool_name="sendVoiceCall",
+        confirmation_message_template="📞 **Confirmation Required**\n\nMake voice call:\n- **To**: {phone_number}\n- **Message**: {message}\n\nPlace this call?",
+        risk_level="medium"
+    ),
+    "send_voice_call": ToolConfirmationRule(  # MCP tools use snake_case
+        tool_name="send_voice_call",
         confirmation_message_template="📞 **Confirmation Required**\n\nMake voice call:\n- **To**: {phone_number}\n- **Message**: {message}\n\nPlace this call?",
         risk_level="medium"
     ),
@@ -64,8 +99,18 @@ TOOLS_REQUIRING_CONFIRMATION: Dict[str, ToolConfirmationRule] = {
         confirmation_message_template="📧 **Confirmation Required**\n\nSend email via Salesforce:\n- **To**: {to_addresses}\n- **Subject**: {subject}\n\nSend this email?",
         risk_level="medium"
     ),
+    "send_salesforce_email": ToolConfirmationRule(  # MCP tools use snake_case
+        tool_name="send_salesforce_email",
+        confirmation_message_template="📧 **Confirmation Required**\n\nSend email via Salesforce:\n- **To**: {to_addresses}\n- **Subject**: {subject}\n\nSend this email?",
+        risk_level="medium"
+    ),
     "createGmailDraft": ToolConfirmationRule(
         tool_name="createGmailDraft",
+        confirmation_message_template="✉️ **Confirmation Required**\n\nCreate Gmail draft:\n- **To**: {receiver}\n- **Subject**: {subject}\n\nCreate this draft?",
+        risk_level="low"
+    ),
+    "create_gmail_draft": ToolConfirmationRule(  # MCP tools use snake_case
+        tool_name="create_gmail_draft",
         confirmation_message_template="✉️ **Confirmation Required**\n\nCreate Gmail draft:\n- **To**: {receiver}\n- **Subject**: {subject}\n\nCreate this draft?",
         risk_level="low"
     ),
@@ -76,8 +121,18 @@ TOOLS_REQUIRING_CONFIRMATION: Dict[str, ToolConfirmationRule] = {
         confirmation_message_template="📅 **Confirmation Required**\n\nAdd calendar event:\n- **Title**: {summary}\n- **Start**: {startTime}\n- **End**: {endTime}\n- **Attendees**: {attendees}\n\nCreate this event?",
         risk_level="medium"
     ),
+    "add_calendar_event": ToolConfirmationRule(  # MCP tools use snake_case
+        tool_name="add_calendar_event",
+        confirmation_message_template="📅 **Confirmation Required**\n\nAdd calendar event:\n- **Title**: {summary}\n- **Start**: {start_time}\n- **End**: {end_time}\n- **Attendees**: {attendees}\n\nCreate this event?",
+        risk_level="medium"
+    ),
     "createSalesforceTask": ToolConfirmationRule(
         tool_name="createSalesforceTask",
+        confirmation_message_template="✅ **Confirmation Required**\n\nCreate Salesforce task:\n- **Subject**: {subject}\n- **Priority**: {priority}\n- **Due Date**: {due_date}\n\nCreate this task?",
+        risk_level="low"
+    ),
+    "create_salesforce_task": ToolConfirmationRule(  # MCP tools use snake_case
+        tool_name="create_salesforce_task",
         confirmation_message_template="✅ **Confirmation Required**\n\nCreate Salesforce task:\n- **Subject**: {subject}\n- **Priority**: {priority}\n- **Due Date**: {due_date}\n\nCreate this task?",
         risk_level="low"
     ),
@@ -88,6 +143,11 @@ TOOLS_REQUIRING_CONFIRMATION: Dict[str, ToolConfirmationRule] = {
         confirmation_message_template="📁 **Confirmation Required**\n\nUpload file to Salesforce:\n- **Title**: {title}\n- **Description**: {description}\n\nProceed with upload?",
         risk_level="high"
     ),
+    "upload_salesforce_file": ToolConfirmationRule(  # MCP tools use snake_case
+        tool_name="upload_salesforce_file",
+        confirmation_message_template="📁 **Confirmation Required**\n\nUpload file to Salesforce:\n- **Title**: {title}\n- **Description**: {description}\n\nProceed with upload?",
+        risk_level="high"
+    ),
     
     # HIGH RISK - Compliance Document Generation
     "generateComplianceReport": ToolConfirmationRule(
@@ -95,10 +155,20 @@ TOOLS_REQUIRING_CONFIRMATION: Dict[str, ToolConfirmationRule] = {
         confirmation_message_template="📋 **Confirmation Required**\n\nGenerate compliance report:\n- **Standards**: {standards_json}\n- **Include Checklist**: {include_checklist}\n- **Include Penalties**: {include_penalties}\n\nGenerate this report?",
         risk_level="medium"
     ),
+    "generate_compliance_report": ToolConfirmationRule(  # MCP tools use snake_case
+        tool_name="generate_compliance_report",
+        confirmation_message_template="📋 **Confirmation Required**\n\nGenerate compliance report:\n- **Standards**: {standards_json}\n- **Include Checklist**: {include_checklist}\n- **Include Penalties**: {include_penalties}\n\nGenerate this report?",
+        risk_level="medium"
+    ),
     
     # HIGH RISK - Compliance Module Creation
     "createComplianceModule": ToolConfirmationRule(
         tool_name="createComplianceModule",
+        confirmation_message_template="⚠️ **Confirmation Required**\n\nCreate compliance module:\n- **Filename**: {filename}\n- **Overwrite**: {allow_overwrite}\n\nThis will create/modify code. Proceed?",
+        risk_level="high"
+    ),
+    "create_compliance_module": ToolConfirmationRule(  # MCP tools use snake_case
+        tool_name="create_compliance_module",
         confirmation_message_template="⚠️ **Confirmation Required**\n\nCreate compliance module:\n- **Filename**: {filename}\n- **Overwrite**: {allow_overwrite}\n\nThis will create/modify code. Proceed?",
         risk_level="high"
     ),
