@@ -155,6 +155,8 @@ function App() {
 
                 <NavOption label={"Solutions"} target={"agent"} theme={theme.text}/>
 
+                <NavOption label={"AI Handbook"} target={"handbook"} theme={theme.text}/>
+
                 <NavOption label={"Pricing"} target={"pricing"} theme={theme.text}/>
 
                 <NavOption label={"Contact"} target={"contact"} theme={theme.text}/>
@@ -177,6 +179,8 @@ function App() {
               <NavOption label={"Features"} target={"security"} theme={theme.text}/>
 
               <NavOption label={"Solutions"} target={"agent"} theme={theme.text}/>
+
+              <NavOption label={"AI Handbook"} target={"handbook"} theme={theme.text}/>
 
               <NavOption label={"Pricing"} target={"pricing"} theme={theme.text}/>
 
