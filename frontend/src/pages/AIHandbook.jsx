@@ -314,12 +314,11 @@ function AIHandbook() {
                         }`}
                       >
                         {msg.role === "assistant" ? (
-                          <ReactMarkdown
-                            rehypePlugins={[rehypeHighlight]}
-                            className="prose prose-sm dark:prose-invert max-w-none"
-                          >
-                            {msg.content}
-                          </ReactMarkdown>
+                          <div className="prose prose-sm dark:prose-invert max-w-none">
+                            <ReactMarkdown rehypePlugins={[rehypeHighlight]}>
+                              {msg.content}
+                            </ReactMarkdown>
+                          </div>
                         ) : (
                           <p className="text-sm">{msg.content}</p>
                         )}
