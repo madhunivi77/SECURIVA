@@ -3161,3 +3161,969 @@ def getComplianceExamples(topic: str, show_non_compliant: bool = True) -> str:
         }, indent=2)
 
 # ==================== END COMPLIANCE PROCEDURAL GUIDANCE TOOLS ====================
+# ==================== COMPLIANCE STANDARDS TOOLS ====================
+# Tools for querying GDPR, HIPAA, and PCI-DSS compliance standards
+
+@mcp.tool()
+def getComplianceOverview(standard: str) -> str:
+    """
+    Get an overview of a compliance standard (GDPR, HIPAA, or PCI-DSS)
+    
+    Args:
+        standard: Compliance standard name - must be one of: 'gdpr', 'hipaa', 'pci_dss'
+    
+    Returns:
+        JSON string with standard overview including name, region, effective date, and description
+    
+    Example:
+        getComplianceOverview('gdpr')
+    """
+    try:
+        result = get_compliance_overview(standard)
+        return json.dumps(result, indent=2)
+    except Exception as e:
+        return json.dumps({
+            "success": False,
+            "error": str(e)
+        }, indent=2)
+
+
+@mcp.tool()
+def getComplianceRequirements(standard: str, requirement_id: str = None) -> str:
+    """
+    Get detailed compliance requirements for a standard
+    
+    Args:
+        standard: Compliance standard name ('gdpr', 'hipaa', 'pci_dss')
+        requirement_id: Optional specific requirement ID to retrieve
+    
+    Returns:
+        JSON string with detailed requirements, articles/sections, and implementation guidance
+    
+    Example:
+        getComplianceRequirements('gdpr')
+        getComplianceRequirements('pci_dss', '3')
+    """
+    try:
+        # Convert requirement_id to int if it's a number
+        if requirement_id and requirement_id.isdigit():
+            requirement_id = int(requirement_id)
+        
+        result = get_compliance_requirements(standard, requirement_id)
+        return json.dumps(result, indent=2)
+    except Exception as e:
+        return json.dumps({
+            "success": False,
+            "error": str(e)
+        }, indent=2)
+
+
+@mcp.tool()
+def getComplianceChecklist(standard: str) -> str:
+    """
+    Get a compliance audit checklist for the specified standard
+    
+    Args:
+        standard: Compliance standard name ('gdpr', 'hipaa', 'pci_dss')
+    
+    Returns:
+        JSON string with checklist items grouped by category for audit preparation
+    
+    Example:
+        getComplianceChecklist('hipaa')
+    """
+    try:
+        result = get_compliance_checklist(standard)
+        return json.dumps(result, indent=2)
+    except Exception as e:
+        return json.dumps({
+            "success": False,
+            "error": str(e)
+        }, indent=2)
+
+
+@mcp.tool()
+def getPenaltyInformation(standard: str) -> str:
+    """
+    Get penalty and fine information for non-compliance
+    
+    Args:
+        standard: Compliance standard name ('gdpr', 'hipaa', 'pci_dss')
+    
+    Returns:
+        JSON string with penalty tiers, amounts, and violation types
+    
+    Example:
+        getPenaltyInformation('gdpr')
+    """
+    try:
+        result = get_penalty_information(standard)
+        return json.dumps(result, indent=2)
+    except Exception as e:
+        return json.dumps({
+            "success": False,
+            "error": str(e)
+        }, indent=2)
+
+
+@mcp.tool()
+def getBreachNotificationRequirements(standard: str) -> str:
+    """
+    Get breach notification requirements and timelines for a standard
+    
+    Args:
+        standard: Compliance standard name ('gdpr', 'hipaa', 'pci_dss')
+    
+    Returns:
+        JSON string with notification timelines and requirements
+    
+    Example:
+        getBreachNotificationRequirements('hipaa')
+    """
+    try:
+        result = get_breach_notification_requirements(standard)
+        return json.dumps(result, indent=2)
+    except Exception as e:
+        return json.dumps({
+            "success": False,
+            "error": str(e)
+        }, indent=2)
+
+
+@mcp.tool()
+def crossReferenceComplianceTopic(topic: str) -> str:
+    """
+    Cross-reference a compliance topic across GDPR, HIPAA, and PCI-DSS
+    Shows how each standard addresses the same topic
+    
+    Args:
+        topic: Compliance topic - must be one of:
+               'data_encryption', 'access_control', 'audit_logging', 
+               'breach_notification', 'data_retention'
+    
+    Returns:
+        JSON string with cross-referenced requirements from all three standards
+    
+    Example:
+        crossReferenceComplianceTopic('data_encryption')
+    """
+    try:
+        result = cross_reference_compliance_topic(topic)
+        return json.dumps(result, indent=2)
+    except Exception as e:
+        return json.dumps({
+            "success": False,
+            "error": str(e)
+        }, indent=2)
+
+
+@mcp.tool()
+def searchComplianceRequirements(query: str, standards_json: str = None) -> str:
+    """
+    Search for compliance requirements matching a query across standards
+    
+    Args:
+        query: Search query string
+        standards_json: Optional JSON array of standards to search.
+                       Example: '["gdpr","hipaa"]'
+                       If not provided, searches all standards
+    
+    Returns:
+        JSON string with matching requirements from specified standards
+    
+    Example:
+        searchComplianceRequirements('encryption')
+        searchComplianceRequirements('access control', '["gdpr","hipaa"]')
+    """
+    try:
+        standards = None
+        if standards_json:
+            standards = json.loads(standards_json)
+        
+        result = search_compliance_requirements(query, standards)
+        return json.dumps(result, indent=2)
+    except Exception as e:
+        return json.dumps({
+            "success": False,
+            "error": str(e)
+        }, indent=2)
+
+
+@mcp.tool()
+def generateComplianceReport(standards_json: str, include_checklist: bool = True, 
+                             include_penalties: bool = True, include_breach_info: bool = True) -> str:
+    """
+    Generate a comprehensive compliance report for specified standards
+    
+    Args:
+        standards_json: JSON array of standards to include.
+                       Example: '["gdpr","hipaa","pci_dss"]'
+        include_checklist: Include compliance checklists (default: True)
+        include_penalties: Include penalty information (default: True)
+        include_breach_info: Include breach notification requirements (default: True)
+    
+    Returns:
+        JSON string with comprehensive compliance report
+    
+    Example:
+        generateComplianceReport('["gdpr","hipaa"]')
+        generateComplianceReport('["pci_dss"]', True, True, False)
+    """
+    try:
+        standards = json.loads(standards_json)
+        
+        result = generate_compliance_report(
+            standards=standards,
+            include_checklist=include_checklist,
+            include_penalties=include_penalties,
+            include_breach_info=include_breach_info
+        )
+        return json.dumps(result, indent=2)
+    except json.JSONDecodeError:
+        return json.dumps({
+            "success": False,
+            "error": "Invalid JSON format. Expected array of standard names like ['gdpr','hipaa']"
+        }, indent=2)
+    except Exception as e:
+        return json.dumps({
+            "success": False,
+            "error": str(e)
+        }, indent=2)
+
+# ==================== END COMPLIANCE TOOLS ====================
+
+
+# ==================== COMPLIANCE CONFIRMATION TOOLS ====================
+# Tools for AI to confirm understanding before taking actions
+
+@mcp.tool()
+def confirmComplianceUnderstanding(
+    user_request: str,
+    my_understanding: str,
+    planned_action: str,
+    standards_involved: str = ""
+) -> str:
+    """
+    Confirm understanding with the user before generating compliance documents or reports.
+    
+    USE THIS TOOL when a user asks you to create, generate, or analyze compliance information.
+    This ensures accuracy and allows the user to correct any misunderstandings.
+    
+    Args:
+        user_request: The exact request from the user (e.g., "Create a HIPAA compliance report")
+        my_understanding: Your interpretation of what the user wants
+        planned_action: What you plan to do next (e.g., "Generate comprehensive HIPAA report with checklist")
+        standards_involved: Compliance standards you'll use (e.g., "HIPAA, GDPR")
+    
+    Returns:
+        JSON string formatted as a confirmation prompt for the user
+    
+    Example:
+        confirmComplianceUnderstanding(
+            user_request="I need GDPR and HIPAA compliance docs",
+            my_understanding="You need comprehensive compliance documentation for both GDPR and HIPAA standards",
+            planned_action="Generate full compliance reports including requirements, checklists, and penalties",
+            standards_involved="GDPR, HIPAA"
+        )
+    
+    The user will respond with confirmation or corrections, and you should proceed accordingly.
+    """
+    try:
+        confirmation = {
+            "message_type": "confirmation_request",
+            "original_request": user_request,
+            "my_understanding": my_understanding,
+            "planned_action": planned_action,
+            "standards_involved": standards_involved,
+            "confirmation_prompt": f"""
+📋 **Let me confirm I understood correctly:**
+
+**Your Request:** {user_request}
+
+**My Understanding:** {my_understanding}
+
+**What I'll Do:** {planned_action}
+{f'**Standards:** {standards_involved}' if standards_involved else ''}
+
+✅ **Is this correct?** 
+- Reply "yes" or "confirm" to proceed
+- Reply with corrections if I misunderstood something
+
+""",
+            "next_steps": [
+                "If confirmed: Proceed with planned action",
+                "If corrected: Adjust understanding and re-confirm",
+                "If unclear: Ask clarifying questions"
+            ]
+        }
+        
+        return json.dumps(confirmation, indent=2)
+        
+    except Exception as e:
+        return json.dumps({
+            "success": False,
+            "error": str(e)
+        }, indent=2)
+
+
+@mcp.tool()
+def summarizeComplianceRequest(
+    standards: str,
+    information_needed: str,
+    output_format: str = "report"
+) -> str:
+    """
+    Summarize what compliance information will be gathered before retrieving it.
+    
+    Use this to show the user what data you'll collect and in what format.
+    
+    Args:
+        standards: Comma-separated list of standards (e.g., "GDPR, HIPAA, PCI-DSS")
+        information_needed: What information to retrieve (e.g., "requirements, penalties, checklists")
+        output_format: How the data will be presented (e.g., "report", "checklist", "comparison table")
+    
+    Returns:
+        JSON string with summary of what will be retrieved
+    
+    Example:
+        summarizeComplianceRequest(
+            standards="GDPR, HIPAA",
+            information_needed="breach notification requirements, penalties",
+            output_format="comparison table"
+        )
+    """
+    try:
+        standards_list = [s.strip() for s in standards.split(",")]
+        info_list = [i.strip() for i in information_needed.split(",")]
+        
+        summary = {
+            "message_type": "request_summary",
+            "summary": f"""
+📊 **Compliance Information Summary**
+
+**Standards to Query:** {len(standards_list)}
+{chr(10).join([f"  • {std}" for std in standards_list])}
+
+**Information to Retrieve:**
+{chr(10).join([f"  • {info}" for info in info_list])}
+
+**Output Format:** {output_format}
+
+**Estimated Details:** This will provide comprehensive {', '.join(info_list)} for {len(standards_list)} compliance standard(s).
+
+**Ready to proceed?** I'll gather this information for you.
+""",
+            "standards_count": len(standards_list),
+            "standards": standards_list,
+            "information_types": info_list,
+            "output_format": output_format
+        }
+        
+        return json.dumps(summary, indent=2)
+        
+    except Exception as e:
+        return json.dumps({
+            "success": False,
+            "error": str(e)
+        }, indent=2)
+
+
+@mcp.tool()
+def validateComplianceParameters(
+    standards: str,
+    include_checklist: str = "true",
+    include_penalties: str = "true",
+    include_breach_info: str = "true"
+) -> str:
+    """
+    Validate parameters before generating a compliance report and show what will be included.
+    
+    Use this before calling generateComplianceReport to confirm scope with the user.
+    
+    Args:
+        standards: Comma-separated standards (e.g., "gdpr, hipaa, pci_dss")
+        include_checklist: Whether to include audit checklists ("true" or "false")
+        include_penalties: Whether to include penalty information ("true" or "false")
+        include_breach_info: Whether to include breach notification requirements ("true" or "false")
+    
+    Returns:
+        JSON string with validation results and what will be included
+    
+    Example:
+        validateComplianceParameters(
+            standards="gdpr, hipaa",
+            include_checklist="true",
+            include_penalties="true",
+            include_breach_info="false"
+        )
+    """
+    try:
+        standards_list = [s.strip().lower() for s in standards.split(",")]
+        valid_standards = ["gdpr", "hipaa", "pci_dss", "sox"]
+        
+        # Validate standards
+        invalid = [s for s in standards_list if s not in valid_standards]
+        
+        checklist_bool = include_checklist.lower() == "true"
+        penalties_bool = include_penalties.lower() == "true"
+        breach_bool = include_breach_info.lower() == "true"
+        
+        validation = {
+            "valid": len(invalid) == 0,
+            "standards": {
+                "requested": standards_list,
+                "valid": [s for s in standards_list if s in valid_standards],
+                "invalid": invalid
+            },
+            "report_scope": {
+                "checklist_included": checklist_bool,
+                "penalties_included": penalties_bool,
+                "breach_notification_included": breach_bool
+            },
+            "preview": f"""
+🔍 **Report Configuration Preview**
+
+**Standards to Include:** {', '.join([s.upper() for s in standards_list if s in valid_standards])}
+
+**Report Will Include:**
+{'✅' if checklist_bool else '❌'} Compliance Checklists
+{'✅' if penalties_bool else '❌'} Penalty Information
+{'✅' if breach_bool else '❌'} Breach Notification Requirements
+
+**Status:** {'✅ Ready to generate' if len(invalid) == 0 else f'❌ Invalid standards: {", ".join(invalid)}'}
+
+{f'**Note:** Invalid standards will be skipped: {", ".join(invalid)}' if invalid else ''}
+"""
+        }
+        
+        if invalid:
+            validation["message"] = f"Warning: These standards are not recognized: {', '.join(invalid)}"
+            validation["available_standards"] = valid_standards
+        
+        return json.dumps(validation, indent=2)
+        
+    except Exception as e:
+        return json.dumps({
+            "success": False,
+            "error": str(e)
+        }, indent=2)
+
+
+# ==================== END COMPLIANCE CONFIRMATION TOOLS ====================
+
+
+# ==================== COMPLIANCE MODULE GENERATOR TOOLS ====================
+# Secure tools for AI to generate new compliance modules
+
+@mcp.tool()
+def listComplianceModules() -> str:
+    """
+    List all available compliance modules in the system
+    
+    Returns:
+        JSON string with list of all compliance module files and their metadata
+    
+    Example:
+        listComplianceModules()
+    """
+    try:
+        result = list_compliance_modules()
+        return json.dumps(result, indent=2)
+    except Exception as e:
+        return json.dumps({
+            "success": False,
+            "error": str(e)
+        }, indent=2)
+
+
+@mcp.tool()
+def validateComplianceModule(filename: str, content: str) -> str:
+    """
+    Validate a compliance module WITHOUT creating the file (dry-run)
+    
+    ⚠️ ALWAYS CALL THIS FIRST before createComplianceModule()!
+    
+    This performs comprehensive security validation:
+    - Validates filename and path safety (prevents path traversal)
+    - Checks Python syntax
+    - Scans for dangerous code (eval, exec, os.system, etc.)
+    - Validates STANDARD structure
+    - Checks required fields
+    
+    Args:
+        filename: Module filename (e.g., 'sox.py', 'iso_27001.py')
+                  - Only lowercase letters, numbers, and underscores allowed
+                  - Automatically adds .py extension if missing
+        content: Complete Python module content with STANDARD constant
+                 - Must include: name, region, overview fields
+                 - Should follow the same structure as existing modules
+    
+    Returns:
+        JSON string with validation results and preview (no file created)
+    
+    Example:
+        content = ""\"
+        '''SOX Compliance Module'''
+        
+        STANDARD = {
+            "name": "Sarbanes-Oxley Act",
+            "region": "United States",
+            "overview": "Financial reporting compliance",
+            "key_requirements": [...]
+        }
+        \"""
+        validateComplianceModule('sox.py', content)
+    """
+    try:
+        result = create_compliance_module_dry_run(filename, content)
+        return json.dumps(result, indent=2)
+    except Exception as e:
+        return json.dumps({
+            "success": False,
+            "error": str(e)
+        }, indent=2)
+
+
+@mcp.tool()
+def createComplianceModule(filename: str, content: str, allow_overwrite: bool = False) -> str:
+    """
+    Create a new compliance module file (WRITES TO DISK)
+    
+    ⚠️ CRITICAL: ALWAYS call validateComplianceModule() first and review results!
+    
+    This creates an actual .py file in the compliance_modules/ directory.
+    The file will be automatically discovered and available for compliance queries.
+    
+    Security Features:
+    - Restricted to compliance_modules/ directory only
+    - Automatic backup of existing files (if overwriting)
+    - Multiple validation layers
+    - Code safety scanning
+    - File size limits (500KB max)
+    
+    Args:
+        filename: Module filename (e.g., 'sox.py')
+                  Must pass security validation
+        content: Complete Python module content with STANDARD constant
+                 Must pass syntax and structure validation
+        allow_overwrite: If True, allows overwriting existing files
+                         (creates backup first)
+                         Default: False (prevents accidental overwrites)
+    
+    Returns:
+        JSON string with creation status, file path, and validation results
+    
+    Workflow:
+        1. Call validateComplianceModule() first
+        2. Review validation results
+        3. If valid, call createComplianceModule()
+        4. Verify file was created with listComplianceModules()
+    
+    Example:
+        # Step 1: Validate
+        result = validateComplianceModule('sox.py', content)
+        # Step 2: Review and confirm validation passed
+        # Step 3: Create
+        result = createComplianceModule('sox.py', content, False)
+    """
+    try:
+        result = create_compliance_module(filename, content, allow_overwrite)
+        return json.dumps(result, indent=2)
+    except Exception as e:
+        return json.dumps({
+            "success": False,
+            "error": str(e)
+        }, indent=2)
+
+# ==================== END COMPLIANCE MODULE GENERATOR TOOLS ====================
+
+# Even better: Use FastMCP's native tool listing if available
+
+@mcp.tool()
+def listAvailableTools(context: Context, category: str = "all") -> str:
+    """
+    List all available MCP tools using FastMCP's native tool registry
+    
+    Args:
+        category: Filter by category (all, gmail, calendar, salesforce, telesign, compliance)
+    
+    Returns:
+        JSON string with all registered tools and their metadata
+    """
+    try:
+        import inspect
+        import json
+        
+        # FastMCP stores tools in mcp.tools or similar
+        # Let's access the tool registry directly
+        tools_dict = {}
+        
+        # Get the current module to find all decorated functions
+        current_module = inspect.getmodule(inspect.currentframe())
+        
+        # Find all functions decorated with @mcp.tool()
+        for name, obj in inspect.getmembers(current_module):
+            if callable(obj) and hasattr(obj, '__name__'):
+                # Check if it's a tool by looking for context parameter
+                sig = None
+                try:
+                    sig = inspect.signature(obj)
+                    params = list(sig.parameters.keys())
+                    
+                    # MCP tools have 'context' as first parameter
+                    if params and params[0] == 'context':
+                        # This is an MCP tool!
+                        tool_name = obj.__name__
+                        
+                        # Extract metadata
+                        tool_info = {
+                            "name": tool_name,
+                            "parameters": []
+                        }
+                        
+                        # Get parameters (skip context)
+                        for param_name, param in list(sig.parameters.items())[1:]:
+                            param_info = {
+                                "name": param_name,
+                                "type": str(param.annotation).replace("<class '", "").replace("'>", "") if param.annotation != inspect.Parameter.empty else "Any",
+                                "required": param.default == inspect.Parameter.empty
+                            }
+                            if param.default != inspect.Parameter.empty:
+                                param_info["default"] = str(param.default)
+                            tool_info["parameters"].append(param_info)
+                        
+                        # Extract docstring
+                        docstring = inspect.getdoc(obj)
+                        if docstring:
+                            # Get first line as short description
+                            lines = docstring.strip().split('\n')
+                            tool_info["description"] = lines[0] if lines else ""
+                            tool_info["full_docs"] = docstring
+                        
+                        # Categorize
+                        name_lower = tool_name.lower()
+                        if any(x in name_lower for x in ['email', 'gmail', 'draft']):
+                            cat = 'gmail'
+                        elif any(x in name_lower for x in ['calendar', 'event', 'attendee']):
+                            cat = 'calendar'
+                        elif any(x in name_lower for x in ['salesforce', 'case', 'account', 'contact', 'opportunity', 'soql', 'sosl', 'chatter', 'task']):
+                            cat = 'salesforce'
+                        elif any(x in name_lower for x in ['sms', 'phone', 'voice', 'verification', 'telesign', 'message', 'batch']):
+                            cat = 'telesign'
+                        elif any(x in name_lower for x in ['compliance', 'gdpr', 'hipaa', 'pci', 'penalty', 'breach', 'sox']):
+                            cat = 'compliance'
+                        else:
+                            cat = 'utility'
+                        
+                        if cat not in tools_dict:
+                            tools_dict[cat] = []
+                        tools_dict[cat].append(tool_info)
+                        
+                except (ValueError, TypeError):
+                    # Not a valid function signature
+                    continue
+        
+        # Filter by category
+        if category.lower() != "all":
+            if category.lower() in tools_dict:
+                tools_dict = {category.lower(): tools_dict[category.lower()]}
+            else:
+                return json.dumps({
+                    "success": False,
+                    "error": f"Category '{category}' not found",
+                    "available_categories": list(tools_dict.keys())
+                }, indent=2)
+        
+        # Calculate totals
+        total = sum(len(v) for v in tools_dict.values())
+        
+        return json.dumps({
+            "success": True,
+            "total_tools": total,
+            "categories": list(tools_dict.keys()),
+            "tools": tools_dict,
+            "note": "Tools discovered dynamically at runtime"
+        }, indent=2)
+        
+    except Exception as e:
+        import traceback
+        return json.dumps({
+            "success": False,
+            "error": str(e),
+            "traceback": traceback.format_exc()
+        }, indent=2)
+
+
+# ==================== COMPLIANCE PROCEDURAL GUIDANCE TOOLS ====================
+# Tools for accessing step-by-step procedures, decision trees, and real-world examples
+
+@mcp.tool()
+def getGroundedSecurityGuidance(
+    user_question: str,
+    regulation: str = None,
+    guidance_type: str = None,
+) -> str:
+    """
+    Retrieve curated cybersecurity and compliance guidance from local source files.
+
+    Use this tool first when the user asks for guidance, process explanations,
+    decision support, or implementation examples. The result is grounded in
+    curated files so the model can summarize without inventing policy details.
+
+    Args:
+        user_question: User's original question in natural language
+        regulation: Optional regulation filter such as GDPR, HIPAA, CCPA, PCI-DSS, or SOX
+        guidance_type: Optional hint: procedure, decision_tree, or example
+
+    Returns:
+        JSON string containing matched source metadata, response rules, and guidance content
+    """
+    try:
+        result = guidance_catalog.get_guidance(
+            user_question=user_question,
+            regulation=regulation,
+            guidance_type=guidance_type,
+        )
+        return json.dumps(result, indent=2)
+    except Exception as e:
+        return json.dumps({
+            "success": False,
+            "error": str(e)
+        }, indent=2)
+
+@mcp.tool()
+def getComplianceProcedure(procedure_type: str, regulation: str = None) -> str:
+    """
+    Get step-by-step compliance procedures for handling data.
+    
+    Returns detailed, actionable procedures with regulation references,
+    compliant/non-compliant examples, and implementation checklists.
+    
+    🎯 USE THIS WHEN: User asks "How do I...", "What's the process for...", "Steps to..."
+    
+    Available Procedures:
+    - data_collection: How to collect user data compliantly
+    - data_storage: How to store data securely  
+    - data_sharing: How to share data with third parties
+    - data_deletion: How to handle deletion requests
+    - breach_response: How to respond to data breaches
+    
+    Args:
+        procedure_type: Type of procedure - one of:
+                       'data_collection', 'data_storage', 'data_sharing',
+                       'data_deletion', 'breach_response'
+        regulation: Optional filter by regulation (e.g., 'GDPR', 'CCPA', 'HIPAA')
+                   If provided, highlights requirements for that specific regulation
+    
+    Returns:
+        JSON string with step-by-step procedure including:
+        - Title and description
+        - Applicable regulations
+        - Detailed steps with actions
+        - Regulation references for each step
+        - Compliant vs non-compliant examples
+        - Implementation checklists
+    
+    Example:
+        getComplianceProcedure('data_deletion')
+        getComplianceProcedure('data_collection', 'GDPR')
+    """
+    try:
+        procedures = guidance_catalog.store.get_procedures()
+        valid_procedures = list(procedures.keys())
+        if procedure_type not in valid_procedures:
+            return json.dumps({
+                "success": False,
+                "error": f"Invalid procedure_type. Must be one of: {', '.join(valid_procedures)}",
+                "available_procedures": valid_procedures
+            }, indent=2)
+        
+        # Get the procedure
+        procedure = procedures[procedure_type]
+        
+        # If regulation filter is provided, add note
+        result = {
+            "success": True,
+            "procedure_type": procedure_type,
+            "procedure": procedure
+        }
+        
+        if regulation:
+            result["regulation_filter"] = regulation.upper()
+            result["note"] = f"Showing procedure with focus on {regulation.upper()} requirements. All regulations are listed, but {regulation.upper()} is highlighted."
+        
+        return json.dumps(result, indent=2)
+        
+    except Exception as e:
+        return json.dumps({
+            "success": False,
+            "error": str(e)
+        }, indent=2)
+
+
+@mcp.tool()
+def getComplianceDecisionTree(scenario: str) -> str:
+    """
+    Get an interactive decision tree flowchart for making compliance decisions.
+    
+    Returns a tree structure with yes/no decision points that guide users
+    to the correct action. Perfect for real-time decision-making.
+    
+    🎯 USE THIS WHEN: User asks "Can I...", "Should I...", "Is it ok to..."
+    
+    Available Decision Trees:
+    - email_compliance: "Can I email customer data to this vendor?"
+    - data_sharing: "Should I share data with this third party?"
+    - data_deletion: "How do I handle this deletion request?"
+    - vendor_access: "Should I give this vendor access to our systems?"
+    
+    Args:
+        scenario: Decision tree scenario - one of:
+                 'email_compliance', 'data_sharing', 'data_deletion', 'vendor_access'
+    
+    Returns:
+        JSON string with interactive decision tree including:
+        - Tree title and description
+        - Start node to begin decision process
+        - Decision nodes with questions and guidance
+        - Possible actions with required steps
+        - Quick reference for common scenarios
+    
+    How to Use the Tree:
+        1. Start at the start_node
+        2. Answer the question at each node
+        3. Follow 'next_node' based on answer  
+        4. When you reach an action, follow the steps provided
+    
+    Example:
+        getComplianceDecisionTree('email_compliance')
+        # Returns tree with nodes: check requester identity → check authorization → 
+        # check data minimization → actions (approve, deny, report phishing, etc.)
+    """
+    try:
+        trees = guidance_catalog.store.get_decision_trees()
+
+        if scenario not in LEGACY_DECISION_TREE_MAP:
+            return json.dumps({
+                "success": False,
+                "error": f"Invalid scenario. Must be one of: {', '.join(LEGACY_DECISION_TREE_MAP.keys())}",
+                "available_scenarios": list(LEGACY_DECISION_TREE_MAP.keys())
+            }, indent=2)
+        
+        tree_key = LEGACY_DECISION_TREE_MAP[scenario]
+        
+        if tree_key not in trees:
+            return json.dumps({
+                "success": False,
+                "error": f"Decision tree '{tree_key}' not found in file"
+            }, indent=2)
+        
+        tree = trees[tree_key]
+        
+        result = {
+            "success": True,
+            "scenario": scenario,
+            "decision_tree": tree,
+            "usage_instructions": {
+                "step_1": "Start at the node indicated by 'start_node'",
+                "step_2": "Read the question and guidance at each node",
+                "step_3": "Based on your situation, follow the appropriate 'next_node' path",
+                "step_4": "When you reach an action (no next_node), follow the steps provided",
+                "tip": "Use the quick_reference if available for instant answers to common questions"
+            }
+        }
+        
+        return json.dumps(result, indent=2)
+
+    except Exception as e:
+        return json.dumps({
+            "success": False,
+            "error": str(e)
+        }, indent=2)
+
+
+@mcp.tool()
+def getComplianceExamples(topic: str, show_non_compliant: bool = True) -> str:
+    """
+    Get real-world examples of compliant vs non-compliant actions.
+    
+    Returns concrete scenarios with code examples, explanations, and consequences.
+    Perfect for training, learning, and understanding what to do (and what NOT to do).
+    
+    🎯 USE THIS WHEN: User asks "Can you give me an example of...", "Show me how to...",
+                      "What's the right way to..."
+    
+    Available Topics:
+    - email_scenarios: Handling customer data requests, marketing emails, vendor requests
+    - technical_scenarios: Password storage, logging, API auth, database encryption  
+    - process_scenarios: Employee onboarding/termination, consent management
+    - data_breach_scenarios: Discovering and responding to breaches
+    
+    Args:
+        topic: Example topic - one of:
+              'email_scenarios', 'technical_scenarios', 'process_scenarios', 
+              'data_breach_scenarios'
+        show_non_compliant: If True (default), includes non-compliant examples
+                           If False, shows only compliant examples
+                           (Showing both helps users understand contrast)
+    
+    Returns:
+        JSON string with array of scenarios, each including:
+        - Scenario description and situation
+        - Applicable regulations (GDPR, CCPA, HIPAA, etc.)
+        - Compliant response with steps, code examples, and explanation
+        - Non-compliant response with examples and consequences (if show_non_compliant=True)
+    
+    Example:
+        getComplianceExamples('technical_scenarios')
+        # Returns examples: password hashing (bcrypt vs plaintext),
+        # logging (user IDs vs PII), API auth (JWT vs no auth)
+        
+        getComplianceExamples('email_scenarios', False)
+        # Returns only compliant examples without non-compliant counterparts
+    """
+    try:
+        # Validate topic
+        examples_by_topic = guidance_catalog.store.get_examples()
+        valid_topics = list(examples_by_topic.keys())
+        if topic not in valid_topics:
+            return json.dumps({
+                "success": False,
+                "error": f"Invalid topic. Must be one of: {', '.join(valid_topics)}",
+                "available_topics": valid_topics
+            }, indent=2)
+        
+        # Get examples for the topic
+        examples = examples_by_topic[topic]
+        
+        # Optionally filter out non-compliant examples
+        if not show_non_compliant:
+            filtered_examples = []
+            for example in examples:
+                filtered_example = example.copy()
+                if 'non_compliant' in filtered_example or 'non_compliant_response' in filtered_example:
+                    # Remove non-compliant parts
+                    filtered_example.pop('non_compliant', None)
+                    filtered_example.pop('non_compliant_response', None)
+                    filtered_example['note'] = "Non-compliant examples hidden (show_non_compliant=False)"
+                filtered_examples.append(filtered_example)
+            examples = filtered_examples
+        
+        result = {
+            "success": True,
+            "topic": topic,
+            "examples_count": len(examples),
+            "showing_non_compliant": show_non_compliant,
+            "examples": examples,
+            "usage_tip": "Study both compliant and non-compliant examples to understand the contrast. Code examples are provided where applicable."
+        }
+        
+        return json.dumps(result, indent=2)
+
+    except Exception as e:
+        return json.dumps({
+            "success": False,
+            "error": str(e)
+        }, indent=2)
+
+# ==================== END COMPLIANCE PROCEDURAL GUIDANCE TOOLS ====================
