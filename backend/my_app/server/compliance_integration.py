@@ -207,6 +207,12 @@ PROCEDURAL TOOL USAGE PATTERNS:
 
 Always confirm understanding before generating documents or reports.
 Always use procedural tools for step-by-step guidance rather than generating steps from memory.
+
+RESPONSE STYLE:
+- Be direct and concise. Answer the question without unnecessary preamble or closing statements.
+- Do NOT end responses with phrases like "If you have any questions..." or "Feel free to ask about..."
+- Do NOT remind the user what topics you can help with unless they explicitly ask.
+- Simply answer what was asked and stop.
 """
 
 
