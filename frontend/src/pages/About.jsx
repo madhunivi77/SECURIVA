@@ -10,7 +10,7 @@ export default function About() {
       <section className="hero py-24 text-white">
         <div className="hero-content text-center max-w-4xl">
           <div>
-            <h1 className="text-5xl font-bold mb-6">About SecuriVA</h1>
+            <h1 className="text-5xl font-bold mb-6">About</h1>
             <p className="text-xl opacity-90">
               SecuriVA is an enterprise AI platform that combines automation,
               cybersecurity, and secure communication into one unified system.
@@ -139,7 +139,7 @@ export default function About() {
       <section className="bg-black">
         <div className="mx-auto text-black">
 
-          <h2 className="text-3xl font-bold text-center text-gray-900 dark:text-white mb-12">
+          <h2 className="text-3xl font-bold text-center text-gray-900 dark:text-white mb-12 pt-10">
             The SecuriVA Platform
           </h2>
 

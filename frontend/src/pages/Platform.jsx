@@ -1,8 +1,7 @@
 import { Link } from "react-router-dom";
-import Sponsors from "../components/Sponsors";
 import {
     Mic, ShieldCheck, MessageSquare, Lock,
-    CheckCircle2, Users, Play, CircleDollarSign,
+    Users, Play, CircleDollarSign,
     LayoutDashboard, Zap, Phone
 } from "lucide-react";
 import { useTheme } from "../context/ThemeContext";
@@ -210,7 +209,7 @@ export default function Platform() {
         <div className="min-h-screen bg-gray-100 dark:bg-gray-900">
 
             {/* ---------- HERO ---------- */}
-            <section className="hero py-24 bg-linear-to-br from-blue-900 to-black text-white">
+            <section className="hero pt-24 bg-linear-to-br bg-[#0a0f1f] text-white">
                 <div className="hero-content text-center max-w-4xl">
                     <div>
                         <h1 className="text-5xl font-bold mb-6">Platform</h1>
@@ -224,17 +223,35 @@ export default function Platform() {
                 </div>
             </section>
 
-            <section className="px-8 py-16 max-w-4xl mx-auto">
+            <section className="relative overflow-hidden">
+                <div className="relative w-full h-[500px] overflow-hidden bg-black mx-auto">
+                    <video
+                        autoPlay
+                        loop
+                        muted
+                        playsInline
+                        className="absolute top-0 left-0 w-full h-[70%] object-cover opacity-40"
+                    >
+                        <source src="Video_3.mp4" type="video/mp4" />
+                        Your browser does not support the video tag.
+                    </video>
 
-                {/* Header */}
-                <div className="mb-12 text-center">
-                    <h2 className="text-3xl font-normal text-gray-900 mb-3 dark:text-white">
-                        A Unified Intelligent Platform for Secure, Automated, AI-Driven Operations
-                    </h2>
-                    <p className="text-xl font-light text-gray-500 max-w-xl mx-auto leading-relaxed dark:text-gray-400">
-                        Our platform is designed to support organizations of all sizes—across all industries—seeking to modernize their operations, protect their data, and elevate customer engagement.
-                    </p>
+                    <div className="absolute top-0 left-0 w-full h-64 bg-gradient-to-b from-[#0a0f1f] via-[#0a0f1f]/60 to-transparent pointer-events-none"></div>
+
+                    <div className="absolute bottom-0 left-0 w-full h-64 bg-gradient-to-t from-[#131827] via-gray-black/60 to-transparent pointer-events-none"></div>
+
+                    {/* Content */}
+                    <div className="relative max-w-6xl mx-auto pt-10">
+
+                        <h2 className="subheading">
+                            A Unified Intelligent Platform for Secure, Automated, AI-Driven Operations
+                        </h2>
+                        <p className="text-center backdrop-blur bg-gray-800/30 shadow-lg card p-10 mx-[15%] text-xl">Our platform is designed to support organizations of all sizes—across all industries—seeking to modernize their operations, protect their data, and elevate customer engagement.</p>
+                    </div>
                 </div>
+            </section>
+
+            <section className="px-8 pb-16 mx-[15%]">
 
                 <h2 className="text-center text-3xl font-normal text-gray-900 mb-3 dark:text-white">
                     Platform Components

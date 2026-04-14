@@ -1,0 +1,620 @@
+{
+  "email_compliance_decision": {
+    "title": "Email Request Compliance Decision Tree",
+    "description": "Use this flowchart when you receive an email requesting client data or asking you to share personal information",
+    "start_node": "email_received",
+    "nodes": {
+      "email_received": {
+        "question": "Did you receive an email asking for client/customer data or personal information?",
+        "context": "This includes requests to share contact lists, customer info, employee data, or any other personal information",
+        "yes": "check_requester_identity",
+        "no": "end_safe"
+      },
+      "check_requester_identity": {
+        "question": "Can you verify the requester's identity?",
+        "guidance": [
+          "Check the email domain (is it from your company or legitimate business partner?)",
+          "Look for phishing indicators (urgent tone, spelling errors, suspicious links)",
+          "Verify through a separate channel (call the person on a known phone number)",
+          "Be suspicious of: Gmail/Yahoo addresses claiming to be from vendors, urgent/threatening language"
+        ],
+        "examples": {
+          "verified": "Email from john.smith@yourcompany.com (company domain) or partner@knownvendor.com",
+          "suspicious": "Email from ceo@gmail.com claiming to be your CEO, or vendor@fakeco.com (slight misspelling)"
+        },
+        "yes": "check_authorization",
+        "no": "action_report_phishing"
+      },
+      "check_authorization": {
+        "question": "Does the requester have proper authorization to access this data?",
+        "guidance": [
+          "Internal requests: Does requester's role/department need this data? Is there manager/DPO approval?",
+          "Vendor requests: Is there an active contract or Data Processing Agreement (DPA)?",
+          "Legal requests: Is there a valid court order or subpoena?",
+          "Third-party requests: Do we have a business relationship and signed agreement?"
+        ],
+        "authorization_types": {
+          "internal": "Manager approval + job role requires data access",
+          "vendor": "Active contract with data processing provisions",
+          "legal": "Valid court order, subpoena, or regulatory request",
+          "partner": "Signed partnership/data sharing agreement"
+        },
+        "yes": "check_data_minimization",
+        "no": "action_deny_and_escalate"
+      },
+      "check_data_minimization": {
+        "question": "Is the request limited to only the necessary data?",
+        "details": "The request should ask for the minimum amount of data needed for the stated purpose (data minimization principle)",
+        "examples": {
+          "compliant": [
+            "Request: 'Can you share contact info (name, email) for customers who opted into our webinar?' (specific, limited)",
+            "Request: 'Please send transaction ID and status for order #12345' (specific order)",
+            "Request: 'I need billing address for customer ID 789 to process refund' (specific customer, specific field)"
+          ],
+          "non_compliant": [
+            "Request: 'Send me a full database export of all customers' (excessive)",
+            "Request: 'Can you share all user data including passwords and SSNs?' (unnecessarily broad)",
+            "Request: 'Give me access to your entire CRM system' (excessive access when specific data would suffice)"
+          ]
+        },
+        "yes": "check_secure_transfer",
+        "no": "action_request_clarification"
+      },
+      "check_secure_transfer": {
+        "question": "Is there a secure method available for transferring the data?",
+        "approved_methods": [
+          "Encrypted email (S/MIME, PGP)",
+          "Secure file transfer portal with authentication",
+          "Encrypted cloud storage link with password protection and expiration",
+          "Direct API integration over HTTPS",
+          "SFTP (Secure File Transfer Protocol)",
+          "Company-approved secure messaging system"
+        ],
+        "rejected_methods": [
+          "Unencrypted email attachment",
+          "Regular email with sensitive data in message body",
+          "Public Google Drive/Dropbox link without access controls",
+          "SMS/text message",
+          "Unencrypted FTP",
+          "Posting data on shared network drive accessible to everyone"
+        ],
+        "yes": "action_approve_with_logging",
+        "no": "action_propose_secure_method"
+      }
+    },
+    "actions": {
+      "end_safe": {
+        "result": "✅ NO ACTION NEEDED",
+        "message": "This decision tree is for requests involving personal data. If you're unsure whether something counts as personal data, ask your supervisor or Data Protection Officer."
+      },
+      "action_approve_with_logging": {
+        "result": "✅ COMPLIANT - You may proceed with sharing",
+        "required_steps": [
+          "1. Log the data access/sharing request in the compliance log or ticketing system",
+          "2. Transfer data ONLY via the approved secure method (never plain email for sensitive data)",
+          "3. Set data retention terms: Inform recipient when data must be deleted (e.g., '30 days after project completion')",
+          "4. For file transfers: Enable auto-expiration (delete shared files after 30-90 days)",
+          "5. If GDPR applies: Ensure you have a Data Processing Agreement with recipient",
+          "6. Keep a record: Save the request, your approval, and confirmation of delivery"
+        ],
+        "documentation_template": "Shared [data type] with [recipient] on [date] for [purpose], via [secure method], authorized by [manager/agreement], retention: [timeframe]"
+      },
+      "action_deny_and_escalate": {
+        "result": "❌ NON-COMPLIANT - Do NOT proceed with sharing",
+        "required_steps": [
+          "1. Reply politely: 'I cannot fulfill this request without proper authorization. Please work with [your manager / our legal team / DPO] to obtain necessary approvals.'",
+          "2. Forward the request to your Data Protection Officer (DPO) or legal/compliance team",
+          "3. Log the attempted unauthorized access for compliance records",
+          "4. Do NOT share any data until proper authorization is obtained",
+          "5. If requester persists or becomes aggressive, report to your manager immediately"
+        ],
+        "sample_response": "Thank you for reaching out. I'm unable to share client data without proper authorization. Please contact our legal team at legal@company.com to initiate a formal data request process and execute necessary data sharing agreements."
+      },
+      "action_report_phishing": {
+        "result": "🚨 SUSPICIOUS - This may be a phishing attack",
+        "required_steps": [
+          "1. DO NOT click any links or download any attachments in the suspicious email",
+          "2. DO NOT reply to the email or provide any information",
+          "3. Forward the email to your security team (security@company.com or IT Help Desk)",
+          "4. Delete the original suspicious email from your inbox",
+          "5. If you already clicked a link or provided information: Report immediately to security@company.com and IT - this is urgent!",
+          "6. Alert your colleagues if they might receive similar emails"
+        ],
+        "phishing_indicators": [
+          "Sender email doesn't match official company domain",
+          "Urgent language ('Act now!', 'Your account will be suspended')",
+          "Spelling or grammar errors",
+          "Suspicious links (hover to see real URL before clicking)",
+          "Requests for passwords or sensitive data via email",
+          "Unexpected attachments"
+        ]
+      },
+      "action_request_clarification": {
+        "result": "⚠️ REQUEST NEEDS REFINEMENT",
+        "required_steps": [
+          "1. Reply to requester: 'To comply with data minimization principles, can you please specify exactly which data fields you need and for what specific purpose?'",
+          "2. Ask for justification: 'Why do you need [specific broad category]? Can we provide a more limited subset?'",
+          "3. Propose alternative: 'Instead of sharing all customer data, can we share just [specific fields] for [specific purpose]?'",
+          "4. Escalate if necessary: If requester insists on excessive data, consult with DPO or legal team",
+          "5. Document the exchange for compliance records"
+        ],
+        "sample_response": "To ensure we comply with data protection regulations, could you please clarify: (1) Which specific data fields do you need? (2) What is the specific business purpose? (3) How long will you need to retain this data? This will help us provide exactly what you need while minimizing unnecessary data exposure."
+      },
+      "action_propose_secure_method": {
+        "result": "⚠️ INSECURE METHOD - Propose secure alternative",
+        "required_steps": [
+          "1. Reply to requester: 'For data protection compliance, we cannot share personal data via [insecure method]. Can we use one of these secure alternatives?'",
+          "2. Propose approved methods: 'We can share via: (1) Our secure portal at [URL], (2) Encrypted email (we can set this up), or (3) Our SFTP server'",
+          "3. Offer to coordinate: 'I'm happy to help set up the secure transfer. Which method works best for you?'",
+          "4. Do NOT proceed with insecure method even if requester insists - escalate to DPO if needed",
+          "5. Document the request and the secure method ultimately used"
+        ],
+        "sample_response": "For data security reasons, we cannot send client data via unencrypted email. I can share this information through our secure portal [link] or via encrypted email. Would either of those work for you? I'm happy to help you get set up."
+      }
+    },
+    "quick_reference": {
+      "always_ok": [
+        "Sharing anonymized/aggregated data (no individual identifiers)",
+        "Sharing data with your own company's systems/tools (if part of your job)",
+        "Sharing publicly available information"
+      ],
+      "never_ok": [
+        "Emailing passwords or Social Security Numbers unencrypted",
+        "Sharing entire customer database to personal email",
+        "Giving data to anyone who asks without verification",
+        "Sharing employee salary info without HR authorization"
+      ],
+      "when_in_doubt": "Always err on the side of caution. It's better to delay and verify than to cause a data breach. Contact your Data Protection Officer (DPO) or compliance team if you're unsure."
+    }
+  },
+
+  "data_sharing_decision": {
+    "title": "Third-Party Data Sharing Decision Tree",
+    "description": "Use this flowchart before sharing personal data with vendors, partners, or other third parties",
+    "start_node": "considering_sharing",
+    "nodes": {
+      "considering_sharing": {
+        "question": "Are you about to share personal data with a third party (vendor, partner, consultant)?",
+        "examples_of_sharing": [
+          "Giving vendor access to customer database",
+          "Uploading client data to third-party tool (CRM, marketing platform)",
+          "Sending employee data to benefits provider",
+          "Sharing user data with analytics service"
+        ],
+        "yes": "check_business_necessity",
+        "no": "end_no_sharing"
+      },
+      "check_business_necessity": {
+        "question": "Is sharing this data truly necessary for business operations?",
+        "guidance": "Data should only be shared if it's required to provide a service, fulfill a contract, or meet a legal obligation",
+        "examples": {
+          "necessary": [
+            "Sharing payment info with payment processor to charge customer",
+            "Sharing employee data with payroll provider to process payroll",
+            "Sharing email addresses with email service to send transactional emails"
+          ],
+          "not_necessary": [
+            "Sharing customer list with random marketing company for unsolicited ads",
+            "Giving vendor full database access when they only need summary reports",
+            "Sharing with partner 'just in case they might need it someday'"
+          ]
+        },
+        "yes": "check_contract_exists",
+        "no": "action_do_not_share"
+      },
+      "check_contract_exists": {
+        "question": "Do you have a signed Data Processing Agreement (DPA) or Business Associate Agreement (BAA) with this third party?",
+        "details": "Before sharing personal data, you MUST have a contract with specific data protection terms",
+        "required_agreements": {
+          "gdpr": "Data Processing Agreement (DPA) with GDPR Article 28 provisions",
+          "ccpa": "Service Provider contract with CCPA restrictions on data use/sale",
+          "hipaa": "Business Associate Agreement (BAA) before sharing protected health information"
+        },
+        "yes": "check_data_minimized",
+        "no": "action_get_contract_first"
+      },
+      "check_data_minimized": {
+        "question": "Are you sharing only the minimum data necessary?",
+        "guidance": "Don't give full database access when limited data or API access would suffice",
+        "examples": {
+          "minimized": [
+            "Sharing: Customer name + email only (not full profile)",
+            "Sharing: Transaction IDs + amounts (not full credit card numbers)",
+            "API access: Read-only, limited to specific fields"
+          ],
+          "excessive": [
+            "Sharing: Full database dump including passwords and SSNs",
+            "Giving: Admin access to all systems when read-only would work",
+            "Sending: All employee records when vendor only needs active employees"
+          ]
+        },
+        "yes": "check_secure_transfer_method",
+        "no": "action_minimize_data_first"
+      },
+      "check_secure_transfer_method": {
+        "question": "Will the transfer use secure, encrypted methods?",
+        "approved_methods": [
+          "API over HTTPS with authentication",
+          "SFTP with SSH keys",
+          "Encrypted cloud storage (AWS S3 SSE, Azure Blob encryption)",
+          "Secure file transfer portal with MFA"
+        ],
+        "rejected_methods": [
+          "Unencrypted email",
+          "Public file sharing links",
+          "FTP (without encryption)",
+          "USB drives or physical media (unless encrypted)"
+        ],
+        "yes": "action_approved_proceed_with_logging",
+        "no": "action_setup_secure_transfer"
+      }
+    },
+    "actions": {
+      "end_no_sharing": {
+        "result": "✅ NO PERSONAL DATA SHARING",
+        "message": "If you're sharing non-personal data (public info, anonymized data, aggregate statistics), you can proceed without these special protections. When in doubt, ask your DPO."
+      },
+      "action_approved_proceed_with_logging": {
+        "result": "✅ APPROVED - You may share data",
+        "required_steps": [
+          "1. Log this data sharing in your compliance tracking system",
+          "2. Document: What data, to whom, for what purpose, under which agreement",
+          "3. Use ONLY the secure transfer method",
+          "4. Set data retention terms with recipient (when must they delete?)",
+          "5. Monitor: Schedule periodic reviews of third-party's data practices",
+          "6. Keep copy of executed DPA/BAA on file"
+        ],
+        "ongoing_obligations": [
+          "Annual review of vendor compliance",
+          "Audit vendor security practices if high-risk data",
+          "Update DPA when regulations change",
+          "Ensure vendor notifies you of any breaches within 72 hours"
+        ]
+      },
+      "action_do_not_share": {
+        "result": "❌ DO NOT SHARE",
+        "message": "Sharing data when not necessary violates data minimization principles and exposes company to unnecessary risk",
+        "alternatives": [
+          "Can you provide aggregated/anonymized data instead?",
+          "Can you provide a report/summary instead of raw data?",
+          "Can the business goal be achieved without sharing personal data?"
+        ],
+        "if_requested_by_management": "Escalate to DPO or legal team to assess necessity and document decision"
+      },
+      "action_get_contract_first": {
+        "result": "🛑 STOP - Execute contract before sharing ANY data",
+        "required_steps": [
+          "1. DO NOT SHARE ANY DATA until contract is signed",
+          "2. Contact your legal/procurement team to initiate DPA/BAA execution",
+          "3. Ensure contract includes required data protection terms (purpose limitation, security requirements, breach notification, data return/deletion)",
+          "4. Wait for fully executed (signed by both parties) agreement",
+          "5. THEN and only then proceed with data sharing"
+        ],
+        "what_contract_must_include": [
+          "Specific purposes for data use (cannot use for own purposes)",
+          "Security requirements (encryption, access controls)",
+          "Subprocessor approval (notify if sharing with others)",
+          "Breach notification (within 24-72 hours)",
+          "Data return or deletion after contract ends",
+          "Audit rights (you can verify compliance)",
+          "Compliance certification (vendor confirms they follow laws)"
+        ],
+        "urgent_situations": "Even if 'urgent', sharing without a DPA/BAA can result in regulatory fines up to €20M or 4% revenue (GDPR). Get expedited legal review if truly urgent."
+      },
+      "action_minimize_data_first": {
+        "result": "⚠️ TOO MUCH DATA - Reduce scope before sharing",
+        "required_steps": [
+          "1. Review: What does vendor actually need vs. what you're giving them?",
+          "2. Create limited data extract (specific fields, date ranges, user segments)",
+          "3. Remove unnecessary fields (e.g., if they need name + email, don't include SSN, birthdate)",
+          "4. Consider: Can you anonymize or pseudonymize some fields?",
+          "5. Use API with field-level permissions instead of full database access",
+          "6. Document why each field is necessary"
+        ],
+        "examples": {
+          "before": "Giving vendor full customer table (50 fields including SSN, passwords, credit cards)",
+          "after": "Giving vendor only: customer_id, name, email, account_status (4 fields, necessary for their service)"
+        }
+      },
+      "action_setup_secure_transfer": {
+        "result": "⚠️ INSECURE TRANSFER - Set up encryption first",
+        "required_steps": [
+          "1. Coordinate with IT to set up secure transfer method",
+          "2. Options: Set up SFTP access, use secure portal, implement API with TLS",
+          "3. NEVER send personal data via plain email or unencrypted methods",
+          "4. If vendor insists on insecure method, escalate to DPO/Security team",
+          "5. Document the secure transfer method used"
+        ],
+        "if_vendor_refuses_secure_method": "This is a red flag. Reconsider whether to work with vendor. Escalate to legal/security team."
+      }
+    }
+  },
+
+  "data_deletion_decision": {
+    "title": "Data Deletion Request Decision Tree",
+    "description": "Use this flowchart when a user requests deletion of their personal data (Right to Erasure / Right to Delete)",
+    "start_node": "deletion_request_received",
+    "nodes": {
+      "deletion_request_received": {
+        "question": "Did you receive a request to delete someone's personal data?",
+        "request_forms": [
+          "Email: 'Please delete my account and all my data'",
+          "Web form: User submitted deletion request",
+          "Phone call: User wants data deleted",
+          "GDPR/CCPA formal request"
+        ],
+        "yes": "verify_identity",
+        "no": "end_no_request"
+      },
+      "verify_identity": {
+        "question": "Have you verified the requester's identity?",
+        "guidance": "You must confirm the person is actually the data subject (not someone impersonating them)",
+        "verification_methods": [
+          "Email confirmation (send verification link to registered email)",
+          "Account login (user submits request while logged in)",
+          "Match multiple data points (name + birthdate + last 4 of phone)",
+          "Government ID (for high-risk requests or CCPA)"
+        ],
+        "yes": "check_retention_obligations",
+        "no": "action_verify_identity_first"
+      },
+      "check_retention_obligations": {
+        "question": "Are there legal obligations requiring you to retain this data?",
+        "common_retention_requirements": {
+          "financial_records": "7 years (IRS, SOX)",
+          "medical_records": "6+ years (HIPAA)",
+          "employment_records": "3-7 years (varies by state)",
+          "litigation_hold": "Until legal matter resolved",
+          "ongoing_investigation": "Until investigation completed"
+        },
+        "valid_exceptions_to_deletion": {
+          "gdpr_article_17_3": [
+            "Compliance with legal obligation",
+            "Public interest (public health, archiving)",
+            "Legal claims (establishment, exercise, or defense)"
+          ],
+          "ccpa_1798_105_d": [
+            "Complete transaction",
+            "Detect/prevent security incidents or fraud",
+            "Comply with legal obligation",
+            "Internal lawful uses compatible with consumer expectations"
+          ]
+        },
+        "yes": "action_partial_deletion_explain",
+        "no": "execute_full_deletion"
+      },
+      "execute_full_deletion": {
+        "question": "Can you delete data from ALL systems (production, backups, archives, third parties)?",
+        "systems_checklist": [
+          "Production database",
+          "Data warehouse / analytics",
+          "Backup systems (or mark for deletion in next backup cycle)",
+          "Log files (application, audit, API)",
+          "Cached data (Redis, Memcached, CDN)",
+          "Third-party systems (notify service providers)",
+          "Development/test environments (if contain production data)"
+        ],
+        "yes": "action_execute_and_confirm",
+        "no": "action_escalate_technical_deletion"
+      }
+    },
+    "actions": {
+      "end_no_request": {
+        "result": "✅ NO DELETION REQUEST",
+        "message": "This flowchart is for deletion requests. If you're doing routine data cleanup, follow your data retention policy."
+      },
+      "action_verify_identity_first": {
+        "result": "⚠️ VERIFY IDENTITY BEFORE PROCEEDING",
+        "required_steps": [
+          "1. Send verification email to registered email address: 'Click this link to confirm deletion request'",
+          "2. OR ask user to log in to their account and submit request from authenticated session",
+          "3. For high-value accounts or CCPA: Request additional verification (last 4 of phone, birthdate, or ID)",
+          "4. Document verification method used",
+          "5. ONLY proceed with deletion after successful verification"
+        ],
+        "why_required": "Prevents malicious deletion by unauthorized parties (ex-partner, hacker, competitor trying to harm user)",
+        "deadline": "GDPR: Respond within 30 days (1 month). CCPA: Respond within 45 days. Verification should happen within first week to meet deadline."
+      },
+      "action_partial_deletion_explain": {
+        "result": "⚠️ PARTIAL DELETION with explanation to user",
+        "required_steps": [
+          "1. Delete ALL data that is not subject to legal retention requirement",
+          "2. Prepare clear explanation of what must be retained and why",
+          "3. Respond to user within deadline (30 days GDPR / 45 days CCPA)",
+          "4. Include: What was deleted, what was retained, legal basis for retention, how long retention will last",
+          "5. Log the partial deletion for compliance records"
+        ],
+        "sample_response": "We have processed your deletion request. We have deleted your profile, activity history, preferences, and marketing data. However, we are required to retain your transaction records for the period 2022-2024 for an additional 5 years to comply with tax law (IRS 7-year retention requirement). These records will be automatically deleted in 2029. If you have questions, please contact privacy@company.com.",
+        "what_to_delete": "Everything NOT covered by retention exception (profile, preferences, activity logs, marketing data, etc.)",
+        "what_to_retain": "Only what's legally required (financial transactions for tax law, medical records for HIPAA, etc.)"
+      },
+      "action_execute_and_confirm": {
+        "result": "✅ EXECUTE FULL DELETION",
+        "required_steps": [
+          "1. Delete from production database",
+          "2. Delete from data warehouse / analytics",
+          "3. Mark for deletion in backup systems (or wait for backup expiration)",
+          "4. Delete/anonymize from log files where feasible",
+          "5. Notify all service providers to delete (email, CRM, analytics vendors)",
+          "6. Confirm deletions completed across all systems",
+          "7. Send confirmation email to user",
+          "8. Log the deletion request and actions taken for compliance audit",
+          "9. Complete within deadline: 30 days (GDPR) or 45 days (CCPA)"
+        ],
+        "confirmation_email_template": "Your deletion request has been completed. We have permanently deleted your personal data from our systems, including your profile, activity history, and all associated records. This deletion was completed on [date]. Thank you for using our service. If you have any questions, contact privacy@company.com.",
+        "special_note_on_backups": "GDPR allows reasonable backup retention periods. If backup cycle is 90 days, data will be purged from backups as they expire. Document this in your response to user."
+      },
+      "action_escalate_technical_deletion": {
+        "result": "🛑 ESCALATE - Technical assistance needed",
+        "required_steps": [
+          "1. Contact your IT/Engineering team immediately",
+          "2. Explain: User has right to deletion, must comply within 30-45 days",
+          "3. Identify systems where deletion is challenging (legacy systems, backups, etc.)",
+          "4. Develop deletion plan with IT team",
+          "5. Keep user informed: 'We are processing your request. Due to technical complexity, we may need up to [X] days. We will keep you updated.'",
+          "6. If extension needed: Notify user and provide reason",
+          "7. Document technical challenges and how you overcame them for future requests"
+        ],
+        "common_technical_challenges": [
+          "Data stored in immutable log systems (solution: anonymize)",
+          "Backups on tape without granular deletion (solution: mark for deletion, explain backup cycle)",
+          "Legacy systems without delete functionality (solution: manual deletion, deactivate account)",
+          "Distributed data across many microservices (solution: create deletion service that calls all systems)"
+        ],
+        "deadline_pressure": "Don't let technical debt prevent compliance. If you truly cannot delete within deadline, provide explanation to user and commit to timeline. Consider this motivation to improve your data architecture."
+      }
+    },
+    "important_notes": {
+      "deadline": {
+        "gdpr": "30 days (1 month) to respond, extendable by 2 months if complex",
+        "ccpa": "45 days to respond, extendable by 45 days with notice to consumer"
+      },
+      "must_be_free": "You cannot charge consumers for deletion requests (up to 2 per year for CCPA, unlimited reasonable requests for GDPR)",
+      "cannot_refuse_without_valid_reason": "Deletion is a right, not a request. You can only refuse if you have a valid legal exception (retention laws, ongoing legal claims, etc.)"
+    }
+  },
+
+  "vendor_access_decision": {
+    "title": "Granting Vendor System Access Decision Tree",
+    "description": "Use this flowchart when a vendor requests access to systems containing personal data",
+    "start_node": "vendor_requests_access",
+    "nodes": {
+      "vendor_requests_access": {
+        "question": "Is a vendor requesting access to systems or databases containing personal data?",
+        "examples": [
+          "Vendor wants database credentials for CRM",
+          "Consultant needs access to production servers",
+          "Support vendor wants admin access to troubleshoot",
+          "Integration partner needs API keys"
+        ],
+        "yes": "check_contract_exists",
+        "no": "end_no_vendor_access"
+      },
+      "check_contract_exists": {
+        "question": "Do you have an active contract with required data protection terms?",
+        "required_terms": [
+          "Data Processing Agreement (DPA) or Business Associate Agreement (BAA)",
+          "Confidentiality and security obligations",
+          "Purpose limitation (what they can use data for)",
+          "Access controls and audit rights"
+        ],
+        "yes": "determine_minimum_access",
+        "no": "action_no_access_without_contract"
+      },
+      "determine_minimum_access": {
+        "question": "What is the minimum access level needed for vendor to perform their service?",
+        "access_levels": {
+          "read_only": "Vendor needs to view data but not modify",
+          "limited_write": "Vendor needs to update specific fields/records",
+          "full_admin": "Vendor needs system administration (rare, high risk)"
+        },
+        "examples": {
+          "appropriate": [
+            "Support vendor: Read-only access to support tickets",
+            "Analytics vendor: Anonymized data export (no PII)",
+            "Integration: API access with specific endpoints only"
+          ],
+          "excessive": [
+            "Support vendor: Full admin access to entire system",
+            "Analytics vendor: Direct database credentials with all data",
+            "Integration: Root SSH access to production servers"
+          ]
+        },
+        "yes": "implement_access_controls",
+        "no": "action_deny_excessive_access"
+      },
+      "implement_access_controls": {
+        "question": "Have you implemented these security controls?",
+        "required_controls": [
+          "Unique user account (not shared credentials)",
+          "Multi-factor authentication (MFA)",
+          "Least privilege access (minimum permissions)",
+          "Time-limited access (expires after project)",
+          "Audit logging (all vendor actions logged)",
+          "IP whitelist (only from vendor's known IPs)"
+        ],
+        "yes": "action_grant_monitored_access",
+        "no": "action_implement_controls_first"
+      }
+    },
+    "actions": {
+      "end_no_vendor_access": {
+        "result": "✅ NO PERSONAL DATA ACCESS",
+        "message": "If vendor doesn't need access to personal data, standard IT security policies apply (not compliance-specific)."
+      },
+      "action_grant_monitored_access": {
+        "result": "✅ GRANT ACCESS with monitoring",
+        "required_steps": [
+          "1. Create unique vendor user account (never share credentials)",
+          "2. Configure minimum required permissions (least privilege)",
+          "3. Enable MFA for the vendor account",
+          "4. Set account expiration date (e.g., end of project + 30 days)",
+          "5. Enable audit logging for all vendor actions",
+          "6. Document: Who has access, what level, for what purpose, until when",
+          "7. Review vendor access logs monthly",
+          "8. Revoke access immediately when no longer needed"
+        ],
+        "ongoing_monitoring": [
+          "Weekly review of vendor login activity",
+          "Alert on unusual patterns (off-hours access, bulk downloads)",
+          "Quarterly access recertification (still needed?)",
+          "Require vendor to report any security incidents within 24 hours"
+        ]
+      },
+      "action_no_access_without_contract": {
+        "result": "🛑 DO NOT GRANT ACCESS - Contract required first",
+        "required_steps": [
+          "1. DO NOT provide any access credentials until contract executed",
+          "2. Contact legal/procurement to expedite DPA/BAA execution",
+          "3. Explain to vendor: 'We cannot provide access until data protection agreement is signed'",
+          "4. Essential contract terms: Purpose limitation, security requirements, breach notification, audit rights, termination/data return",
+          "5. Wait for fully executed contract",
+          "6. THEN provision access with security controls"
+        ],
+        "why_this_matters": "Without a DPA/BAA, you (the data controller) remain fully liable for any vendor misuse or breach. Contract is your legal protection and compliance requirement.",
+        "if_vendor_refuses_dpa": "Red flag. Legitimate vendors understand data protection requirements. Escalate to legal team to assess whether to proceed with this vendor."
+      },
+      "action_deny_excessive_access": {
+        "result": "❌ DENY - Access request exceeds necessity",
+        "required_steps": [
+          "1. Deny the overly broad access request",
+          "2. Propose alternative: 'We can provide [limited access] which should meet your needs for [specific purpose]'",
+          "3. Ask vendor to justify: 'Why do you need [excessive access]? Can [limited access] work instead?'",
+          "4. Escalate to security team if vendor insists on excessive access",
+          "5. Consider: Is this vendor the right choice if they require excessive access?"
+        ],
+        "examples": {
+          "excessive_request": "Vendor: 'Give us admin access to your entire AWS account'",
+          "appropriate_counter": "You: 'We can create an IAM role with access only to [specific S3 bucket] for [specific purpose]'"
+        }
+      },
+      "action_implement_controls_first": {
+        "result": "⚠️ SET UP CONTROLS BEFORE GRANTING ACCESS",
+        "required_steps": [
+          "1. Work with IT/Security team to implement required controls",
+          "2. Set up: Unique account, MFA, least privilege permissions, logging",
+          "3. Test: Verify vendor can do their job with limited access",
+          "4. Document: Access level, purpose, expiration, monitoring plan",
+          "5. THEN provide access credentials to vendor",
+          "6. Never skip security controls due to urgency - urgent breaches are worse"
+        ],
+        "minimum_security_baseline": "At minimum: Unique account (not shared), MFA enabled, read-only where possible, audit logging active, 90-day expiration"
+      }
+    },
+    "post_access_management": {
+      "immediate_revocation_required": [
+        "Project completed",
+        "Vendor contract terminated",
+        "Employee left vendor company",
+        "Suspected security incident",
+        "Vendor requested access revocation"
+      ],
+      "access_reviews": {
+        "weekly": "Review login logs for unusual activity",
+        "monthly": "Verify vendor accounts are still needed and active",
+        "quarterly": "Full access recertification (manager approval to keep access)",
+        "annual": "Audit all vendor relationships and data access"
+      }
+    }
+  }
+}

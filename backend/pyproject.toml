@@ -25,3 +25,6 @@ dependencies = [
     "setuptools>=80.9.0",
     "boto3>=1.42.55",
 ]
+
+[tool.setuptools]
+packages = ["my_app"]

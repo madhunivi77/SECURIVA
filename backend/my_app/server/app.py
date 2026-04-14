@@ -14,6 +14,7 @@ from pathlib import Path
 from .chat_handler import execute_chat_with_tools
 from .salesforce_app import salesforce_app
 from .db import db_app
+from .security_tools import security_app
 from .api_key_manager import generate_api_key, store_api_key, validate_api_key
 from .salesforce_utils import load_oauth_data, save_oauth_data
 from .telesign_auth import (
@@ -487,3 +488,4 @@ api_app = Starlette(
 
 api_app.mount("/salesforce", salesforce_app)
 api_app.mount("/chat",db_app)
+api_app.mount("/security", security_app)
