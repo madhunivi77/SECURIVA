@@ -925,7 +925,6 @@ def listSalesforceCases(context: Context, limit: int = 10):
 
 
 # ==================== CONTACTS & ACCOUNTS ====================
-
 @mcp.tool()
 def createSalesforceContact(context: Context, last_name: str, first_name: str = "", 
                            email: str = "", phone: str = "", account_id: str = ""):
