@@ -74,18 +74,49 @@ function AIHandbook() {
   const [searchTerm, setSearchTerm] = useState("");
   const [selectedCategory, setSelectedCategory] = useState("All");
   const [selectedStandard, setSelectedStandard] = useState(null);
-  const [messages, setMessages] = useState([]);
+  const [messages, setMessages] = useState([
+    {
+      role: "system",
+      content: `You are a helpful AI assistant for the SECURIVA AI Handbook. You help users understand compliance standards (GDPR, HIPAA, PCI-DSS, SOX, CCPA) and cybersecurity topics.
+
+When answering:
+- Be clear, accurate, and professional
+- Use the compliance tools available to provide grounded information
+- Cite specific regulation articles when relevant
+- Keep responses concise and easy to understand
+
+Response style:
+- Answer directly without unnecessary preamble
+- Don't end with "If you have questions..." or similar phrases
+- Focus on the user's specific question`
+    }
+  ]);
   const [input, setInput] = useState("");
   const [isLoading, setIsLoading] = useState(false);
+  const [typingMessage, setTypingMessage] = useState("");
+  const [isTyping, setIsTyping] = useState(false);
   const messagesEndRef = useRef(null);
+  const messagesContainerRef = useRef(null);
+  const typingIntervalRef = useRef(null);
+
+  // Cleanup typing interval on unmount
+  useEffect(() => {
+    return () => {
+      if (typingIntervalRef.current) {
+        clearInterval(typingIntervalRef.current);
+      }
+    };
+  }, []);
 
   const scrollToBottom = () => {
-    messagesEndRef.current?.scrollIntoView({ behavior: "smooth" });
+    if (messagesContainerRef.current) {
+      messagesContainerRef.current.scrollTop = messagesContainerRef.current.scrollHeight;
+    }
   };
 
   useEffect(() => {
     scrollToBottom();
-  }, [messages]);
+  }, [messages, typingMessage]);
 
   const categories = ["All", ...new Set(complianceStandards.map(s => s.category))];
 
@@ -97,8 +128,9 @@ function AIHandbook() {
     return matchesSearch && matchesCategory;
   });
 
-  const handleSendMessage = async () => {
-    if (!input.trim()) return;
+  const handleSendMessage = async (e) => {
+    if (e) e.preventDefault();
+    if (!input.trim() || isLoading || isTyping) return;
 
     const userMessage = { role: "user", content: input };
     const newMessages = [...messages, userMessage];
@@ -130,12 +162,34 @@ function AIHandbook() {
         throw new Error(data.error);
       }
 
-      const assistantMessage = {
-        role: "assistant",
-        content: data.response
-      };
+      // Start typing animation
+      setIsLoading(false);
+      setIsTyping(true);
+      const fullText = data.response;
+      let currentIndex = 0;
+      
+      // Clear any existing typing interval
+      if (typingIntervalRef.current) {
+        clearInterval(typingIntervalRef.current);
+      }
+      
+      typingIntervalRef.current = setInterval(() => {
+        if (currentIndex < fullText.length) {
+          setTypingMessage(fullText.slice(0, currentIndex + 1));
+          currentIndex++;
+        } else {
+          clearInterval(typingIntervalRef.current);
+          typingIntervalRef.current = null;
+          setIsTyping(false);
+          setTypingMessage("");
+          const assistantMessage = {
+            role: "assistant",
+            content: fullText
+          };
+          setMessages([...newMessages, assistantMessage]);
+        }
+      }, 20); // Adjust speed by changing this value (lower = faster)
 
-      setMessages([...newMessages, assistantMessage]);
     } catch (err) {
       console.error("Chat error:", err);
       setMessages([
@@ -145,8 +199,8 @@ function AIHandbook() {
           content: `❌ Error: ${err.message || "Failed to get response"}`
         }
       ]);
-    } finally {
       setIsLoading(false);
+      setIsTyping(false);
     }
   };
 
@@ -159,6 +213,35 @@ function AIHandbook() {
   const handleTopicClick = (topic) => {
     const query = `Explain ${topic} requirements across compliance standards`;
     setInput(query);
+  };
+
+  const handleClearChat = () => {
+    // Clear any ongoing typing animation
+    if (typingIntervalRef.current) {
+      clearInterval(typingIntervalRef.current);
+      typingIntervalRef.current = null;
+    }
+    
+    setMessages([
+      {
+        role: "system",
+        content: `You are a helpful AI assistant for the SECURIVA AI Handbook. You help users understand compliance standards (GDPR, HIPAA, PCI-DSS, SOX, CCPA) and cybersecurity topics.
+
+When answering:
+- Be clear, accurate, and professional
+- Use the compliance tools available to provide grounded information
+- Cite specific regulation articles when relevant
+- Keep responses concise and easy to understand
+
+Response style:
+- Answer directly without unnecessary preamble
+- Don't end with "If you have questions..." or similar phrases
+- Focus on the user's specific question`
+      }
+    ]);
+    setInput("");
+    setTypingMessage("");
+    setIsTyping(false);
   };
 
   const colorVariants = {
@@ -283,48 +366,77 @@ function AIHandbook() {
             <div className="bg-white dark:bg-gray-800 rounded-lg shadow-lg flex flex-col h-[calc(100vh-12rem)] sticky top-6">
               {/* Chat Header */}
               <div className="p-4 border-b border-gray-200 dark:border-gray-700">
-                <h2 className="text-xl font-bold text-gray-900 dark:text-white flex items-center gap-2">
-                  <Shield className="w-5 h-5 text-blue-600 dark:text-blue-400" />
-                  Ask AI Assistant
-                </h2>
-                <p className="text-sm text-gray-600 dark:text-gray-400 mt-1">
-                  Get instant answers about compliance
-                </p>
+                <div className="flex items-center justify-between">
+                  <div>
+                    <h2 className="text-xl font-bold text-gray-900 dark:text-white flex items-center gap-2">
+                      <Shield className="w-5 h-5 text-blue-600 dark:text-blue-400" />
+                      Ask AI Assistant
+                    </h2>
+                    <p className="text-sm text-gray-600 dark:text-gray-400 mt-1">
+                      Get instant answers about compliance
+                    </p>
+                  </div>
+                  <button
+                    onClick={handleClearChat}
+                    className="px-3 py-1.5 text-sm font-medium text-gray-700 dark:text-gray-300 
+                             hover:text-blue-600 dark:hover:text-blue-400 
+                             border border-gray-300 dark:border-gray-600 rounded-lg
+                             hover:border-blue-500 transition-all"
+                    title="Clear conversation"
+                  >
+                    Clear
+                  </button>
+                </div>
               </div>
 
               {/* Messages */}
-              <div className="flex-1 overflow-y-auto p-4 space-y-4">
-                {messages.length === 0 ? (
+              <div ref={messagesContainerRef} className="flex-1 overflow-y-auto p-4 space-y-4">
+                {messages.filter(msg => msg.role !== "system").length === 0 && !isTyping ? (
                   <div className="text-center text-gray-500 dark:text-gray-400 mt-8">
                     <BookOpen className="w-12 h-12 mx-auto mb-3 opacity-50" />
                     <p className="font-medium">Ask me anything about compliance!</p>
                     <p className="text-sm mt-2">Try clicking a standard or topic to get started</p>
                   </div>
                 ) : (
-                  messages.map((msg, idx) => (
-                    <div
-                      key={idx}
-                      className={`flex ${msg.role === "user" ? "justify-end" : "justify-start"}`}
-                    >
+                  <>
+                    {messages
+                      .filter(msg => msg.role !== "system")
+                      .map((msg, idx) => (
                       <div
-                        className={`max-w-[85%] rounded-lg p-3 ${
-                          msg.role === "user"
-                            ? "bg-blue-600 text-white"
-                            : "bg-gray-100 dark:bg-gray-700 text-gray-900 dark:text-white"
-                        }`}
+                        key={idx}
+                        className={`flex ${msg.role === "user" ? "justify-end" : "justify-start"}`}
                       >
-                        {msg.role === "assistant" ? (
+                        <div
+                          className={`max-w-[85%] rounded-lg p-3 ${
+                            msg.role === "user"
+                              ? "bg-blue-600 text-white"
+                              : "bg-gray-100 dark:bg-gray-700 text-gray-900 dark:text-white"
+                          }`}
+                        >
+                          {msg.role === "assistant" ? (
+                            <div className="prose prose-sm dark:prose-invert max-w-none">
+                              <ReactMarkdown rehypePlugins={[rehypeHighlight]}>
+                                {msg.content}
+                              </ReactMarkdown>
+                            </div>
+                          ) : (
+                            <p className="text-sm">{msg.content}</p>
+                          )}
+                        </div>
+                      </div>
+                    ))}
+                    {isTyping && typingMessage && (
+                      <div className="flex justify-start">
+                        <div className="max-w-[85%] rounded-lg p-3 bg-gray-100 dark:bg-gray-700 text-gray-900 dark:text-white">
                           <div className="prose prose-sm dark:prose-invert max-w-none">
                             <ReactMarkdown rehypePlugins={[rehypeHighlight]}>
-                              {msg.content}
+                              {typingMessage}
                             </ReactMarkdown>
                           </div>
-                        ) : (
-                          <p className="text-sm">{msg.content}</p>
-                        )}
+                        </div>
                       </div>
-                    </div>
-                  ))
+                    )}
+                  </>
                 )}
                 {isLoading && (
                   <div className="flex justify-start">
@@ -338,26 +450,33 @@ function AIHandbook() {
 
               {/* Input */}
               <div className="p-4 border-t border-gray-200 dark:border-gray-700">
-                <div className="flex gap-2">
+                <form onSubmit={handleSendMessage} className="flex gap-2">
                   <input
                     type="text"
                     value={input}
                     onChange={(e) => setInput(e.target.value)}
-                    onKeyPress={(e) => e.key === "Enter" && handleSendMessage()}
+                    onKeyPress={(e) => {
+                      if (e.key === "Enter") {
+                        e.preventDefault();
+                        handleSendMessage(e);
+                      }
+                    }}
                     placeholder="Ask about compliance..."
+                    disabled={isLoading || isTyping}
                     className="flex-1 px-3 py-2 border border-gray-300 dark:border-gray-600 rounded-lg
                              bg-white dark:bg-gray-700 text-gray-900 dark:text-white
-                             focus:ring-2 focus:ring-blue-500 focus:border-transparent"
+                             focus:ring-2 focus:ring-blue-500 focus:border-transparent
+                             disabled:opacity-50"
                   />
                   <button
-                    onClick={handleSendMessage}
-                    disabled={isLoading || !input.trim()}
+                    type="submit"
+                    disabled={isLoading || isTyping || !input.trim()}
                     className="px-4 py-2 bg-blue-600 text-white rounded-lg hover:bg-blue-700 
                              disabled:opacity-50 disabled:cursor-not-allowed transition-all"
                   >
                     <Send className="w-5 h-5" />
                   </button>
-                </div>
+                </form>
               </div>
             </div>
           </div>
