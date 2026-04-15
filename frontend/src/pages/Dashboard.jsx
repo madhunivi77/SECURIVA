@@ -33,7 +33,7 @@ const Dashboard = () => {
       <div className="flex-1 flex flex-col overflow-hidden">
         <DashboardNav onCreateAutomation={handleCreateAutomation} onRefresh={handleRefresh} />
 
-        <main className="flex-1 overflow-auto p-6 relative">
+        <main className="flex-1 relative">
           <Outlet context={{handleRefresh, cards:[cards]}}/>
         </main>
 

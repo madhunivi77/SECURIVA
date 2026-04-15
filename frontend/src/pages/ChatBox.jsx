@@ -22,32 +22,32 @@ function ChatBox() {
 
   const messagesContainerRef = useRef(null);
 
- 
+
   useEffect(() => {
     const loadChat = async () => {
       try {
         const res = await fetch("http://localhost:8000/chat/latest", {
           credentials: "include"
         });
-  
+
         if (!res.ok) return;
-  
+
         const data = await res.json();
-  
+
         if (Array.isArray(data.messages)) {
           setMessages(data.messages);
-          setConversationId(data.version); 
+          setConversationId(data.version);
           conversationIdRef.current = data.version;
         }
       } catch (err) {
         console.error("Failed to load chat history", err);
       }
     };
-  
+
     loadChat();
   }, []);
 
- 
+
   useEffect(() => {
     const container = messagesContainerRef.current;
     if (container) {
@@ -55,7 +55,7 @@ function ChatBox() {
     }
   }, [messages, isLoading]);
 
-  
+
   const handleSend = async () => {
     if (!input.trim()) return;
 
@@ -100,14 +100,14 @@ function ChatBox() {
       const updatedMessages = [...newMessages, assistantMessage];
       setMessages(updatedMessages);
       console.log("Saving with version:", conversationId);
-      
-      
+
+
       const saveRes = await fetch("http://localhost:8000/chat/save", {
         method: "POST",
         credentials: "include",
         headers: { "Content-Type": "application/json" },
         body: JSON.stringify({
-          version: conversationId ?? undefined, 
+          version: conversationId ?? undefined,
           messages: updatedMessages
         })
       });
@@ -136,7 +136,7 @@ function ChatBox() {
     }
   };
   const handleNewChat = () => {
-    setConversationId(null);   
+    setConversationId(null);
     setMessages([
       {
         role: "system",
@@ -145,19 +145,19 @@ function ChatBox() {
     ]);
   };
 
-  
-  
+
+
   const handleSelectChat = async (version) => {
     try {
       const res = await fetch(
         `http://localhost:8000/chat/get?version=${version}`,
         { credentials: "include" }
       );
-  
+
       if (!res.ok) return;
-  
+
       const data = await res.json();
-  
+
       setMessages(data.messages);
       setConversationId(version);
     } catch (err) {
@@ -165,71 +165,71 @@ function ChatBox() {
     }
   };
   return (
-    <div className="flex h-screen w-screen bg-white text-black">
-      <ChatSidebar 
-      onNewChat={handleNewChat}
-      onSelectChat={handleSelectChat}
+    <div className="flex bg-white text-black">
+      <ChatSidebar
+        onNewChat={handleNewChat}
+        onSelectChat={handleSelectChat}
       />
-      
-    <div className="chat-layout">
-      <div className="chatbox">
-        <div className="chatbox-header">
-        </div>
-  
-        <div className="chatbox-messages" ref={messagesContainerRef}>
-        {messages.filter(msg => msg.role !== "system").map((msg, index) => {
-  const isUser = msg.role === "user";
 
-  return (
-    <div
-      key={index}
-      className={`chat-row ${isUser ? "user" : "assistant"}`}
-    >
-      {!isUser && (
-        <div className="avatar agent-avatar">
-          <img src="/logo.png" alt="Agent" />
-        </div>
-      )}
+      <div className="chat-layout">
+        <div className="chatbox">
+          <div className="chatbox-header">
+          </div>
 
-      <div className="chat-bubble">
-        <ReactMarkdown rehypePlugins={[rehypeHighlight]}>
-          {msg.content}
-        </ReactMarkdown>
+          <div className="chatbox-messages" ref={messagesContainerRef}>
+            {messages.filter(msg => msg.role !== "system").map((msg, index) => {
+              const isUser = msg.role === "user";
+
+              return (
+                <div
+                  key={index}
+                  className={`chat-row ${isUser ? "user" : "assistant"}`}
+                >
+                  {!isUser && (
+                    <div className="avatar agent-avatar">
+                      <img src="/logo.png" alt="Agent" />
+                    </div>
+                  )}
+
+                  <div className="chat-bubble">
+                    <ReactMarkdown rehypePlugins={[rehypeHighlight]}>
+                      {msg.content}
+                    </ReactMarkdown>
+                  </div>
+
+                  {isUser && (
+                    <div className="avatar user-avatar">
+                      👤
+                    </div>
+                  )}
+                </div>
+              );
+            })}
+
+            {isLoading && (
+              <div className="chat-row assistant">
+                <div className="chat-bubble">
+                  Thinking...
+                </div>
+              </div>
+            )}
+          </div>
+
+          <div className="chatbox-input">
+            <input
+              type="text"
+              value={input}
+              onChange={(e) => setInput(e.target.value)}
+              onKeyDown={(e) => e.key === "Enter" && !isLoading && handleSend()}
+              placeholder="Type a message..."
+              disabled={isLoading}
+            />
+            <button onClick={handleSend} disabled={isLoading || !input.trim()}>
+              Send
+            </button>
+          </div>
+        </div>
       </div>
-
-      {isUser && (
-        <div className="avatar user-avatar">
-          👤
-        </div>
-      )}
-    </div>
-  );
-})}
-
-  {isLoading && (
-    <div className="chat-row assistant">
-      <div className="chat-bubble">
-        Thinking...
-      </div>
-    </div>
-  )}
-</div>
-  
-        <div className="chatbox-input">
-          <input
-            type="text"
-            value={input}
-            onChange={(e) => setInput(e.target.value)}
-            onKeyDown={(e) => e.key === "Enter" && !isLoading && handleSend()}
-            placeholder="Type a message..."
-            disabled={isLoading}
-          />
-          <button onClick={handleSend} disabled={isLoading || !input.trim()}>
-            Send
-          </button>
-        </div>
-      </div>
-    </div>
     </div>
   );
 }
