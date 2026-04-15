@@ -117,6 +117,8 @@ class Settings(BaseSettings):
     # LOGGING
     # ============================================================================
     LOG_LEVEL: str = Field(default="INFO", description="Logging level: DEBUG, INFO, WARNING, ERROR")
+    ENABLE_CLOUDWATCH_LOGS: bool = Field(default=False, description="Send logs to AWS CloudWatch")
+    USE_DYNAMO_LOGS: bool = Field(default=False, description="Store activity logs in DynamoDB instead of local files")
 
     # ============================================================================
     # PYDANTIC SETTINGS CONFIGURATION

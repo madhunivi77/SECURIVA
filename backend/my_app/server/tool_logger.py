@@ -9,7 +9,7 @@ from typing import Any, Dict, Optional
 class ToolCallLogger:
     """
     Logger for MCP tool calls with both JSON and human-readable output.
-    Logs are stored in backend/logs/ directory.
+    Logs are stored in backend/logs/ directory and optionally sent to CloudWatch.
     """
 
     def __init__(self, enabled: bool = True, log_dir: str = None):
@@ -53,6 +53,29 @@ class ToolCallLogger:
         )
         console_handler.setFormatter(console_formatter)
         self.logger.addHandler(console_handler)
+
+        # CloudWatch handler (when running on AWS)
+        self._setup_cloudwatch()
+
+    def _setup_cloudwatch(self):
+        """Add CloudWatch logging handler if ENABLE_CLOUDWATCH_LOGS is set."""
+        if os.getenv("ENABLE_CLOUDWATCH_LOGS", "false").lower() != "true":
+            return
+
+        try:
+            import watchtower
+            import boto3
+
+            cw_handler = watchtower.CloudWatchLogHandler(
+                log_group_name="/securiva/tool-calls",
+                log_stream_name=f"apprunner-{datetime.utcnow().strftime('%Y-%m-%d')}",
+                boto3_client=boto3.client("logs", region_name="us-east-2"),
+            )
+            cw_handler.setLevel(logging.INFO)
+            self.logger.addHandler(cw_handler)
+            self.logger.info("CloudWatch logging enabled")
+        except Exception as e:
+            self.logger.warning(f"CloudWatch logging unavailable: {e}")
 
     def log_tool_call(
         self,
