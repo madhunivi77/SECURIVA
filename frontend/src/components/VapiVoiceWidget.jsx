@@ -3,6 +3,7 @@ import { Canvas, useFrame } from '@react-three/fiber';
 import { MeshDistortMaterial, Sphere, Environment } from '@react-three/drei';
 import * as THREE from 'three';
 import './VapiVoiceWidget.css';
+import { useOutletContext } from 'react-router-dom';
 
 // Animated 3D Orb component
 function AnimatedOrb({ isActive, isSpeaking, isListening, volume }) {
@@ -121,6 +122,9 @@ function Particles({ count = 50 }) {
 }
 
 export default function VapiVoiceWidget() {
+  const {setHeading, setSubtext} = useOutletContext();
+  setHeading("Voice Agent");
+  setSubtext("Perform complex business tasks with your voice");
   const [isConnected, setIsConnected] = useState(false);
   const [isConnecting, setIsConnecting] = useState(false);
   const [isSpeaking, setIsSpeaking] = useState(false);

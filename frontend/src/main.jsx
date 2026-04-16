@@ -29,6 +29,8 @@ import AgentVoice from './pages/AgentVoice.jsx';
 import AgentText from './pages/AgentText.jsx';
 import Cybersecurity from './pages/Cybersecurity.jsx';
 import VPN from './pages/VPN.jsx';
+import ToolsPage from './pages/ToolsPage.jsx';
+import Firewall from './pages/Firewall.jsx';
 
 const router = createBrowserRouter([
   {
@@ -127,6 +129,13 @@ const router = createBrowserRouter([
           {
             path: 'voice',
             element: <VoiceTest />,
+          },
+          {
+            path: 'tools',
+            element: <ToolsPage />
+          },
+          {path: 'firewall',
+            element: <Firewall />
           }
         ]
       }

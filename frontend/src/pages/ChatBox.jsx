@@ -4,8 +4,12 @@ import rehypeHighlight from "rehype-highlight";
 import "highlight.js/styles/github-dark.css";
 import "./ChatBox.css";
 import ChatSidebar from "./ChatSidebar";
+import { useOutletContext } from "react-router-dom";
 
 function ChatBox() {
+  const {setHeading, setSubtext} = useOutletContext();
+  setHeading("Chat Agent");
+  setSubtext("Dynamic workflows at your fingertips");
   const [messages, setMessages] = useState([
     {
       role: "system",

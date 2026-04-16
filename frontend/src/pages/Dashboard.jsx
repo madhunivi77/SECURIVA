@@ -6,6 +6,8 @@ import DashboardNav from "../components/DashboardNav";
 const Dashboard = () => {
 
   const [cards, setCards] = useState([]);
+  const [heading, setHeading] = useState([]);
+  const [subtext, setSubtext] = useState([]);
 
   const handleCreateAutomation = async () => {
     return;
@@ -31,10 +33,10 @@ const Dashboard = () => {
     <div className="flex h-screen w-screen bg-white text-black">
       <Sidebar />
       <div className="flex-1 flex flex-col overflow-hidden">
-        <DashboardNav onCreateAutomation={handleCreateAutomation} onRefresh={handleRefresh} />
+        <DashboardNav onCreateAutomation={handleCreateAutomation} onRefresh={handleRefresh} heading={heading} subtext={subtext}/>
 
         <main className="flex-1 relative">
-          <Outlet context={{handleRefresh, cards:[cards]}}/>
+          <Outlet context={{handleRefresh, cards:[cards], setHeading, setSubtext}}/>
         </main>
 
       </div>

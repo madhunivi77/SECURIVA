@@ -1,4 +1,4 @@
-import { MessageSquarePlus, Mic, Settings, User, Workflow } from "lucide-react";
+import { Hammer, MessageSquarePlus, Mic, Settings, User, Workflow } from "lucide-react";
 import { Link } from "react-router-dom";
 
 
@@ -7,7 +7,7 @@ const Sidebar = () => {
     <aside className="flex flex-col h-full w-64 border-r border-gray-300">
       {/* Logo area */}
         <div className="p-4 border-b border-border border-gray-300">
-          <img src="logo.png" />
+          <img src="/logo.png" />
         </div>
 
       {/* New Chat Button */}
@@ -30,6 +30,13 @@ const Sidebar = () => {
                 <Workflow className="w-4 h-4" />
                 Automations
             </button>
+        </Link>
+
+        <Link to="/dashboard/tools" className="m-2">
+          <button className=" inline-flex justify-normal w-full items-center text-black bg-gray-200 border-gray-300 gap-4 ">
+            <Hammer className="w-4 h-4" />
+            Tools
+          </button>
         </Link>
 
       {/* Spacer */}
