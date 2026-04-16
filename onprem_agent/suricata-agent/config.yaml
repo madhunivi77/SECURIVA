@@ -1,0 +1,34 @@
+# ─────────────────────────────────────────────
+# Suricata Agent Configuration
+# ─────────────────────────────────────────────
+
+# Where Suricata writes EVE JSON
+eve_json_path: tmp/eve.json #/var/log/suricata/eve.json
+
+# Securiva API
+api_endpoint: http://127.0.0.1:8000/security/firewall
+api_key: your-api-key
+
+# Agent configuration:
+llm-api: openai
+llm-model: gpt-3.5-turbo
+
+# Sensor identity (shows up in every payload)
+sensor_id: MyTestSite
+hostname: ""        # leave blank to auto-detect
+location: "HQ - Server Room"
+
+# Batching
+batch_interval_seconds: 60      # flush every N seconds
+max_batch_size: 100              # or when batch hits this size
+
+# Severities that trigger an immediate flush (don't wait for interval)
+immediate_flush_severities:
+  - critical
+  - high
+
+# Minimum severity to forward (critical / high / medium / low / info)
+min_severity: medium
+
+# HTTP timeout
+request_timeout_seconds: 10
