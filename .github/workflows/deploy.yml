@@ -1,0 +1,90 @@
+name: Deploy backend to App Runner
+
+on:
+  push:
+    branches: [dev]
+  workflow_dispatch:
+
+env:
+  AWS_REGION: us-east-2
+  ECR_REPOSITORY: securiva-backend
+  APP_RUNNER_SERVICE_ARN: arn:aws:apprunner:us-east-2:281505305629:service/securiva-backend/27d257db40ec46d1a43adf3d29b1c74d
+
+jobs:
+  deploy:
+    runs-on: ubuntu-latest
+    steps:
+      - name: Checkout
+        uses: actions/checkout@v4
+
+      - name: Configure AWS credentials
+        uses: aws-actions/configure-aws-credentials@v4
+        with:
+          aws-access-key-id: ${{ secrets.AWS_ACCESS_KEY_ID }}
+          aws-secret-access-key: ${{ secrets.AWS_SECRET_ACCESS_KEY }}
+          aws-region: ${{ env.AWS_REGION }}
+
+      - name: Login to Amazon ECR
+        id: login-ecr
+        uses: aws-actions/amazon-ecr-login@v2
+
+      - name: Create frontend/.env from secrets
+        run: |
+          cat > frontend/.env <<EOF
+          VITE_VAPI_PUBLIC_KEY=${{ secrets.VITE_VAPI_PUBLIC_KEY }}
+          VITE_VAPI_SERVER_URL=${{ secrets.VITE_VAPI_SERVER_URL }}
+          EOF
+
+      - name: Set up Docker Buildx
+        uses: docker/setup-buildx-action@v3
+
+      - name: Build and push image
+        env:
+          ECR_REGISTRY: ${{ steps.login-ecr.outputs.registry }}
+          IMAGE_URI: ${{ steps.login-ecr.outputs.registry }}/${{ env.ECR_REPOSITORY }}
+        run: |
+          docker buildx build \
+            --platform linux/amd64 \
+            -f backend/Dockerfile \
+            -t $IMAGE_URI:latest \
+            -t $IMAGE_URI:${{ github.sha }} \
+            --push \
+            .
+
+      - name: Trigger App Runner deployment
+        id: deploy
+        run: |
+          OP_ID=$(aws apprunner start-deployment \
+            --service-arn ${{ env.APP_RUNNER_SERVICE_ARN }} \
+            --region ${{ env.AWS_REGION }} \
+            --query 'OperationId' --output text)
+          echo "Operation: $OP_ID"
+          echo "op_id=$OP_ID" >> $GITHUB_OUTPUT
+
+      - name: Wait for deployment to finish
+        run: |
+          for i in $(seq 1 60); do
+            STATUS=$(aws apprunner list-operations \
+              --service-arn ${{ env.APP_RUNNER_SERVICE_ARN }} \
+              --region ${{ env.AWS_REGION }} \
+              --max-results 1 \
+              --query 'OperationSummaryList[0].Status' \
+              --output text)
+            echo "[$i/60] status=$STATUS"
+            case "$STATUS" in
+              SUCCEEDED) echo "Deployment succeeded"; exit 0 ;;
+              *FAIL*|*ROLL*|*ERROR*) echo "Deployment ended with $STATUS"; exit 1 ;;
+            esac
+            sleep 10
+          done
+          echo "Timed out waiting for deployment"
+          exit 1
+
+      - name: Smoke test
+        run: |
+          sleep 10
+          for p in / /api/status; do
+            CODE=$(curl -s -o /dev/null -w "%{http_code}" --max-time 10 "https://buechw2rme.us-east-2.awsapprunner.com$p")
+            echo "$p -> $CODE"
+            [ "$CODE" = "200" ] || exit 1
+          done

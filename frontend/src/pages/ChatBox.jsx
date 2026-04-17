@@ -26,7 +26,7 @@ function ChatBox() {
   useEffect(() => {
     const loadChat = async () => {
       try {
-        const res = await fetch("http://localhost:8000/chat/latest", {
+        const res = await fetch("/chat/latest", {
           credentials: "include"
         });
   
@@ -69,7 +69,7 @@ function ChatBox() {
     setIsLoading(true);
 
     try {
-      const response = await fetch("http://localhost:8000/api/chat", {
+      const response = await fetch("/api/chat", {
         method: "POST",
         credentials: "include",
         headers: {
@@ -102,7 +102,7 @@ function ChatBox() {
       console.log("Saving with version:", conversationId);
       
       
-      const saveRes = await fetch("http://localhost:8000/chat/save", {
+      const saveRes = await fetch("/chat/save", {
         method: "POST",
         credentials: "include",
         headers: { "Content-Type": "application/json" },
@@ -150,7 +150,7 @@ function ChatBox() {
   const handleSelectChat = async (version) => {
     try {
       const res = await fetch(
-        `http://localhost:8000/chat/get?version=${version}`,
+        `/chat/get?version=${version}`,
         { credentials: "include" }
       );
   

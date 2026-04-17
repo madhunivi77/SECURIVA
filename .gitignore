@@ -3,6 +3,9 @@
 env/
 ENV/
 
+# Local SQLite DB (ephemeral; prod uses DynamoDB)
+backend/local.db
+
 # Environment Files (KEEP THIS - sensitive data)
 *.env*
 !.env.example

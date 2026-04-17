@@ -1,16 +1,21 @@
-FROM python:3.12-slim
-
+FROM node:20-alpine AS frontend-build
 WORKDIR /app
+COPY frontend/package*.json ./
+RUN npm install
+COPY frontend/ ./
+RUN npm run build
 
-# Install uv
+FROM python:3.12-slim
+WORKDIR /app
 
 RUN pip install uv
 
-COPY pyproject.toml uv.lock ./
+COPY backend/pyproject.toml backend/uv.lock ./
 RUN uv sync --frozen
 
-COPY . .
+COPY backend/ ./
+COPY --from=frontend-build /app/dist ./static
 
 EXPOSE 8000
 
-CMD ["uv", "run", "run.py"]
+CMD ["uv", "run", "uvicorn", "my_app.server.main:app", "--host", "0.0.0.0", "--port", "8000", "--proxy-headers", "--forwarded-allow-ips", "*"]

@@ -67,7 +67,7 @@ function App() {
   };
 
   const handleGoogleLogin = () => {
-    window.location.href = "http://localhost:8000/login";
+    window.location.href = "/api/auth/google/login";
   };
 
   const handleSalesforceLogin = () => {
@@ -75,12 +75,12 @@ function App() {
       alert("Please login with Google first");
       return;
     }
-    window.location.href = "http://localhost:8000/salesforce/login";
+    window.location.href = "/salesforce/login";
   };
 
   const handleSalesforceLogout = async () => {
     try {
-      await fetch("http://localhost:8000/salesforce/logout", {
+      await fetch("/salesforce/logout", {
         method: "POST",
         credentials: "include"
       });

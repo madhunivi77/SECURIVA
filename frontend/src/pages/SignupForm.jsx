@@ -13,7 +13,7 @@ export default function SignupForm() {
     if (onGoogleLogin) {
       onGoogleLogin();
     } else {
-      window.location.href = "http://localhost:8000/login";
+      window.location.href = "/api/auth/google/login";
     }
   };
 
@@ -22,7 +22,7 @@ export default function SignupForm() {
     if (onSalesforceLogin) {
       onSalesforceLogin();
     } else {
-      window.location.href = "http://localhost:8000/salesforce/login";
+      window.location.href = "/salesforce/login";
     }
   };
 

@@ -9,7 +9,7 @@ function ChatSidebar({ onNewChat, onSelectChat }) {
   
   const loadConversations = async () => {
     try {
-      const res = await fetch("http://localhost:8000/chat/list", {
+      const res = await fetch("/chat/list", {
         credentials: "include"
       });
 
@@ -32,7 +32,7 @@ function ChatSidebar({ onNewChat, onSelectChat }) {
 
     try {
       await fetch(
-        `http://localhost:8000/chat/delete_by_version?version=${version}`,
+        `/chat/delete_by_version?version=${version}`,
         {
           method: "DELETE",
           credentials: "include"

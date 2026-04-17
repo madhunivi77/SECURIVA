@@ -3,11 +3,11 @@ import { createContext, useContext, useState, useEffect, useCallback } from "rea
 const AuthContext = createContext(null);
 
 export function AuthProvider({ children }) {
-  const LOGOUT_ENDPOINT = "http://localhost:8000/api/logout";
-  const STATUS_ENDPOINT = "http://localhost:8000/api/status";
-  const GOOGLE_LOGIN_ENDPOINT = "http://localhost:8000/login";
-  const SALESFORCE_LOGIN_ENDPOINT = "http://localhost:8000/salesforce/login";
-  const SALESFORCE_LOGOUT_ENDPOINT = "http://localhost:8000/salesforce/logout";
+  const LOGOUT_ENDPOINT = "/api/logout";
+  const STATUS_ENDPOINT = "/api/status";
+  const GOOGLE_LOGIN_ENDPOINT = "/api/auth/google/login";
+  const SALESFORCE_LOGIN_ENDPOINT = "/salesforce/login";
+  const SALESFORCE_LOGOUT_ENDPOINT = "/salesforce/logout";
   const [isAuthenticated, setIsAuthenticated] = useState(false);
   const [userEmail, setUserEmail] = useState(null);
   const [isSalesforceConnected, setIsSalesforceConnected] = useState(false);

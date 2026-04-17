@@ -1,6 +1,6 @@
 ﻿from starlette.applications import Starlette
 from starlette.routing import Route
-from starlette.responses import HTMLResponse, JSONResponse, Response, RedirectResponse
+from starlette.responses import HTMLResponse, JSONResponse, Response, RedirectResponse, FileResponse
 from google_auth_oauthlib.flow import Flow
 import json
 import bcrypt
@@ -579,13 +579,12 @@ async def dashboard_refresh(request):
 # ==================== APPLICATION SETUP ====================
 api_app = Starlette(
     routes=[
-        Route("/", index),
         Route("/api/status", api_status),
         Route("/api/chat", api_chat, methods=["POST"]),
         Route("/api/logout", api_logout, methods=["POST"]),
         Route("/api/voice-token", api_voice_token, methods=["GET"]),
         Route("/api/voice-session", api_voice_session, methods=["POST"]),
-        Route("/login", login, methods=["GET"]),
+        Route("/api/auth/google/login", login, methods=["GET"]),
         Route("/callback", callback),
         Route("/api/whatsapp/send-sms", api_send_sms, methods=["POST"]),
         Route("/api/dashboard/refresh", dashboard_refresh, methods=["GET"]),
@@ -594,5 +593,28 @@ api_app = Starlette(
 )
 
 api_app.mount("/salesforce", salesforce_app)
-api_app.mount("/chat",db_app)
-api_app.mount("/security", security_app)
+api_app.mount("/chat", db_app)
+api_app.mount("/api/security", security_app)
+
+
+# ==================== SPA FALLBACK ====================
+STATIC_DIR = Path(__file__).resolve().parents[2] / "static"
+INDEX_FILE = STATIC_DIR / "index.html"
+
+
+async def spa_fallback(request):
+    path = request.url.path.lstrip("/")
+    if STATIC_DIR.exists():
+        candidate = (STATIC_DIR / path).resolve() if path else STATIC_DIR
+        try:
+            candidate.relative_to(STATIC_DIR)
+        except ValueError:
+            return JSONResponse({"error": "not found"}, status_code=404)
+        if candidate.is_file():
+            return FileResponse(candidate)
+        if INDEX_FILE.exists() and request.method == "GET":
+            return FileResponse(INDEX_FILE)
+    return JSONResponse({"error": "not found"}, status_code=404)
+
+
+api_app.router.routes.append(Route("/{path:path}", spa_fallback))

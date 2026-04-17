@@ -1,8 +1,17 @@
-import { MessageSquarePlus, Mic, ScrollText, Settings, User } from "lucide-react";
-import { Link } from "react-router-dom";
+import { LogOut, MessageSquarePlus, Mic, ScrollText, Settings, User } from "lucide-react";
+import { Link, useNavigate } from "react-router-dom";
+import { useAuth } from "../context/AuthContext";
 
 
 const Sidebar = () => {
+  const { logout } = useAuth();
+  const navigate = useNavigate();
+
+  const handleLogout = async () => {
+    await logout();
+    navigate("/");
+  };
+
   return (
     <aside className="flex flex-col h-full w-64 border-r border-gray-300">
       {/* Logo area */}
@@ -45,6 +54,10 @@ const Sidebar = () => {
         <button className="inline-flex items-center justify-normal gap-4 m-2">
             <User className="w-4 h-4" />
             Account
+        </button>
+        <button onClick={handleLogout} className="inline-flex items-center justify-normal gap-4 m-2 text-red-600 hover:text-red-700">
+            <LogOut className="w-4 h-4" />
+            Logout
         </button>
       </div>
     </aside>

@@ -4,6 +4,7 @@ from starlette.requests import Request
 from starlette.routing import Route
 from pydantic import BaseModel
 import asyncio
+from pathlib import Path
 from typing import List, Dict, Optional
 import sqlite3
 import json
@@ -45,7 +46,8 @@ def get_authenticated_user(request: Request):
         print("No api_key cookie found")
         return None
 
-    user_id = validate_api_key(api_key)
+    oauth_file = Path(__file__).parent / "oauth.json"
+    user_id = validate_api_key(api_key, oauth_file)
 
     if not user_id:
         print("Invalid api_key")
@@ -266,15 +268,14 @@ class DynamoDBConnector(BaseConnector):
         try:
             response = self.table.query(
                 KeyConditionExpression=Key("user_id").eq(user_id),
-                FilterExpression="version = :v",
-                ExpressionAttributeValues={
-                    ":v": version
-                }
+                FilterExpression="#v = :v",
+                ExpressionAttributeNames={"#v": "version"},
+                ExpressionAttributeValues={":v": version},
             )
             items = response.get("Items", [])
             if not items:
                 return None
-            
+
             item = items[0]
             return ChatRecord(
                 user_id=user_id,
@@ -284,20 +285,19 @@ class DynamoDBConnector(BaseConnector):
             )
         except ClientError as e:
             raise RuntimeError(str(e))
-    
+
     def delete_by_version(self, user_id: str, version: int) -> bool:
         try:
             response = self.table.query(
                 KeyConditionExpression=Key("user_id").eq(user_id),
-                FilterExpression="version = :v",
-                ExpressionAttributeValues={
-                    ":v": version
-                }
+                FilterExpression="#v = :v",
+                ExpressionAttributeNames={"#v": "version"},
+                ExpressionAttributeValues={":v": version},
             )
             items = response.get("Items", [])
             if not items:
                 return False
-            
+
             item = items[0]
             self.table.delete_item(
                 Key={
@@ -308,17 +308,18 @@ class DynamoDBConnector(BaseConnector):
             return True
         except ClientError as e:
             raise RuntimeError(str(e))
-    
+
     def list_user_chats(self, user_id: str) -> List[Dict]:
         try:
             response = self.table.query(
                 KeyConditionExpression=Key("user_id").eq(user_id),
-                ProjectionExpression="version, title",
+                ProjectionExpression="#v, title",
+                ExpressionAttributeNames={"#v": "version"},
                 ScanIndexForward=False  # Descending order
             )
             items = response.get("Items", [])
             return [
-                {"version": item["version"], "title": item.get("title", f"Chat {item['version']}")} 
+                {"version": item["version"], "title": item.get("title", f"Chat {item['version']}")}
                 for item in items
             ]
         except ClientError as e:
@@ -329,7 +330,7 @@ class DynamoDBConnector(BaseConnector):
 # DB Selection
 
 
-USE_DYNAMO = False  # set True in production
+USE_DYNAMO = os.getenv("ENVIRONMENT", "development") == "production"
 db = DynamoDBConnector("SecuriVAChats") if USE_DYNAMO else SQLiteConnector()
 
 

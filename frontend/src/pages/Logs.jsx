@@ -28,7 +28,7 @@ function Logs() {
       if (search) params.set("search", search);
 
       const res = await fetch(
-        `http://localhost:8000/api/logs?${params.toString()}`,
+        `/api/logs?${params.toString()}`,
         { credentials: "include" }
       );
       if (res.ok) {

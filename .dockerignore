@@ -1,0 +1,14 @@
+.git
+.gitignore
+.DS_Store
+**/__pycache__
+**/*.pyc
+**/node_modules
+**/.env
+**/.env.*
+!frontend/.env
+!frontend/.env.*
+**/dist
+backend/local.db
+backend/.venv
+onprem_agent
