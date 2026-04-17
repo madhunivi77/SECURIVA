@@ -14,6 +14,7 @@ import ProviderForm from './pages/ProviderForm.jsx';
 import LoginForm from './pages/LoginForm.jsx';
 import SignupForm from './pages/SignupForm.jsx';
 import VoiceTest from './pages/VoiceTest.jsx';
+import Logs from './pages/Logs.jsx';
 import Pricing from "./pages/Pricing";
 import AutomationGrid from './components/AutomationGrid.jsx';
 import ProtectedRoute from './components/ProtectedRoute.jsx';
@@ -101,6 +102,10 @@ const router = createBrowserRouter([
           {
             path: 'voice',
             element: <VoiceTest />,
+          },
+          {
+            path: 'logs',
+            element: <Logs />,
           }
         ]
       }

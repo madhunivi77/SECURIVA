@@ -105,6 +105,11 @@ secure_creds.txt
 *credentials*.json
 *secrets*.json
 
+# Deployment configs with secrets
+backend/apprunner-config.json
+backend/cloudshell-command.txt
+backend/cloudshell-update.txt
+
 # Temporary Files
 *.tmp
 *.temp
