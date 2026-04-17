@@ -39,7 +39,7 @@ export default function Cybersecurity() {
         <div className="min-h-screen bg-gray-100 dark:bg-gray-900">
 
             {/* ---------- HERO ---------- */}
-            <section className="hero py-24 bg-linear-to-br from-blue-900 to-black text-white">
+            <section className="hero py-24 bg-linear-to-br bg-[#0a0f1f] text-white">
                 <div className="hero-content text-center max-w-4xl">
                     <div>
                         <h1 className="text-5xl font-bold mb-6">Cybersecurity</h1>
@@ -50,20 +50,35 @@ export default function Cybersecurity() {
                 </div>
             </section>
 
-            {/* Header */}
-            <section className="pt-10 mb-12 text-center">
-                <h2 className="subheading">
-                    Protect Your Business with AI-Driven Security and Compliance
-                </h2>
-                <p className="subtext">
-                    SecuriVA ensures organizations of all sizes, across all industries, operate safely in a digital-first world.
-                </p>
-                <h2 className="subheading">
-                    Cybersecurity Fundamentals
-                </h2>
+            <section className="relative overflow-hidden">
+                <div className="relative w-full h-[400px] overflow-hidden bg-black mx-auto">
+                    <video
+                        autoPlay
+                        loop
+                        muted
+                        playsInline
+                        className="absolute top-0 left-0 w-full object-cover opacity-40"
+                    >
+                        <source src="Cybersecurity_video.mp4" type="video/mp4" />
+                        Your browser does not support the video tag.
+                    </video>
+
+                    <div className="absolute top-0 left-0 w-full h-64 bg-gradient-to-b from-[#0a0f1f] via-[#0a0f1f]/60 to-transparent pointer-events-none"></div>
+
+                    <div className="absolute bottom-0 left-0 w-full h-64 bg-gradient-to-t from-[#131827] via-gray-black/60 to-transparent pointer-events-none"></div>
+
+                    {/* Content */}
+                    <div className="relative max-w-6xl mx-auto -mt-10">
+                        <h2 className="subheading">Protect Your Business with AI-Driven Security and Compliance</h2>
+                        <p className="text-center card p-12 mx-[15%] backdrop-blur bg-gray-800/50 shadow-lg text-xl">
+                            SecuriVA ensures organizations of all sizes, across all industries, operate safely in a digital-first world.
+                        </p>
+                    </div>
+                </div>
             </section>
 
-            <section className="flex flex-col gap-5 my-5 mx-[15%]">
+            <section className="flex flex-col gap-5 mb-5 -mt-20 mx-[15%]">
+                <h2 className="subheading pt-10 mb-12 text-center">Cybersecurity Fundamentals</h2>
                 <CapabilityCard icon={GlobeLock} label={"Encryption Protocols"} description={"All communications, transactions, and stored data are encrypted using industry-standard methods, ensuring confidentiality and integrity."} />
                 <CapabilityCard icon={ShieldAlert} label={"Threat Detection"} description={"AI-driven monitoring continuously scans for anomalies, suspicious behavior, and potential cyberattacks in real-time."} />
                 <CapabilityCard icon={SearchCode} label={"Vulnerability Analysis"} description={"Regular automated and manual security audits identify weak points, with actionable recommendations to prevent breaches."} />

@@ -37,24 +37,44 @@ export default function AgentText({ }) {
         <div className="min-h-screen bg-gray-100 dark:bg-gray-900">
 
             {/* ---------- HERO ---------- */}
-            <section className="hero py-24 bg-linear-to-br from-blue-900 to-black text-white">
-                <div className="hero-content text-center max-w-4xl">
+            <section className="hero pt-24 bg-linear-to-br bg-[#0a0f1f] text-white">
+                <div className="hero-content text-center">
                     <div>
                         <h1 className="text-5xl font-bold mb-6">
-                            Text AI Agent: Intelligent Automation for Email, Chat, and Messaging
+                            Text AI Agent
                         </h1>
-                        <p className="text-xl opacity-90">
-                            The Text AI Agent is SecuriVA’s intelligent automation module designed to streamline business communication and workflow. It allows organizations to save time, reduce errors, and improve responsiveness across multiple channels—all while ensuring data security and compliance.
-                        </p>
+                        <p className="text-4xl opacity-90">Intelligent Automation for Email, Chat, and Messaging</p>
+                            
                     </div>
                 </div>
             </section>
 
-            <h2 className="subheading">
-                Automation Capabilities
-            </h2>
+            <section className="relative overflow-hidden">
+                <div className="relative w-full h-[450px] overflow-hidden bg-black mx-auto">
+                    <video
+                        autoPlay
+                        loop
+                        muted
+                        playsInline
+                        className="absolute top-0 left-0 w-full object-cover opacity-40"
+                    >
+                        <source src="text_agent.mp4" type="video/mp4" />
+                        Your browser does not support the video tag.
+                    </video>
 
-            <section className="flex flex-col gap-5 my-5 mx-[15%]">
+                    <div className="absolute top-0 left-0 w-full h-64 bg-gradient-to-b from-[#0a0f1f] via-[#0a0f1f]/60 to-transparent pointer-events-none"></div>
+
+                    <div className="absolute bottom-0 left-0 w-full h-64 bg-gradient-to-t from-[#131827] via-gray-black/60 to-transparent pointer-events-none"></div>
+
+                    {/* Content */}
+                    <div className="relative max-w-6xl pt-25 mx-auto">
+                        <p className="text-center backdrop-blur bg-gray-800/30 shadow-lg card p-10 mx-[15%] text-xl">The Text AI Agent is SecuriVA’s intelligent automation module designed to streamline business communication and workflow. It allows organizations to save time, reduce errors, and improve responsiveness across multiple channels—all while ensuring data security and compliance.</p>
+                    </div>
+                </div>
+            </section>
+
+            <section className="flex flex-col gap-5 mb-5 -mt-15 mx-[15%]">
+                <h2 className="z-100 subheading">Automation Capabilities</h2>
                 <CapabilityCard icon={Mail} label={"Email responses and follow-ups"} description={"Automatically drafts and sends context-aware replies, reducing manual effort and ensuring timely communication."} />
                 <CapabilityCard icon={MessageCircle} label={"Chat interactions on WhatsApp, Gmail, and websites"} description={"Handles customer inquiries, support chats, and internal messaging with AI-driven responses."} />
                 <CapabilityCard icon={File} label={"Document handling, analysis, and data extraction"} description={"Processes attachments, extracts relevant data, summarizes content, and integrates results into workflows."} />
