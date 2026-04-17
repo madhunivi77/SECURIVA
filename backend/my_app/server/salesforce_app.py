@@ -8,7 +8,6 @@ from pathlib import Path
 from urllib.parse import urlencode, parse_qs
 from datetime import datetime
 from .api_key_manager import validate_api_key
-from .salesforce_utils import load_oauth_data, save_oauth_data
 
 
 # Environment variables
@@ -24,27 +23,34 @@ async def salesforce_logout(request):
 
     # Get API key from cookie
     api_key = request.cookies.get("api_key")
+    
+    oauth_path = Path(__file__).parent / "oauth.json"
 
     # Validate API key and get user_id mapping
-    user_id = validate_api_key(api_key)
+    user_id = validate_api_key(api_key, oauth_path)
 
-    oauth_data = load_oauth_data()
-    users = oauth_data.get("users", [])
+    if oauth_path.exists():
+        with open(oauth_path, "r") as f:
+            oauth_data = json.load(f)
 
-    # Find user entry by user_id
-    user_entry = None
-    for user in users:
-        if user.get("user_id") == user_id:
-            user_entry = user
-            break
-    # user found
-    if user_entry:
-        # remove salesforce creds
-        user_entry["services"].pop("salesforce", None)
+        users = oauth_data.get("users", [])
 
-        # write back
-        oauth_data["users"] = users
-        save_oauth_data(oauth_data)
+        # Find user entry by user_id
+        user_entry = None
+        for user in users:
+            if user.get("user_id") == user_id:
+                user_entry = user
+                break
+        # user found
+        if user_entry:
+            # remove salesforce creds
+            user_entry["services"].pop("salesforce", None)
+
+            # write back to oauth.json
+            oauth_data["users"] = users
+
+            with open(oauth_path, "w") as f:
+                json.dump(oauth_data, f, indent=2)
 
     # Successful response
     response = JSONResponse({
@@ -71,7 +77,8 @@ async def salesforce_login(request):
         )
 
     # Validate API key
-    user_id = validate_api_key(api_key)
+    oauth_file = Path(__file__).parent / "oauth.json"
+    user_id = validate_api_key(api_key, oauth_file)
 
     if not user_id:
         return JSONResponse(
@@ -130,7 +137,12 @@ async def salesforce_callback(request):
     creds = r.json()
 
     # Store Salesforce tokens with new schema
-    oauth_data = load_oauth_data()
+    oauth_path = Path(__file__).parent / "oauth.json"
+    if oauth_path.exists():
+        with open(oauth_path, "r") as f:
+            oauth_data = json.load(f)
+    else:
+        oauth_data = {"users": []}
 
     users = oauth_data.get("users", [])
 
@@ -167,7 +179,9 @@ async def salesforce_callback(request):
     }
 
     oauth_data["users"] = users
-    save_oauth_data(oauth_data)
+
+    with open(oauth_path, "w") as f:
+        json.dump(oauth_data, f, indent=2)
 
     # Redirect to frontend with success message
     return RedirectResponse(

@@ -19,9 +19,8 @@ from .request_validator import should_block_request
 
 
 # --- Configuration ---
-from ..config.settings import settings
-MCP_SERVER_URL = settings.MCP_SERVER_URL
-AUTH_SERVER_URL = settings.AUTH_SERVER_URL
+MCP_SERVER_URL = "http://localhost:8000/mcp/"
+AUTH_SERVER_URL = "http://localhost:8000/auth/token"
 
 # Load config for default model settings
 config_path = Path(__file__).parent.parent / "client" / "config.json"
