@@ -7,7 +7,7 @@ export default function AgentVoice({ }) {
         <div className="min-h-screen bg-gray-100 dark:bg-gray-900">
 
             {/* ---------- HERO ---------- */}
-            <section className="hero pt-24 bg-linear-to-br bg-[#0a0f1f] text-white">
+            <section className="hero py-24 bg-linear-to-br from-blue-900 to-black text-white">
                 <div className="hero-content text-center max-w-4xl">
                     <div>
                         <h1 className="text-5xl font-bold mb-6">AI Agent Voice: Intelligent Voice-to-Action Engine </h1>
@@ -15,34 +15,6 @@ export default function AgentVoice({ }) {
                             AI Voice is SecuriVA’s advanced vocal intelligence module that converts speech into smart text, contextualized messages, translations, and automated actions.
                             Users simply speak, and SecuriVA understands, reformulates, translates, analyzes, and executes.
                         </p>
-                    </div>
-                </div>
-            </section>
-
-            <section className="relative overflow-hidden">
-                <div className="relative w-full h-[500px] overflow-hidden bg-black mx-auto">
-                    <video
-                        autoPlay
-                        loop
-                        muted
-                        playsInline
-                        className="absolute top-0 left-0 w-full h-[70%] object-cover opacity-40"
-                    >
-                        <source src="Voice_AI_agent.mp4" type="video/mp4" />
-                        Your browser does not support the video tag.
-                    </video>
-
-                    <div className="absolute top-0 left-0 w-full h-64 bg-gradient-to-b from-[#0a0f1f] via-[#0a0f1f]/60 to-transparent pointer-events-none"></div>
-
-                    <div className="absolute bottom-0 left-0 w-full h-64 bg-gradient-to-t from-[#131827] via-gray-black/60 to-transparent pointer-events-none"></div>
-
-                    {/* Content */}
-                    <div className="relative max-w-6xl mx-auto pt-10">
-
-                        <h2 className="subheading">
-                            A Unified Intelligent Platform for Secure, Automated, AI-Driven Operations
-                        </h2>
-                        <p className="text-center backdrop-blur bg-gray-800/30 shadow-lg card p-10 mx-[15%] text-xl">Our platform is designed to support organizations of all sizes—across all industries—seeking to modernize their operations, protect their data, and elevate customer engagement.</p>
                     </div>
                 </div>
             </section>
@@ -139,24 +111,32 @@ export default function AgentVoice({ }) {
                             </div>
                         </div>
                     } />
-
-
                 <CapabilityCard icon={AudioWaveform} label={"Advanced Voice Commands"} description={"Examples:"} content=
                     {
-                        <div className="flex flex-wrap gap-2">
-                            {[
-                                "“SecuriVA, listen and record the meeting.”",
-                                "“Generate a professional report and send it to the team.”",
-                                "“Summarize the conversation in a formal tone.”",
-                                "“Translate the report to Spanish and export it as PDF.”",
-                            ].map((feature, index) => (
-                                <span
-                                    key={feature}
-                                    className="inline-flex items-center gap-1.5 rounded-lg bg-blue-50 border border-blue-100 px-3 py-1 text-lg text-blue-700 dark:bg-blue-950 dark:border-blue-900 dark:text-blue-300"
-                                >
-                                    <p className="text-lg stroke-blue-500 dark:stroke-blue-400">{index+1}.{feature}</p>
-                                </span>
-                            ))}
+                        <div className="flex flex-col items-center gap-5">
+                            <div className="rounded-2xl border border-blue-100 bg-blue-50 px-8 py-6 text-center dark:border-blue-900 dark:bg-blue-950">
+                                <p className="text-[15px] font-light italic text-blue-700 dark:text-blue-300">
+                                    “SecuriVA, listen and record the meeting.”
+                                </p>
+                            </div>
+
+                            <div className="rounded-2xl border border-blue-100 bg-blue-50 px-8 py-6 text-center dark:border-blue-900 dark:bg-blue-950">
+                                <p className="text-[15px] font-light italic text-blue-700 dark:text-blue-300">
+                                    “Generate a professional report and send it to the team.”
+                                </p>
+                            </div>
+
+                            <div className="rounded-2xl border border-blue-100 bg-blue-50 px-8 py-6 text-center dark:border-blue-900 dark:bg-blue-950">
+                                <p className="text-[15px] font-light italic text-blue-700 dark:text-blue-300">
+                                    “Summarize the conversation in a formal tone.”
+                                </p>
+                            </div>
+
+                            <div className="rounded-2xl border border-blue-100 bg-blue-50 px-8 py-6 text-center dark:border-blue-900 dark:bg-blue-950">
+                                <p className="text-[15px] font-light italic text-blue-700 dark:text-blue-300">
+                                    “Translate the report to Spanish and export it as PDF.”
+                                </p>
+                            </div>
                         </div>
                     } />
                 <CapabilityCard icon={BadgeCheck} label={"Compliance & Smart History"} content=

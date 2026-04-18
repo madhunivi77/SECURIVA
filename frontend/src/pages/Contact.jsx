@@ -33,7 +33,7 @@ export default function Contact() {
     <div className="min-h-screen bg-gray-100 dark:bg-gray-900">
 
       {/* ---------- HERO ---------- */}
-      <section className="hero pt-24 pb-40 bg-[#0a0f1f] text-white">
+      <section className="hero py-24 bg-gradient-to-br from-blue-900 to-black text-white">
         <div className="hero-content text-center max-w-4xl">
           <div>
             <h1 className="text-5xl font-bold mb-6">Contact SecuriVA</h1>
@@ -47,93 +47,91 @@ export default function Contact() {
       </section>
 
       {/* ---------- CONTACT SERVICES ---------- */}
-      <section className="relative overflow-hidden">
-        <div className="relative w-full min-h-screen overflow-hidden bg-black mx-auto">
-          <video
-            autoPlay
-            loop
-            muted
-            playsInline
-            className="absolute top-0 left-0 w-full h-full object-cover opacity-50"
-          >
-            <source src="Video_1.mp4" type="video/mp4" />
-            Your browser does not support the video tag.
-          </video>
+      <section className="relative py-20 px-10 overflow-hidden">
 
-          <div className="absolute top-0 left-0 w-full h-64 bg-gradient-to-b from-[#0a0f1f] via-[#0a0f1f]/60 to-transparent pointer-events-none"></div>
+        {/* 🔵 Background Image */}
+        <img
+          src="/Cybersecurity_Protection.png"
+          alt="Cybersecurity Protection"
+          className="absolute inset-0 w-full h-full object-cover opacity-60"
+        />
 
-          <div className="absolute bottom-0 left-0 w-full h-64 bg-gradient-to-t from-black via-gray-black/60 to-transparent pointer-events-none"></div>
+        {/* 🎨 Horizontal gradient fade */}
+        <div className="absolute inset-0 bg-gradient-to-r from-white via-transparent to-white dark:from-gray-900 dark:via-transparent dark:to-gray-900"></div>
 
-          {/* 🧠 Content */}
-          <div className="relative max-w-6xl mx-auto pt-50">
+        {/* 🎨 Vertical gradient fade */}
+        <div className="absolute inset-0 bg-gradient-to-b from-white via-transparent to-white dark:from-gray-900 dark:via-transparent dark:to-gray-900"></div>
 
-            <h2 className="text-3xl font-bold text-center text-gray-900 dark:text-white mb-12">
-              Contact Services
-            </h2>
+        {/* 🧠 Content */}
+        <div className="relative max-w-6xl mx-auto">
 
-            <div className="grid md:grid-cols-3 gap-8">
+          <h2 className="text-3xl font-bold text-center text-gray-900 dark:text-white mb-12">
+            Contact Services
+          </h2>
 
-              <div className="card bg-white/90 backdrop-blur dark:bg-gray-800/90 shadow-lg">
-                <div className="card-body">
-                  <h3 className="card-title">Sales & Enterprise Solutions</h3>
-                  <p>
-                    Guidance on platform capabilities, pricing models, enterprise
-                    deployment architecture, and custom integrations.
-                  </p>
+          <div className="grid md:grid-cols-3 gap-8">
 
-                  <div className="mt-4 text-sm opacity-80 space-y-1">
-                    <p>• Product demos and onboarding</p>
-                    <p>• Enterprise deployment planning</p>
-                    <p>• Security compliance discussion</p>
-                    <p>• Custom solution architecture</p>
-                    <p>• Integration consulting</p>
-                  </div>
+            <div className="card bg-white/90 backdrop-blur dark:bg-gray-800/90 shadow-lg">
+              <div className="card-body">
+                <h3 className="card-title">Sales & Enterprise Solutions</h3>
+                <p>
+                  Guidance on platform capabilities, pricing models, enterprise
+                  deployment architecture, and custom integrations.
+                </p>
+
+                <div className="mt-4 text-sm opacity-80 space-y-1">
+                  <p>• Product demos and onboarding</p>
+                  <p>• Enterprise deployment planning</p>
+                  <p>• Security compliance discussion</p>
+                  <p>• Custom solution architecture</p>
+                  <p>• Integration consulting</p>
                 </div>
               </div>
-
-              <div className="card bg-white/90 backdrop-blur dark:bg-gray-800/90 shadow-lg">
-                <div className="card-body">
-                  <h3 className="card-title">Technical Support</h3>
-                  <p>
-                    Assistance with authentication, integrations, connectivity,
-                    platform usage, and troubleshooting.
-                  </p>
-
-                  <div className="mt-4 text-sm opacity-80 space-y-1">
-                    <p>• Account and login issues</p>
-                    <p>• API and integration troubleshooting</p>
-                    <p>• Platform configuration help</p>
-                    <p>• Security and protection setup</p>
-                    <p>• System diagnostics</p>
-                  </div>
-                </div>
-              </div>
-
-              <div className="card bg-white/90 backdrop-blur dark:bg-gray-800/90 shadow-lg">
-                <div className="card-body">
-                  <h3 className="card-title">Partnership & Collaboration</h3>
-                  <p>
-                    Opportunities for technology partnerships, integrations,
-                    research collaboration, and ecosystem development.
-                  </p>
-
-                  <div className="mt-4 text-sm opacity-80 space-y-1">
-                    <p>• Integration partnerships</p>
-                    <p>• Strategic alliances</p>
-                    <p>• Technology collaboration</p>
-                    <p>• Research initiatives</p>
-                    <p>• Enterprise ecosystem development</p>
-                  </div>
-                </div>
-              </div>
-
             </div>
+
+            <div className="card bg-white/90 backdrop-blur dark:bg-gray-800/90 shadow-lg">
+              <div className="card-body">
+                <h3 className="card-title">Technical Support</h3>
+                <p>
+                  Assistance with authentication, integrations, connectivity,
+                  platform usage, and troubleshooting.
+                </p>
+
+                <div className="mt-4 text-sm opacity-80 space-y-1">
+                  <p>• Account and login issues</p>
+                  <p>• API and integration troubleshooting</p>
+                  <p>• Platform configuration help</p>
+                  <p>• Security and protection setup</p>
+                  <p>• System diagnostics</p>
+                </div>
+              </div>
+            </div>
+
+            <div className="card bg-white/90 backdrop-blur dark:bg-gray-800/90 shadow-lg">
+              <div className="card-body">
+                <h3 className="card-title">Partnership & Collaboration</h3>
+                <p>
+                  Opportunities for technology partnerships, integrations,
+                  research collaboration, and ecosystem development.
+                </p>
+
+                <div className="mt-4 text-sm opacity-80 space-y-1">
+                  <p>• Integration partnerships</p>
+                  <p>• Strategic alliances</p>
+                  <p>• Technology collaboration</p>
+                  <p>• Research initiatives</p>
+                  <p>• Enterprise ecosystem development</p>
+                </div>
+              </div>
+            </div>
+
           </div>
         </div>
+
       </section>
 
       {/* ---------- CONTACT FORM ---------- */}
-      <section className="py-20 px-10 bg-white dark:bg-black">
+      <section className="py-20 px-10 bg-white dark:bg-gray-800">
         <div className="max-w-4xl mx-auto">
 
           <h2 className="text-3xl font-bold text-center mb-4">

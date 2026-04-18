@@ -1,6 +1,6 @@
-import { Link, useOutletContext } from "react-router-dom";
+import { useTheme } from "../context/ThemeContext";
 export default function Industry(){
-    const {theme} = useOutletContext();
+    const {theme} = useTheme();
     return(
         <div className="text-white text-center">
             <div className="section-min-height">

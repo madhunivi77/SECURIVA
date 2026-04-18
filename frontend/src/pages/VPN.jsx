@@ -39,7 +39,7 @@ export default function VPN() {
         <div className="min-h-screen bg-gray-100 dark:bg-gray-900">
 
             {/* ---------- HERO ---------- */}
-            <section className="hero pt-24 bg-linear-to-br bg-[#0a0f1f] text-white">
+            <section className="hero py-24 bg-linear-to-br from-blue-900 to-black text-white">
                 <div className="hero-content text-center max-w-4xl">
                     <div>
                         <h1 className="text-5xl font-bold mb-6">VPN Secure Access</h1>
@@ -50,40 +50,22 @@ export default function VPN() {
                 </div>
             </section>
 
-            <section className="relative overflow-hidden">
-                <div className="relative w-full h-[600px] overflow-hidden bg-black mx-auto">
-                    <video
-                        autoPlay
-                        loop
-                        muted
-                        playsInline
-                        className="absolute top-0 left-0 w-full h-[70%] object-cover opacity-40"
-                    >
-                        <source src="VPN_video.mp4" type="video/mp4" />
-                        Your browser does not support the video tag.
-                    </video>
-
-                    <div className="absolute top-0 left-0 w-full h-64 bg-gradient-to-b from-[#0a0f1f] via-[#0a0f1f]/60 to-transparent pointer-events-none"></div>
-
-                    <div className="absolute bottom-0 left-0 w-full h-64 bg-gradient-to-t from-[#131827] via-gray-black/60 to-transparent pointer-events-none"></div>
-
-                    {/* Content */}
-                    <div className="relative max-w-6xl mx-auto pt-10">
-                        <h2 className="subheading">Protect Your Business with AI-Driven Security and Compliance</h2>
-                        <p className="text-center card p-2 mx-[15%] backdrop-blur bg-gray-800/50 shadow-lg text-xl">
-                            VPN Secure Access is the network-layer protection module of SecuriVA, delivering
-                            encrypted connectivity, zero-trust access, and AI-driven threat detection for
-                            distributed teams, cloud systems, and sensitive workflows.
-                        </p>
-                        {/* Unlike traditional
-                            virtual assistants or automation platforms, SecuriVA embeds a native VPN
-                            infrastructure, ensuring that every voice interaction, text automation, API
-                            communication, and workflow execution happens inside a protected, private network. */}
-                    </div>
-                </div>
+            <section className="pt-10 mb-6 text-center">
+                <h2 className="subheading">
+                    Protect Your Business with AI-Driven Security and Compliance
+                </h2>
+                <p className="subtext">
+                    VPN Secure Access is the network-layer protection module of SecuriVA, delivering
+                    encrypted connectivity, zero-trust access, and AI-driven threat detection for
+                    distributed teams, cloud systems, and sensitive workflows. Unlike traditional
+                    virtual assistants or automation platforms, SecuriVA embeds a native VPN
+                    infrastructure, ensuring that every voice interaction, text automation, API
+                    communication, and workflow execution happens inside a protected, private network.
+                </p>
+                <div class="border-t border-gray-100 mb-8 dark:border-gray-800" />
             </section>
 
-            <section className="relative overflow-hidden px-8 pb-6 -mt-20">
+            <section className="relative overflow-hidden px-8 py-6">
                 <h2 className="subheading">Integrating VPN Into SecuriVA</h2>
                 <p class="text-xl font-light text-gray-500 mb-8 text-center dark:text-gray-400 mx-[15%]">VPN Secure Access is seamlessly integrated across all SecuriVA components:</p>
                 <div className="flex flex-wrap gap-3 mb-6 mx-[15%]">

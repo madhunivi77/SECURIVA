@@ -1,12 +1,10 @@
 import {
   Cpu, ShieldCheck, Globe, Users, BookOpen,
   Puzzle, Sparkles, LayoutDashboard, Bot,
-  Settings, DollarSign, Lightbulb, Layers, Heart,
-  ChevronRight
+  Settings, DollarSign, Lightbulb, Layers, Heart
 } from "lucide-react";
 import ReasonCard from "../components/ReasonCard";
 import SolutionCard from "../components/SolutionCard";
-import { Link } from "react-router-dom";
 
 const solutions = [
   {
@@ -210,15 +208,6 @@ export default function Solutions() {
           <p className="text-[15px] font-light italic text-blue-700 dark:text-blue-300">
             "With SecuriVA, your business doesn't just work — it learns, protects, and grows."
           </p>
-        </div>
-
-        <div className="flex justify-center">
-          <Link to={"/industries"} >
-            <button className="flex justify-center items-center btn bg-blue-900 mt-10">
-              View Solutions by Industry
-              <ChevronRight />
-            </button>
-          </Link>
         </div>
 
       </section>

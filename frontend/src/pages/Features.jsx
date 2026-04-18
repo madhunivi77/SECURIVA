@@ -1,6 +1,6 @@
 import { Link } from "react-router-dom";
 import Sponsors from "../components/Sponsors";
-import { Check, Phone, Calendar, MessageCircle, Zap, Activity, Lock, ShieldCheck, Server, Mail, MessageSquare, FileText, Workflow, MousePointerClick, ShieldAlert, Network, KeyRound, Layers, Globe, Settings, SlidersHorizontal, BadgeCheck, Play, BookOpen, ChevronRight } from "lucide-react";
+import { Check, Phone, Calendar, MessageCircle, Zap, Activity, Lock, ShieldCheck, Server, Mail, MessageSquare, FileText, Workflow, MousePointerClick, ShieldAlert, Network, KeyRound, Layers, Globe, Settings, SlidersHorizontal, BadgeCheck, Play, BookOpen } from "lucide-react";
 import CapabilityCard from "../components/CapabilityCard";
 import SymmetricalChecklist from "../components/SymmetricalChecklist";
 
@@ -78,15 +78,6 @@ export default function Features() {
             "Embedded cybersecurity for safe voice comms",
           ]
         }/>
-
-        <div className="flex justify-center">
-          <Link to={"/agent-voice"} >
-            <button className="flex justify-center items-center btn bg-blue-900 mt-10">
-              More Information
-              <ChevronRight />
-            </button>
-          </Link>
-        </div>
 
       </section>
 
@@ -175,7 +166,7 @@ export default function Features() {
       {/* VPN */}
       <section className="relative overflow-hidden px-8 py-12">
         <h2 className="text-4xl font-normal text-center text-gray-900 mb-2 dark:text-white">
-          VPN Secure Access
+          VPN
         </h2>
         <p className="text-xl font-light text-gray-500 mb-8 text-center dark:text-gray-400 mx-[15%]">
           Secure, Encrypted, and Compliance-Ready Network Access
