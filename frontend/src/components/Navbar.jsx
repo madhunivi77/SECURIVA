@@ -3,10 +3,14 @@ import { useTheme } from "../context/ThemeContext";
 import { useState } from "react";
 import NavOption from "./NavOption";
 import { Link, useNavigate } from "react-router-dom";
+import LanguageSwitcher from "./LanguageSwitcher";
+import { useTranslation } from "react-i18next";
 
 export default function Navbar() {
   const [showStatus, setShowStatus] = useState(false);
   const navigate = useNavigate();
+  const { t } = useTranslation();
+
   const {
     isAuthenticated,
     userEmail,
@@ -58,11 +62,15 @@ export default function Navbar() {
             onClick={() => navigate("/")}
           />
 
+          <div className="flex justify-end p-4">
+            <LanguageSwitcher />
+          </div>
+
           <Link to={"/contact"}>
             <button
-              className="w-50 h-13.5 bg-red-500 text-white"
+              className="w-60 h-13.5 bg-red-500 text-white"
             >
-              Request a Demo
+              {t("navbar.upper.requestDemo")}
             </button>
           </Link>
         </div>
@@ -95,7 +103,7 @@ export default function Navbar() {
                 cursor: "pointer",
               }}
             >
-              Reconnect
+              {t("navbar.upper.buttons.reconnect")}
             </button>
 
             {!isAuthenticated && (
@@ -110,7 +118,7 @@ export default function Navbar() {
                   cursor: "pointer",
                 }}
               >
-                Login with Google
+                {t("navbar.upper.buttons.loginGoogle")}
               </button>
             )}
 
@@ -126,7 +134,7 @@ export default function Navbar() {
                   cursor: "pointer",
                 }}
               >
-                Connect Salesforce
+                {t("navbar.upper.buttons.connectSalesforce")}
               </button>
             )}
 
@@ -144,7 +152,7 @@ export default function Navbar() {
                     flexShrink: 0,
                   }}
                 >
-                  Disconnect Salesforce
+                  {t("navbar.upper.buttons.disconnectSalesforce")}
                 </button>
               )
             }
@@ -160,7 +168,7 @@ export default function Navbar() {
                   cursor: "pointer",
                 }}
               >
-                Logout
+                {t("navbar.upper.buttons.logout")}
               </button>
             )}
           </div>
@@ -170,51 +178,51 @@ export default function Navbar() {
       {/* LOWER NAV BAR */}
       <div
         className="shrink-0 py-3 px-5 flex justify-between w-full flex-wrap box-border  bg-black"
-        // style={{ background: theme.bg, }}
+      // style={{ background: theme.bg, }}
       >
 
         {!isAuthenticated ? (
           // LOGGED OUT
           <div className="flex justify-between flex-1 pl-14">
             <div style={{ display: "flex", gap: "10px" }}>
-              <NavOption label={"About"} target={"about"} theme={theme.text} />
+              <NavOption label={t("navbar.lower.loggedOut.nav.about")} target={"about"} theme={theme.text} />
 
-              <NavOption label={"Features"} target={"features"} theme={theme.text} />
+              <NavOption label={t("navbar.lower.loggedOut.nav.features")} target={"features"} theme={theme.text} />
 
-              <NavOption label={"Solutions"} target={"solutions"} theme={theme.text} />
+              <NavOption label={t("navbar.lower.loggedOut.nav.solutions")} target={"solutions"} theme={theme.text} />
 
-              <NavOption label={"Platform"} target={"platform"} theme={theme.text} />
+              <NavOption label={t("navbar.lower.loggedOut.nav.platform")} target={"platform"} theme={theme.text} />
 
-              <NavOption label={"Pricing"} target={"pricing"} theme={theme.text} />
+              <NavOption label={t("navbar.lower.loggedOut.nav.pricing")} target={"pricing"} theme={theme.text} />
 
-              <NavOption label={"Contact"} target={"contact"} theme={theme.text} />
+              <NavOption label={t("navbar.lower.loggedOut.nav.contact")} target={"contact"} theme={theme.text} />
 
-              <NavOption label={"FAQ"} target={"FAQ"} theme={theme.text} />
+              <NavOption label={t("navbar.lower.loggedOut.nav.faq")} target={"FAQ"} theme={theme.text} />
             </div>
 
             <div style={{ display: "flex", gap: "10px" }}>
-              <NavOption label={"Sign In"} target={"provider"} theme={theme.text} />
+              <NavOption label={t("navbar.lower.loggedOut.auth.signIn")} target={"provider"} theme={theme.text} />
 
-              <NavOption label={"Sign Up"} target={"signup"} theme={theme.text} />
+              <NavOption label={t("navbar.lower.loggedOut.auth.signUp")} target={"signup"} theme={theme.text} />
 
-              <NavOption label={"Support"} target={"support"} theme={theme.text} />
+              <NavOption label={t("navbar.lower.loggedOut.auth.support")} target={"support"} theme={theme.text} />
             </div>
           </div>
         ) : (
           /* LOGGED IN → show your status toggle */
           <div style={{ display: "flex", gap: "10px" }}>
 
-            <NavOption label={"About"} target={"about"} theme={theme.text} />
+            <NavOption label={t("navbar.lower.loggedIn.nav.about")} target={"about"} theme={theme.text} />
 
-            <NavOption label={"Features"} target={"security"} theme={theme.text} />
+            <NavOption label={t("navbar.lower.loggedIn.nav.features")} target={"security"} theme={theme.text} />
 
-            <NavOption label={"Support"} target={"support"} theme={theme.text} />
+            <NavOption label={t("navbar.lower.loggedIn.nav.support")} target={"support"} theme={theme.text} />
 
-            <NavOption label={"Contact"} target={"contact"} theme={theme.text} />
+            <NavOption label={t("navbar.lower.loggedIn.nav.contact")} target={"contact"} theme={theme.text} />
 
-            <NavOption label={"FAQ"} target={"FAQ"} theme={theme.text} />
+            <NavOption label={t("navbar.lower.loggedIn.nav.faq")} target={"FAQ"} theme={theme.text} />
 
-            <NavOption label={"Dashboard"} target={"dashboard"} theme={theme.text} />
+            <NavOption label={t("navbar.lower.loggedIn.nav.dashboard")} target={"dashboard"} theme={theme.text} />
             <button
               onClick={() => setShowStatus((prev) => !prev)}
               style={{
@@ -226,7 +234,7 @@ export default function Navbar() {
                 cursor: "pointer",
               }}
             >
-              {showStatus ? "Hide Status" : "Show Status"}
+              {showStatus ? t("navbar.lower.loggedIn.toggleStatus.hide") : t("navbar.lower.loggedIn.toggleStatus.show")}
             </button>
           </div>
         )}

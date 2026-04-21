@@ -1,0 +1,140 @@
+[
+  {
+    "category": "General Questions",
+    "items": [
+      {
+        "question": "What is SecuriVA?",
+        "answer": "SecuriVA is an enterprise-grade, AI-powered virtual assistant platform that unifies intelligent automation, cybersecurity, secure communications, and compliance into a single ecosystem. It enables businesses to automate workflows, manage customer interactions across all channels, and operate securely under one unified digital infrastructure — powered by Kimuntu Power Inc."
+      },
+      {
+        "question": "What can SecuriVA do for my business?",
+        "answer": "SecuriVA automates administrative tasks, manages multi-channel communication (voice, email, chat, video), processes complex workflows, detects and mitigates cyber threats in real time, secures sensitive data through VPN and encryption, and integrates with your existing tools — all from one platform."
+      },
+      {
+        "question": "Who is SecuriVA designed for?",
+        "answer": "SecuriVA serves a broad range of organizations including SMBs, large enterprises, e-commerce platforms, fintech companies, healthcare providers, educational institutions, government agencies, nonprofits, and individual professionals seeking AI-driven automation and security."
+      },
+      {
+        "question": "Does SecuriVA support multiple languages?",
+        "answer": "Yes. SecuriVA operates in multilingual environments and includes AI-based translation layers, enabling seamless cross-language communication across voice, text, and automation workflows."
+      },
+      {
+        "question": "Is SecuriVA cloud-based or on-premise?",
+        "answer": "SecuriVA is cloud-native, offering high availability and scalability by default. Enterprise and regulated-sector clients may request on-premise or hybrid deployment options, including dedicated data residency configurations."
+      },
+      {
+        "question": "How secure is SecuriVA?",
+        "answer": "Security is foundational to SecuriVA — not an add-on. The platform employs end-to-end encryption, zero-trust architecture, multi-factor authentication, AI-driven threat detection, role-based access controls, SIEM monitoring, and full compliance with GDPR, HIPAA, and PCI-DSS standards."
+      }
+    ]
+  },
+  {
+    "category": "Features & Functionality",
+    "items": [
+      {
+        "question": "Can SecuriVA automate emails, scheduling, and CRM tasks?",
+        "answer": "Yes. SecuriVA's Text AI Agent automates email drafting, follow-ups, appointment scheduling, CRM record updates, ticket creation, document processing, and multi-platform notifications — reducing manual workload significantly."
+      },
+      {
+        "question": "Does SecuriVA provide voice and video interaction?",
+        "answer": "Yes. The AI Agent Voice module provides human-like voice conversations, 24/7 virtual phone support, automated call routing, identity verification, and avatar-based video interaction capabilities."
+      },
+      {
+        "question": "What platforms does SecuriVA integrate with?",
+        "answer": "SecuriVA integrates with: Email platforms (Gmail, Outlook), messaging apps (WhatsApp, SMS), CRMs (Salesforce, HubSpot), productivity suites (Microsoft 365, Google Workspace), e-commerce platforms (Shopify, WooCommerce), cloud infrastructure (AWS, Azure, Google Cloud), fintech and banking APIs, and any system accessible via REST, GraphQL, or WebSocket APIs."
+      },
+      {
+        "question": "Can I customize SecuriVA for my industry?",
+        "answer": "Absolutely. SecuriVA's AI adapts to industry-specific vocabulary, compliance requirements, workflow structures, and customer interaction standards. Custom models and workflows are available for healthcare, finance, education, government, logistics, agriculture, and more."
+      },
+      {
+        "question": "Does SecuriVA support real-time analytics?",
+        "answer": "Yes. The unified dashboard provides live insights including task performance metrics, customer interaction analytics, cybersecurity threat logs, workflow efficiency reports, and compliance status overviews."
+      },
+      {
+        "question": "Does SecuriVA support multi-agent workflows?",
+        "answer": "Yes. Organizations can orchestrate multiple specialized AI agents — for customer service, HR, finance, compliance, sales, and more — with shared context and coordinated task execution."
+      }
+    ]
+  },
+  {
+    "category": "VPN & Security FAQ",
+    "items": [
+      {
+        "question": "What is VPN Secure Access in SecuriVA?",
+        "answer": "VPN Secure Access is a native, enterprise-grade encrypted connectivity layer built directly into SecuriVA. It ensures that all voice interactions, API calls, automation workflows, and data exchanges occur within a protected private network — eliminating the need for third-party VPN subscriptions."
+      },
+      {
+        "question": "How does AI-driven threat detection work?",
+        "answer": "SecuriVA's cybersecurity engine actively scans all VPN and platform traffic in real time, detecting anomalous packet signatures, malicious API requests, identity fraud attempts, bot attack patterns, and data exfiltration signals — enabling proactive defense rather than reactive response."
+      },
+      {
+        "question": "Is MFA enforced on sensitive systems?",
+        "answer": "Yes. SecuriVA enforces multi-factor authentication, zero-trust device verification, identity validation, and dynamic session authorization for access to protected dashboards, financial systems, and mission-critical tools."
+      }
+    ]
+  },
+  {
+    "category": "Pricing & Billing",
+    "items": [
+      {
+        "question": "How is SecuriVA priced?",
+        "answer": "SecuriVA offers a flexible SaaS pricing model including: monthly and annual subscription plans (Basic, Premium, Enterprise), pay-per-use automation credits, enterprise licensing, white-label solutions, and consulting/professional services packages."
+      },
+      {
+        "question": "Can I cancel anytime?",
+        "answer": "Yes. Subscriptions may be cancelled before the next billing cycle with no penalty. Enterprise contracts may include specific notice provisions as outlined in your service agreement."
+      },
+      {
+        "question": "Do you offer enterprise or white-label versions?",
+        "answer": "Yes. SecuriVA provides fully tailored enterprise deployments, custom AI model configurations, dedicated security environments, white-label branding, and professional services engagements."
+      }
+    ]
+  },
+  {
+    "category": "Technical FAQ (For Developers)",
+    "items": [
+      {
+        "question": "What API architecture does SecuriVA use?",
+        "answer": "SecuriVA exposes RESTful APIs with OAuth 2.0 authentication. It also supports GraphQL and WebSocket endpoints, webhooks for real-time event delivery, and SDKs in Python, JavaScript/Node.js, PHP, .NET, and Java."
+      },
+      {
+        "question": "Is there a sandbox environment for testing?",
+        "answer": "Yes. All developer accounts include a secure sandbox environment for API testing, dummy data workflows, integration simulation, and performance benchmarking before production deployment."
+      },
+      {
+        "question": "How does SecuriVA handle authentication?",
+        "answer": "SecuriVA supports OAuth 2.0, JWT tokens, optional Single Sign-On (SSO), multi-factor authentication (MFA), and Role-Based Access Control (RBAC) for granular user-level permissions."
+      },
+      {
+        "question": "Can I deploy SecuriVA on-premise?",
+        "answer": "Yes. Enterprise clients may request on-premise or hybrid deployments with dedicated infrastructure, custom data residency configurations, and private cloud integrations."
+      }
+    ]
+  },
+  {
+    "category": "Compliance & Legal FAQ",
+    "items": [
+      {
+        "question": "Is SecuriVA GDPR compliant?",
+        "answer": "Yes. SecuriVA fully adheres to GDPR principles including lawful basis for processing, data minimization, purpose limitation, data subject access rights, right to erasure, data portability, and Standard Contractual Clauses (SCCs) for international data transfers."
+      },
+      {
+        "question": "Does SecuriVA support HIPAA compliance?",
+        "answer": "Yes. For healthcare data, SecuriVA functions as a Business Associate under HIPAA and provides Business Associate Agreements (BAAs). Protected Health Information (PHI) is handled under strict privacy and security safeguards."
+      },
+      {
+        "question": "How does SecuriVA protect user data?",
+        "answer": "User data is protected through: end-to-end encryption at rest and in transit (AES-256), role-based access control (RBAC), continuous SIEM monitoring, multi-factor authentication, zero-trust network architecture, regular penetration testing, and vulnerability assessments."
+      },
+      {
+        "question": "Where is data stored?",
+        "answer": "Data is stored in secure cloud regions selected during client onboarding. All international data transfers comply with applicable Standard Contractual Clauses (SCCs) and local regulatory requirements."
+      },
+      {
+        "question": "Does SecuriVA share data with third parties?",
+        "answer": "SecuriVA does not sell client data under any circumstances. Data is shared only with explicit user consent for third-party integrations, with trusted sub-processors bound by equivalent data protection obligations, or when legally required by law."
+      }
+    ]
+  }
+]
