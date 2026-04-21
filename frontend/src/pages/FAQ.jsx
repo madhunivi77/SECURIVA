@@ -1,15 +1,22 @@
 import { useState } from "react";
-import faqData from "../data/faqData.json";
+import faqData from "../data/faq/faqData.json";
+import faqData_fr from "../data/faq/faqData_fr.json";
 import { Search } from "lucide-react";
+import { useTranslation } from "react-i18next";
 
 export default function FAQ() {
     const [query, setQuery] = useState("");
+    const { t, i18n } = useTranslation();
 
-    const filtered = faqData
+    const data = i18n.language === "fr" ? faqData_fr : faqData;
+
+    const filtered = data
     .map(section => ({
       ...section,
       items: section.items.filter(item =>
-        section.category.toLowerCase().includes(query.toLowerCase()) || item.question.toLowerCase().includes(query.toLowerCase()) || item.answer.toLowerCase().includes(query.toLowerCase())
+        section.category.toLowerCase().includes(query.toLowerCase()) ||
+        item.question.toLowerCase().includes(query.toLowerCase()) ||
+        item.answer.toLowerCase().includes(query.toLowerCase())
       ),
     }))
     .filter(section => section.items.length > 0);
@@ -19,12 +26,12 @@ export default function FAQ() {
             {/* ---------- FAQ ---------- */}
             <section className="px-20 pb-20">
                 <h2 className="text-4xl font-mono text-center mb-5 pt-10">
-                    Frequently Asked Questions
+                    {t("faq.hero.title")}
                 </h2>
                 {/* Search bar */}
                 <div className="flex gap-2 border border-b-white rounded-2xl mx-auto w-125 p-2 mb-12">
                     <Search/>
-                    <input type="text" id="search-input" placeholder="Search" className="focus:outline-none focus:ring-0 flex-1" value={query}
+                    <input type="text" id="search-input" placeholder={t("faq.hero.search")} className="focus:outline-none focus:ring-0 flex-1" value={query}
                         onChange={(e) => setQuery(e.target.value)}/>
                 </div>
                 <div className="max-w-4xl mx-auto space-y-12">

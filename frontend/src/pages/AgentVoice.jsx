@@ -1,8 +1,10 @@
 import CapabilityCard from "../components/CapabilityCard";
 import { AudioLines, AudioWaveform, BadgeCheck, Languages, NotepadTextDashed, Send, Videotape } from "lucide-react";
 import SymmetricalChecklist from "../components/SymmetricalChecklist";
+import { useTranslation } from "react-i18next";
 
 export default function AgentVoice({ }) {
+    const { t } = useTranslation();
     return (
         <div className="min-h-screen bg-gray-100 dark:bg-gray-900">
 
@@ -10,10 +12,9 @@ export default function AgentVoice({ }) {
             <section className="hero pt-24 bg-linear-to-br bg-[#0a0f1f] text-white">
                 <div className="hero-content text-center max-w-4xl">
                     <div>
-                        <h1 className="text-5xl font-bold mb-6">AI Agent Voice: Intelligent Voice-to-Action Engine </h1>
+                        <h1 className="text-5xl font-bold mb-6">{t("agentVoice.hero.title")} </h1>
                         <p className="text-xl opacity-90">
-                            AI Voice is SecuriVA’s advanced vocal intelligence module that converts speech into smart text, contextualized messages, translations, and automated actions.
-                            Users simply speak, and SecuriVA understands, reformulates, translates, analyzes, and executes.
+                            {t("agentVoice.hero.description")}
                         </p>
                     </div>
                 </div>
@@ -40,147 +41,175 @@ export default function AgentVoice({ }) {
                     <div className="relative max-w-6xl mx-auto pt-10">
 
                         <h2 className="subheading">
-                            A Unified Intelligent Platform for Secure, Automated, AI-Driven Operations
+                            {t("agentVoice.overview.title")}
                         </h2>
-                        <p className="text-center backdrop-blur bg-gray-800/30 shadow-lg card p-10 mx-[15%] text-xl">Our platform is designed to support organizations of all sizes—across all industries—seeking to modernize their operations, protect their data, and elevate customer engagement.</p>
+                        <p className="text-center backdrop-blur bg-gray-800/30 shadow-lg card p-10 mx-[15%] text-xl">{t("agentVoice.overview.description")}</p>
                     </div>
                 </div>
             </section>
 
             <section className="flex flex-col gap-5 py-5 mx-[15%]">
-                <CapabilityCard icon={AudioLines} label={"High-Accuracy Voice-to-Text"} description={"Instant conversion of speech into structured text, regardless of speed, accent, or language."} />
-                <CapabilityCard icon={NotepadTextDashed} label={"Intelligent Rewriting by Tone"} description={"From the dictated text, the agent generates optimized versions in different tones"} />
-                <CapabilityCard icon={Languages} label={"Automatic Multilingual Translation"} description={"Seamless translation into any language: EN, FR, ES, AR, Lingala, Swahili, Mandarin, Portuguese, etc."} />
-                <CapabilityCard icon={Send} label={"Automated Sending Across Channels"} description={"After user validation, AI Voice can send the message via:"} content=
+                <CapabilityCard icon={AudioLines} label={t("agentVoice.capabilities.voiceToText.label")} description={t("agentVoice.capabilities.voiceToText.description")} />
+                <CapabilityCard icon={NotepadTextDashed} label={t("agentVoice.capabilities.rewriting.label")} description={t("agentVoice.capabilities.rewriting.description")} />
+                <CapabilityCard icon={Languages} label={t("agentVoice.capabilities.translation.label")} description={t("agentVoice.capabilities.translation.description")} />
+                <CapabilityCard icon={Send} label={t("agentVoice.capabilities.sending.label")} description={t("agentVoice.capabilities.sending.description")} content=
                     {
-                        <SymmetricalChecklist items={["Email",
-                            "SMS / Text",
-                            "WhatsApp",
-                            "Messenger",
-                            "Slack",
-                            "Internal CRM",
-                            "Custom APIs"
-                        ]} />
+                        <SymmetricalChecklist items={t("agentVoice.capabilities.sending.items", { returnObjects: true })} />
                     } />
-                <CapabilityCard icon={Videotape} label={"Meeting Listening, Recording & Smart Reporting"} description={"AI Voice becomes an intelligent meeting assistant, capable of:"} content=
-                    {
+                <CapabilityCard
+                    icon={Videotape}
+                    label={t("agentVoice.capabilities.meetings.label")}
+                    description={t("agentVoice.capabilities.meetings.description")}
+                    content={
                         <div className="flex flex-col gap-5">
+
+                            {/* Listening */}
                             <div className="rounded-2xl p-6">
-                                <h3 className="text-xl font-medium text-gray-900 dark:text-white mb-1">Listening to Live Meetings</h3>
-                                <p className="text-[19px] text-gray-500 dark:text-blue-300 mb-4">The agent can join or capture:</p>
-                                <SymmetricalChecklist items={[
-                                    "Virtual meetings (Zoom, Teams, Google Meet, etc.)",
-                                    "In-person meetings (via microphone)",
-                                    "Conference calls",
-                                    "Business calls",
-                                ]} size={"3.5"} />
-                            </div>
-                            <div className="border border-gray-700 mx-[15%]" />
-                            <div className="rounded-2xl p-6">
-                                <h3 className="text-xl font-medium text-gray-900 dark:text-white mb-1">Recording and Analyzing Audio</h3>
-                                <p className="text-[19px] text-gray-500 dark:text-blue-300 mb-4">The agent:</p>
-                                <SymmetricalChecklist items={[
-                                    "Records continuous audio",
-                                    "Detects speakers",
-                                    "Automatically segments discussion topics",
-                                ]} size={"3.5"} />
+                                <h3 className="text-xl font-medium mb-1">
+                                    {t("agentVoice.capabilities.meetings.listening.title")}
+                                </h3>
+                                <p className="mb-4">
+                                    {t("agentVoice.capabilities.meetings.listening.subtitle")}
+                                </p>
+                                <SymmetricalChecklist
+                                    items={t("agentVoice.capabilities.meetings.listening.items", { returnObjects: true })}
+                                    size={"3.5"}
+                                />
                             </div>
 
-                            <div className="border border-gray-700 mx-[15%]" />
+                            <div className="border mx-[15%]" />
 
+                            {/* Recording */}
                             <div className="rounded-2xl p-6">
-                                <h3 className="text-xl font-medium text-gray-900 dark:text-white mb-1">Generating Detailed Reports</h3>
-                                <p className="text-[19px] text-gray-500 dark:text-blue-300 mb-4">At the end of the meeting, SecuriVA automatically produces:</p>
-
-                                <p className="text-[15px] font-medium text-gray-700 dark:text-blue-200 mb-2">Executive Summary</p>
-                                <SymmetricalChecklist items={[
-                                    "Objectives",
-                                    "Key decisions",
-                                    "Action items",
-                                    "Responsible persons",
-                                    "Deadlines",
-                                ]} size={"3.5"} />
-
-                                <p className="text-[15px] font-medium text-gray-700 dark:text-blue-200 mt-4 mb-2">Full Report</p>
-                                <SymmetricalChecklist items={[
-                                    "Complete transcript",
-                                    "Summary per speaker",
-                                    "Summary per topic",
-                                    "Risk alerts, opportunities, and insights",
-                                    "Tone and coherence analysis",
-                                ]} size={"3.5"} />
+                                <h3 className="text-xl font-medium mb-1">
+                                    {t("agentVoice.capabilities.meetings.recording.title")}
+                                </h3>
+                                <p className="mb-4">
+                                    {t("agentVoice.capabilities.meetings.recording.subtitle")}
+                                </p>
+                                <SymmetricalChecklist
+                                    items={t("agentVoice.capabilities.meetings.recording.items", { returnObjects: true })}
+                                    size={"3.5"}
+                                />
                             </div>
 
-                            <div className="border border-gray-700 mx-[15%]" />
+                            <div className="border mx-[15%]" />
 
+                            {/* Reports */}
                             <div className="rounded-2xl p-6">
-                                <h3 className="text-xl font-medium text-gray-900 dark:text-white mb-1">Export in Multiple Formats</h3>
-                                <p className="text-[19px] text-gray-500 dark:text-blue-300 mb-4">Users can download the report in:</p>
-                                <SymmetricalChecklist items={[
-                                    "PDF",
-                                    "Word (DOCX)",
-                                    "Text (TXT)",
-                                    "Markdown",
-                                    "CSV (task lists)",
-                                ]} size={"3.5"} />
+                                <h3 className="text-xl font-medium mb-1">
+                                    {t("agentVoice.capabilities.meetings.reports.title")}
+                                </h3>
+                                <p className="mb-4">
+                                    {t("agentVoice.capabilities.meetings.reports.subtitle")}
+                                </p>
+
+                                <p className="mb-2">
+                                    {t("agentVoice.capabilities.meetings.reports.executive.title")}
+                                </p>
+                                <SymmetricalChecklist
+                                    items={t("agentVoice.capabilities.meetings.reports.executive.items", { returnObjects: true })}
+                                    size={"3.5"}
+                                />
+
+                                <p className="mt-4 mb-2">
+                                    {t("agentVoice.capabilities.meetings.reports.full.title")}
+                                </p>
+                                <SymmetricalChecklist
+                                    items={t("agentVoice.capabilities.meetings.reports.full.items", { returnObjects: true })}
+                                    size={"3.5"}
+                                />
                             </div>
 
-                            <div className="border border-gray-700 mx-[15%]" />
+                            <div className="border mx-[15%]" />
 
+                            {/* Export */}
                             <div className="rounded-2xl p-6">
-                                <h3 className="text-xl font-medium text-gray-900 dark:text-white mb-1">Automatic Distribution</h3>
-                                <p className="text-[19px] text-gray-500 dark:text-blue-300 mb-4">Through voice command, SecuriVA can:</p>
-                                <SymmetricalChecklist items={[
-                                    "Send the report by email",
-                                    "Share it via WhatsApp / Slack",
-                                    "Archive it in cloud storage",
-                                    "Forward it to a team or partner",
-                                ]} size={"3.5"} />
+                                <h3 className="text-xl font-medium mb-1">
+                                    {t("agentVoice.capabilities.meetings.export.title")}
+                                </h3>
+                                <p className="mb-4">
+                                    {t("agentVoice.capabilities.meetings.export.subtitle")}
+                                </p>
+                                <SymmetricalChecklist
+                                    items={t("agentVoice.capabilities.meetings.export.items", { returnObjects: true })}
+                                    size={"3.5"}
+                                />
                             </div>
+
+                            <div className="border mx-[15%]" />
+
+                            {/* Distribution */}
+                            <div className="rounded-2xl p-6">
+                                <h3 className="text-xl font-medium mb-1">
+                                    {t("agentVoice.capabilities.meetings.distribution.title")}
+                                </h3>
+                                <p className="mb-4">
+                                    {t("agentVoice.capabilities.meetings.distribution.subtitle")}
+                                </p>
+                                <SymmetricalChecklist
+                                    items={t("agentVoice.capabilities.meetings.distribution.items", { returnObjects: true })}
+                                    size={"3.5"}
+                                />
+                            </div>
+
                         </div>
-                    } />
+                    }
+                />
 
 
-                <CapabilityCard icon={AudioWaveform} label={"Advanced Voice Commands"} description={"Examples:"} content=
-                    {
+                <CapabilityCard
+                    icon={AudioWaveform}
+                    label={t("agentVoice.capabilities.commands.label")}
+                    description={t("agentVoice.capabilities.commands.description")}
+                    content={
                         <div className="flex flex-wrap gap-2">
-                            {[
-                                "“SecuriVA, listen and record the meeting.”",
-                                "“Generate a professional report and send it to the team.”",
-                                "“Summarize the conversation in a formal tone.”",
-                                "“Translate the report to Spanish and export it as PDF.”",
-                            ].map((feature, index) => (
+                            {t("agentVoice.capabilities.commands.items", { returnObjects: true }).map((item, index) => (
                                 <span
-                                    key={feature}
+                                    key={item}
                                     className="inline-flex items-center gap-1.5 rounded-lg bg-blue-50 border border-blue-100 px-3 py-1 text-lg text-blue-700 dark:bg-blue-950 dark:border-blue-900 dark:text-blue-300"
                                 >
-                                    <p className="text-lg stroke-blue-500 dark:stroke-blue-400">{index+1}.{feature}</p>
+                                    <p className="text-lg">
+                                        {index + 1}. {item}
+                                    </p>
                                 </span>
                             ))}
                         </div>
-                    } />
-                <CapabilityCard icon={BadgeCheck} label={"Compliance & Smart History"} content=
-                    {
+                    }
+                />
+                <CapabilityCard
+                    icon={BadgeCheck}
+                    label={t("agentVoice.capabilities.compliance.label")}
+                    content={
                         <div className="flex flex-col gap-5">
+
+                            {/* Saves */}
                             <div className="rounded-2xl p-6">
-                                <h3 className="text-xl font-medium text-gray-900 dark:text-white mb-1">The agent saves:</h3>
-                                <SymmetricalChecklist items={[
-                                    "Authorized recordings",
-                                    "Generated reports",
-                                    "Sent messages"
-                                ]} size={"3.5"} />
+                                <h3 className="text-xl font-medium mb-1">
+                                    {t("agentVoice.capabilities.compliance.saves.title")}
+                                </h3>
+                                <SymmetricalChecklist
+                                    items={t("agentVoice.capabilities.compliance.saves.items", { returnObjects: true })}
+                                    size={"3.5"}
+                                />
                             </div>
-                            <div className="border border-gray-700 mx-[15%]" />
+
+                            <div className="border mx-[15%]" />
+
+                            {/* Protection */}
                             <div className="rounded-2xl p-6">
-                                <h3 className="text-xl font-medium text-gray-900 dark:text-white mb-1">With protections:</h3>
-                                <SymmetricalChecklist items={[
-                                    "GDPR / PIPEDA compliance",
-                                    "Access control",
-                                    "Encrypted audio storage"
-                                ]} size={"3.5"} />
+                                <h3 className="text-xl font-medium mb-1">
+                                    {t("agentVoice.capabilities.compliance.protection.title")}
+                                </h3>
+                                <SymmetricalChecklist
+                                    items={t("agentVoice.capabilities.compliance.protection.items", { returnObjects: true })}
+                                    size={"3.5"}
+                                />
                             </div>
+
                         </div>
-                    } />
+                    }
+                />
             </section>
         </div>
     );

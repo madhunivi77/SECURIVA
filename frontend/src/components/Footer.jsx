@@ -1,123 +1,169 @@
 import { HashLink } from 'react-router-hash-link';
 import { Link } from 'react-router-dom';
+import { useTranslation } from "react-i18next";
 import Copyright from './Copyright';
 
 export default function Footer() {
+  const { t } = useTranslation();
   const textColor = "#ffffff";
 
   return (
     <div>
-    <footer
-      style={{
-        background: "#052050", // BLUE main footer
-        color: textColor,
-        width: "100%",
-        flexShrink: 0,
-      }}
-    >
-      <div className="flex justify-center pt-10">
-        <img
-          src="/LOGO_SECURIVA_FINAL.png"
-          alt="Footer Logo"
-          className="h-20 object-contain"
-        />
-      </div>
-
-      <style>{`
-        .sec-footer-inner {
-          max-width: 1200px;
-          margin: 0 auto;
-          padding: 40px 20px;
-        }
-
-        .sec-footer-grid {
-          display: grid;
-          grid-template-columns: 1fr;
-          gap: 32px;
-        }
-
-        @media (min-width: 768px) {
-          .sec-footer-grid {
-            grid-template-columns: repeat(3, 1fr);
-          }
-        }
-
-        .sec-footer-col h2 {
-          margin-bottom: 12px;
-          font-size: 1.05rem;
-          font-weight: 600;
-        }
-
-        .sec-footer-col ul {
-          margin: 0;
-          padding-left: 1.1rem;
-          line-height: 1.7;
-        }
-
-        .sec-footer-col li {
-          margin: 6px 0;
-        }
-
-        .sec-footer-col a {
-          color: rgba(255,255,255,0.8);
-          text-decoration: none;
-        }
-
-        .sec-footer-col a:hover {
-          color: white;
-        }
-      `}</style>
-
-      {/* Main footer */}
-      <div className="sec-footer-inner">
-        <div className="sec-footer-grid">
-
-          {/* Industries */}
-          <div className="sec-footer-col">
-            <Link to={"/industries"}><h2>Industries</h2></Link>
-            <ul>
-              <li><HashLink smooth scroll={scrollWithOffset} to='/industries/#healthcare'>Healthcare</HashLink></li>
-              <li><HashLink smooth scroll={scrollWithOffset} to='/industries/#fintech'>Finance &amp; Fintech</HashLink></li>
-              <li><HashLink smooth scroll={scrollWithOffset} to='/industries/#ecommerce'>E-commerce</HashLink></li>
-              <li><HashLink smooth scroll={scrollWithOffset} to='/industries/#smb'>SMBs</HashLink></li>
-              <li><HashLink smooth scroll={scrollWithOffset} to='/industries/#agriculture'>Agriculture</HashLink></li>
-              <li><HashLink smooth scroll={scrollWithOffset} to='/industries/#education'>Education</HashLink></li>
-              <li><HashLink smooth scroll={scrollWithOffset} to='/industries/#nonprofit'>Non Profit</HashLink></li>
-              <li><HashLink smooth scroll={scrollWithOffset} to='/industries/#government'>Government</HashLink></li>
-            </ul>
-          </div>
-
-          {/* Resources */}
-          <div className="sec-footer-col">
-            <h2>Resources</h2>
-            <ul>
-              <li><a href="#">Blog</a></li>
-              <li><a href="#">eBooks &amp; Whitepapers</a></li>
-              <li><a href="#">Affiliates</a></li>
-              <li><a href="#">Partnerships</a></li>
-              <li><a href="#">Media Kit</a></li>
-              <li><a href="#">Webinars</a></li>
-              <li><a href="#">API Documentation</a></li>
-            </ul>
-          </div>
-
-          {/* Legal */}
-          <div className="sec-footer-col">
-            <h2>Legal</h2>
-            <ul>
-              <li><a href="#">Privacy Policy</a></li>
-              <li><a href="#">Terms of Service</a></li>
-              <li><a href="#">Data Protection Policy</a></li>
-              <li><a href="#">Cookie Preferences</a></li>
-              <li><a href="#">Accessibility Statement</a></li>
-            </ul>
-          </div>
-
+      <footer
+        style={{
+          background: "#052050",
+          color: textColor,
+          width: "100%",
+          flexShrink: 0,
+        }}
+      >
+        <div className="flex justify-center pt-10">
+          <img
+            src="/LOGO_SECURIVA_FINAL.png"
+            alt="Footer Logo"
+            className="h-20 object-contain"
+          />
         </div>
-      </div>
 
-      <Copyright />
-    </footer>
+        <style>{`
+          .sec-footer-inner {
+            max-width: 1200px;
+            margin: 0 auto;
+            padding: 40px 20px;
+          }
+
+          .sec-footer-grid {
+            display: grid;
+            grid-template-columns: 1fr;
+            gap: 32px;
+          }
+
+          @media (min-width: 768px) {
+            .sec-footer-grid {
+              grid-template-columns: repeat(3, 1fr);
+            }
+          }
+
+          .sec-footer-col h2 {
+            margin-bottom: 12px;
+            font-size: 1.05rem;
+            font-weight: 600;
+          }
+
+          .sec-footer-col ul {
+            margin: 0;
+            padding-left: 1.1rem;
+            line-height: 1.7;
+          }
+
+          .sec-footer-col li {
+            margin: 6px 0;
+          }
+
+          .sec-footer-col a {
+            color: rgba(255,255,255,0.8);
+            text-decoration: none;
+          }
+
+          .sec-footer-col a:hover {
+            color: white;
+          }
+        `}</style>
+
+        {/* Main footer */}
+        <div className="sec-footer-inner">
+          <div className="sec-footer-grid">
+
+            {/* Industries */}
+            <div className="sec-footer-col">
+              <Link to={"/industries"}>
+                <h2>{t("footer.industries.title")}</h2>
+              </Link>
+
+              <ul>
+                <li>
+                  <HashLink smooth scroll={scrollWithOffset} to='/industries/#healthcare'>
+                    {t("footer.industries.items.healthcare")}
+                  </HashLink>
+                </li>
+
+                <li>
+                  <HashLink smooth scroll={scrollWithOffset} to='/industries/#fintech'>
+                    {t("footer.industries.items.finance")}
+                  </HashLink>
+                </li>
+
+                <li>
+                  <HashLink smooth scroll={scrollWithOffset} to='/industries/#ecommerce'>
+                    {t("footer.industries.items.ecommerce")}
+                  </HashLink>
+                </li>
+
+                <li>
+                  <HashLink smooth scroll={scrollWithOffset} to='/industries/#smb'>
+                    {t("footer.industries.items.smb")}
+                  </HashLink>
+                </li>
+
+                <li>
+                  <HashLink smooth scroll={scrollWithOffset} to='/industries/#agriculture'>
+                    {t("footer.industries.items.agriculture")}
+                  </HashLink>
+                </li>
+
+                <li>
+                  <HashLink smooth scroll={scrollWithOffset} to='/industries/#education'>
+                    {t("footer.industries.items.education")}
+                  </HashLink>
+                </li>
+
+                <li>
+                  <HashLink smooth scroll={scrollWithOffset} to='/industries/#nonprofit'>
+                    {t("footer.industries.items.nonprofit")}
+                  </HashLink>
+                </li>
+
+                <li>
+                  <HashLink smooth scroll={scrollWithOffset} to='/industries/#government'>
+                    {t("footer.industries.items.government")}
+                  </HashLink>
+                </li>
+              </ul>
+            </div>
+
+            {/* Resources */}
+            <div className="sec-footer-col">
+              <h2>{t("footer.resources.title")}</h2>
+
+              <ul>
+                <li><a href="#">{t("footer.resources.items.blog")}</a></li>
+                <li><a href="#">{t("footer.resources.items.ebooks")}</a></li>
+                <li><a href="#">{t("footer.resources.items.affiliates")}</a></li>
+                <li><a href="#">{t("footer.resources.items.partnerships")}</a></li>
+                <li><a href="#">{t("footer.resources.items.mediaKit")}</a></li>
+                <li><a href="#">{t("footer.resources.items.webinars")}</a></li>
+                <li><a href="#">{t("footer.resources.items.apiDocs")}</a></li>
+              </ul>
+            </div>
+
+            {/* Legal */}
+            <div className="sec-footer-col">
+              <h2>{t("footer.legal.title")}</h2>
+
+              <ul>
+                <li><a href="#">{t("footer.legal.items.privacy")}</a></li>
+                <li><a href="#">{t("footer.legal.items.terms")}</a></li>
+                <li><a href="#">{t("footer.legal.items.dataProtection")}</a></li>
+                <li><a href="#">{t("footer.legal.items.cookies")}</a></li>
+                <li><a href="#">{t("footer.legal.items.accessibility")}</a></li>
+              </ul>
+            </div>
+
+          </div>
+        </div>
+
+        <Copyright />
+      </footer>
     </div>
   );
 }
