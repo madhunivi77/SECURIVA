@@ -25,6 +25,7 @@ dependencies = [
     "setuptools>=80.9.0",
     "boto3>=1.42.55",
     "watchtower>=3.3.0",
+    "stripe>=11.6.0",
 ]
 
 [tool.setuptools]

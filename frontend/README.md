@@ -255,7 +255,7 @@ const assistantConfig = {
     voiceId: 'asteria'  // Female voice
   },
   firstMessage: 'Hi! How can I help you today?',
-  serverUrl: `${serverUrl}/api/vapi/webhook`
+  serverUrl: `${serverUrl}/api/vapi/events`
 };
 ```
 
@@ -301,15 +301,22 @@ The widget handles these VAPI events:
 
 ### Authentication Flow
 
-If the user is logged in (has `api_key` cookie), it's embedded in the system message:
+If the user is logged in (has `api_key` cookie), frontend requests a short-lived voice session token from backend and passes it in VAPI metadata:
 
 ```javascript
-const systemContent = apiKey
-  ? `You are SECURIVA... [AUTH:${apiKey}]`
-  : 'You are SECURIVA...';
+const res = await fetch('http://localhost:8000/api/voice-session', {
+  method: 'POST',
+  credentials: 'include'
+});
+
+const { voice_token } = await res.json();
+
+assistantOverrides: {
+  metadata: voice_token ? { voiceToken: voice_token } : {}
+}
 ```
 
-The backend extracts this token to authenticate MCP tool access.
+The backend validates this `voiceToken` and uses it to authorize MCP tool access.
 
 ### Styling
 
