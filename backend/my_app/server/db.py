@@ -12,6 +12,7 @@ import time
 from botocore.exceptions import ClientError
 from boto3.dynamodb.conditions import Key
 import traceback
+from pathlib import Path
 from .api_key_manager import validate_api_key
 import os
 from openai import OpenAI
@@ -56,7 +57,8 @@ def get_authenticated_user(request: Request):
         print("No api_key cookie found")
         return None
 
-    user_id = validate_api_key(api_key)
+    oauth_file = Path(__file__).parent / "oauth.json"
+    user_id = validate_api_key(api_key, oauth_file)
 
     if not user_id:
         print("Invalid api_key")

@@ -1,20 +1,15 @@
 import { useState, useEffect } from "react";
-import { MessageSquarePlus, Trash2 , ArrowLeft} from "lucide-react";
+import { MessageSquarePlus, Trash2, ArrowLeft } from "lucide-react";
 import { useNavigate } from "react-router-dom";
 
 function ChatSidebar({ onNewChat, onSelectChat }) {
   const [conversations, setConversations] = useState([]);
   const navigate = useNavigate();
 
-  
   const loadConversations = async () => {
     try {
-      const res = await fetch("http://localhost:8000/chat/list", {
-        credentials: "include"
-      });
-
+      const res = await fetch("/chat/list", { credentials: "include" });
       if (!res.ok) return;
-
       const data = await res.json();
       setConversations(data.conversations || []);
     } catch (err) {
@@ -26,72 +21,68 @@ function ChatSidebar({ onNewChat, onSelectChat }) {
     loadConversations();
   }, []);
 
-  
   const handleDelete = async (version, e) => {
-    e.stopPropagation(); 
-
+    e.stopPropagation();
     try {
-      await fetch(
-        `http://localhost:8000/chat/delete_by_version?version=${version}`,
-        {
-          method: "DELETE",
-          credentials: "include"
-        }
+      await fetch(`/chat/delete_by_version?version=${version}`, {
+        method: "DELETE",
+        credentials: "include",
+      });
+      setConversations((prev) =>
+        prev.filter((chat) => chat.version !== version)
       );
-
-      
-      setConversations(prev =>
-        prev.filter(chat => chat.version !== version)
-      );
-
     } catch (err) {
       console.error("Failed to delete chat", err);
     }
   };
 
   return (
-    <aside className="w-64 bg-gray-900 text-white flex flex-col">
-      <div className="p-4 text-xl font-semibold border-b border-gray-700 flex items-center gap-3">
-        <ArrowLeft
-          size={20}
-          className="cursor-pointer hover:text-blue-400 transition"
+    <aside className="w-64 shrink-0 bg-white border-r border-zinc-200 flex flex-col">
+      <div className="h-14 px-4 flex items-center gap-2.5 border-b border-zinc-200">
+        <button
           onClick={() => navigate("/dashboard")}
-        />
-        <span>Chat</span>
+          className="w-7 h-7 rounded-md flex items-center justify-center text-zinc-500 hover:bg-zinc-100 hover:text-zinc-900 transition-colors"
+          aria-label="Back"
+        >
+          <ArrowLeft size={16} />
+        </button>
+        <span className="text-sm font-semibold tracking-tight text-zinc-900">
+          Chats
+        </span>
       </div>
 
-      {/* new chat button */}
-      <button
-        onClick={onNewChat}
-        className="m-3 w-[85%] mx-auto flex items-center justify-center gap-2 bg-white text-black font-medium p-3 rounded-lg"
-      >
-        <MessageSquarePlus size={18} />
-        New Chat
-      </button>
+      <div className="p-3">
+        <button
+          onClick={onNewChat}
+          className="w-full flex items-center justify-center gap-2 bg-zinc-900 text-white text-sm font-medium py-2 rounded-md hover:bg-zinc-800 transition-colors"
+        >
+          <MessageSquarePlus size={16} />
+          New chat
+        </button>
+      </div>
 
-      {/* conversation list */}
-      <div className="flex-1 overflow-y-auto px-3">
+      <div className="flex-1 overflow-y-auto px-2 pb-2">
         {conversations.length === 0 ? (
-          <div className="text-sm text-gray-400 mt-4">
+          <div className="text-xs text-zinc-500 px-3 py-2">
             No previous chats yet
           </div>
         ) : (
-          conversations.map((chat) => (
-            <div
-              key={chat.version}
-              onClick={() => onSelectChat(chat.version)}
-              className="mt-3 p-3 bg-gray-800 hover:bg-gray-700 rounded-lg cursor-pointer text-sm flex justify-between items-center group"
-            >
-              <span>{chat.title}</span>
-
-              {/* Trash Icon */}
-              <Trash2
-                size={16}
-                className="text-gray-400 hover:text-red-500 opacity-0 group-hover:opacity-100 transition cursor-pointer"
-                onClick={(e) => handleDelete(chat.version, e)}
-              />
-            </div>
-          ))
+          <div className="space-y-0.5">
+            {conversations.map((chat) => (
+              <div
+                key={chat.version}
+                onClick={() => onSelectChat(chat.version)}
+                className="group px-2.5 py-2 rounded-md cursor-pointer text-sm flex justify-between items-center gap-2 text-zinc-700 hover:bg-zinc-100 hover:text-zinc-900 transition-colors"
+              >
+                <span className="truncate flex-1">{chat.title}</span>
+                <Trash2
+                  size={14}
+                  className="text-zinc-400 hover:text-red-600 opacity-0 group-hover:opacity-100 transition shrink-0"
+                  onClick={(e) => handleDelete(chat.version, e)}
+                />
+              </div>
+            ))}
+          </div>
         )}
       </div>
     </aside>

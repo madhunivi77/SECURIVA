@@ -29,6 +29,9 @@ import AgentVoice from './pages/AgentVoice.jsx';
 import AgentText from './pages/AgentText.jsx';
 import Cybersecurity from './pages/Cybersecurity.jsx';
 import VPN from './pages/VPN.jsx';
+import Integrations from './pages/Integrations.jsx';
+import Home from './pages/Home.jsx';
+import Logs from './pages/Logs.jsx';
 
 const router = createBrowserRouter([
   {
@@ -118,7 +121,7 @@ const router = createBrowserRouter([
         children: [
           {
             index: true,
-            element: <AutomationGrid />,
+            element: <Home />,
           },
           {
             path: 'chat',
@@ -127,6 +130,14 @@ const router = createBrowserRouter([
           {
             path: 'voice',
             element: <VoiceTest />,
+          },
+          {
+            path: 'logs',
+            element: <Logs />,
+          },
+          {
+            path: 'integrations',
+            element: <Integrations />,
           }
         ]
       }

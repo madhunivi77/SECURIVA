@@ -1,6 +1,6 @@
 ﻿from starlette.applications import Starlette
 from starlette.routing import Route
-from starlette.responses import HTMLResponse, JSONResponse, Response, RedirectResponse
+from starlette.responses import HTMLResponse, JSONResponse, Response, RedirectResponse, StreamingResponse
 from google_auth_oauthlib.flow import Flow
 import json
 import bcrypt
@@ -11,12 +11,16 @@ import secrets
 import httpx
 from datetime import datetime, timedelta, timezone
 from pathlib import Path
-from .chat_handler import execute_chat_with_tools
+from .chat_handler import (
+    execute_chat_with_tools,
+    execute_chat_with_tools_stream,
+    ensure_tool_catalog_ready,
+)
 from .salesforce_app import salesforce_app
 from .db import db_app
-from .security_tools import security_app
 from .api_key_manager import generate_api_key, store_api_key, validate_api_key
-from .salesforce_utils import load_oauth_data, save_oauth_data
+from .activity_logger import log_activity, get_activity_logs
+from .security_tools import security_app
 from .telesign_auth import (
     send_whatsapp_message,
     send_sms,
@@ -69,10 +73,7 @@ SESSION_COOKIE_MAX_AGE = 30 * 24 * 3600  # 30 days
 import logging
 from logging.handlers import RotatingFileHandler
 
-if ENVIRONMENT == "production":
-    log_path = Path("/tmp") / "ai_calls.log"
-else:
-    log_path = Path(__file__).parent / "ai_calls.log"
+log_path = Path(__file__).parent / "ai_calls.log"
 handler = RotatingFileHandler(log_path, maxBytes=5_000_000, backupCount=5, encoding="utf-8")
 
 logging.basicConfig(
@@ -127,17 +128,19 @@ async def api_status(request):
     salesforce_connected = False
 
     if api_key:
-        user_id = validate_api_key(api_key)
+        oauth_file = Path(__file__).parent / "oauth.json"
+        user_id = validate_api_key(api_key, oauth_file)
 
         if user_id:
             authenticated = True
             try:
-                data = load_oauth_data()
-                for user in data.get("users", []):
-                    if user.get("user_id") == user_id:
-                        user_email = user.get("email")
-                        salesforce_connected = "salesforce" in user.get("services", {})
-                        break
+                with open(oauth_file, "r") as f:
+                    data = json.load(f)
+                    for user in data.get("users", []):
+                        if user.get("user_id") == user_id:
+                            user_email = user.get("email")
+                            salesforce_connected = "salesforce" in user.get("services", {})
+                            break
             except:
                 pass
 
@@ -176,7 +179,12 @@ async def callback(request):
         except:
             pass
 
-        data = load_oauth_data()
+        oauth_file = Path(__file__).parent / "oauth.json"
+        if oauth_file.exists():
+            with open(oauth_file, "r") as f:
+                data = json.load(f)
+        else:
+            data = {"users": []}
 
         users = data.get("users", [])
         user_entry = None
@@ -207,10 +215,14 @@ async def callback(request):
         }
 
         data["users"] = users
-        save_oauth_data(data)
+
+        with open(oauth_file, "w") as f:
+            json.dump(data, f, indent=2)
 
         api_key = generate_api_key()
-        store_api_key(user_id, api_key)
+        store_api_key(user_id, api_key, oauth_file)
+
+        log_activity("signin", user_email=user_email, user_id=user_id, details={"method": "google_oauth"})
 
         response = RedirectResponse(
             url=f"{FRONTEND_URL}?auth=success&email={user_email}",
@@ -230,6 +242,7 @@ async def callback(request):
         return response
 
     except Exception as e:
+        log_activity("signin", error=str(e), details={"method": "google_oauth"})
         print(f"OAuth callback error: {e}")
         return JSONResponse(
             {"error": f"Authentication failed: {str(e)}"},
@@ -238,6 +251,25 @@ async def callback(request):
 
 async def api_logout(request):
     """Clear authentication cookies and logout."""
+    # Try to identify the user before clearing cookies
+    api_key = request.cookies.get("api_key")
+    user_email = None
+    if api_key:
+        oauth_file = Path(__file__).parent / "oauth.json"
+        user_id = validate_api_key(api_key, oauth_file)
+        if user_id:
+            try:
+                with open(oauth_file, "r") as f:
+                    data = json.load(f)
+                    for user in data.get("users", []):
+                        if user.get("user_id") == user_id:
+                            user_email = user.get("email")
+                            break
+            except:
+                pass
+
+    log_activity("logout", user_email=user_email)
+
     response = JSONResponse({
         "status": "ok",
         "message": "Logged out successfully"
@@ -259,7 +291,8 @@ async def api_chat(request):
                 status_code=401
             )
 
-        user_id = validate_api_key(api_key)
+        oauth_file = Path(__file__).parent / "oauth.json"
+        user_id = validate_api_key(api_key, oauth_file)
 
         if not user_id:
             return JSONResponse(
@@ -281,6 +314,16 @@ async def api_chat(request):
         result = await execute_chat_with_tools(messages, model, api, user_id)
         log_ai_call(user_id, model, messages, result)
 
+        # Count user messages (exclude system)
+        user_msgs = [m for m in messages if m.get("role") == "user"]
+        tool_calls = result.get("tool_calls", [])
+        log_activity("chat", user_id=user_id, details={
+            "model": model,
+            "api": api,
+            "user_message": user_msgs[-1].get("content", "")[:200] if user_msgs else "",
+            "tool_calls_count": len(tool_calls) if tool_calls else 0,
+        })
+
         return JSONResponse(result)
 
     except json.JSONDecodeError:
@@ -289,11 +332,81 @@ async def api_chat(request):
             status_code=400
         )
     except Exception as e:
+        log_activity("chat", user_id=user_id if 'user_id' in dir() else None, error=str(e))
         print(f"Internal error: {str(e)}")
         return JSONResponse(
             {"error": "An internal error occurred"},
             status_code=500
         )
+
+
+async def api_chat_stream(request):
+    """Streaming chat — Server-Sent Events.
+
+    Auth: cookie api_key → user_id.
+    Body: {"messages": [...], "model"?: str, "api"?: str}
+    Stream: lines of `data: <json>\\n\\n` where each json is an event dict
+    (see execute_chat_with_tools_stream). Terminates with `data: [DONE]\\n\\n`.
+    """
+    api_key = request.cookies.get("api_key")
+    if not api_key:
+        return JSONResponse({"error": "Not authenticated"}, status_code=401)
+
+    oauth_file = Path(__file__).parent / "oauth.json"
+    user_id = validate_api_key(api_key, oauth_file)
+    if not user_id:
+        return JSONResponse({"error": "Invalid or expired API key"}, status_code=401)
+
+    try:
+        body = await request.json()
+    except json.JSONDecodeError:
+        return JSONResponse({"error": "Invalid JSON"}, status_code=400)
+
+    messages = body.get("messages", [])
+    model = body.get("model")
+    api = body.get("api")
+
+    if not messages or not isinstance(messages, list):
+        return JSONResponse(
+            {"error": "'messages' array is required"}, status_code=400
+        )
+
+    async def sse():
+        tool_call_names: list[str] = []
+        try:
+            async for event in execute_chat_with_tools_stream(
+                messages, model, api, user_id
+            ):
+                if event.get("type") == "tool_end" and event.get("name"):
+                    tool_call_names.append(event["name"])
+                yield f"data: {json.dumps(event, default=str)}\n\n"
+        except Exception as e:
+            err = {"type": "error", "error": str(e)}
+            yield f"data: {json.dumps(err)}\n\n"
+        finally:
+            yield "data: [DONE]\n\n"
+            # Log activity after the stream finishes
+            try:
+                user_msgs = [m for m in messages if m.get("role") == "user"]
+                log_activity("chat", user_id=user_id, details={
+                    "model": model, "api": api,
+                    "user_message": (user_msgs[-1].get("content", "")[:200] if user_msgs else ""),
+                    "tool_calls_count": len(tool_call_names),
+                    "stream": True,
+                })
+            except Exception:
+                pass
+
+    return StreamingResponse(
+        sse(),
+        media_type="text/event-stream",
+        headers={
+            "Cache-Control": "no-cache",
+            "Connection": "keep-alive",
+            "X-Accel-Buffering": "no",
+        },
+    )
+
 
 # Telesign endpoints (add authentication in production)
 async def api_send_sms(request):
@@ -311,8 +424,10 @@ async def api_send_sms(request):
         
         phone = phone.lstrip('+')
         result = send_sms(phone, message)
+        log_activity("sms", details={"phone": phone[:3] + "****"})
         return JSONResponse(result)
     except Exception as e:
+        log_activity("sms", error=str(e))
         return JSONResponse(
             {"error": "Failed to send SMS"},
             status_code=500
@@ -348,7 +463,10 @@ async def manual_login(request):
 
     user = next((u for u in users if u["email"] == email), None)
     if not user or not bcrypt.checkpw(password.encode(), user["password"].encode()):
+        log_activity("signin", user_email=email, error="Invalid credentials", details={"method": "local"})
         return JSONResponse({"error": "Invalid credentials"}, status_code=401)
+
+    log_activity("signin", user_email=email, details={"method": "local"})
 
     token = pyjwt.encode(
         {"sub": email, "iat": datetime.now().timestamp()},
@@ -381,7 +499,8 @@ async def api_voice_token(request):
     if not api_key:
         return JSONResponse({"error": "Not authenticated"}, status_code=401)
 
-    user_id = validate_api_key(api_key)
+    oauth_file = Path(__file__).parent / "oauth.json"
+    user_id = validate_api_key(api_key, oauth_file)
     if not user_id:
         return JSONResponse({"error": "Invalid API key"}, status_code=401)
 
@@ -395,7 +514,8 @@ async def api_voice_session(request):
     if not api_key:
         return JSONResponse({"error": "Not authenticated"}, status_code=401)
 
-    user_id = validate_api_key(api_key)
+    oauth_file = Path(__file__).parent / "oauth.json"
+    user_id = validate_api_key(api_key, oauth_file)
     if not user_id:
         return JSONResponse({"error": "Invalid API key"}, status_code=401)
 
@@ -411,7 +531,97 @@ async def api_voice_session(request):
         algorithm="HS256",
     )
 
+    log_activity("voice_session", user_id=user_id)
+
     return JSONResponse({"voice_token": voice_token})
+
+
+async def api_voice_prewarm(request):
+    """
+    Fire-and-forget: kick off semantic-index build for the authenticated user.
+    Frontend hits this as soon as the voice widget mounts, so by the time
+    the user actually taps to speak the index is ready (or nearly ready),
+    avoiding the 2-3s cold-start penalty inside the first tool-selection.
+    """
+    api_key = request.cookies.get("api_key")
+    if not api_key:
+        return JSONResponse({"error": "Not authenticated"}, status_code=401)
+    oauth_file = Path(__file__).parent / "oauth.json"
+    user_id = validate_api_key(api_key, oauth_file)
+    if not user_id:
+        return JSONResponse({"error": "Invalid API key"}, status_code=401)
+
+    import asyncio
+    async def _warm():
+        try:
+            t0 = datetime.now(timezone.utc)
+            ok = await ensure_tool_catalog_ready(user_id)
+            ms = (datetime.now(timezone.utc) - t0).total_seconds() * 1000
+            print(f"[PREWARM] user={user_id} ready={ok} | {ms:.0f}ms")
+        except Exception as e:
+            print(f"[PREWARM] user={user_id} failed: {e}")
+
+    asyncio.create_task(_warm())
+    return JSONResponse({"status": "prewarming"})
+
+
+async def api_logs(request):
+    """Return activity logs and/or tool call logs."""
+    api_key = request.cookies.get("api_key")
+    if not api_key:
+        return JSONResponse({"error": "Not authenticated"}, status_code=401)
+
+    oauth_file = Path(__file__).parent / "oauth.json"
+    user_id = validate_api_key(api_key, oauth_file)
+    if not user_id:
+        return JSONResponse({"error": "Invalid API key"}, status_code=401)
+
+    # Query params
+    limit = int(request.query_params.get("limit", "200"))
+    status_filter = request.query_params.get("status")
+    event_filter = request.query_params.get("event")  # signin, logout, chat, tool_call, etc.
+    search = request.query_params.get("search", "")
+
+    # Get activity logs
+    activity_logs = get_activity_logs(limit=limit, event_filter=event_filter)
+
+    # Get tool call logs and normalize them into activity format
+    if not event_filter or event_filter == "tool_call":
+        from .tool_logger import get_tool_logger
+        logger = get_tool_logger()
+        tool_logs = logger.get_recent_logs(limit=limit)
+        for tl in tool_logs:
+            activity_logs.append({
+                "timestamp": tl.get("timestamp"),
+                "event": "tool_call",
+                "status": tl.get("status"),
+                "user_id": None,
+                "user_email": None,
+                "details": {
+                    "tool_name": tl.get("tool_name"),
+                    "arguments": tl.get("arguments"),
+                    "result": tl.get("result"),
+                    "duration_ms": tl.get("duration_ms"),
+                    "session_id": tl.get("session_id"),
+                },
+                "error": tl.get("error"),
+                "metadata": tl.get("metadata"),
+            })
+
+    # Sort all logs by timestamp descending
+    activity_logs.sort(key=lambda x: x.get("timestamp", ""), reverse=True)
+
+    # Apply filters
+    if status_filter:
+        activity_logs = [l for l in activity_logs if l.get("status") == status_filter]
+    if search:
+        search_lower = search.lower()
+        activity_logs = [l for l in activity_logs if search_lower in json.dumps(l).lower()]
+
+    activity_logs = activity_logs[:limit]
+
+    return JSONResponse({"logs": activity_logs, "total": len(activity_logs)})
+
 
 async def dashboard_refresh(request):
     """Fetch integration data to update dashboard"""
@@ -475,17 +685,22 @@ api_app = Starlette(
         Route("/", index),
         Route("/api/status", api_status),
         Route("/api/chat", api_chat, methods=["POST"]),
+        Route("/api/chat/stream", api_chat_stream, methods=["POST"]),
         Route("/api/logout", api_logout, methods=["POST"]),
         Route("/api/voice-token", api_voice_token, methods=["GET"]),
         Route("/api/voice-session", api_voice_session, methods=["POST"]),
+        Route("/api/voice/prewarm", api_voice_prewarm, methods=["POST"]),
         Route("/login", login, methods=["GET"]),
         Route("/callback", callback),
         Route("/api/whatsapp/send-sms", api_send_sms, methods=["POST"]),
-        Route("/api/dashboard/refresh", dashboard_refresh, methods=["GET"])
-        # Add other routes as needed
+        Route("/api/dashboard/refresh", dashboard_refresh, methods=["GET"]),
+        Route("/api/logs", api_logs, methods=["GET"]),
     ]
 )
 
 api_app.mount("/salesforce", salesforce_app)
 api_app.mount("/chat",db_app)
 api_app.mount("/security", security_app)
+
+from .composio_app import composio_app
+api_app.mount("/api/composio", composio_app)

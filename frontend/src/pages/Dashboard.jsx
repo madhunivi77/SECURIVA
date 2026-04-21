@@ -1,44 +1,17 @@
 import { Outlet } from "react-router-dom";
 import Sidebar from "../components/Sidebar";
-import { useEffect, useState } from "react";
-import DashboardNav from "../components/DashboardNav";
+import TopBar from "../components/TopBar";
 
 const Dashboard = () => {
-
-  const [cards, setCards] = useState([]);
-
-  const handleCreateAutomation = async () => {
-    return;
-  };
-
-  const handleRefresh = async () => {
-    // call endpoint
-    const res = await fetch("http://localhost:8000/api/dashboard/refresh");
-    if(res.status == 200){
-      console.log("Data fetched successfully.");
-      const data = await res.json();
-      setCards(data["cards"]);
-    }else{
-      console.log("Failed to fetch automation data.")
-    }
-    return;
-  };
-
-  useEffect(() => {
-    handleRefresh();
-  }, []);
   return (
-    <div className="flex h-screen w-screen bg-white text-black">
+    <div className="h-screen w-screen bg-white text-zinc-900 flex overflow-hidden">
       <Sidebar />
       <div className="flex-1 flex flex-col overflow-hidden">
-        <DashboardNav onCreateAutomation={handleCreateAutomation} onRefresh={handleRefresh} />
-
-        <main className="flex-1 overflow-auto p-6 relative">
-          <Outlet context={{handleRefresh, cards:[cards]}}/>
+        <TopBar />
+        <main className="flex-1 overflow-auto bg-white">
+          <Outlet />
         </main>
-
       </div>
-
     </div>
   );
 };

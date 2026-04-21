@@ -3,7 +3,8 @@ from .api_key_manager import validate_api_key
 from starlette.applications import Starlette
 from starlette.routing import Route
 from collections import Counter
-from.chat_handler import get_llm_client
+from .llm_client import get_llm_client
+from pathlib import Path
 import json
 
 def verify_auth(request):
@@ -16,7 +17,8 @@ def verify_auth(request):
                 status_code=401
             )
 
-        user_id = validate_api_key(api_key)
+        oauth_file = Path(__file__).parent / "oauth.json"
+        user_id = validate_api_key(api_key, oauth_file)
 
         if not user_id:
             return JSONResponse(
