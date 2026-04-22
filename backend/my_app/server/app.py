@@ -2,6 +2,8 @@
 from starlette.routing import Route
 from starlette.responses import HTMLResponse, JSONResponse, Response, RedirectResponse, StreamingResponse
 from google_auth_oauthlib.flow import Flow
+from google.oauth2 import id_token
+from google.auth.transport import requests
 import json
 import bcrypt
 import jwt as pyjwt
@@ -167,15 +169,16 @@ async def callback(request):
     """Handle Google OAuth callback"""
     try:
         flow.fetch_token(authorization_response=str(request.url))
-        credentials = flow.credentials.to_json()
-        credentials_dict = json.loads(credentials)
-
+        credentials = flow.credentials
         user_email = None
         try:
-            id_token = credentials_dict.get("id_token")
-            if id_token:
-                decoded = pyjwt.decode(id_token, options={"verify_signature": False})
-                user_email = decoded.get("email")
+            idinfo = id_token.verify_oauth2_token(
+                credentials.id_token,
+                requests.Request(),
+                GOOGLE_CLIENT_ID
+            )
+
+            user_email = idinfo.get("email")
         except:
             pass
 
@@ -209,7 +212,7 @@ async def callback(request):
 
         user_entry["services"]["google"] = {
             "email": user_email,
-            "credentials": credentials,
+            "credentials": credentials.to_json(),
             "connected_at": datetime.now().isoformat(),
             "scopes": SCOPES
         }
