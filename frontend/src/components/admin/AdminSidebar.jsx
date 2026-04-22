@@ -17,7 +17,7 @@ import { NavLink } from "react-router-dom";
 const topMenu = [
   { name: "Dashboard", icon: Home, path: "/admin" },
   { name: "Analytics", icon: BarChart3, path: "/admin/analytics" },
-  { name: "Users", icon: Users, path: "/admin/users" },
+  { name: "Users Analytics", icon: Users, path: "/admin/users" },
   { name: "Payments", icon: CreditCard, path: "/admin/payments" },
   { name: "Integrations", icon: Link, path: "/admin/integrations" },
   { name: "Content Management", icon: FileText, path: "/admin/content" },

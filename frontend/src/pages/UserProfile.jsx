@@ -1,4 +1,5 @@
 import { useState } from "react";
+import AdminSidebar from "../components/admin/AdminSidebar";
 import {
   ArrowLeft,
   Trash2,
@@ -44,7 +45,9 @@ const UserProfile = () => {
   ];
 
   return (
-    <div className="p-6 space-y-6">
+    <div className="flex h-screen bg-gray-100 font-sans">
+      <AdminSidebar />
+      <div className="flex-1 p-6 overflow-y-auto">
       {/* Breadcrumb */}
       <div className="text-sm text-gray-500">
         <span className="text-blue-600 font-medium">Users</span> / {user.id}
@@ -76,6 +79,7 @@ const UserProfile = () => {
           </button>
         </div>
       </div>
+      
 
       {/* User Summary Card */}
       <div className="bg-white rounded-2xl shadow border border-gray-200 p-6 flex flex-col md:flex-row md:items-center md:justify-between">
@@ -246,6 +250,7 @@ const UserProfile = () => {
           </div>
         </div>
       </div>
+    </div>
     </div>
   );
 };
