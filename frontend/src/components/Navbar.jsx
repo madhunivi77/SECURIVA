@@ -206,7 +206,7 @@ export default function Navbar() {
 
             <NavOption label={"About"} target={"about"} theme={theme.text} />
 
-            <NavOption label={"Features"} target={"security"} theme={theme.text} />
+            <NavOption label={"Features"} target={"features"} theme={theme.text} />
 
             <NavOption label={"Support"} target={"support"} theme={theme.text} />
 
