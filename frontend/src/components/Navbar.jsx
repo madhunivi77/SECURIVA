@@ -62,17 +62,17 @@ export default function Navbar() {
             onClick={() => navigate("/")}
           />
 
-          <div className="flex justify-end p-4">
+          <div className="flex justify-end p-4 gap-4">
             <LanguageSwitcher />
-          </div>
 
-          <Link to={"/contact"}>
-            <button
-              className="w-60 h-13.5 bg-red-500 text-white"
-            >
-              {t("navbar.upper.requestDemo")}
-            </button>
-          </Link>
+            <Link to={"/contact"}>
+              <button
+                className="w-60 h-13.5 bg-red-500 text-white"
+              >
+                {t("navbar.upper.requestDemo")}
+              </button>
+            </Link>
+          </div>
         </div>
 
 

@@ -11,14 +11,14 @@ export default function LanguageSwitcher() {
     <div className="flex gap-2">
       <button
         onClick={() => changeLanguage("en")}
-        className="px-3 py-1 rounded bg-red-300 hover:bg-red-400 text-black"
+        className="px-3 py-1 rounded bg-red-500 hover:bg-red-400 text-white"
       >
         EN
       </button>
 
       <button
         onClick={() => changeLanguage("fr")}
-        className="px-3 py-1 rounded bg-red-300 hover:bg-red-400 text-black"
+        className="px-3 py-1 rounded bg-red-500 hover:bg-red-400 text-white"
       >
         FR
       </button>
