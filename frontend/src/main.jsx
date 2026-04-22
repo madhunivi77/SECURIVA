@@ -31,6 +31,12 @@ import Cybersecurity from './pages/Cybersecurity.jsx';
 import VPN from './pages/VPN.jsx';
 import ToolsPage from './pages/ToolsPage.jsx';
 import Firewall from './pages/Firewall.jsx';
+import PrivacyPolicy from './pages/PrivacyPolicy.jsx';
+import TermsOfService from './pages/TermsOfService.jsx';
+import DataProcessingAgreement from './pages/DataProcessingAgreement.jsx';
+import CookiePolicy from './pages/CookiePolicy.jsx';
+import SecurityPolicy from './pages/SecurityPolicy.jsx';
+import ComplianceOverview from './pages/ComplianceOverview.jsx';
 
 const router = createBrowserRouter([
   {
@@ -96,6 +102,30 @@ const router = createBrowserRouter([
       {
         path: "/vpn",
         element: <VPN />
+      }, 
+      {
+        path: "/privacy-policy",
+        element: <PrivacyPolicy/>
+      },
+      {
+        path: "/terms-of-service",
+        element: <TermsOfService/>
+      },
+      {
+        path: "/data-processing-agreement",
+        element: <DataProcessingAgreement/>
+      },
+      {
+        path: "/cookie-policy",
+        element: <CookiePolicy/>
+      },
+      {
+        path: "/security-policy",
+        element: <SecurityPolicy/>
+      },
+      {
+        path: "/compliance-overview",
+        element: <ComplianceOverview/>
       }
     ]
   },
