@@ -1,0 +1,1884 @@
+{
+  "about": {
+    "hero": {
+      "title": "À propos",
+      "description": "SecuriVA est une plateforme d’IA d’entreprise qui combine l’automatisation, la cybersécurité et la communication sécurisée en un seul système unifié. Nous aidons les organisations à fonctionner plus rapidement, plus sûrement et plus intelligemment grâce à des technologies avancées conçues pour le monde numérique moderne."
+    },
+    "story": {
+      "title": "Notre histoire",
+      "p1": "Les entreprises modernes s’appuient sur des dizaines d’outils déconnectés pour gérer la sécurité, l’automatisation et la communication. Cette fragmentation crée de la complexité, augmente les risques et ralentit l’innovation.",
+      "p2": "SecuriVA a été conçu pour résoudre ce problème. Nous avons créé une plateforme unifiée qui intègre l’automatisation pilotée par l’IA, une cybersécurité de niveau entreprise et une infrastructure de communication sécurisée au sein d’un écosystème intelligent.",
+      "p3": "Notre objectif est simple : fournir aux organisations un système numérique qui fonctionne en continu en arrière-plan — protégeant les données, automatisant les opérations et améliorant la productivité."
+    },
+    "enterprise": {
+      "title": "Conçu pour les entreprises modernes",
+      "features": {
+        "ai_assistant": "Assistance virtuelle alimentée par l’IA",
+        "threat_detection": "Détection des menaces en temps réel",
+        "secure_networking": "Réseau IA sécurisé et VPN",
+        "communication": "Gestion automatisée des communications",
+        "integrations": "Intégrations fluides avec les outils métiers"
+      }
+    },
+    "principles": {
+      "title": "Nos principes",
+      "mission": {
+        "title": "Notre mission",
+        "text": "Donner aux organisations des systèmes d’IA sécurisés qui automatisent les opérations, protègent les actifs numériques et améliorent la productivité humaine."
+      },
+      "vision": {
+        "title": "Notre vision",
+        "text": "Un monde où l’automatisation intelligente et la cybersécurité fonctionnent ensemble de manière transparente pour permettre une transformation numérique sûre et efficace pour chaque organisation."
+      },
+      "values": {
+        "title": "Nos valeurs",
+        "items": {
+          "security": "La sécurité avant tout",
+          "ai": "Innovation responsable en IA",
+          "privacy": "Confidentialité dès la conception",
+          "reliability": "Fiabilité et confiance",
+          "improvement": "Amélioration continue"
+        }
+      }
+    },
+    "platform": {
+      "title": "La plateforme SecuriVA",
+      "features": {
+        "ai_agent": {
+          "title": "Agent virtuel IA",
+          "text": "Automatise les flux de travail, la communication, la planification et les interactions clients grâce à une IA conversationnelle intelligente."
+        },
+        "cybersecurity": {
+          "title": "Protection en cybersécurité",
+          "text": "Des systèmes de défense pilotés par l’IA surveillent l’activité, détectent les menaces et sécurisent les environnements d’entreprise en temps réel."
+        },
+        "vpn": {
+          "title": "Réseau IA sécurisé",
+          "text": "Un VPN adaptatif et des communications chiffrées garantissent des connexions sûres entre équipes et systèmes distribués."
+        },
+        "customer_ai": {
+          "title": "IA d’interaction client",
+          "text": "Gérez les appels, les chats et les e-mails grâce à un assistant numérique intelligent disponible 24h/24 et 7j/7."
+        },
+        "ebook": {
+          "title": "Générateur d’eBooks et de formations",
+          "text": "Créez instantanément des guides de sensibilisation à la sécurité, de la documentation et des supports de formation grâce à l’IA."
+        },
+        "integrations": {
+          "title": "Intégrations d’entreprise",
+          "text": "Connectez-vous facilement à Gmail, Microsoft 365, Salesforce et d’autres outils d’entreprise."
+        }
+      }
+    },
+    "howItWorks": {
+      "title": "Comment fonctionne SecuriVA",
+      "steps": {
+        "step1": "Connectez vos systèmes et outils métier",
+        "step2": "L’IA analyse les flux de travail et la posture de sécurité",
+        "step3": "L’automatisation et la protection s’activent instantanément",
+        "step4": "Surveillance et optimisation continues"
+      }
+    }
+  },
+  "agent": {
+    "hero": {
+      "title": "AGENT IA INTELLIGENT POUR DES FLUX DE TRAVAIL PERSONNALISÉS",
+      "description": "L’agent IA intégré de SecuriVA vous permet de créer facilement des flux de travail automatisés et de générer des analyses de sécurité.",
+      "cta": "Commencer l’essai gratuit"
+    },
+    "intro": {
+      "title": "Découvrez Ava, l’assistante IA intelligente de SecuriVA"
+    },
+    "interfaces": {
+      "voice": {
+        "title": "Interface vocale",
+        "description": "Interagissez avec un assistant vocal en langage naturel, à faible latence, doté d’une compréhension complète de votre contexte métier.",
+        "cta": "Parler maintenant"
+      },
+      "chat": {
+        "title": "Interface de chat",
+        "description": "Envoyez des requêtes écrites ou téléchargez rapidement du contexte supplémentaire via une interface de chatbot classique.",
+        "cta": "Discuter maintenant"
+      },
+      "divider": "OU"
+    },
+    "productivity": {
+      "title": "Améliorez votre productivité grâce à l’IA en fournissant un contexte métier complet"
+    }
+  },
+  "agentText": {
+    "hero": {
+      "title": "Agent IA Textuel",
+      "subtitle": "Automatisation intelligente pour les e-mails, le chat et la messagerie"
+    },
+    "overview": {
+      "description": "L’agent IA textuel est le module d’automatisation intelligente de SecuriVA, conçu pour rationaliser la communication et les flux de travail des entreprises. Il permet aux organisations de gagner du temps, de réduire les erreurs et d’améliorer leur réactivité sur plusieurs canaux, tout en garantissant la sécurité des données et la conformité."
+    },
+    "capabilities": {
+      "title": "Fonctionnalités d’automatisation",
+      "items": {
+        "email": {
+          "label": "Réponses et suivis par e-mail",
+          "description": "Rédige et envoie automatiquement des réponses adaptées au contexte, réduisant les efforts manuels et garantissant une communication rapide."
+        },
+        "chat": {
+          "label": "Interactions de chat sur WhatsApp, Gmail et les sites web",
+          "description": "Gère les demandes clients, les conversations de support et la messagerie interne grâce à des réponses alimentées par l’IA."
+        },
+        "documents": {
+          "label": "Traitement, analyse et extraction de données des documents",
+          "description": "Traite les pièces jointes, extrait les données pertinentes, résume le contenu et intègre les résultats dans les flux de travail."
+        },
+        "api": {
+          "label": "Automatisation des tâches basée sur API sur plusieurs plateformes",
+          "description": "Se connecte à vos systèmes et services existants pour automatiser les tâches répétitives, des mises à jour CRM aux actions de stockage cloud."
+        }
+      }
+    },
+    "advantages": {
+      "title": "Avantages clés",
+      "items": [
+        "Réduit les charges de travail manuelles",
+        "Améliore les temps de réponse aux clients",
+        "S’intègre aux outils d’automatisation des flux de travail",
+        "Sécurisé et conforme aux normes de protection des données"
+      ]
+    },
+    "reasons": {
+      "title": "Pourquoi choisir l’agent IA textuel",
+      "items": {
+        "cross_platform": {
+          "label": "Compatibilité multiplateforme",
+          "description": "Fonctionne avec les e-mails, les applications de chat, les sites web et les API tierces."
+        },
+        "accuracy": {
+          "label": "Précision alimentée par l’IA",
+          "description": "Des réponses adaptées au contexte réduisent les erreurs et améliorent l’engagement."
+        },
+        "scalable": {
+          "label": "Évolutif dans tous les secteurs",
+          "description": "Adapté aux secteurs de la santé, de la finance, du e-commerce, des PME, de l’éducation, du gouvernement, et bien plus encore."
+        },
+        "security": {
+          "label": "Sécurité de bout en bout",
+          "description": "Toutes les données sont traitées au sein de l’écosystème sécurisé de SecuriVA."
+        },
+        "savings": {
+          "label": "Gain de temps et réduction des coûts",
+          "description": "Optimise les opérations tout en réduisant les coûts opérationnels."
+        }
+      }
+    },
+    "cta": {
+      "title": "Améliorez la communication de votre entreprise grâce à l’IA",
+      "description": "Automatisez les e-mails, les chats, le traitement des documents et les tâches API de manière sécurisée et efficace.",
+      "demo": "Demander une démonstration",
+      "learn": "Découvrez comment l’agent IA textuel s’intègre à vos flux de travail",
+      "contact": "Contactez notre équipe pour plus d’informations"
+    }
+  },
+  "agentVoice": {
+    "hero": {
+      "title": "Agent Vocal IA : Moteur intelligent de la voix à l’action",
+      "description": "AI Voice est le module avancé d’intelligence vocale de SecuriVA qui convertit la parole en texte intelligent, en messages contextualisés, en traductions et en actions automatisées. Les utilisateurs parlent simplement, et SecuriVA comprend, reformule, traduit, analyse et exécute."
+    },
+    "overview": {
+      "title": "Une plateforme intelligente unifiée pour des opérations sécurisées, automatisées et pilotées par l’IA",
+      "description": "Notre plateforme est conçue pour accompagner les organisations de toutes tailles—dans tous les secteurs—souhaitant moderniser leurs opérations, protéger leurs données et améliorer l’engagement client."
+    },
+    "capabilities": {
+      "voiceToText": {
+        "label": "Conversion voix-texte haute précision",
+        "description": "Conversion instantanée de la parole en texte structuré, quelle que soit la vitesse, l’accent ou la langue."
+      },
+      "rewriting": {
+        "label": "Réécriture intelligente selon le ton",
+        "description": "À partir du texte dicté, l’agent génère des versions optimisées dans différents tons"
+      },
+      "translation": {
+        "label": "Traduction multilingue automatique",
+        "description": "Traduction fluide vers n’importe quelle langue : EN, FR, ES, AR, Lingala, Swahili, Mandarin, Portugais, etc."
+      },
+      "sending": {
+        "label": "Envoi automatisé sur plusieurs canaux",
+        "description": "Après validation de l’utilisateur, AI Voice peut envoyer le message via :",
+        "items": [
+          "Email",
+          "SMS / Texto",
+          "WhatsApp",
+          "Messenger",
+          "Slack",
+          "CRM interne",
+          "APIs personnalisées"
+        ]
+      },
+      "meetings": {
+        "label": "Écoute des réunions, enregistrement et reporting intelligent",
+        "description": "AI Voice devient un assistant de réunion intelligent, capable de :",
+        "listening": {
+          "title": "Écoute des réunions en direct",
+          "subtitle": "L’agent peut rejoindre ou capturer :",
+          "items": [
+            "Réunions virtuelles (Zoom, Teams, Google Meet, etc.)",
+            "Réunions en présentiel (via microphone)",
+            "Conférences téléphoniques",
+            "Appels professionnels"
+          ]
+        },
+        "recording": {
+          "title": "Enregistrement et analyse audio",
+          "subtitle": "L’agent :",
+          "items": [
+            "Enregistre l’audio en continu",
+            "Identifie les intervenants",
+            "Segmente automatiquement les sujets de discussion"
+          ]
+        },
+        "reports": {
+          "title": "Génération de rapports détaillés",
+          "subtitle": "À la fin de la réunion, SecuriVA génère automatiquement :",
+          "executive": {
+            "title": "Résumé exécutif",
+            "items": [
+              "Objectifs",
+              "Décisions clés",
+              "Actions à mener",
+              "Personnes responsables",
+              "Échéances"
+            ]
+          },
+          "full": {
+            "title": "Rapport complet",
+            "items": [
+              "Transcription complète",
+              "Résumé par intervenant",
+              "Résumé par sujet",
+              "Alertes de risques, opportunités et insights",
+              "Analyse du ton et de la cohérence"
+            ]
+          }
+        },
+        "export": {
+          "title": "Exportation dans plusieurs formats",
+          "subtitle": "Les utilisateurs peuvent télécharger le rapport en :",
+          "items": [
+            "PDF",
+            "Word (DOCX)",
+            "Texte (TXT)",
+            "Markdown",
+            "CSV (listes de tâches)"
+          ]
+        },
+        "distribution": {
+          "title": "Distribution automatique",
+          "subtitle": "Via commande vocale, SecuriVA peut :",
+          "items": [
+            "Envoyer le rapport par email",
+            "Le partager via WhatsApp / Slack",
+            "L’archiver dans un stockage cloud",
+            "Le transmettre à une équipe ou un partenaire"
+          ]
+        }
+      },
+      "commands": {
+        "label": "Commandes vocales avancées",
+        "description": "Exemples :",
+        "items": [
+          "« SecuriVA, écoute et enregistre la réunion. »",
+          "« Génère un rapport professionnel et envoie-le à l’équipe. »",
+          "« Résume la conversation avec un ton formel. »",
+          "« Traduis le rapport en espagnol et exporte-le en PDF. »"
+        ]
+      },
+      "compliance": {
+        "label": "Conformité et historique intelligent",
+        "saves": {
+          "title": "L’agent enregistre :",
+          "items": [
+            "Enregistrements autorisés",
+            "Rapports générés",
+            "Messages envoyés"
+          ]
+        },
+        "protection": {
+          "title": "Avec des protections :",
+          "items": [
+            "Conformité RGPD / LPRPDE",
+            "Contrôle d’accès",
+            "Stockage audio chiffré"
+          ]
+        }
+      }
+    }
+  },
+  "contact": {
+    "hero": {
+      "title": "Contacter SecuriVA",
+      "description": "Notre équipe aide les organisations à déployer des systèmes d’IA sécurisés, à résoudre des problèmes techniques et à concevoir des solutions d’entreprise. Faites-nous part de vos besoins et nous vous répondrons rapidement avec l’aide de nos experts."
+    },
+    "services": {
+      "title": "Services de contact",
+      "sales": {
+        "title": "Ventes et solutions d’entreprise",
+        "description": "Conseils sur les capacités de la plateforme, les modèles de tarification, l’architecture de déploiement en entreprise et les intégrations personnalisées.",
+        "items": [
+          "Démonstrations produit et intégration",
+          "Planification du déploiement en entreprise",
+          "Discussion sur la conformité et la sécurité",
+          "Conception de solutions personnalisées",
+          "Conseil en intégration"
+        ]
+      },
+      "support": {
+        "title": "Support technique",
+        "description": "Assistance pour l’authentification, les intégrations, la connectivité, l’utilisation de la plateforme et le dépannage.",
+        "items": [
+          "Problèmes de compte et de connexion",
+          "Dépannage API et intégrations",
+          "Aide à la configuration de la plateforme",
+          "Configuration de la sécurité et des protections",
+          "Diagnostics système"
+        ]
+      },
+      "partnership": {
+        "title": "Partenariats et collaboration",
+        "description": "Opportunités de partenariats technologiques, intégrations, recherche collaborative et développement d’écosystèmes.",
+        "items": [
+          "Partenariats d’intégration",
+          "Alliances stratégiques",
+          "Collaboration technologique",
+          "Initiatives de recherche",
+          "Développement d’écosystèmes d’entreprise"
+        ]
+      }
+    },
+    "form": {
+      "title": "Envoyez-nous un message",
+      "description": "Fournissez les détails de votre demande et notre équipe vous répondra avec une assistance personnalisée.",
+      "fields": {
+        "name": "Nom complet",
+        "email": "Adresse e-mail",
+        "company": "Entreprise / Organisation (optionnel)",
+        "type": {
+          "general": "Demande générale",
+          "sales": "Ventes et entreprise",
+          "support": "Support technique",
+          "partnership": "Partenariat"
+        },
+        "message": "Décrivez votre demande en détail..."
+      },
+      "button": "Envoyer le message",
+      "success": "Message envoyé ! Notre équipe vous contactera sous peu."
+    },
+    "policy": {
+      "title": "Politique de support et de réponse",
+      "responseTime": {
+        "title": "Délai de réponse",
+        "value": "< 24 heures",
+        "description": "Réponse en jours ouvrables pour toutes les demandes"
+      },
+      "availability": {
+        "title": "Disponibilité",
+        "value": "24h/24 et 7j/7",
+        "description": "Surveillance et protection de la plateforme"
+      },
+      "global": {
+        "title": "Support mondial",
+        "value": "International",
+        "description": "Clients entreprises et professionnels"
+      }
+    },
+    "company": {
+      "title": "Informations sur l’entreprise",
+      "supportEmail": {
+        "title": "E-mail de support",
+        "value": "support@securiva.ai",
+        "description": "Canal principal de support"
+      },
+      "hq": {
+        "title": "Siège social",
+        "value": "Canada",
+        "description": "Infrastructure mondiale"
+      },
+      "security": {
+        "title": "Engagement de sécurité",
+        "value": "Niveau entreprise",
+        "description": "Axé sur la confidentialité et la protection"
+      }
+    },
+    "faq": {
+      "title": "Questions fréquentes",
+      "q1": {
+        "question": "Sous quel délai vais-je recevoir une réponse ?",
+        "answer": "La plupart des demandes reçoivent une réponse sous 24 heures les jours ouvrables. Les clients entreprise peuvent bénéficier d’un support prioritaire."
+      },
+      "q2": {
+        "question": "Quelles informations dois-je inclure dans mon message ?",
+        "answer": "Incluez des détails sur votre cas d’usage, votre problème ou vos besoins métier afin que notre équipe puisse vous aider plus rapidement."
+      },
+      "q3": {
+        "question": "Proposez-vous un support pour les déploiements en entreprise ?",
+        "answer": "Oui. Nous accompagnons la planification d’architecture, la conception d’intégrations et les déploiements à grande échelle."
+      }
+    }
+  },
+  "cybersecurity": {
+    "hero": {
+      "title": "Cybersécurité",
+      "description": "Chez SecuriVA, la cybersécurité n’est pas une réflexion secondaire—elle est intégrée à chaque couche de la plateforme. Des agents IA aux workflows automatisés et à l’accès VPN sécurisé, vos données, communications et interactions clients sont protégées, surveillées et conformes en permanence."
+    },
+    "video": {
+      "title": "Protégez votre entreprise grâce à une sécurité et une conformité pilotées par l’IA",
+      "description": "SecuriVA garantit aux organisations de toutes tailles et de tous secteurs un fonctionnement sécurisé dans un monde numérique."
+    },
+    "fundamentals": {
+      "title": "Fondamentaux de la cybersécurité",
+      "encryption": {
+        "label": "Protocoles de chiffrement",
+        "description": "Toutes les communications, transactions et données stockées sont chiffrées selon des standards industriels garantissant confidentialité et intégrité."
+      },
+      "threat": {
+        "label": "Détection des menaces",
+        "description": "Une surveillance pilotée par l’IA analyse en continu les anomalies, comportements suspects et cyberattaques potentielles en temps réel."
+      },
+      "vulnerability": {
+        "label": "Analyse des vulnérabilités",
+        "description": "Des audits de sécurité réguliers automatisés et manuels identifient les failles avec des recommandations exploitables."
+      },
+      "compliance": {
+        "label": "Conformité réglementaire",
+        "description": "SecuriVA respecte les normes GDPR, HIPAA et PCI-DSS afin de garantir une gestion conforme des données."
+      }
+    },
+    "value": {
+      "title": "Proposition de valeur",
+      "description": "SecuriVA transforme la cybersécurité d’une fonction réactive en un avantage opérationnel proactif."
+    },
+    "protection": {
+      "heading": "Protection cybersécurité :",
+      "items": [
+        "Détection des menaces en temps réel",
+        "Chiffrement des données au repos et en transit",
+        "Conformité GDPR, HIPAA, PCI-DSS",
+        "Intégration dans tous les services SecuriVA"
+      ]
+    },
+    "core": {
+      "title": "Activités principales",
+      "framework": {
+        "title": "Cadre de cybersécurité et conformité",
+        "items1": [
+          "Détection des menaces en temps réel",
+          "Gestion des données chiffrées",
+          "Rapports de conformité sur toutes les plateformes"
+        ]
+      },
+      "monitoring": {
+        "title": "Surveillance et mises à jour de sécurité",
+        "items": [
+          "Surveillance continue du système",
+          "Alertes automatiques en cas d’anomalies",
+          "Correctifs de sécurité réguliers",
+          "Conformité réglementaire continue"
+        ]
+      }
+    },
+    "cost": {
+      "title": "Structure des coûts",
+      "description": "Les investissements cybersécurité incluent :",
+      "items": [
+        "Audits et tests de vulnérabilité",
+        "Mise en place et mises à jour du chiffrement",
+        "Déploiement d’outils de protection avancés",
+        "Support de conformité et certification"
+      ],
+      "footer": "Cela garantit une protection robuste sans coûts imprévus."
+    },
+    "partnership": {
+      "title": "Partenariats",
+      "description": "SecuriVA collabore avec des fournisseurs de cybersécurité de premier plan :",
+      "items": [
+        "Fournisseurs de frameworks de sécurité",
+        "Solutions SIEM",
+        "Spécialistes du chiffrement",
+        "Outils de détection de vulnérabilités"
+      ],
+      "footer": "Ces partenariats garantissent une sécurité de niveau supérieur."
+    },
+    "resources": {
+      "title": "Ressources",
+      "description": "SecuriVA fournit les ressources suivantes :",
+      "items": [
+        "Frameworks de cybersécurité",
+        "Outils SIEM",
+        "Protocoles de chiffrement",
+        "Tests réguliers de vulnérabilité",
+        "Documentation et formation"
+      ],
+      "footer": "Ces ressources permettent de renforcer la maturité en cybersécurité."
+    },
+    "reasons": {
+      "title": "Pourquoi la cybersécurité SecuriVA se démarque",
+      "integrated": {
+        "label": "Sécurité intégrée sur toutes les plateformes",
+        "description": "IA, automatisation et communication bénéficient toutes d’une protection intégrée."
+      },
+      "threatIntelligence": {
+        "label": "Intelligence des menaces en temps réel",
+        "description": "L’IA identifie et réagit aux risques avant qu’ils ne causent des dommages."
+      },
+      "compliance": {
+        "label": "Conformité réglementaire",
+        "description": "Conforme aux normes GDPR, HIPAA et PCI-DSS."
+      },
+      "scalable": {
+        "label": "Scalable pour tous les secteurs",
+        "description": "Santé, finance, e-commerce, éducation, gouvernement, PME, agriculture, ONG et plus."
+      },
+      "continuous": {
+        "label": "Amélioration continue",
+        "description": "Les cadres de sécurité sont constamment mis à jour."
+      }
+    },
+    "cta": {
+      "title": "Protégez votre entreprise dès aujourd’hui",
+      "description": "Assurez la sécurité, la conformité et la surveillance en temps réel de vos opérations IA.",
+      "demo": "Demander une démo",
+      "docs": "Voir la documentation",
+      "contact": "Contacter l’équipe cybersécurité"
+    }
+  },
+  "faq": {
+    "hero": {
+      "title": "Foire aux questions",
+      "search": "Rechercher"
+    }
+  },
+  "features": {
+    "hero": {
+      "title": "Fonctionnalités",
+      "description": "SecuriVA est une plateforme tout-en-un alimentée par l’IA, conçue pour transformer la manière dont les entreprises fonctionnent. Des agents virtuels intelligents à la cybersécurité de niveau entreprise et l’accès VPN, chaque fonctionnalité est conçue pour l’efficacité, la sécurité et la conformité."
+    },
+    "sections": {
+      "aiAgent": {
+        "title": "Agent Virtuel IA",
+        "subtitle": "Assistant vocal alimenté par l’IA pour une communication professionnelle plus intelligente",
+        "description": "L’agent virtuel est l’assistant vocal intelligent de SecuriVA, capable de :",
+        "cards": {
+          "callManagement": {
+            "label": "Gestion des appels clients",
+            "description": "Gère automatiquement les appels, demandes et suivis"
+          },
+          "scheduling": {
+            "label": "Planification et calendriers",
+            "description": "Réserve des rendez-vous et gère les calendriers en temps réel"
+          },
+          "multichannel": {
+            "label": "Interaction multicanal",
+            "description": "Fonctionne sur la voix, le chat et les plateformes numériques"
+          },
+          "integrations": {
+            "label": "Intégrations transparentes",
+            "description": "Se connecte aux CRM, plateformes cloud et API"
+          }
+        },
+        "advantages": {
+          "title": "Avantages clés",
+          "items": [
+            "Interactions client personnalisées",
+            "Disponibilité 24/7",
+            "Évolutif pour tous les secteurs et départements",
+            "Cybersécurité intégrée pour des communications vocales sécurisées"
+          ]
+        },
+        "cta": {
+          "button": "Plus d’informations"
+        }
+      },
+      "cybersecurity": {
+        "title": "Cybersécurité",
+        "subtitle": "Protégez vos données, workflows et communications",
+        "description": "Le module de cybersécurité de SecuriVA fournit une détection des menaces en temps réel, un chiffrement et une conformité réglementaire.",
+        "cards": {
+          "monitoring": {
+            "label": "Surveillance continue",
+            "description": "Surveillance continue et prévention des menaces"
+          },
+          "encryption": {
+            "label": "Stockage chiffré",
+            "description": "Stockage de données chiffré et communications sécurisées"
+          },
+          "compliance": {
+            "label": "Conformité réglementaire",
+            "description": "Conformité aux normes GDPR, HIPAA et PCI-DSS"
+          },
+          "vulnerability": {
+            "label": "Tests de vulnérabilité",
+            "description": "Tests de vulnérabilité et cadres SIEM pour une protection de niveau entreprise"
+          }
+        },
+        "advantages": {
+          "title": "Avantages clés",
+          "items": [
+            "Intégré dans toutes les fonctionnalités SecuriVA",
+            "Détection proactive des menaces par IA",
+            "Prêt pour la conformité réglementaire",
+            "Confiance pour les secteurs fortement réglementés"
+          ]
+        }
+      },
+      "textAgent": {
+        "title": "Agent IA Texte",
+        "subtitle": "Automatisation intelligente des e-mails, chats et messages",
+        "description": "L’agent IA texte améliore la communication d’entreprise en automatisant :",
+        "cards": {
+          "email": {
+            "label": "Automatisation des e-mails",
+            "description": "Réponses et suivis d’e-mails automatisés"
+          },
+          "chat": {
+            "label": "Interactions de chat",
+            "description": "Automatisation des chats sur WhatsApp, Gmail et sites web"
+          },
+          "documents": {
+            "label": "Gestion de documents",
+            "description": "Analyse de documents et extraction de données à grande échelle"
+          },
+          "automation": {
+            "label": "Automatisation API",
+            "description": "Automatisation des tâches via API sur différentes plateformes"
+          }
+        },
+        "advantages": {
+          "title": "Avantages clés",
+          "items": [
+            "Réduction des tâches manuelles",
+            "Amélioration des temps de réponse client",
+            "Intégration avec les outils d’automatisation",
+            "Sécurisé et conforme aux normes de confidentialité"
+          ]
+        }
+      },
+      "vpn": {
+        "title": "Accès VPN sécurisé",
+        "subtitle": "Accès réseau sécurisé, chiffré et conforme",
+        "description": "L’accès VPN sécurisé de SecuriVA garantit que toutes les communications et automatisations se déroulent dans un tunnel chiffré et protégé.",
+        "cards": {
+          "secureBrowsing": {
+            "label": "Navigation sécurisée en un clic",
+            "description": "Navigation sécurisée pour appels, messages, e-mails et API en un seul clic"
+          },
+          "aiThreat": {
+            "label": "Détection des menaces par IA",
+            "description": "Détection des menaces par IA dans le trafic VPN"
+          },
+          "routing": {
+            "label": "Routage adaptatif",
+            "description": "Sélection automatique du serveur le plus rapide et le plus sûr"
+          },
+          "mfa": {
+            "label": "Authentification multi-facteurs",
+            "description": "Application du MFA pour tous les accès sensibles"
+          }
+        },
+        "advantages": {
+          "title": "Avantages clés",
+          "items": [
+            "Élimine le besoin d’un VPN séparé",
+            "Intégré dans tous les workflows SecuriVA",
+            "Protection réseau de niveau entreprise",
+            "Support des équipes distantes et hybrides"
+          ]
+        }
+      },
+      "recap": {
+        "title": "Pourquoi les fonctionnalités SecuriVA se démarquent",
+        "cards": {
+          "allInOne": {
+            "label": "Plateforme tout-en-un",
+            "description": "Agents virtuels, IA texte, VPN et cybersécurité intégrés de manière fluide."
+          },
+          "crossIndustry": {
+            "label": "Applicabilité intersectorielle",
+            "description": "Santé, finance, e-commerce, PME, éducation, gouvernement, ONG, agriculture et plus."
+          },
+          "automationSecurity": {
+            "label": "Automatisation + sécurité",
+            "description": "Conçu pour optimiser les workflows tout en protégeant les données."
+          },
+          "customizable": {
+            "label": "Personnalisable et évolutif",
+            "description": "Adaptable à toute taille d’entreprise ou complexité de workflow."
+          },
+          "compliance": {
+            "label": "Conformité et tranquillité d’esprit",
+            "description": "Protection intégrée garantissant le respect des exigences légales et réglementaires."
+          }
+        }
+      },
+      "cta": {
+        "title": "Découvrez la puissance des fonctionnalités SecuriVA",
+        "description": "Donnez à votre entreprise une automatisation IA sécurisée et une meilleure interaction client.",
+        "buttons": {
+          "demo": "Demander une démo",
+          "learn": "En savoir plus sur chaque fonctionnalité",
+          "contact": "Contacter notre équipe"
+        }
+      }
+    }
+  },
+  "homepage": {
+    "hero": {
+      "title": "La plateforme d’IA qui protège et automatise votre entreprise",
+      "brand": "SecuriVA",
+      "unifies": "unifie",
+      "aiAutomation": "l’automatisation par IA",
+      "cybersecurity": "la cybersécurité",
+      "secureCommunication": "la communication sécurisée",
+      "into": "dans",
+      "platform": "une plateforme intelligente",
+      "tail": "conçue pour les entreprises modernes.",
+      "cta": "Essai gratuit"
+    },
+    "overview": {
+      "title": "Tout ce dont votre entreprise a besoin — automatisé, sécurisé et connecté.",
+      "description": "SecuriVA unifie l’automatisation par IA, la cybersécurité de niveau entreprise et un réseau VPN IA sécurisé dans une seule plateforme intelligente. Agissant comme un membre d’équipe numérique disponible 24h/24 et 7j/7, elle gère les appels, emails, SMS et chats tout en protégeant votre domaine, votre site web et vos données. Grâce à la création intégrée d’eBooks et à des intégrations fluides avec les principaux outils métiers, SecuriVA aide les organisations à travailler plus vite, à rester sécurisées et à offrir de meilleures expériences client — le tout depuis une seule plateforme."
+    },
+    "cards": {
+      "aiAgent": {
+        "title": "Agent IA Virtuel",
+        "description": "Optimisez les workflows, la planification et la communication grâce à des outils d’automatisation intelligents."
+      },
+      "cybersecurity": {
+        "title": "Protection en cybersécurité",
+        "description": "Défense IA en temps réel pour les données, les utilisateurs et les actifs numériques."
+      },
+      "vpn": {
+        "title": "VPN IA",
+        "description": "Sécurisez chaque connexion grâce à un réseau adaptatif et chiffré."
+      },
+      "customerInteraction": {
+        "title": "Interaction client",
+        "description": "Gérez appels, chats et emails via un avatar IA intelligent."
+      },
+      "ebook": {
+        "title": "Générateur d’eBook",
+        "description": "Créez instantanément des manuels de formation et des guides de sensibilisation."
+      },
+      "integrations": {
+        "title": "Intégrations",
+        "description": "Connectez Gmail, Microsoft 365, Salesforce, OpenAI et bien plus encore."
+      }
+    },
+    "why": {
+      "title": "Pourquoi nous choisir ?",
+      "description": "SecuriVA combine l’automatisation par IA, l’assistance virtuelle intelligente et la cybersécurité de niveau entreprise dans une seule plateforme puissante. Conçue pour s’intégrer parfaitement à vos outils existants, SecuriVA protège votre entreprise, optimise les opérations et améliore les interactions clients grâce à une IA sécurisée et humaine. Grâce à des technologies d’avenir comme le VPN basé sur l’IA et les Digital Twins, SecuriVA permet aux organisations de croître de manière efficace, sécurisée et évolutive.",
+      "getMore": "En savoir plus",
+      "cards": {
+        "allInOne": {
+          "title": "Plateforme tout-en-un",
+          "description": "Automatisation IA, cybersécurité et communication dans un système unifié."
+        },
+        "intelligent": {
+          "title": "Intelligent et humain",
+          "description": "Interagissez avec un assistant IA conversationnel qui s’adapte à votre entreprise."
+        },
+        "integration": {
+          "title": "Intégration fluide",
+          "description": "Fonctionne parfaitement avec vos outils et services cloud existants."
+        },
+        "future": {
+          "title": "Prêt pour l’avenir",
+          "description": "Propulsé par le VPN IA et la technologie Digital Twin pour l’innovation de nouvelle génération."
+        }
+      }
+    },
+    "demo": {
+      "title": "Découvrez comment SecuriVA peut transformer votre entreprise",
+      "description": "Transformez des outils de sécurité fragmentés en une défense intelligente et unifiée.",
+      "button": "Demander une démo"
+    },
+    "video": {
+      "bannerText": "Assistant virtuel sécurisé et suite de protection garantissant confidentialité, communication chiffrée et sécurité en ligne."
+    },
+    "faq": {
+      "title": "Questions fréquemment posées",
+      "items": [
+        {
+          "question": "Qu’est-ce que SecuriVA ?",
+          "answer": "Une plateforme IA qui automatise les tâches métier, améliore la communication client et offre une cybersécurité de niveau entreprise."
+        },
+        {
+          "question": "SecuriVA est-il sécurisé ?",
+          "answer": "Oui — chiffrement de bout en bout, détection des menaces et conformité GDPR, HIPAA et PCI-DSS."
+        },
+        {
+          "question": "SecuriVA peut-il s’intégrer à mes outils ?",
+          "answer": "Oui. SecuriVA se connecte à Gmail, WhatsApp, Salesforce, APIs et bien plus encore."
+        },
+        {
+          "question": "Qui peut utiliser SecuriVA ?",
+          "answer": "PME, entreprises, fintech, santé, éducation, e-commerce et professionnels ayant besoin d’automatisation."
+        },
+        {
+          "question": "Offrez-vous un support client ?",
+          "answer": "Oui — support 24/7, onboarding et documentation détaillée."
+        }
+      ],
+      "moreButton": "Plus de FAQ"
+    },
+    "newsletter": {
+      "title": "Abonnez-vous à notre newsletter",
+      "description": "Entrez votre email pour recevoir des informations de sécurité plus intelligentes directement dans votre boîte mail.",
+      "placeholder": "Adresse email",
+      "button": "S’abonner",
+      "success": "Merci pour votre abonnement !"
+    }
+  },
+  "industry": {
+    "hero": {
+      "title": "Solutions pour les industries",
+      "subtitle": "Une intelligence unifiée et puissante pour chaque secteur"
+    },
+    "intro": {
+      "paragraph1": "Securiva fournit une plateforme d’intelligence sécurisée tout-en-un qui transforme la manière dont les organisations fonctionnent dans tous les secteurs.",
+      "paragraph2": "Contrairement aux plateformes traditionnelles qui proposent des outils fragmentés, Securiva offre un écosystème intégré de bout en bout où l’automatisation, la protection et la communication intelligente fonctionnent ensemble de manière fluide—soutenu par une sécurité de niveau entreprise."
+    },
+    "why": {
+      "title": "Pourquoi Securiva est différent",
+      "subtitle": "Securiva se distingue par quatre piliers fondamentaux de valeur",
+      "cards": {
+        "unified": {
+          "title": "Couche d’intelligence unifiée",
+          "description": "La plupart des plateformes fournissent soit de l’IA, soit de la sécurité—mais pas les deux. Securiva combine :",
+          "points": [
+            "Agent virtuel IA (voix + texte)",
+            "Cybersécurité",
+            "Accès VPN sécurisé",
+            "Automatisation des workflows",
+            "Outils d’interaction client",
+            "Protection des données et conformité"
+          ],
+          "footer": "Tout fonctionne ensemble dans une seule architecture."
+        },
+        "adaptive": {
+          "title": "IA adaptative aux industries",
+          "description": "L’agent virtuel IA s’adapte automatiquement aux règles du secteur, aux workflows, aux contraintes de conformité et aux standards de communication."
+        },
+        "zeroTrust": {
+          "title": "Sécurité Zero-Trust au cœur du système",
+          "description": "Au lieu d’ajouter la sécurité comme une couche externe, Securiva intègre la cybersécurité dans toutes les interactions, automatisations et flux de données."
+        },
+        "compliance": {
+          "title": "Conformité intégrée par défaut",
+          "description": "De la confidentialité dans la santé aux réglementations financières, Securiva garantit que toutes les automatisations et interactions virtuelles restent entièrement conformes."
+        }
+      }
+    },
+    "industries": {
+      "healthcare": {
+        "title": "Santé",
+        "challenges": [
+          "Protection des données des patients",
+          "Temps d’attente longs",
+          "Planification manuelle",
+          "Communication sensible",
+          "Conformité aux normes médicales"
+        ],
+        "solutions": [
+          "Agent virtuel IA pour la prise de rendez-vous, le triage et les rappels",
+          "Canaux de communication sécurisés pour les patients",
+          "Flux automatisés pour les patients (suivi, notifications de résultats)",
+          "Vérification d’identité pour les portails patients",
+          "Cybersécurité et gouvernance des données conformes aux normes du secteur"
+        ],
+        "impact": [
+          "Réduction de la charge administrative",
+          "Service patient plus rapide",
+          "Protection renforcée des dossiers médicaux",
+          "Coordination des soins automatisée"
+        ]
+      },
+      "fintech": {
+        "title": "Finance & Fintech",
+        "challenges": [
+          "Environnement à haut risque de fraude et de sécurité",
+          "Conformité réglementaire",
+          "Onboarding client et KYC",
+          "Volume élevé de demandes"
+        ],
+        "solutions": [
+          "Onboarding assisté par IA avec vérification d’identité sécurisée",
+          "Flux de conformité automatisés",
+          "Garde-fous de cybersécurité pour les transactions financières",
+          "Agent virtuel IA pour support client, prêts et comptes",
+          "Détection des risques et alertes"
+        ],
+        "impact": [
+          "Réduction des risques opérationnels",
+          "Onboarding plus rapide et conforme",
+          "Satisfaction client accrue",
+          "Automatisation évolutive du support financier"
+        ]
+      },
+      "ecommerce": {
+        "title": "E-commerce",
+        "challenges": [
+          "Volume élevé d’interactions clients",
+          "Suivi des commandes et support",
+          "Détection de fraude",
+          "Abandon de panier",
+          "Besoin d’automatisation en temps réel"
+        ],
+        "solutions": [
+          "Agent virtuel IA pour statut de commande, retours et FAQ",
+          "Protection contre les faux comptes et attaques en ligne",
+          "Flux automatisés de récupération de panier",
+          "Outils d’interaction client personnalisés",
+          "Flux de paiement sécurisés et conformes"
+        ],
+        "impact": [
+          "Augmentation des ventes",
+          "Réduction des coûts de support",
+          "Meilleure confiance et protection contre la fraude",
+          "Amélioration du parcours client"
+        ]
+      },
+      "smb": {
+        "title": "PME",
+        "challenges": [
+          "Effectifs limités",
+          "Besoin d’automatisation des processus",
+          "Sécurité basique mais menaces croissantes",
+          "Exigences d’engagement client"
+        ],
+        "solutions": [
+          "Automatisation tout-en-un des opérations quotidiennes",
+          "Agent virtuel IA pour le support",
+          "Cybersécurité intégrée",
+          "Automatisation des workflows pour admin, ventes, RH",
+          "Outils de communication (email, chat, notifications)"
+        ],
+        "impact": [
+          "Réduction du travail manuel",
+          "Expérience client professionnelle",
+          "Posture de sécurité améliorée",
+          "Automatisation rentable"
+        ]
+      },
+      "agriculture": {
+        "title": "Agriculture",
+        "challenges": [
+          "Coordination de la chaîne logistique",
+          "Papiers manuels",
+          "Traçabilité requise",
+          "Problèmes de communication rurale",
+          "Suivi de production et logistique"
+        ],
+        "solutions": [
+          "Agent virtuel IA pour logistique et planification",
+          "Flux automatisés de conformité et reporting",
+          "Gestion sécurisée des données agricoles",
+          "Outils d’interaction client pour acheteurs et fournisseurs",
+          "Cybersécurité pour IoT et équipements"
+        ],
+        "impact": [
+          "Efficacité accrue",
+          "Meilleure traçabilité",
+          "Coordination plus rapide",
+          "Données agricoles protégées"
+        ]
+      },
+      "education": {
+        "title": "Éducation",
+        "challenges": [
+          "Charge administrative élevée",
+          "Gestion des services étudiants",
+          "Sécurité en ligne",
+          "Exigences de conformité"
+        ],
+        "solutions": [
+          "Agent virtuel IA pour demandes et onboarding",
+          "Automatisation des inscriptions et rapports",
+          "Cybersécurité des données étudiantes",
+          "Outils de communication pour parents et enseignants",
+          "Protection des données conforme"
+        ],
+        "impact": [
+          "Administration simplifiée",
+          "Communication plus rapide",
+          "Confidentialité renforcée"
+        ]
+      },
+      "nonprofit": {
+        "title": "Organisation à but non lucratif",
+        "challenges": [
+          "Budgets limités",
+          "Gestion des bénévoles et donateurs",
+          "Exigences de transparence",
+          "Gestion de données sensibles"
+        ],
+        "solutions": [
+          "Agent virtuel IA pour donateurs et bénévoles",
+          "Flux automatisés de collecte de fonds et reporting",
+          "Cybersécurité des données sensibles",
+          "Outils d’engagement communautaire",
+          "Conformité pour subventions et audits"
+        ],
+        "impact": [
+          "Réduction des coûts",
+          "Plus de temps pour la mission",
+          "Confiance renforcée"
+        ]
+      },
+      "government": {
+        "title": "Gouvernement",
+        "challenges": [
+          "Bureaucratie et services lents",
+          "Vérification d’identité",
+          "Communication citoyenne",
+          "Exigences de sécurité et conformité"
+        ],
+        "solutions": [
+          "Agent virtuel IA pour services publics et FAQ",
+          "Automatisation des permis et documents",
+          "Cybersécurité Zero-Trust",
+          "Outils de communication citoyenne",
+          "Politiques de conformité renforcées"
+        ],
+        "impact": [
+          "Services plus rapides",
+          "Systèmes numériques modernisés",
+          "Données citoyennes sécurisées"
+        ]
+      }
+    },
+    "otherIndustries": {
+      "title": "Autres industries",
+      "subtitle": "Securiva est adaptable pour",
+      "industries": [
+        "Logistique",
+        "Immobilier",
+        "Transport",
+        "Hôtellerie",
+        "Fabrication",
+        "Services professionnels"
+      ],
+      "foundationTitle": "Chaque intégration inclut la même base",
+      "features": [
+        "Agent virtuel IA",
+        "Cybersécurité",
+        "Automatisation des workflows",
+        "Outils d’interaction client",
+        "Protection des données et conformité"
+      ]
+    },
+    "advantage": {
+      "title": "L’avantage Securiva",
+      "subtitle": "Quel que soit le secteur, Securiva permet aux organisations de",
+      "items": [
+        "Automatiser les opérations",
+        "Sécuriser les données et les accès",
+        "Améliorer la communication",
+        "Maintenir la conformité",
+        "Déployer des agents virtuels IA sur tous les points de contact",
+        "Passer à l’échelle sans complexité"
+      ]
+    }
+  },
+  "platform": {
+    "capabilities": "Fonctionnalités",
+    "idealFor": "Idéal pour",
+    "value": "Valeur",
+    "cards": [
+      {
+        "label": "Agent Vocal IA",
+        "tagline": "Intelligence vocale naturelle pour toutes les interactions",
+        "description": "L’agent vocal IA fournit une assistance vocale autonome en temps réel, alimentée par une intelligence conversationnelle avancée. Il peut remplacer ou compléter les agents humains, simplifier la communication interne et automatiser les flux de travail.",
+        "capabilities": [
+          "Réponses vocales naturelles et humaines",
+          "Support téléphonique virtuel 24/7",
+          "Gestion, routage et triage automatisés des appels",
+          "Planification de rendez-vous et rappels",
+          "Gestion des commandes, suivis et notifications",
+          "Vérification sécurisée de l’identité par la voix",
+          "Intégration avec CRM, systèmes internes et outils de ticketing"
+        ],
+        "idealFor": [
+          "Centres de support client",
+          "Cliniques de santé",
+          "Institutions financières",
+          "Organismes gouvernementaux",
+          "Service client e-commerce",
+          "Services éducatifs et universitaires"
+        ],
+        "value": [
+          "Réduction des coûts de support",
+          "Amélioration de la rapidité de réponse",
+          "Service cohérent et de haute qualité",
+          "Scalabilité instantanée des opérations"
+        ]
+      },
+      {
+        "label": "Cybersécurité",
+        "tagline": "Une sécurité intégrée à chaque interaction",
+        "description": "La cybersécurité dans Securiva n’est pas une option — c’est la base de la plateforme. Chaque interaction IA, flux de travail, appel vocal et automatisation est sécurisé via une architecture robuste zero-trust.",
+        "capabilities": [
+          "Détection et prévention des menaces multicouches",
+          "Gestion des identités et des accès",
+          "Surveillance des menaces en temps réel",
+          "Chiffrement des données (au repos et en transit)",
+          "Intégrations API sécurisées",
+          "Outils de réponse aux incidents",
+          "Protection anti-fraude",
+          "Conformité aux normes (selon le secteur)"
+        ],
+        "idealFor": [
+          "Finance",
+          "Santé",
+          "Gouvernement",
+          "E-commerce",
+          "Toute organisation nécessitant une forte protection des données"
+        ],
+        "value": [
+          "Protection renforcée contre les cybermenaces",
+          "Intégrité et confidentialité des données",
+          "Environnement prêt pour la conformité",
+          "Réduction des risques opérationnels"
+        ]
+      },
+      {
+        "label": "Agent Textuel",
+        "tagline": "Automatisation intelligente du texte sur tous les canaux",
+        "description": "L’agent textuel gère automatiquement les conversations sur plusieurs canaux écrits, offrant des messages instantanés, personnalisés et sécurisés.",
+        "capabilities": [
+          "Assistant IA pour sites web, applications et portails",
+          "Réponses automatiques aux e-mails",
+          "Messagerie déclenchée par workflows",
+          "Notifications et engagement SMS",
+          "Gestion des tickets et des cas",
+          "Remplissage automatique de formulaires et assistance onboarding",
+          "Assistance basée sur la connaissance"
+        ],
+        "idealFor": [
+          "Service client",
+          "Services d’admission",
+          "Commerce en ligne",
+          "Services administratifs",
+          "Engagement associatif",
+          "Support IT et helpdesk"
+        ],
+        "value": [
+          "Communication textuelle instantanée 24/7",
+          "Réduction de la charge des agents humains",
+          "Amélioration de la satisfaction client",
+          "Collecte de données et automatisation plus rapides"
+        ]
+      },
+      {
+        "label": "Accès VPN Sécurisé",
+        "tagline": "Accès chiffré, privé et zero-trust partout",
+        "description": "L’accès VPN sécurisé garantit que tous les employés distants, partenaires et prestataires se connectent en toute sécurité à vos systèmes, où qu’ils soient.",
+        "capabilities": [
+          "Accès distant chiffré",
+          "Application du modèle zero-trust",
+          "Connexion sécurisée aux systèmes cloud et locaux",
+          "Configuration multi-appareils (desktop/mobile)",
+          "Anonymisation du trafic",
+          "Protection des flux sensibles et des interactions IA"
+        ],
+        "idealFor": [
+          "Équipes distribuées",
+          "Agents de support à distance",
+          "Secteurs réglementés et gouvernementaux",
+          "Organisations manipulant des données sensibles",
+          "Équipes internationales"
+        ],
+        "value": [
+          "Protection des systèmes internes contre les accès non autorisés",
+          "Travail à distance sécurisé",
+          "Conformité garantie pour tous les utilisateurs"
+        ]
+      }
+    ],
+    "hero": {
+      "title": "Plateforme",
+      "description": "Securiva propose une plateforme intégrée qui combine communication sécurisée, automatisation avancée par IA et protection de niveau entreprise. Chaque composant fonctionne de manière fluide au sein de l’écosystème Securiva afin de fournir un environnement unifié pour l’intelligence vocale, l’automatisation textuelle, la cybersécurité et l’accès sécurisé."
+    },
+    "overview": {
+      "title": "Une plateforme intelligente unifiée pour des opérations sécurisées, automatisées et pilotées par l’IA",
+      "description": "Notre plateforme est conçue pour accompagner les organisations de toutes tailles — dans tous les secteurs — souhaitant moderniser leurs opérations, protéger leurs données et améliorer l’engagement client."
+    },
+    "components": {
+      "title": "Composants de la plateforme"
+    },
+    "unifiedArchitecture": {
+      "title": "Architecture unifiée de la plateforme",
+      "description": "Securiva intègre les quatre composants dans un écosystème unique et cohérent — éliminant le besoin d’outils fragmentés, réduisant les coûts, améliorant la sécurité et accélérant le déploiement.",
+      "points": [
+        "L’agent vocal IA et l’agent textuel fonctionnent simultanément pour gérer les interactions vocales et textuelles sur tous les canaux.",
+        "La cybersécurité assure une protection continue pour chaque automatisation, conversation et flux de travail.",
+        "L’accès VPN sécurisé garantit que toutes les opérations internes et connexions externes sont entièrement chiffrées."
+      ]
+    },
+    "whyChoose": {
+      "title": "Pourquoi les organisations choisissent la plateforme Securiva",
+      "subtitle": "Une plateforme, quatre capacités, des applications infinies :",
+      "items": [
+        "Automatisation complète des opérations clients et internes",
+        "Cybersécurité de niveau entreprise",
+        "Protection des données axée sur la conformité",
+        "IA vocale et textuelle unifiée dans un seul écosystème",
+        "Accès sécurisé pour le télétravail et les équipes hybrides",
+        "Scalable pour les PME, entreprises et gouvernements"
+      ]
+    },
+    "cta": {
+      "title": "Découvrez la puissance de la plateforme SecuriVA",
+      "subtitle": "Modernisez votre organisation avec la plateforme Securiva tout-en-un",
+      "requestDemo": "Demander une démo",
+      "contactSales": "Contacter les ventes",
+      "pricing": "Voir les tarifs"
+    }
+  },
+  "automationCard": {
+    "status": {
+      "active": "Actif",
+      "paused": "En pause"
+    },
+    "lastRun": {
+      "neverRun": "Jamais exécuté"
+    },
+    "runs": {
+      "label": "exécutions"
+    }
+  },
+  "dashboardNav": {
+    "title": "Automatisations",
+    "subtitle": "Gérez vos règles d'automatisation",
+    "buttons": {
+      "newAutomation": "Nouvelle automatisation"
+    },
+    "tooltips": {
+      "refresh": "Actualiser",
+      "logout": "Déconnexion"
+    }
+  },
+  "footer": {
+    "industries": {
+      "title": "Secteurs",
+      "items": {
+        "healthcare": "Santé",
+        "finance": "Finance et Fintech",
+        "ecommerce": "E-commerce",
+        "smb": "PME",
+        "agriculture": "Agriculture",
+        "education": "Éducation",
+        "nonprofit": "Organisations à but non lucratif",
+        "government": "Gouvernement"
+      }
+    },
+    "resources": {
+      "title": "Ressources",
+      "items": {
+        "blog": "Blog",
+        "ebooks": "eBooks et Livres blancs",
+        "affiliates": "Affiliation",
+        "partnerships": "Partenariats",
+        "mediaKit": "Kit média",
+        "webinars": "Webinaires",
+        "apiDocs": "Documentation API"
+      }
+    },
+    "legal": {
+      "title": "Légal",
+      "items": {
+        "privacy": "Politique de confidentialité",
+        "terms": "Conditions d'utilisation",
+        "dataProtection": "Politique de protection des données",
+        "cookies": "Préférences des cookies",
+        "accessibility": "Déclaration d'accessibilité"
+      }
+    }
+  },
+  "industryCard": {
+    "challenges": "Défis du secteur",
+    "solutions": "Solutions",
+    "impact": "Impact"
+  },
+  "navbar": {
+    "upper": {
+      "requestDemo": "Demander une démo",
+      "backendStatus": "État du backend",
+      "buttons": {
+        "reconnect": "Reconnecter",
+        "loginGoogle": "Se connecter avec Google",
+        "connectSalesforce": "Connecter Salesforce",
+        "disconnectSalesforce": "Déconnecter Salesforce",
+        "logout": "Déconnexion"
+      }
+    },
+    "lower": {
+      "loggedOut": {
+        "nav": {
+          "about": "À propos",
+          "features": "Fonctionnalités",
+          "solutions": "Solutions",
+          "platform": "Plateforme",
+          "pricing": "Tarifs",
+          "contact": "Contact",
+          "faq": "FAQ"
+        },
+        "auth": {
+          "signIn": "Connexion",
+          "signUp": "Inscription",
+          "support": "Support"
+        }
+      },
+      "loggedIn": {
+        "nav": {
+          "about": "À propos",
+          "features": "Sécurité",
+          "support": "Support",
+          "contact": "Contact",
+          "faq": "FAQ",
+          "dashboard": "Tableau de bord"
+        },
+        "toggleStatus": {
+          "show": "Afficher le statut",
+          "hide": "Masquer le statut"
+        }
+      }
+    }
+  },
+  "sidebar": {
+    "buttons": {
+      "newChat": "Nouvelle discussion",
+      "voiceAgent": "Agent vocal",
+      "automations": "Automatisations",
+      "settings": "Paramètres",
+      "account": "Compte"
+    }
+  },
+  "sponsors": {
+    "title": "Nos partenaires jouent un rôle clé dans le développement de l’écosystème SecuriVA."
+  },
+  "chatbox": {
+    "system": {
+      "default": "Vous êtes un assistant utile. Vous avez accès à des outils. Répondez en markdown.",
+      "newChat": "Vous êtes un assistant utile."
+    },
+    "input": {
+      "placeholder": "Écrivez un message...",
+      "send": "Envoyer",
+      "thinking": "Réflexion..."
+    },
+    "errors": {
+      "failedResponse": "Échec de la réponse",
+      "backendError": "Erreur du backend"
+    },
+    "messages": {
+      "errorPrefix": "Erreur"
+    }
+  },
+  "chatSidebar": {
+    "header": "Discussion",
+    "buttons": {
+      "newChat": "Nouvelle discussion"
+    },
+    "empty": "Aucune discussion précédente"
+  },
+  "login": {
+    "welcome": "Bon retour",
+    "subtitle": "Entrez vos identifiants pour accéder à votre compte",
+    "email": "Email",
+    "password": "Mot de passe",
+    "forgotPassword": "Mot de passe oublié ?",
+    "signIn": "Se connecter",
+    "noAccount": "Vous n’avez pas de compte ?",
+    "createAccount": "Créer un compte"
+  },
+  "pricing": {
+    "title": "Tarification",
+    "subtitle": "Quel que soit votre statut, nos offres évoluent selon vos besoins",
+    "starter": {
+      "name": "Starter",
+      "price": "29$/mois",
+      "description": "Idéal pour les entrepreneurs et les petites entreprises",
+      "button": "S'inscrire",
+      "features": [
+        "Automatisation des tâches et planification des e-mails",
+        "Assistant de chat IA (basé sur texte)",
+        "Rapports et analyses de base",
+        "Jusqu'à 3 intégrations de plateformes",
+        "Support standard"
+      ]
+    },
+    "professional": {
+      "name": "Professionnel",
+      "price": "89$/mois",
+      "description": "Idéal pour les entreprises en croissance",
+      "badge": "Le plus populaire",
+      "button": "S'inscrire",
+      "features": [
+        "Toutes les fonctionnalités du plan Basic",
+        "Protection de cybersécurité alimentée par l'IA",
+        "Interactions avec assistant vocal et vidéo",
+        "Génération de livres électroniques et documents",
+        "Jusqu'à 10 intégrations",
+        "Support prioritaire 24h/24 et 7j/7"
+      ]
+    },
+    "enterprise": {
+      "name": "Entreprise",
+      "price": "Sur mesure",
+      "description": "Pour les organisations à grande échelle",
+      "button": "S'inscrire",
+      "features": [
+        "Suite complète d'automatisation + VPN géré par IA",
+        "Simulation d'entreprise Digital Twin",
+        "Assistant avatar IA multilingue",
+        "Intégrations illimitées et accès API",
+        "Gestionnaire de compte dédié",
+        "SLA garanti avec disponibilité et conformité (prêt pour GDPR/HIPAA)"
+      ]
+    }
+  },
+  "providerForm": {
+    "title": "Connectez-vous ou créez votre compte",
+    "emailPlaceholder": "nom@site.com",
+    "continue": "Continuer",
+    "redirecting": "Redirection...",
+    "otherLogin": "ou\nAutres moyens de connexion",
+    "google": "Se connecter avec Google",
+    "salesforce": "Connecter Salesforce",
+    "alreadyAccount": "Vous avez déjà un compte ?",
+    "signIn": "Se connecter"
+  },
+  "signupForm": {
+    "title": "Créer votre compte",
+    "subtitle": "Remplissez vos informations pour commencer avec Securiva",
+    "email": "E-mail",
+    "phone": "Téléphone",
+    "password": "Mot de passe",
+    "confirmPassword": "Confirmer le mot de passe",
+    "terms": "J’accepte les Conditions d’utilisation et la Politique de confidentialité",
+    "button": "Créer un compte",
+    "alreadyAccount": "Vous avez déjà un compte ?",
+    "signIn": "Se connecter"
+  },
+  "solutions": {
+    "hero": {
+      "title": "Solutions",
+      "subtitle": "SecuriVA combine l’intelligence artificielle, la cybersécurité et la collaboration virtuelle dans un écosystème sécurisé unique — conçu pour automatiser, protéger et optimiser les entreprises modernes."
+    },
+    "reasons": {
+      "items": {
+        "platform": {
+          "label": "Plateforme d’intelligence tout-en-un",
+          "description": "Un hub unifié combinant automatisation IA, cybersécurité, VPN et engagement client. Plus besoin de plusieurs outils — SecuriVA centralise tout."
+        },
+        "security": {
+          "label": "Sécurité de niveau entreprise",
+          "description": "Conçu avec une défense cyber et une confidentialité intégrées dès la conception, garantissant que toutes les données, messages et appels sont chiffrés et surveillés en toute sécurité par l’IA."
+        },
+        "aiAssistant": {
+          "label": "Assistant IA réel avec une touche humaine",
+          "description": "L’avatar IA de SecuriVA peut parler, discuter et interagir naturellement avec les utilisateurs, offrant une expérience humaine avec l’efficacité de l’automatisation."
+        },
+        "ecosystem": {
+          "label": "Intégration fluide de l’écosystème",
+          "description": "S’intègre facilement aux services cloud, CRM, plateformes email et systèmes fintech, en s’adaptant à tous les secteurs d’activité."
+        },
+        "customizable": {
+          "label": "Personnalisable pour tous les secteurs",
+          "description": "De la finance à l’éducation en passant par l’e-commerce — SecuriVA s’adapte aux workflows, aux exigences de conformité et aux objectifs d’automatisation."
+        },
+        "monetization": {
+          "label": "Options de monétisation évolutives",
+          "description": "Choisissez entre des abonnements SaaS, une facturation à l’usage ou des licences en marque blanche pour les entreprises."
+        },
+        "innovation": {
+          "label": "Porté par l’innovation",
+          "description": "Propulsé par Kimuntu Power Inc. et construit sur l’infrastructure cloud AWS, SecuriVA intègre OpenAI, TensorFlow et des modules de sécurité IA adaptatifs."
+        },
+        "future": {
+          "label": "Plateforme prête pour l’avenir",
+          "description": "Conçue pour évoluer en continu — des fonctionnalités à venir comme le Digital Twin, les améliorations du VPN IA et les tableaux de bord de renseignement sur les menaces permettent aux entreprises de garder une longueur d’avance."
+        },
+        "people": {
+          "label": "Conçu pour les humains, approuvé par les professionnels",
+          "description": "Notre mission : simplifier la technologie, renforcer la sécurité et permettre aux entreprises de toutes tailles de fonctionner de manière plus intelligente et plus sûre."
+        }
+      }
+    },
+    "solutionsList": {
+      "aiAutomation": {
+        "label": "Automatisation des entreprises par IA",
+        "description": "Automatisez les workflows, la planification, la communication et les rapports dans toute votre organisation.",
+        "points": [
+          "Gestion intelligente des tâches et optimisation des workflows",
+          "Synchronisation des calendriers et des e-mails (Gmail, Outlook, etc.)",
+          "Intégration avec les CRM, outils de gestion de projet et plateformes fintech",
+          "Génération automatique de rapports et résumés d’activité"
+        ],
+        "imageAlt": "Icône Automatisation des entreprises par IA"
+      },
+      "cybersecurity": {
+        "label": "Cybersécurité et protection des données",
+        "description": "Protégez votre entreprise grâce à une surveillance IA en temps réel et des protocoles de sécurité adaptatifs.",
+        "points": [
+          "Détection et prévention des menaces par IA",
+          "Protection des terminaux et du cloud",
+          "Gestion des identités et des accès avec analyse biométrique",
+          "Alertes en temps réel pour comportements suspects ou tentatives de phishing"
+        ],
+        "imageAlt": "Icône Cybersécurité et protection des données"
+      },
+      "vpn": {
+        "label": "VPN géré par IA",
+        "description": "Protégez chaque interaction avec un VPN intégré alimenté par l’IA.",
+        "points": [
+          "Communications chiffrées pour appels, e-mails et transferts de données",
+          "Routage dynamique pour des connexions plus rapides et sécurisées",
+          "Analyse des menaces intégrée dans la couche VPN",
+          "Conformité avec le RGPD, HIPAA et PCI-DSS"
+        ],
+        "imageAlt": "Icône VPN géré par IA"
+      },
+      "communication": {
+        "label": "Interaction client et communication",
+        "description": "Engagez vos clients via des conversations humaines, des appels vocaux et des e-mails.",
+        "points": [
+          "Assistant multicanal : appels, e-mails, chats, réseaux sociaux et vidéo",
+          "Avatar IA pour support client et onboarding",
+          "Suivis personnalisés et réponses intelligentes",
+          "Intégration CRM pour un suivi client fluide"
+        ],
+        "imageAlt": "Interaction client et communication"
+      },
+      "ebook": {
+        "label": "Génération d’eBooks et de contenus de formation",
+        "description": "Transformez les connaissances techniques en eBooks, manuels ou guides de sensibilisation faciles à comprendre.",
+        "points": [
+          "Génération automatique d’eBooks professionnels et de formations en cybersécurité",
+          "Modèles pour guides, checklists de sécurité et manuels d’intégration",
+          "Options d’export : PDF, EPUB et format web"
+        ],
+        "examples": [
+          "Cybersécurité pour débutants : rester en sécurité en ligne",
+          "Manuel de protection des données pour les petites entreprises"
+        ],
+        "imageAlt": "Icône génération d’eBooks et de contenus de formation"
+      },
+      "integrations": {
+        "label": "Intégrations multi-plateformes",
+        "description": "Connectez SecuriVA à vos plateformes et outils préférés.",
+        "points": [
+          "WhatsApp, Gmail, Microsoft 365, Slack, Salesforce, OpenAI",
+          "Systèmes financiers et API fintech",
+          "Générateur de requêtes HTTP pour intégrations personnalisées"
+        ],
+        "imageAlt": "Icône intégrations multi-plateformes"
+      },
+      "digitalTwin": {
+        "label": "Jumeau numérique d’entreprise alimenté par l’IA",
+        "description": "Découvrez la prochaine évolution de l’intelligence d’entreprise.",
+        "points": [
+          "Création d’une réplique numérique de vos opérations",
+          "Simulation des workflows, prédiction des risques et suggestions d’optimisation",
+          "Identification des vulnérabilités cyber avant qu’elles ne surviennent",
+          "Prise de décision prédictive et corrections automatisées"
+        ],
+        "imageAlt": "Icône jumeau numérique d’entreprise alimenté par l’IA"
+      }
+    },
+    "reasonsTitle": "Pourquoi choisir SecuriVA",
+    "reasonsSubtitle": "SecuriVA n’est pas un simple assistant virtuel — c’est votre partenaire IA pour l’automatisation, la sécurité et la croissance.",
+    "quote": "\"Avec SecuriVA, votre entreprise ne se contente pas de fonctionner — elle apprend, se protège et grandit.\"",
+    "button": "Voir les solutions par industrie"
+  },
+  "support": {
+    "hero": {
+      "title": "Centre de support SecuriVA",
+      "subtitle": "Assistance professionnelle pour l’utilisation de la plateforme, les intégrations, la configuration de la cybersécurité et les opérations d’entreprise. Notre équipe de support garantit fiabilité, sécurité et automatisation fluide de vos workflows."
+    },
+    "sections": {
+      "supportAreasTitle": "Domaines de support",
+      "processTitle": "Comment fonctionne notre processus de support",
+      "faqTitle": "Questions fréquemment posées",
+      "formTitle": "Soumettre une demande de support",
+      "commitmentTitle": "Engagement de support entreprise",
+      "commitmentText": "SecuriVA offre une fiabilité de niveau entreprise avec une surveillance continue, une réponse rapide aux incidents et une gestion proactive de la santé du système pour garantir des opérations sans interruption."
+    },
+    "supportAreas": {
+      "account": {
+        "title": "Compte et authentification",
+        "description": "Assistance pour les problèmes de connexion, l’authentification Google, les permissions d’accès au compte, les problèmes de session et la vérification d’identité.",
+        "commonTitle": "Problèmes courants que nous traitons :",
+        "items": [
+          "Échecs de connexion ou restrictions d’accès",
+          "Configuration du compte ou permissions de rôle",
+          "Erreurs d’authentification",
+          "Expiration de session ou problèmes de vérification"
+        ]
+      },
+      "platform": {
+        "title": "Plateforme et intégrations",
+        "description": "Support pour les connexions Salesforce, les intégrations API, les workflows d’automatisation, la configuration système et les problèmes de synchronisation des données.",
+        "commonTitle": "Nous vous assistons pour :",
+        "items": [
+          "Configuration et dépannage des intégrations",
+          "Configuration des workflows d’automatisation",
+          "Problèmes de connectivité API",
+          "Optimisation des performances système"
+        ]
+      },
+      "security": {
+        "title": "Sécurité et confidentialité",
+        "description": "Conseils sur la configuration sécurisée, la protection des données, les pratiques de chiffrement et les meilleures pratiques en cybersécurité.",
+        "commonTitle": "Couverture inclut :",
+        "items": [
+          "Recommandations de configuration de sécurité",
+          "Pratiques de protection des données",
+          "Questions de confidentialité et de conformité",
+          "Conseils de réponse aux incidents"
+        ]
+      }
+    },
+    "process": {
+      "steps": [
+        {
+          "title": "Soumettre une demande",
+          "description": "Fournissez les détails de votre problème, votre environnement et le résultat attendu."
+        },
+        {
+          "title": "Analyse du problème",
+          "description": "Nos ingénieurs analysent les journaux, la configuration et le comportement du système."
+        },
+        {
+          "title": "Résolution",
+          "description": "Nous fournissons des correctifs, recommandations ou un dépannage guidé."
+        },
+        {
+          "title": "Suivi",
+          "description": "Une surveillance continue garantit un fonctionnement stable."
+        }
+      ]
+    },
+    "faq": {
+      "q1": {
+        "question": "Comment connecter Salesforce à SecuriVA ?",
+        "answer": "Après connexion, accédez à votre tableau de bord et choisissez l’option de configuration d’intégration. Suivez les étapes d’autorisation pour connecter votre environnement Salesforce en toute sécurité."
+      },
+      "q2": {
+        "question": "En combien de temps vais-je recevoir une réponse ?",
+        "answer": "Les réponses du support standard sont fournies sous 24 heures. Les demandes entreprise bénéficient d’un traitement prioritaire et de délais de réponse plus rapides."
+      },
+      "q3": {
+        "question": "Quelles informations dois-je inclure dans ma demande ?",
+        "answer": "Incluez les détails de votre environnement, les étapes pour reproduire le problème, les messages d’erreur et le comportement attendu. Cela aide nos ingénieurs à résoudre votre problème plus rapidement."
+      },
+      "q4": {
+        "question": "Mes données sont-elles sécurisées lors du contact avec le support ?",
+        "answer": "Oui. Toutes les communications de support respectent des pratiques sécurisées de traitement et des normes de confidentialité."
+      }
+    },
+    "form": {
+      "name": "Nom complet",
+      "email": "Email professionnel",
+      "categoryOptions": [
+        "Problème technique",
+        "Aide au compte",
+        "Support intégration",
+        "Question de sécurité",
+        "Facturation",
+        "Autre"
+      ],
+      "message": "Décrivez votre problème ou votre demande...",
+      "button": "Envoyer la demande",
+      "success": "Demande de support envoyée. Notre équipe vous contactera sous peu."
+    },
+    "badges": [
+      "Surveillance 24/7 de la plateforme",
+      "Réponse standard sous 24h",
+      "Support entreprise prioritaire",
+      "Canaux de communication sécurisés"
+    ]
+  },
+  "vpn": {
+    "reasons": {
+      "remoteTeams": {
+        "label": "Équipes distantes et hybrides",
+        "description": "Accès sécurisé aux systèmes internes, CRM, bases de données et tableaux de bord, quel que soit l’emplacement des employés."
+      },
+      "regulated": {
+        "label": "Secteurs hautement réglementés",
+        "description": "Les secteurs de la santé, de la finance, du gouvernement et du juridique bénéficient d’un environnement protégé pour les processus sensibles."
+      },
+      "aiSecurity": {
+        "label": "Sécurité de l’automatisation IA",
+        "description": "Toutes les tâches basées sur l’IA restent privées et chiffrées."
+      },
+      "crossBorder": {
+        "label": "Opérations transfrontalières",
+        "description": "Les équipes internationales se connectent en toute sécurité au même écosystème protégé."
+      },
+      "apiWorkflows": {
+        "label": "Flux de travail basés sur les API",
+        "description": "Échange sécurisé de données entre outils, plateformes cloud et agents IA."
+      }
+    },
+    "hero": {
+      "title": "Accès VPN sécurisé",
+      "subtitle": "L’accès VPN sécurisé transforme SecuriVA d’une plateforme d’IA en un environnement opérationnel sécurisé pour toute l’organisation"
+    },
+    "intro": {
+      "title": "Protégez votre entreprise avec une sécurité et une conformité pilotées par l’IA",
+      "description": "Le VPN Secure Access est le module de protection réseau de SecuriVA, offrant une connectivité chiffrée, un accès zero-trust et une détection des menaces basée sur l’IA pour les équipes distribuées, les systèmes cloud et les flux de travail sensibles."
+    },
+    "integration": {
+      "title": "Intégration du VPN dans SecuriVA",
+      "subtitle": "Le VPN Secure Access est entièrement intégré à tous les composants de SecuriVA :",
+      "footer": "Ce positionnement fait du VPN une base essentielle de SecuriVA, et non un outil séparé."
+    },
+    "integrationCards": [
+      {
+        "label": "Agent vocal IA",
+        "description": "Toutes les interactions vocales, le routage des appels, les vérifications d’identité et les requêtes backend se déroulent dans le réseau chiffré."
+      },
+      {
+        "label": "Agent textuel",
+        "description": "Les messages, e-mails, documents, formulaires et recherches dans la base de connaissances sont protégés contre toute interception externe."
+      },
+      {
+        "label": "Moteur de cybersécurité",
+        "description": "Le trafic VPN est continuellement analysé par l’intelligence artificielle de SecuriVA."
+      },
+      {
+        "label": "Flux d’automatisation",
+        "description": "Chaque tâche automatisée—interne ou externe—s’exécute via un tunnel privé et chiffré."
+      },
+      {
+        "label": "Intégrations système (Gmail, WhatsApp, Salesforce, API bancaires, plateformes cloud, OpenAI, etc.)",
+        "description": "Toutes les appels API passent par une couche réseau sécurisée garantissant une confidentialité maximale."
+      }
+    ],
+    "features": {
+      "title": "Fonctionnalités du VPN SecuriVA",
+      "items": [
+        {
+          "label": "Navigation sécurisée en un clic",
+          "description": "Toutes les communications—including e-mails, chats, appels et requêtes API—passent par un tunnel chiffré activé en un seul clic.",
+          "points": [
+            "Transport de données chiffré",
+            "Masquage de l’adresse IP et anonymisation du trafic",
+            "Activation automatique du tunnel pour les workflows IA",
+            "Surveillance continue des activités inhabituelles"
+          ],
+          "footer": "Cela protège toutes les données opérationnelles et clients contre l’interception, les fuites ou les accès non autorisés."
+        },
+        {
+          "label": "Détection des menaces par IA dans le VPN",
+          "description": "SecuriVA introduit une analyse IA en temps réel de tout le trafic VPN.",
+          "points": [
+            "Signatures de paquets suspects",
+            "Requêtes API malveillantes",
+            "Tentatives de fraude d’identité",
+            "Modèles d’attaques automatisées ou bots",
+            "Signaux d’exfiltration de données"
+          ],
+          "footer": "Cela transforme la technologie VPN en intelligence proactive de cybersécurité."
+        },
+        {
+          "label": "Routage adaptatif",
+          "description": "Le VPN choisit dynamiquement le serveur le plus rapide et le plus sûr grâce à une optimisation basée sur l’IA.",
+          "points": [
+            "Charge serveur",
+            "Latence",
+            "Contraintes géographiques",
+            "Menaces détectées",
+            "Exigences de conformité"
+          ],
+          "footer": "Garantit des performances stables dans des environnements mondiaux."
+        },
+        {
+          "label": "Protection conforme aux réglementations",
+          "description": "Prend en charge le RGPD, HIPAA, PCI-DSS et d’autres cadres réglementaires.",
+          "points": [
+            "RGPD",
+            "HIPAA",
+            "PCI-DSS",
+            "Règles de résidence des données financières",
+            "Normes de sécurité gouvernementales"
+          ],
+          "footer": "Permet la conformité sans configuration complexe."
+        },
+        {
+          "label": "Authentification multi-facteurs intégrée (MFA)",
+          "description": "SecuriVA applique le MFA et des contrôles zero-trust pour les accès sensibles.",
+          "points": [
+            "Connexion MFA",
+            "Vérification des appareils en zero-trust",
+            "Vérification d’identité",
+            "Autorisation dynamique des sessions"
+          ],
+          "footer": "Seuls les utilisateurs autorisés peuvent accéder aux environnements protégés."
+        }
+      ]
+    },
+    "value": {
+      "title": "Pourquoi le VPN SecuriVA est précieux",
+      "items": [
+        {
+          "label": "Plateforme tout-en-un",
+          "points": [
+            "Assistants IA (voix et texte)",
+            "Flux d’automatisation",
+            "Cybersécurité",
+            "Protection des données",
+            "Sécurité VPN intégrée"
+          ],
+          "footer": "Aucun besoin d’outils ou de fournisseurs séparés."
+        },
+        {
+          "label": "Remplace les VPN externes",
+          "points": [
+            "Travail à distance sécurisé",
+            "Accès sécurisé aux systèmes internes",
+            "Utilisation cloud protégée",
+            "Exécution de workflows confidentiels"
+          ],
+          "footer": "Tout est natif et optimisé."
+        },
+        {
+          "label": "Différenciation sur le marché",
+          "intro": "La plupart des plateformes IA offrent :",
+          "badItems": [
+            "IA uniquement",
+            "Automatisation uniquement",
+            "Chatbots uniquement",
+            "Sécurité basique"
+          ],
+          "closing": "SecuriVA intègre IA + cybersécurité + réseau privé + automatisation dans un seul système.",
+          "footer": "Cela positionne SecuriVA comme une plateforme d’opérations IA sécurisée."
+        }
+      ]
+    },
+    "useCases": {
+      "title": "Cas d’usage clés"
+    },
+    "final": {
+      "title": "Proposition de valeur finale",
+      "description": "Le VPN Secure Access est une couche de sécurité stratégique qui transforme SecuriVA en une plateforme d’automatisation et de protection de niveau entreprise.",
+      "items": [
+        "Opérations entièrement chiffrées de bout en bout",
+        "Détection des menaces augmentée par l’IA",
+        "Infrastructure conforme aux réglementations",
+        "Gestion des accès zero-trust",
+        "Flux de travail entièrement protégés intégrés",
+        "Aucun VPN tiers requis"
+      ]
+    }
+  }
+}

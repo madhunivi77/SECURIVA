@@ -1,0 +1,140 @@
+[
+  {
+    "category": "Questions générales",
+    "items": [
+      {
+        "question": "Qu’est-ce que SecuriVA ?",
+        "answer": "SecuriVA est une plateforme d’assistant virtuel alimentée par l’IA de niveau entreprise qui unifie l’automatisation intelligente, la cybersécurité, les communications sécurisées et la conformité dans un seul écosystème. Elle permet aux entreprises d’automatiser leurs flux de travail, de gérer les interactions clients sur tous les canaux et d’opérer en toute sécurité au sein d’une infrastructure numérique unifiée — développée par Kimuntu Power Inc."
+      },
+      {
+        "question": "Que peut faire SecuriVA pour mon entreprise ?",
+        "answer": "SecuriVA automatise les tâches administratives, gère les communications multicanales (voix, email, chat, vidéo), traite des flux de travail complexes, détecte et neutralise les cybermenaces en temps réel, sécurise les données sensibles via VPN et chiffrement, et s’intègre à vos outils existants — le tout depuis une seule plateforme."
+      },
+      {
+        "question": "À qui s’adresse SecuriVA ?",
+        "answer": "SecuriVA s’adresse à un large éventail d’organisations, notamment les PME, les grandes entreprises, les plateformes e-commerce, les entreprises fintech, les établissements de santé, les institutions éducatives, les agences gouvernementales, les organisations à but non lucratif et les professionnels recherchant une automatisation et une sécurité basées sur l’IA."
+      },
+      {
+        "question": "SecuriVA prend-il en charge plusieurs langues ?",
+        "answer": "Oui. SecuriVA fonctionne dans des environnements multilingues et inclut des couches de traduction basées sur l’IA, permettant une communication fluide entre différentes langues dans la voix, le texte et les workflows automatisés."
+      },
+      {
+        "question": "SecuriVA est-il basé sur le cloud ou sur site ?",
+        "answer": "SecuriVA est nativement cloud, offrant une haute disponibilité et une grande évolutivité par défaut. Les clients des secteurs réglementés peuvent demander des options de déploiement sur site ou hybride, y compris des configurations de résidence des données dédiées."
+      },
+      {
+        "question": "Quelle est la sécurité de SecuriVA ?",
+        "answer": "La sécurité est au cœur de SecuriVA — ce n’est pas une option. La plateforme utilise le chiffrement de bout en bout, une architecture zero-trust, l’authentification multifacteur, la détection de menaces basée sur l’IA, des contrôles d’accès basés sur les rôles, la supervision SIEM et la conformité totale avec les normes GDPR, HIPAA et PCI-DSS."
+      }
+    ]
+  },
+  {
+    "category": "Fonctionnalités",
+    "items": [
+      {
+        "question": "SecuriVA peut-il automatiser les emails, la planification et les tâches CRM ?",
+        "answer": "Oui. L’agent IA textuel de SecuriVA automatise la rédaction d’emails, les suivis, la planification de rendez-vous, la mise à jour des CRM, la création de tickets, le traitement de documents et les notifications multi-plateformes — réduisant considérablement la charge de travail manuelle."
+      },
+      {
+        "question": "SecuriVA propose-t-il des interactions vocales et vidéo ?",
+        "answer": "Oui. Le module vocal de l’agent IA permet des conversations vocales naturelles, un support téléphonique virtuel 24/7, le routage automatique des appels, la vérification d’identité et des interactions vidéo basées sur des avatars."
+      },
+      {
+        "question": "Avec quelles plateformes SecuriVA s’intègre-t-il ?",
+        "answer": "SecuriVA s’intègre avec les emails (Gmail, Outlook), les applications de messagerie (WhatsApp, SMS), les CRM (Salesforce, HubSpot), les suites de productivité (Microsoft 365, Google Workspace), les plateformes e-commerce (Shopify, WooCommerce), les infrastructures cloud (AWS, Azure, Google Cloud), les API fintech et bancaires, ainsi que tout système accessible via REST, GraphQL ou WebSocket."
+      },
+      {
+        "question": "Puis-je personnaliser SecuriVA pour mon secteur ?",
+        "answer": "Absolument. L’IA de SecuriVA s’adapte au vocabulaire spécifique, aux exigences de conformité, aux structures de workflow et aux standards d’interaction client de chaque secteur. Des modèles et workflows personnalisés sont disponibles pour la santé, la finance, l’éducation, le gouvernement, la logistique, l’agriculture et plus encore."
+      },
+      {
+        "question": "SecuriVA prend-il en charge les analyses en temps réel ?",
+        "answer": "Oui. Le tableau de bord unifié fournit des analyses en temps réel, incluant les performances des tâches, les interactions clients, les journaux de cybersécurité, l’efficacité des workflows et les rapports de conformité."
+      },
+      {
+        "question": "SecuriVA prend-il en charge les workflows multi-agents ?",
+        "answer": "Oui. Les organisations peuvent orchestrer plusieurs agents IA spécialisés — pour le service client, les ressources humaines, la finance, la conformité, les ventes, etc. — avec un contexte partagé et une exécution coordonnée."
+      }
+    ]
+  },
+  {
+    "category": "VPN & Sécurité",
+    "items": [
+      {
+        "question": "Qu’est-ce que l’accès VPN sécurisé dans SecuriVA ?",
+        "answer": "L’accès VPN sécurisé est une couche native de connectivité chiffrée de niveau entreprise intégrée directement à SecuriVA. Il garantit que toutes les interactions vocales, appels API, workflows automatisés et échanges de données se déroulent dans un réseau privé protégé — éliminant le besoin de VPN tiers."
+      },
+      {
+        "question": "Comment fonctionne la détection des menaces par IA ?",
+        "answer": "Le moteur de cybersécurité de SecuriVA analyse en temps réel tout le trafic VPN et plateforme, détectant les signatures de paquets anormales, les requêtes API malveillantes, les tentatives de fraude d’identité, les attaques de bots et les exfiltrations de données — permettant une défense proactive."
+      },
+      {
+        "question": "L’authentification MFA est-elle obligatoire ?",
+        "answer": "Oui. SecuriVA impose l’authentification multifacteur, la vérification des appareils en zero-trust, la validation d’identité et l’autorisation de session dynamique pour accéder aux systèmes sensibles."
+      }
+    ]
+  },
+  {
+    "category": "Tarifs & Facturation",
+    "items": [
+      {
+        "question": "Comment SecuriVA est-il tarifé ?",
+        "answer": "SecuriVA propose un modèle SaaS flexible comprenant des abonnements mensuels et annuels (Basic, Premium, Enterprise), des crédits d’automatisation à l’usage, des licences entreprise, des solutions en marque blanche et des services de conseil."
+      },
+      {
+        "question": "Puis-je annuler à tout moment ?",
+        "answer": "Oui. Les abonnements peuvent être annulés avant le prochain cycle de facturation sans pénalité. Les contrats entreprise peuvent inclure des conditions spécifiques de préavis."
+      },
+      {
+        "question": "Proposez-vous des versions entreprise ou en marque blanche ?",
+        "answer": "Oui. SecuriVA propose des déploiements entreprise entièrement personnalisés, des configurations IA sur mesure, des environnements sécurisés dédiés, du branding en marque blanche et des services professionnels."
+      }
+    ]
+  },
+  {
+    "category": "Technique (Développeurs)",
+    "items": [
+      {
+        "question": "Quelle architecture API utilise SecuriVA ?",
+        "answer": "SecuriVA expose des API REST avec authentification OAuth 2.0. Il prend également en charge GraphQL, WebSocket, les webhooks pour les événements en temps réel et des SDK en Python, JavaScript/Node.js, PHP, .NET et Java."
+      },
+      {
+        "question": "Existe-t-il un environnement sandbox ?",
+        "answer": "Oui. Tous les comptes développeurs incluent un environnement sandbox sécurisé pour tester les API, simuler des workflows et effectuer des benchmarks avant production."
+      },
+      {
+        "question": "Comment SecuriVA gère-t-il l’authentification ?",
+        "answer": "SecuriVA prend en charge OAuth 2.0, les tokens JWT, le SSO optionnel, l’authentification multifacteur (MFA) et le contrôle d’accès basé sur les rôles (RBAC)."
+      },
+      {
+        "question": "Peut-on déployer SecuriVA sur site ?",
+        "answer": "Oui. Les clients entreprise peuvent demander des déploiements sur site ou hybrides avec infrastructure dédiée et configurations de résidence des données."
+      }
+    ]
+  },
+  {
+    "category": "Conformité & Légal",
+    "items": [
+      {
+        "question": "SecuriVA est-il conforme au RGPD ?",
+        "answer": "Oui. SecuriVA respecte pleinement le RGPD : base légale du traitement, minimisation des données, limitation des finalités, droits des utilisateurs, droit à l’effacement, portabilité des données et clauses contractuelles standard pour les transferts internationaux."
+      },
+      {
+        "question": "SecuriVA est-il conforme HIPAA ?",
+        "answer": "Oui. Pour les données de santé, SecuriVA agit comme Business Associate et propose des accords BAA. Les données de santé protégées sont traitées selon des normes strictes de sécurité."
+      },
+      {
+        "question": "Comment SecuriVA protège-t-il les données ?",
+        "answer": "Les données sont protégées par chiffrement AES-256, contrôle d’accès RBAC, surveillance SIEM continue, authentification multifacteur, architecture zero-trust, tests de pénétration réguliers et audits de vulnérabilité."
+      },
+      {
+        "question": "Où sont stockées les données ?",
+        "answer": "Les données sont stockées dans des régions cloud sécurisées sélectionnées lors de l’onboarding. Tous les transferts internationaux respectent les clauses contractuelles standard et les réglementations locales."
+      },
+      {
+        "question": "SecuriVA partage-t-il les données avec des tiers ?",
+        "answer": "Non. SecuriVA ne vend jamais les données clients. Les données sont partagées uniquement avec consentement explicite, avec des intégrations tierces ou si la loi l’exige."
+      }
+    ]
+  }
+]

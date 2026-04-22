@@ -1,12 +1,14 @@
 import { useState, useEffect } from "react";
-import { MessageSquarePlus, Trash2 , ArrowLeft} from "lucide-react";
+import { MessageSquarePlus, Trash2, ArrowLeft } from "lucide-react";
 import { useNavigate } from "react-router-dom";
+import { useTranslation } from "react-i18next";
 
 function ChatSidebar({ onNewChat, onSelectChat }) {
+  const { t } = useTranslation();
+
   const [conversations, setConversations] = useState([]);
   const navigate = useNavigate();
 
-  
   const loadConversations = async () => {
     try {
       const res = await fetch("http://localhost:8000/chat/list", {
@@ -26,9 +28,8 @@ function ChatSidebar({ onNewChat, onSelectChat }) {
     loadConversations();
   }, []);
 
-  
   const handleDelete = async (version, e) => {
-    e.stopPropagation(); 
+    e.stopPropagation();
 
     try {
       await fetch(
@@ -39,7 +40,6 @@ function ChatSidebar({ onNewChat, onSelectChat }) {
         }
       );
 
-      
       setConversations(prev =>
         prev.filter(chat => chat.version !== version)
       );
@@ -51,29 +51,31 @@ function ChatSidebar({ onNewChat, onSelectChat }) {
 
   return (
     <aside className="w-64 bg-gray-900 text-white flex flex-col">
+
+      {/* Header */}
       <div className="p-4 text-xl font-semibold border-b border-gray-700 flex items-center gap-3">
         <ArrowLeft
           size={20}
           className="cursor-pointer hover:text-blue-400 transition"
           onClick={() => navigate("/dashboard")}
         />
-        <span>Chat</span>
+        <span>{t("chatSidebar.header")}</span>
       </div>
 
-      {/* new chat button */}
+      {/* New Chat Button */}
       <button
         onClick={onNewChat}
         className="m-3 w-[85%] mx-auto flex items-center justify-center gap-2 bg-white text-black font-medium p-3 rounded-lg"
       >
         <MessageSquarePlus size={18} />
-        New Chat
+        {t("chatSidebar.buttons.newChat")}
       </button>
 
-      {/* conversation list */}
+      {/* Conversation List */}
       <div className="flex-1 overflow-y-auto px-3">
         {conversations.length === 0 ? (
           <div className="text-sm text-gray-400 mt-4">
-            No previous chats yet
+            {t("chatSidebar.empty")}
           </div>
         ) : (
           conversations.map((chat) => (
@@ -84,7 +86,6 @@ function ChatSidebar({ onNewChat, onSelectChat }) {
             >
               <span>{chat.title}</span>
 
-              {/* Trash Icon */}
               <Trash2
                 size={16}
                 className="text-gray-400 hover:text-red-500 opacity-0 group-hover:opacity-100 transition cursor-pointer"
@@ -94,6 +95,7 @@ function ChatSidebar({ onNewChat, onSelectChat }) {
           ))
         )}
       </div>
+
     </aside>
   );
 }
