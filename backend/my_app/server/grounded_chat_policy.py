@@ -41,11 +41,6 @@ When you answer from grounded content:
 - Cite the source type and source id from the tool result.
 - Summarize the relevant steps, guidance, or legal basis in plain language.
 - If the request is ambiguous, ask a clarifying question instead of guessing.
-
-Response style:
-- Be direct and concise. Answer the question without unnecessary preamble or closing statements.
-- Do NOT end responses with phrases like "If you have any questions..." or "Feel free to ask about..."
-- Simply answer what was asked and stop.
 """.strip()
 
 

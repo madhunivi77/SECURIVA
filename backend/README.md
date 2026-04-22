@@ -5,23 +5,10 @@
 - start the server
 `python run.py (or uv run run.py)`
 - start the agent
-` uv run --active my_app/client/agent.py `
+` code uv run --active my_app/client/agent.py `
 
 Compliance report DynamoDB testing: see [docs/COMPLIANCE_REPORTS_DYNAMODB_TESTING.md](docs/COMPLIANCE_REPORTS_DYNAMODB_TESTING.md).
 Compliance feature/module improvements: see [docs/COMPLIANCE_IMPROVEMENT_GUIDE.md](docs/COMPLIANCE_IMPROVEMENT_GUIDE.md).
-
----
-
-## Stripe Integration
-
-Stripe is mounted in the API app at `/stripe` and currently provides:
-
-- `GET /stripe/config`
-- `POST /stripe/checkout/session`
-- `POST /stripe/billing-portal/session`
-- `POST /stripe/webhook`
-
-When `STRIPE_SECRET_KEY` is not configured, Stripe routes return a configuration error while the rest of the backend remains available.
 
 ---
 
@@ -215,9 +202,7 @@ Custom LLM endpoint that VAPI calls for AI responses.
   ],
   "stream": true,
   "call": {
-      "assistant": {
-         "metadata": {"voiceToken": "short-lived-voice-jwt"}
-      }
+    "metadata": {"apiKey": "user-api-key"}
   }
 }
 ```
@@ -240,11 +225,11 @@ Custom LLM endpoint that VAPI calls for AI responses.
 
 **Features:**
 - Supports streaming responses (SSE) for faster voice output
-- Extracts `voiceToken` from call metadata (`call.assistant.metadata.voiceToken`)
+- Extracts API key from call metadata or `[AUTH:xxx]` tag in system message
 - Falls back to direct OpenAI if not authenticated
 - Dev mode allows tool access without authentication
 
-#### `POST /api/vapi/events`
+#### `POST /api/vapi/webhook`
 Handles VAPI webhook events (tool calls, status updates, etc.).
 
 **Supported Message Types:**
@@ -354,25 +339,6 @@ Toggle logging with `ENABLE_TOOL_LOGGING="false"` in `.env`.
 ### Testing
 Run the SMS test suite:
 
-```bash
-cd backend
-uv run python tests/test_telesign.py
-```
-
-### Sender ID Configuration
-
-- Preferred env key: `TELESIGN_SENDER_ID`
-- Legacy fallback key still accepted: `SENDER_ID`
-- SMS send path passes configured sender ID explicitly when present.
-
-### Reusable SMS Templates
-
-Reusable templates for OTP and customer contact are defined in `my_app/server/telesign_auth.py` (`SMS_TEMPLATES`) and can be used through:
-
-- `get_sms_templates()`
-- `render_sms_template(...)`
-- `send_sms_from_template(...)`
-
 ### Tool Mappings
 
 The MCP server provides these Telesign SMS tools: (trial version restricted to verified numbers only)
@@ -380,7 +346,7 @@ The MCP server provides these Telesign SMS tools: (trial version restricted to v
 | Tool Name | Description | Example Usage |
 |-----------|-------------|---------------|
 | `sendSMS` | Send SMS message | "Send SMS to (___): Meeting at 3pm" |
-| `verifyPhoneNumber` | Verify phone details | "Verify phone number (____)" |
-| `sendVerificationCode` | Send 2FA code | "Send verification code to (___)" |
+| `verifyPhoneNumber` | Verify phone details | "Verify phone number (____) |
+| `sendVerificationCode` | Send 2FA code | "Send verification code to (___) |
 | `checkPhoneRisk` | Assess fraud risk | "Check risk for phone 2623984079" |
 | `checkMessageStatus` | Check delivery status | "Check status of message ABC123" |

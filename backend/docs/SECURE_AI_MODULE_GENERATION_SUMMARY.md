@@ -36,7 +36,7 @@ A **multi-layer security system** that allows AI to safely generate compliance m
    - Benefits vs legacy system
 
 ### Testing & Demos
-5. **[test_generator_security.py](../tests/test_generator_security.py)** (450+ lines)
+5. **[test_generator_security.py](../../test_generator_security.py)** (450+ lines)
    - 13 comprehensive security tests
    - Valid usage tests (3 tests)
    - Attack prevention tests (10 tests)
@@ -49,7 +49,7 @@ A **multi-layer security system** that allows AI to safely generate compliance m
    - Shows security checks in action
    - **Result: ✅ SOX module successfully created**
 
-7. **[test_sox_module.py](../tests/test_sox_module.py)** (80 lines)
+7. **[test_sox_module.py](../../test_sox_module.py)** (80 lines)
    - Verifies generated module works with AI tools
    - Tests overview, requirements, checklist queries
    - **Result: ✅ SOX fully integrated**
@@ -194,7 +194,7 @@ All 13 security tests passed:
 
 ### Test 1: Security Tests
 ```bash
-$ python tests/test_generator_security.py
+$ python test_generator_security.py
 ================================================================================
 ✅ Passed: 13
 ❌ Failed: 0
@@ -230,7 +230,7 @@ STEP 3: VERIFY MODULE AVAILABLE
 
 ### Test 3: AI Integration
 ```bash
-$ python tests/test_sox_module.py
+$ python test_sox_module.py
 ================================================================================
 [1] Get SOX Overview
 ✓ Name: Sarbanes-Oxley Act of 2002
@@ -382,13 +382,13 @@ Run these tests to verify the system:
 
 ```bash
 # 1. Security tests (13 tests)
-python tests/test_generator_security.py
+python test_generator_security.py
 
 # 2. Workflow demo (creates SOX module)
 python demo_generator_workflow.py
 
 # 3. Verify SOX integration
-python tests/test_sox_module.py
+python test_sox_module.py
 
 # 4. Verify HIPAA integration
 python test_hipaa_tools.py
