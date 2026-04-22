@@ -8,7 +8,6 @@ from .mcp_server import mcp
 from ..auth_server.main import auth_app
 from .vapi_webhook import vapi_app
 from .mcp_pool import mcp_pool
-from ..config.settings import settings
 
 
 @contextlib.asynccontextmanager
@@ -33,7 +32,7 @@ app = Starlette(
 # Add CORS middleware at the top level to cover all routes
 app.add_middleware(
     CORSMiddleware,
-    allow_origins=settings.CORS_ORIGINS,
+    allow_origins=["http://localhost:5173"],
     allow_credentials=True,
     allow_methods=["*"],
     allow_headers=["*"],

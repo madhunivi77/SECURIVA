@@ -121,11 +121,3 @@ button:focus-visible {
     background-color: #f9f9f9;
   }
 }
-
-.subheading {
-  @apply text-4xl font-normal text-center text-gray-900 my-10 dark:text-white
-}
-
-.subtext {
-  @apply text-xl font-light text-gray-500 mb-8 text-center dark:text-gray-400 mx-[15%]
-}

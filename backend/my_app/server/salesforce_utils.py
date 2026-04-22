@@ -8,22 +8,6 @@ import requests
 from pathlib import Path
 
 
-_s3_client = None
-
-
-def _get_s3_client():
-    global _s3_client
-    if _s3_client is None:
-        import boto3
-        _s3_client = boto3.client("s3")
-    return _s3_client
-
-
-def _use_s3():
-    from ..config.settings import settings
-    return bool(settings.OAUTH_S3_BUCKET)
-
-
 def get_oauth_file_path():
     """Get the path to oauth.json file"""
     return Path(__file__).parent / "oauth.json"
@@ -31,35 +15,14 @@ def get_oauth_file_path():
 
 def load_oauth_data():
     """Load oauth.json data"""
-    if _use_s3():
-        from ..config.settings import settings
-        try:
-            obj = _get_s3_client().get_object(
-                Bucket=settings.OAUTH_S3_BUCKET, Key=settings.OAUTH_S3_KEY
-            )
-            return json.loads(obj["Body"].read().decode("utf-8"))
-        except _get_s3_client().exceptions.NoSuchKey:
-            return {"users": []}
-    path = get_oauth_file_path()
-    if path.exists():
-        with open(path, "r") as f:
-            return json.load(f)
-    return {"users": []}
+    with open(get_oauth_file_path(), "r") as f:
+        return json.load(f)
 
 
 def save_oauth_data(data):
     """Save data to oauth.json"""
-    if _use_s3():
-        from ..config.settings import settings
-        _get_s3_client().put_object(
-            Bucket=settings.OAUTH_S3_BUCKET,
-            Key=settings.OAUTH_S3_KEY,
-            Body=json.dumps(data, indent=2).encode("utf-8"),
-            ContentType="application/json",
-        )
-    else:
-        with open(get_oauth_file_path(), "w") as f:
-            json.dump(data, f, indent=2)
+    with open(get_oauth_file_path(), "w") as f:
+        json.dump(data, f, indent=2)
 
 
 def refresh_salesforce_token(user_id):

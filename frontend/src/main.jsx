@@ -32,6 +32,7 @@ import VPN from './pages/VPN.jsx';
 import Integrations from './pages/Integrations.jsx';
 import Home from './pages/Home.jsx';
 import Logs from './pages/Logs.jsx';
+import AIHandbook from './pages/AIHandbook.jsx';
 
 const router = createBrowserRouter([
   {
@@ -99,6 +100,10 @@ const router = createBrowserRouter([
         element: <VPN />
       }
     ]
+  },
+  {
+    path: '/handbook',
+    element: <AIHandbook />
   },
   {
     path: '/provider', // select a login provider

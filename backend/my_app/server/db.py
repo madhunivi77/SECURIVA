@@ -14,36 +14,25 @@ from boto3.dynamodb.conditions import Key
 import traceback
 from pathlib import Path
 from .api_key_manager import validate_api_key
+import openai
 import os
-from openai import OpenAI
-from dotenv import load_dotenv
-load_dotenv()
 
-client = OpenAI(api_key=os.getenv("OPENAI_API_KEY"))
+openai.api_key = os.getenv("OPENAI_API_KEY")
 
 async def generate_title_from_ai(prompt: str):
     try:
-        response = client.chat.completions.create(
+        response = await openai.ChatCompletion.acreate(
             model="gpt-3.5-turbo",
             messages=[
-                {"role": "system", "content": "Return ONLY one short title (3-4 words). No explanations. No numbering. No prefixes."},
+                {"role": "system", "content": "Generate short conversation titles."},
                 {"role": "user", "content": prompt}
             ],
             max_tokens=10,
             temperature=0.3
         )
+
         title = response.choices[0].message.content.strip()
-        title = title.split("\n")[0]          
-        title = title.replace("Chat title ideas:", "")
-        title = title.replace("Title:", "")
-        title = title.strip()
 
-        # remove numbering like "1."
-        if title[:2].isdigit():
-            title = title[2:].strip()
-
-        # final cleanup
-        title = title[:40]
         return title
 
     except Exception as e:
@@ -366,16 +355,7 @@ async def save_chat(request: Request):
             latest = await asyncio.to_thread(db.get_latest_chat, user_id)
             version = 1 if not latest else latest.version + 1
 
-            #
-            assistant_messages = [
-            m["content"] for m in messages 
-            if m["role"] == "assistant" and len(m["content"].strip()) > 20
-        ]
-
-            first_assistant_message = assistant_messages[0] if assistant_messages else "New Chat"
-
-            # 
-            title = await generate_title_from_ai(first_assistant_message)
+            title = f"Chat {version}"
 
         else:
             existing = await asyncio.to_thread(

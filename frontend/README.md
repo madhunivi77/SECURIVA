@@ -178,7 +178,15 @@ console.log("All cookies:", document.cookie);  // Will be EMPTY (HttpOnly)
 
 ### 9. React State Management
 
-To streamline access to global state, we defined the AuthContext context provider that can be accessed from any page within the app. Simply add `import { useAuth } from "../context/AuthContext";` to your imports and unpack any relevant state/handlers for your page.
+```javascript
+// App.jsx maintains authentication state
+const [authToken, setAuthToken] = useState(null);      // For display
+const [csrfToken, setCsrfToken] = useState(null);      // For API calls
+const [isAuthenticated, setIsAuthenticated] = useState(false);
+
+// Passed down to ChatBox component
+<ChatBox authToken={authToken} csrfToken={csrfToken} />
+```
 
 **Note:** `authToken` in state is only for displaying in the UI. The actual authentication happens via the HTTP-only cookie that JavaScript cannot access.
 
@@ -247,7 +255,7 @@ const assistantConfig = {
     voiceId: 'asteria'  // Female voice
   },
   firstMessage: 'Hi! How can I help you today?',
-  serverUrl: `${serverUrl}/api/vapi/webhook`
+  serverUrl: `${serverUrl}/api/vapi/events`
 };
 ```
 
@@ -293,20 +301,24 @@ The widget handles these VAPI events:
 
 ### Authentication Flow
 
-If the user is logged in (has `api_key` cookie), it's embedded in the system message:
+If the user is logged in (has `api_key` cookie), frontend requests a short-lived voice session token from backend and passes it in VAPI metadata:
 
 ```javascript
-const systemContent = apiKey
-  ? `You are SECURIVA... [AUTH:${apiKey}]`
-  : 'You are SECURIVA...';
+const res = await fetch('http://localhost:8000/api/voice-session', {
+  method: 'POST',
+  credentials: 'include'
+});
+
+const { voice_token } = await res.json();
+
+assistantOverrides: {
+  metadata: voice_token ? { voiceToken: voice_token } : {}
+}
 ```
 
-The backend extracts this token to authenticate MCP tool access.
+The backend validates this `voiceToken` and uses it to authorize MCP tool access.
 
 ### Styling
-We use primarily use Tailwind CSS classes for styling components. Custom styling can be found in /frontend/src/styles/global.css unless otherwise specified. 
-
-In an effort to maintain consistency across pages, we implemented a global context provider called 'ThemeContext' which provides the function UseTheme, yielding an object containing predefined company colors. Simply add `import { useTheme } from "./context/ThemeContext";` to your imports and assign useTheme() to a variable within your page component. 
 
 **CSS:** `src/components/VapiVoiceWidget.css`
 

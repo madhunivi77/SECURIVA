@@ -28,6 +28,8 @@ dependencies = [
     "composio>=0.11.5",
     "composio-openai>=0.11.5",
     "numpy>=2.2.6",
+    "watchtower>=3.3.0",
+    "stripe>=11.6.0",
 ]
 
 [tool.setuptools]
