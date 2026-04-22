@@ -21,7 +21,7 @@ const topMenu = [
   { name: "Payments", icon: CreditCard, path: "/admin/payments" },
   { name: "Integrations", icon: Link, path: "/admin/integrations" },
   { name: "Content Management", icon: FileText, path: "/admin/content" },
-  { name: "Security", icon: Shield, path: "/admin/security" },
+  { name: "Cyber Security Track", icon: Shield, path: "/admin/security" },
   { name: "Notifications", icon: Bell, path: "/admin/notifications", badge: 12 },
 ];
 
