@@ -1,10 +1,10 @@
 // src/pages/AdminDashboard.jsx
 import { useState } from "react";
-import AdminSidebar from "../components/admin/AdminSidebar";
-import AnalyticsCards from "../components/admin/AnalyticsCards";
-import UsersTable from "../components/admin/AdminUsertable";
-import SystemStatus from "../components/admin/SystemStatus";
-import SecurityAlerts from "../components/admin/SecurityAlerts";
+import AdminSidebar from "../../components/admin/AdminSidebar";
+import AnalyticsCards from "../../components/admin/AnalyticsCards";
+import UsersTable from "../../components/admin/AdminUsertable";
+import SystemStatus from "../../components/admin/SystemStatus";
+import SecurityAlerts from "../../components/admin/SecurityAlerts";
 import { Calendar, Download } from "lucide-react";
 
 const AdminDashboard = () => {
@@ -36,9 +36,10 @@ const AdminDashboard = () => {
         {/* Header */}
         <div className="flex justify-between items-center mb-6">
           <div>
-            <h1 className="text-3xl font-bold text-gray-800">Admin Dashboard</h1>
+          <h1 className="text-2xl font-semibold tracking-tight text-blue-900">Welcome John </h1>
+         
             <p className="text-gray-500">
-              Centralized Control for Platform Management, Security, and Operations.
+              Admin Dashboard
             </p>
           </div>
 

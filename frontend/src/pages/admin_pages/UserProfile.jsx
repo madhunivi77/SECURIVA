@@ -1,5 +1,5 @@
 import { useState } from "react";
-import AdminSidebar from "../components/admin/AdminSidebar";
+import AdminSidebar from "../../components/admin/AdminSidebar";
 import {
   ArrowLeft,
   Trash2,

@@ -1,15 +1,15 @@
 import { StrictMode } from 'react';
 import { createRoot } from 'react-dom/client';
 import { createBrowserRouter, RouterProvider } from 'react-router-dom';
-import UsersPage from "./pages/UsersPage";
-import UserProfile from "./pages/UserProfile";
+import UsersPage from "./pages/admin_pages/UsersPage";
+import UserProfile from "./pages/admin_pages/UserProfile";
 import './styles/global.css';
 import { AuthProvider } from './context/AuthContext.jsx';
 import App from './App.jsx';
 import Dashboard from './pages/Dashboard.jsx';
 import Agent from './pages/Agent.jsx';
 import Security from './pages/Security.jsx';
-import AdminDashboard from './pages/AdminDashboard.jsx';
+import AdminDashboard from './pages/admin_pages/AdminDashboard.jsx';
 import ChatBox from './pages/ChatBox.jsx';
 import Homepage from './pages/Homepage.jsx'
 import ProviderForm from './pages/ProviderForm.jsx';
@@ -24,6 +24,14 @@ import Support from "./pages/Support.jsx";
 import About from "./pages/About.jsx";
 import Contact from "./pages/Contact.jsx";
 import FAQ from "./pages/FAQ.jsx";
+import AdminPayments from './pages/admin_pages/AdminPayments';
+import AdminSecurity from './pages/admin_pages/AdminSecurity';
+import AdminAnalytics from './pages/admin_pages/AdminAnalytics';
+import AdminIntegrations from './pages/admin_pages/AdminIntegration';
+import AdminContent from './pages/admin_pages/AdminCMS';
+import AdminNotifications from './pages/admin_pages/AdminNotification';
+import AdminActivity from './pages/admin_pages/AdminActivity';
+import AdminSettings from './pages/admin_pages/AdminSettings';
 
 const router = createBrowserRouter([
   {
@@ -54,7 +62,7 @@ const router = createBrowserRouter([
         path: '/signup', // create a new account
         element: <SignupForm />
       },
-{
+      {
         path: "pricing",
         element: <Pricing />,
       },
@@ -69,6 +77,39 @@ const router = createBrowserRouter([
       {
         path: "/admin/users/:userId",
         element: <UserProfile />,
+      },
+      {
+        path:"/admin/security",
+        element:<AdminSecurity/>,
+      },
+      {
+        path:"/admin/settings",
+        element:<AdminSettings/>,
+      },
+      {
+        path:"/admin/notifications",
+        element:<AdminNotifications/>,
+      },
+
+      {
+        path:"/admin/activity",
+        element:<AdminActivity/>,
+      },
+      {
+        path:"/admin/integrations",
+        element:<AdminIntegrations/>,
+      },
+      {
+        path:"/admin/payments",
+        element: <AdminPayments/>,
+      },
+      {
+        path:"/admin/content",
+        element:<AdminContent/>,
+      },
+      {
+        path:"/admin/analytics",
+        element:<AdminAnalytics/>,
       },
       {
         path: "/support",

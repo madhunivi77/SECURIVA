@@ -1,7 +1,7 @@
 import { useState } from "react";
 import { Search, ShieldCheck, Lock, Unlock } from "lucide-react";
 import { Link } from "react-router-dom";
-import AdminSidebar from "../components/admin/AdminSidebar";
+import AdminSidebar from "../../components/admin/AdminSidebar";
 
 const UsersPage = () => {
   const [users, setUsers] = useState([
@@ -39,8 +39,8 @@ const UsersPage = () => {
       {/* Header */}
       <div className="flex flex-col md:flex-row md:items-center md:justify-between gap-4">
         <div>
-          <h1 className="text-3xl font-semibold text-gray-800">
-            User Management
+        <h1 className="text-2xl font-semibold tracking-tight text-blue-900">
+            User Analytics
           </h1>
           <p className="text-gray-500">
             Manage platform users and their access.
