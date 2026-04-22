@@ -2,10 +2,10 @@ import { Fragment, useEffect, useState } from "react";
 import { useOutletContext } from "react-router-dom";
 
 const severityStyles = {
-    critical: "bg-red-100 text-red-800 dark:bg-red-900 dark:text-red-200",
-    high: "bg-red-50 text-red-700 dark:bg-red-950 dark:text-red-300",
-    medium: "bg-amber-50 text-amber-700 dark:bg-amber-950 dark:text-amber-300",
-    low: "bg-green-50 text-green-700 dark:bg-green-950 dark:text-green-300",
+    critical: "bg-red-700 text-red-50",
+    high: "bg-amber-700 text-amber-50",
+    medium: "bg-yellow-500 text-yellow-50",
+    low: "bg-green-700 text-green-50",
 };
 
 const severityDot = {

@@ -2,7 +2,7 @@ import { Link, useOutletContext } from "react-router-dom";
 
 export default function ToolsPage() {
     const { setHeading, setSubtext } = useOutletContext();
-    setHeading("Tools");
+    setHeading("Cybersecurity Track");
     setSubtext("Your command center for cybersecurity tools and analytics");
 
     function ToolCard({ cardTitle, cardSubtext, link, imgSrc }) {
