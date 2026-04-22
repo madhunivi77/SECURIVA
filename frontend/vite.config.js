@@ -12,5 +12,14 @@ export default defineConfig({
     watch: {
       usePolling: true,
     },
+    proxy: {
+      '/api': 'http://localhost:8000',
+      '/chat': 'http://localhost:8000',
+      '/salesforce': 'http://localhost:8000',
+      '/callback': 'http://localhost:8000',
+      '/auth': 'http://localhost:8000',
+      '/mcp': 'http://localhost:8000',
+      '/security': 'http://localhost:8000',
+    },
   },
 })

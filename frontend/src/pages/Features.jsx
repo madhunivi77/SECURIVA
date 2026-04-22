@@ -1,6 +1,6 @@
 import { Link } from "react-router-dom";
 import Sponsors from "../components/Sponsors";
-import { Check, Phone, Calendar, MessageCircle, Zap, Activity, Lock, ShieldCheck, Server, Mail, MessageSquare, FileText, Workflow, MousePointerClick, ShieldAlert, Network, KeyRound, Layers, Globe, Settings, SlidersHorizontal, BadgeCheck, Play, BookOpen } from "lucide-react";
+import { Check, Phone, Calendar, MessageCircle, Zap, Activity, Lock, ShieldCheck, Server, Mail, MessageSquare, FileText, Workflow, MousePointerClick, ShieldAlert, Network, KeyRound, Layers, Globe, Settings, SlidersHorizontal, BadgeCheck, Play, BookOpen, ChevronRight } from "lucide-react";
 import CapabilityCard from "../components/CapabilityCard";
 import SymmetricalChecklist from "../components/SymmetricalChecklist";
 
@@ -78,6 +78,15 @@ export default function Features() {
             "Embedded cybersecurity for safe voice comms",
           ]
         }/>
+
+        <div className="flex justify-center">
+          <Link to={"/agent-voice"} >
+            <button className="flex justify-center items-center btn bg-blue-900 mt-10">
+              More Information
+              <ChevronRight />
+            </button>
+          </Link>
+        </div>
 
       </section>
 

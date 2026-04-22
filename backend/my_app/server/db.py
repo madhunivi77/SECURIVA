@@ -13,7 +13,9 @@ import time
 from botocore.exceptions import ClientError
 from boto3.dynamodb.conditions import Key
 import traceback
+from pathlib import Path
 from .api_key_manager import validate_api_key
+
 from openai import OpenAI
 from dotenv import load_dotenv
 import os
@@ -44,6 +46,7 @@ async def generate_title_from_ai(prompt: str):
         if title[:2].isdigit():
             title = title[2:].strip()
 
+
         # final cleanup
         title = title[:40]
         return title
@@ -60,7 +63,6 @@ def get_authenticated_user(request: Request):
         return None
 
     oauth_file = Path(__file__).parent / "oauth.json"
-
     user_id = validate_api_key(api_key, oauth_file)
 
     if not user_id:

@@ -178,15 +178,7 @@ console.log("All cookies:", document.cookie);  // Will be EMPTY (HttpOnly)
 
 ### 9. React State Management
 
-```javascript
-// App.jsx maintains authentication state
-const [authToken, setAuthToken] = useState(null);      // For display
-const [csrfToken, setCsrfToken] = useState(null);      // For API calls
-const [isAuthenticated, setIsAuthenticated] = useState(false);
-
-// Passed down to ChatBox component
-<ChatBox authToken={authToken} csrfToken={csrfToken} />
-```
+To streamline access to global state, we defined the AuthContext context provider that can be accessed from any page within the app. Simply add `import { useAuth } from "../context/AuthContext";` to your imports and unpack any relevant state/handlers for your page.
 
 **Note:** `authToken` in state is only for displaying in the UI. The actual authentication happens via the HTTP-only cookie that JavaScript cannot access.
 
@@ -312,6 +304,9 @@ const systemContent = apiKey
 The backend extracts this token to authenticate MCP tool access.
 
 ### Styling
+We use primarily use Tailwind CSS classes for styling components. Custom styling can be found in /frontend/src/styles/global.css unless otherwise specified. 
+
+In an effort to maintain consistency across pages, we implemented a global context provider called 'ThemeContext' which provides the function UseTheme, yielding an object containing predefined company colors. Simply add `import { useTheme } from "./context/ThemeContext";` to your imports and assign useTheme() to a variable within your page component. 
 
 **CSS:** `src/components/VapiVoiceWidget.css`
 
