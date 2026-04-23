@@ -32,7 +32,17 @@ import VPN from './pages/VPN.jsx';
 import Integrations from './pages/Integrations.jsx';
 import Home from './pages/Home.jsx';
 import Logs from './pages/Logs.jsx';
-
+import UsersPage from "./pages/admin_pages/UsersPage";
+import UserProfile from "./pages/admin_pages/UserProfile";
+import AdminDashboard from './pages/admin_pages/AdminDashboard.jsx';
+import AdminPayments from './pages/admin_pages/AdminPayments';
+import AdminSecurity from './pages/admin_pages/AdminSecurity';
+import AdminAnalytics from './pages/admin_pages/AdminAnalytics';
+import AdminIntegrations from './pages/admin_pages/AdminIntegration';
+import AdminContent from './pages/admin_pages/AdminCMS';
+import AdminNotifications from './pages/admin_pages/AdminNotification';
+import AdminActivity from './pages/admin_pages/AdminActivity';
+import AdminSettings from './pages/admin_pages/AdminSettings';
 const router = createBrowserRouter([
   {
     path: '/',
@@ -53,6 +63,51 @@ const router = createBrowserRouter([
       {
         path: '/features',
         element: <Features />
+      },
+      {
+        path: '/admin',
+        element: <AdminDashboard />
+      },
+      {
+        path: "/admin/users",
+        element: <UsersPage />,
+      },
+      {
+        path: "/admin/users/:userId",
+        element: <UserProfile />,
+      },
+      {
+        path:"/admin/security",
+        element:<AdminSecurity/>,
+      },
+      {
+        path:"/admin/settings",
+        element:<AdminSettings/>,
+      },
+      {
+        path:"/admin/notifications",
+        element:<AdminNotifications/>,
+      },
+
+      {
+        path:"/admin/activity",
+        element:<AdminActivity/>,
+      },
+      {
+        path:"/admin/integrations",
+        element:<AdminIntegrations/>,
+      },
+      {
+        path:"/admin/payments",
+        element: <AdminPayments/>,
+      },
+      {
+        path:"/admin/content",
+        element:<AdminContent/>,
+      },
+      {
+        path:"/admin/analytics",
+        element:<AdminAnalytics/>,
       },
       {
         path: "/pricing",
