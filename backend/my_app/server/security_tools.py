@@ -82,9 +82,105 @@ async def firewall(request):
     # post to database
     return JSONResponse({"status": "ok","response": insight})
 
+async def firewall_get(request):
+    # fetch from aws
+
+    # placeholder data
+    data = {
+        "alerts": 
+            [
+                {
+                    "event_id": "1731421921.222222",
+                    "timestamp": "2024-11-12T14:30:15.000000+0000",
+                    "event_type": "alert",
+                    "sensor_id": "client-site-01",
+                    "src_ip": "192.168.1.44",
+                    "src_port": 49200,
+                    "dest_ip": "192.168.1.10",
+                    "dest_port": 445,
+                    "proto": "TCP",
+                    "severity": "critical",
+                    "category": "Attempted Administrator Privilege Gain",
+                    "summary": "ET EXPLOIT EternalBlue SMB MS17-010 Exploit Attempt",
+                    "raw": {
+                    "signature_id": 2024220,
+                    "rev": 2,
+                    "gid": 1,
+                    "action": "allowed"
+                    },
+                    "analysis": "This alert indicates an active EternalBlue (MS17-010) exploitation attempt from internal host 192.168.1.44 targeting SMB port 445 on 192.168.1.10. The source IP appears to be a compromised internal machine conducting lateral movement — isolate it immediately and audit the destination host for signs of successful exploitation."
+                },
+                {
+                    "event_id": "1731421921.222222",
+                    "timestamp": "2024-11-12T14:30:15.000000+0000",
+                    "event_type": "alert",
+                    "sensor_id": "client-site-01",
+                    "src_ip": "192.168.1.44",
+                    "src_port": 49200,
+                    "dest_ip": "192.168.1.10",
+                    "dest_port": 445,
+                    "proto": "TCP",
+                    "severity": "high",
+                    "category": "Attempted Administrator Privilege Gain",
+                    "summary": "ET EXPLOIT EternalBlue SMB MS17-010 Exploit Attempt",
+                    "raw": {
+                    "signature_id": 2024220,
+                    "rev": 2,
+                    "gid": 1,
+                    "action": "allowed"
+                    },
+                    "analysis": "This alert indicates an active EternalBlue (MS17-010) exploitation attempt from internal host 192.168.1.44 targeting SMB port 445 on 192.168.1.10. The source IP appears to be a compromised internal machine conducting lateral movement — isolate it immediately and audit the destination host for signs of successful exploitation."
+                },
+                {
+                    "event_id": "1731421921.222222",
+                    "timestamp": "2024-11-12T14:30:15.000000+0000",
+                    "event_type": "alert",
+                    "sensor_id": "client-site-01",
+                    "src_ip": "192.168.1.44",
+                    "src_port": 49200,
+                    "dest_ip": "192.168.1.10",
+                    "dest_port": 445,
+                    "proto": "TCP",
+                    "severity": "medium",
+                    "category": "Attempted Administrator Privilege Gain",
+                    "summary": "ET EXPLOIT EternalBlue SMB MS17-010 Exploit Attempt",
+                    "raw": {
+                    "signature_id": 2024220,
+                    "rev": 2,
+                    "gid": 1,
+                    "action": "allowed"
+                    },
+                    "analysis": "This alert indicates an active EternalBlue (MS17-010) exploitation attempt from internal host 192.168.1.44 targeting SMB port 445 on 192.168.1.10. The source IP appears to be a compromised internal machine conducting lateral movement — isolate it immediately and audit the destination host for signs of successful exploitation."
+                },
+                {
+                    "event_id": "1731421921.222222",
+                    "timestamp": "2024-11-12T14:30:15.000000+0000",
+                    "event_type": "alert",
+                    "sensor_id": "client-site-01",
+                    "src_ip": "192.168.1.44",
+                    "src_port": 49200,
+                    "dest_ip": "192.168.1.10",
+                    "dest_port": 445,
+                    "proto": "TCP",
+                    "severity": "low",
+                    "category": "Attempted Administrator Privilege Gain",
+                    "summary": "ET EXPLOIT EternalBlue SMB MS17-010 Exploit Attempt",
+                    "raw": {
+                    "signature_id": 2024220,
+                    "rev": 2,
+                    "gid": 1,
+                    "action": "allowed"
+                    },
+                    "analysis": "This alert indicates an active EternalBlue (MS17-010) exploitation attempt from internal host 192.168.1.44 targeting SMB port 445 on 192.168.1.10. The source IP appears to be a compromised internal machine conducting lateral movement — isolate it immediately and audit the destination host for signs of successful exploitation."
+                }
+            ]
+    }
+    return JSONResponse({"status": "ok", "response": data})
+
 
 security_app = Starlette(
     routes=[
         Route("/firewall", firewall, methods=["POST"]),
+        Route("/firewall", firewall_get, methods=["GET"]),
     ]
 )

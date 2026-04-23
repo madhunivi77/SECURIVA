@@ -11,6 +11,7 @@ import {
   MoreHorizontal,
   Gauge,
   Sparkles,
+  Hammer,
 } from "lucide-react";
 import { NavLink, useNavigate } from "react-router-dom";
 import { useAuth } from "../context/AuthContext";
@@ -21,6 +22,7 @@ const PRIMARY_NAV = [
   { to: "/dashboard/voice", label: "Voice", icon: Mic },
   { to: "/dashboard/logs", label: "Activity", icon: ScrollText },
   { to: "/dashboard/integrations", label: "Integrations", icon: Plug },
+  { to: "/dashboard/tools", label: "Cybersecurity Track", icon: Hammer}
 ];
 
 const SECONDARY_NAV = [

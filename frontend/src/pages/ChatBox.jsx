@@ -26,7 +26,7 @@ function ChatBox() {
 
   const messagesContainerRef = useRef(null);
 
- 
+
   useEffect(() => {
     // If we arrived with an initialMessage, skip loading prior history —
     // the user wants a new conversation with that prompt.
@@ -55,7 +55,7 @@ function ChatBox() {
     loadChat();
   }, [initialMessage]);
 
- 
+
   useEffect(() => {
     const container = messagesContainerRef.current;
     if (container) {
@@ -216,7 +216,7 @@ function ChatBox() {
   }, [initialMessage]);
 
   const handleNewChat = () => {
-    setConversationId(null);   
+    setConversationId(null);
     setMessages([
       {
         role: "system",
@@ -225,19 +225,19 @@ function ChatBox() {
     ]);
   };
 
-  
-  
+
+
   const handleSelectChat = async (version) => {
     try {
       const res = await fetch(
         `/chat/get?version=${version}`,
         { credentials: "include" }
       );
-  
+
       if (!res.ok) return;
-  
+
       const data = await res.json();
-  
+
       setMessages(data.messages);
       setConversationId(version);
     } catch (err) {

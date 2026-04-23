@@ -32,7 +32,7 @@ export default function Features() {
       </section>
 
       {/* AI Assistant */}
-      <section class="relative overflow-hidden px-8 py-12">
+      <section id="virtual-agent" class="relative overflow-hidden px-8 py-12">
 
         <h2 class="text-4xl font-normal text-center text-gray-900 mb-2 dark:text-white">
           Virtual AI Agent
@@ -91,7 +91,7 @@ export default function Features() {
       </section>
 
         {/* Cybersecurity */}
-      <section className="relative overflow-hidden px-8 py-12">
+      <section id="cybersecurity" className="relative overflow-hidden px-8 py-12">
         <h2 className="text-4xl font-normal text-center text-gray-900 mb-2 dark:text-white">
           Cybersecurity
         </h2>
@@ -131,7 +131,7 @@ export default function Features() {
       </section>
 
       {/* Text AI Agent */}
-      <section className="relative overflow-hidden px-8 py-12">
+      <section id="text-agent" className="relative overflow-hidden px-8 py-12">
         <h2 className="text-4xl font-normal text-center text-gray-900 mb-2 dark:text-white">
           Text AI Agent
         </h2>
@@ -173,7 +173,7 @@ export default function Features() {
       </section>
 
       {/* VPN */}
-      <section className="relative overflow-hidden px-8 py-12">
+      <section id="vpn" className="relative overflow-hidden px-8 py-12">
         <h2 className="text-4xl font-normal text-center text-gray-900 mb-2 dark:text-white">
           VPN Secure Access
         </h2>
