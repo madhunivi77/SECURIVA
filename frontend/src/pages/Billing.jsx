@@ -36,16 +36,22 @@ const PLANS = [
 export default function Billing() {
   const [config, setConfig] = useState(null);
   const [loading, setLoading] = useState(true);
+  const [subscriptionStatus, setSubscriptionStatus] = useState(null);
   const [checkoutLoading, setCheckoutLoading] = useState(null);
   const [portalLoading, setPortalLoading] = useState(false);
   const [error, setError] = useState(null);
 
   useEffect(() => {
-    fetch("/stripe/config", { credentials: "include" })
-      .then((r) => r.json())
-      .then((data) => {
-        if (data.error) setError(data.error);
-        else setConfig(data);
+    Promise.all([
+      fetch("/stripe/config", { credentials: "include" }).then((r) => r.json()),
+      fetch("/stripe/subscription/status", { credentials: "include" })
+        .then((r) => r.json())
+        .catch(() => null),
+    ])
+      .then(([configData, statusData]) => {
+        if (configData.error) setError(configData.error);
+        else setConfig(configData);
+        if (statusData && !statusData.error) setSubscriptionStatus(statusData);
       })
       .catch(() => setError("Could not reach billing server."))
       .finally(() => setLoading(false));
@@ -101,6 +107,11 @@ export default function Billing() {
     }
   };
 
+  // Derive which plan is currently active
+  const activeStatus = subscriptionStatus?.status;
+  const activePlanName =
+    activeStatus === "active" || activeStatus === "trialing" ? "Pro" : "Starter";
+
   return (
     <div className="p-6 max-w-5xl mx-auto" style={{ fontFamily: MONO }}>
       {/* Header */}
@@ -118,7 +129,7 @@ export default function Billing() {
         </div>
         <button
           onClick={handlePortal}
-          disabled={portalLoading || loading}
+          disabled={portalLoading || loading || !subscriptionStatus?.subscription_id}
           className="flex items-center gap-2 px-3 py-1.5 rounded-md text-[12px] font-medium transition-colors"
           style={{
             background: "var(--bg-elev)",
@@ -146,7 +157,26 @@ export default function Billing() {
         </div>
       )}
 
-      {/* Stripe not configured notice */}
+      {/* past_due warning */}
+      {activeStatus === "past_due" && (
+        <div
+          className="flex items-center gap-2 px-4 py-3 rounded-md mb-6 text-[12px]"
+          style={{ background: "rgba(234,179,8,0.08)", border: "1px solid rgba(234,179,8,0.35)", color: "#ca8a04" }}
+        >
+          <AlertCircle className="w-4 h-4 shrink-0" />
+          Your last payment failed. Please{" "}
+          <button
+            onClick={handlePortal}
+            className="underline font-medium ml-1"
+            style={{ color: "#ca8a04", background: "none", border: "none", cursor: "pointer" }}
+          >
+            update your billing info
+          </button>{" "}
+          to restore Pro access.
+        </div>
+      )}
+
+      {/* Stripe not configured notice */}}
       {!loading && !config && !error && (
         <div
           className="flex items-center gap-2 px-4 py-3 rounded-md mb-6 text-[12px]"
@@ -211,7 +241,7 @@ export default function Billing() {
               ))}
             </ul>
 
-            {plan.priceId === null ? (
+            {plan.name === activePlanName ? (
               <div
                 className="text-center text-[12px] py-2 rounded-md font-medium"
                 style={{
@@ -232,7 +262,7 @@ export default function Billing() {
               >
                 Contact sales
               </a>
-            ) : (
+            ) : plan.priceId !== null ? (
               <button
                 onClick={() => handleCheckout(plan)}
                 disabled={checkoutLoading === plan.name || !config}
@@ -247,7 +277,7 @@ export default function Billing() {
                 ) : null}
                 {checkoutLoading === plan.name ? "Redirecting…" : "Upgrade"}
               </button>
-            )}
+            ) : null}
           </div>
         ))}
       </div>

@@ -13,7 +13,7 @@ from datetime import datetime, timedelta, timezone
 from pathlib import Path
 from .chat_handler import execute_chat_with_tools
 from .salesforce_app import salesforce_app
-from .stripe_app import stripe_app
+from .stripe_app import stripe_app, check_and_increment_quota
 from .db import db_app
 from .security_tools import security_app
 from .api_key_manager import generate_api_key, store_api_key, validate_api_key
@@ -307,6 +307,10 @@ async def api_chat(request):
                 {"error": "Invalid request: 'messages' array is required"},
                 status_code=400
             )
+
+        allowed, quota_reason = check_and_increment_quota(user_id)
+        if not allowed:
+            return JSONResponse({"error": quota_reason}, status_code=429)
 
         result = await execute_chat_with_tools(messages, model, api, user_id)
         log_ai_call(user_id, model, messages, result)

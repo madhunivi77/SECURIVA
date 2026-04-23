@@ -23,6 +23,60 @@ Stripe is mounted in the API app at `/stripe` and currently provides:
 
 When `STRIPE_SECRET_KEY` is not configured, Stripe routes return a configuration error while the rest of the backend remains available.
 
+### Setting up Stripe for development
+
+**1. Get test credentials**
+- Log in to [dashboard.stripe.com](https://dashboard.stripe.com) and enable **Test mode** (top-right toggle)
+- Go to **Developers → API keys** and copy the **Secret key** (`sk_test_...`) and **Publishable key** (`pk_test_...`)
+
+**2. Create a Product + Price**
+- Go to **Product catalog → Add product**, name it (e.g. `Securiva Pro`), set a recurring price
+- Copy the resulting **Price ID** (`price_1ABC...`)
+
+**3. Fill in `.env`**
+```
+STRIPE_SECRET_KEY="sk_test_..."
+STRIPE_PUBLISHABLE_KEY="pk_test_..."
+STRIPE_PRICE_ID="price_1ABC..."
+```
+
+**4. Forward webhooks locally (Stripe CLI)**
+
+The Stripe CLI is a **system tool** — install it separately, not via uv:
+```powershell
+winget install Stripe.StripeCLI
+stripe login
+stripe listen --forward-to localhost:8000/stripe/webhook
+```
+The CLI will print a webhook signing secret (`whsec_...`). Add it to `.env`:
+```
+STRIPE_WEBHOOK_SECRET="whsec_..."
+```
+Restart the backend after updating `.env`.
+
+**5. Test the flow**
+```powershell
+# Trigger a synthetic event
+stripe trigger checkout.session.completed
+```
+Or go to the frontend `/billing` page and use Stripe's test card `4242 4242 4242 4242` (any future expiry, any CVC).
+
+After a successful checkout, `my_app/server/oauth.json` will show `"subscription_status": "active"` under the user's `services.stripe` object.
+
+### What the webhook handler covers
+
+| Event | Effect |
+|---|---|
+| `checkout.session.completed` | Sets `subscription_status: "active"` in `oauth.json` |
+| `customer.subscription.updated` | Mirrors Stripe status (e.g. `past_due`, `paused`) |
+| `customer.subscription.deleted` | Sets `subscription_status: "canceled"` |
+
+### Known limitations / next steps
+
+- Subscription status is stored in `oauth.json` (flat file — fine for dev, not for production)
+- No feature gating yet — add a `get_subscription_status(user_id)` helper and guard premium endpoints behind `status == "active"`
+- The `stripe` Python package (SDK) is already in `pyproject.toml`; the Stripe CLI is a separate system install
+
 ---
 
 ## Authentication System
