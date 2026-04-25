@@ -176,7 +176,7 @@ export default function Billing() {
         </div>
       )}
 
-      {/* Stripe not configured notice */}}
+      {/* Stripe not configured notice */}
       {!loading && !config && !error && (
         <div
           className="flex items-center gap-2 px-4 py-3 rounded-md mb-6 text-[12px]"

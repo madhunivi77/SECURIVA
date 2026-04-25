@@ -52,6 +52,7 @@ import CookiePolicy from './pages/CookiePolicy.jsx';
 import SecurityPolicy from './pages/SecurityPolicy.jsx';
 import ComplianceOverview from './pages/ComplianceOverview.jsx';
 import AIHandbook from './pages/AIHandbook.jsx';
+import Billing from './pages/Billing.jsx';
 
 const router = createBrowserRouter([
   {
@@ -126,6 +127,10 @@ const router = createBrowserRouter([
       {
         path: "/pricing",
         element: <Pricing />,
+      },
+      {
+        path: "/billing",
+        element: <Billing />,
       },
       {
         path: "/support",

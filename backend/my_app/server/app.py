@@ -19,6 +19,7 @@ from .chat_handler import (
     ensure_tool_catalog_ready,
 )
 from .salesforce_app import salesforce_app
+from .stripe_app import stripe_app
 from .db import db_app
 from .api_key_manager import generate_api_key, store_api_key, validate_api_key
 from .activity_logger import log_activity, get_activity_logs
@@ -702,6 +703,7 @@ api_app = Starlette(
 )
 
 api_app.mount("/salesforce", salesforce_app)
+api_app.mount("/stripe", stripe_app)
 api_app.mount("/chat",db_app)
 api_app.mount("/security", security_app)
 
