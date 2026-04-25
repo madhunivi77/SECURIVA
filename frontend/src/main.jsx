@@ -51,6 +51,7 @@ import DataProcessingAgreement from './pages/DataProcessingAgreement.jsx';
 import CookiePolicy from './pages/CookiePolicy.jsx';
 import SecurityPolicy from './pages/SecurityPolicy.jsx';
 import ComplianceOverview from './pages/ComplianceOverview.jsx';
+import AIHandbook from './pages/AIHandbook.jsx';
 
 const router = createBrowserRouter([
   {
@@ -117,6 +118,10 @@ const router = createBrowserRouter([
       {
         path:"/admin/analytics",
         element:<AdminAnalytics/>,
+      },
+      {
+        path: "/admin/handbook",
+        element: <AIHandbook />,
       },
       {
         path: "/pricing",
@@ -222,6 +227,10 @@ const router = createBrowserRouter([
           {
             path: 'logs',
             element: <Logs />,
+          },
+          {
+            path: 'handbook',
+            element: <AIHandbook />,
           },
           {
             path: 'integrations',

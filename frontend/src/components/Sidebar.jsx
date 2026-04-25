@@ -5,6 +5,7 @@ import {
   Mic,
   Plug,
   ScrollText,
+  BookOpen,
   Settings,
   LogOut,
   Search,
@@ -21,6 +22,7 @@ const PRIMARY_NAV = [
   { to: "/dashboard/chat", label: "Chat", icon: MessageSquare },
   { to: "/dashboard/voice", label: "Voice", icon: Mic },
   { to: "/dashboard/logs", label: "Activity", icon: ScrollText },
+  { to: "/dashboard/handbook", label: "AI Handbook", icon: BookOpen },
   { to: "/dashboard/integrations", label: "Integrations", icon: Plug },
   { to: "/dashboard/tools", label: "Cybersecurity Track", icon: Hammer}
 ];
