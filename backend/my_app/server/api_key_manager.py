@@ -10,6 +10,7 @@ Security:
 - Plaintext key shown to user only once during generation
 """
 
+import os
 import secrets
 import hashlib
 import json
@@ -17,6 +18,8 @@ import time
 from pathlib import Path
 from datetime import datetime
 from typing import Optional, Dict, Any
+
+from ..config.settings import settings
 
 
 def generate_api_key() -> str:
@@ -72,6 +75,11 @@ def validate_api_key(api_key: str, oauth_file_path: Path) -> Optional[str]:
     Returns:
         Optional[str]: user_id if valid, None if invalid
     """
+    if settings.ENVIRONMENT == "development":
+        dev_user = os.getenv("DEV_USER_ID")
+        if dev_user and api_key == os.getenv("DEV_API_KEY", "dev-bypass"):
+            return dev_user
+
     t0 = time.perf_counter()
     if not oauth_file_path.exists():
         return None

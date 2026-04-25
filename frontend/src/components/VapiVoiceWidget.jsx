@@ -57,11 +57,12 @@ function AnimatedOrb({ isActive, isSpeaking, isListening, volume }) {
     }
   });
 
+  // Dark-theme palette — brighter blues visible on deep navy field, red for speech
   const color = useMemo(() => {
-    if (isSpeaking) return '#6366f1';
-    if (isListening) return '#10b981';
-    if (isActive) return '#8b5cf6';
-    return '#71717a';
+    if (isSpeaking) return '#ef4444';   // Securiva red — arterial
+    if (isListening) return '#60a5fa';  // bright Securiva blue — attentive
+    if (isActive) return '#3d5fa8';     // Securiva mid-blue — just-connected
+    return '#4a5890';                   // lifted navy that reads on dark
   }, [isActive, isSpeaking, isListening]);
 
   return (
@@ -69,11 +70,11 @@ function AnimatedOrb({ isActive, isSpeaking, isListening, volume }) {
       <MeshDistortMaterial
         ref={materialRef}
         color={color}
-        roughness={0.1}
-        metalness={0.8}
+        roughness={0.28}
+        metalness={0.6}
         distort={0.2}
         speed={2}
-        envMapIntensity={1}
+        envMapIntensity={0.75}
       />
     </Sphere>
   );
@@ -110,14 +111,23 @@ function Particles({ count = 50 }) {
         />
       </bufferGeometry>
       <pointsMaterial
-        size={0.02}
-        color="#ffffff"
+        size={0.018}
+        color="#9fb0d5"
         transparent
-        opacity={0.3}
+        opacity={0.45}
         sizeAttenuation
       />
     </points>
   );
+}
+
+function formatElapsed(ms) {
+  if (!Number.isFinite(ms) || ms < 0) return '00:00';
+  const s = Math.floor(ms / 1000);
+  const m = Math.floor(s / 60);
+  const ss = (s % 60).toString().padStart(2, '0');
+  const mm = m.toString().padStart(2, '0');
+  return `${mm}:${ss}`;
 }
 
 export default function VapiVoiceWidget() {
@@ -127,9 +137,33 @@ export default function VapiVoiceWidget() {
   const [isListening, setIsListening] = useState(false);
   const [error, setError] = useState(null);
   const [volumeLevel, setVolumeLevel] = useState(0);
+  const [startedAt, setStartedAt] = useState(null);
+  const [elapsed, setElapsed] = useState(0);
 
   const vapiRef = useRef(null);
   const vapiInitialized = useRef(false);
+
+  // Tick elapsed while a call is live
+  useEffect(() => {
+    if (!startedAt) return;
+    const id = setInterval(() => setElapsed(Date.now() - startedAt), 250);
+    return () => clearInterval(id);
+  }, [startedAt]);
+
+  // Pre-warm the backend's semantic tool index as soon as the widget mounts.
+  // Fire-and-forget — by the time the user taps to speak, the 280-tool
+  // embedding index for their connected toolkits is already built, so the
+  // first voice turn skips the ~3s cold-start penalty.
+  useEffect(() => {
+    let cancelled = false;
+    fetch('/api/voice/prewarm', {
+      method: 'POST',
+      credentials: 'include',
+    }).catch(() => {
+      if (!cancelled) console.warn('[VOICE] prewarm failed (non-fatal)');
+    });
+    return () => { cancelled = true; };
+  }, []);
 
   // Initialize Vapi (only once)
   useEffect(() => {
@@ -154,6 +188,8 @@ export default function VapiVoiceWidget() {
           setIsConnected(true);
           setIsConnecting(false);
           setIsListening(true);
+          setStartedAt(Date.now());
+          setElapsed(0);
         });
 
         vapiRef.current.on('call-end', () => {
@@ -162,6 +198,7 @@ export default function VapiVoiceWidget() {
           setIsListening(false);
           setIsSpeaking(false);
           setVolumeLevel(0);
+          setStartedAt(null);
         });
 
         vapiRef.current.on('speech-start', () => {
@@ -356,10 +393,11 @@ export default function VapiVoiceWidget() {
     }
   };
 
-  const statusText = error
+  // Three layers of status expression — serif display, uppercase mono sub, top chip word
+  const displayText = error
     ? error
     : isConnecting
-    ? 'Connecting...'
+    ? 'Connecting'
     : !isConnected
     ? 'Tap to speak'
     : isSpeaking
@@ -368,34 +406,136 @@ export default function VapiVoiceWidget() {
     ? 'Listening'
     : 'Connected';
 
+  const subLabel = error
+    ? 'error'
+    : isConnecting
+    ? 'securing channel'
+    : !isConnected
+    ? 'ready when you are'
+    : isSpeaking
+    ? 'the agent is responding'
+    : isListening
+    ? 'your turn — go ahead'
+    : 'standing by';
+
+  const chipWord = error
+    ? 'Error'
+    : !isConnected
+    ? 'Idle'
+    : isSpeaking
+    ? 'Out'
+    : isListening
+    ? 'In'
+    : 'Live';
+
+  // Reactive halo — scale/opacity follow volume + connection state
+  const haloScale = 1 + volumeLevel * 0.22 + (isConnected ? 0.08 : 0);
+  const haloOpacity = error
+    ? 0.35
+    : isSpeaking
+    ? 0.95
+    : isListening
+    ? 0.7
+    : isConnected
+    ? 0.55
+    : 0.35;
+
+  // Halo — brighter on dark to register: Securiva blue at rest, bright blue listening, RED on speech
+  let haloColorA, haloColorB;
+  if (error) {
+    haloColorA = "rgba(239, 68, 68, 0.55)";
+    haloColorB = "rgba(239, 68, 68, 0.18)";
+  } else if (isSpeaking) {
+    haloColorA = "rgba(239, 68, 68, 0.65)";
+    haloColorB = "rgba(239, 68, 68, 0.2)";
+  } else if (isListening) {
+    haloColorA = "rgba(96, 165, 250, 0.55)";
+    haloColorB = "rgba(96, 165, 250, 0.18)";
+  } else {
+    haloColorA = "rgba(37, 99, 235, 0.45)";
+    haloColorB = "rgba(37, 99, 235, 0.14)";
+  }
+
   return (
     <div className="voice-widget">
-      <div className="voice-orb-section">
-        <div className="voice-canvas-container" onClick={handleOrbClick}>
-          <Canvas camera={{ position: [0, 0, 4], fov: 45 }}>
-            <ambientLight intensity={0.5} />
-            <directionalLight position={[10, 10, 5]} intensity={1} />
-            <pointLight position={[-10, -10, -5]} intensity={0.5} color="#6366f1" />
-            <AnimatedOrb
-              isActive={isConnected}
-              isSpeaking={isSpeaking}
-              isListening={isListening}
-              volume={volumeLevel}
-            />
-            <Particles count={50} />
-            <Environment preset="night" />
-          </Canvas>
-
-          {!isConnected && !isConnecting && (
-            <div className="voice-hint">
-              <svg width="24" height="24" viewBox="0 0 24 24" fill="currentColor">
-                <path d="M12 14c1.66 0 3-1.34 3-3V5c0-1.66-1.34-3-3-3S9 3.34 9 5v6c0 1.66 1.34 3 3 3zm5.91-3c-.49 0-.9.36-.98.85C16.52 14.2 14.47 16 12 16s-4.52-1.8-4.93-4.15c-.08-.49-.49-.85-.98-.85-.61 0-1.09.54-1 1.14.49 3 2.89 5.35 5.91 5.78V20c0 .55.45 1 1 1s1-.45 1-1v-2.08c3.02-.43 5.42-2.78 5.91-5.78.1-.6-.39-1.14-1-1.14z" />
-              </svg>
-            </div>
-          )}
-        </div>
-        <div className={`voice-status ${error ? 'error' : ''}`}>{statusText}</div>
+      <div className="voice-top-mark">
+        <span
+          className={`dot ${error ? 'error' : isConnected || isConnecting ? 'live' : ''}`}
+        />
+        <span>{chipWord}</span>
       </div>
+      <div className="voice-timer">
+        {isConnected || isConnecting ? formatElapsed(elapsed) : '00:00'}
+      </div>
+
+      <div className="voice-chamber">
+        <div className="voice-orb-section">
+          <div
+            className="voice-halo"
+            style={{
+              '--halo-scale': haloScale,
+              '--halo-opacity': haloOpacity,
+              '--halo-color-a': haloColorA,
+              '--halo-color-b': haloColorB,
+            }}
+          />
+          <div className="voice-canvas-container" onClick={handleOrbClick}>
+            <Canvas camera={{ position: [0, 0, 4], fov: 45 }}>
+              <ambientLight intensity={0.35} />
+              <directionalLight
+                position={[6, 8, 5]}
+                intensity={0.9}
+                color="#cfd8ff"
+              />
+              <pointLight
+                position={[-8, -4, -4]}
+                intensity={0.7}
+                color={isSpeaking ? '#ef4444' : '#60a5fa'}
+              />
+              <AnimatedOrb
+                isActive={isConnected}
+                isSpeaking={isSpeaking}
+                isListening={isListening}
+                volume={volumeLevel}
+              />
+              <Particles count={42} />
+              <Environment preset="night" />
+            </Canvas>
+
+            <div className="voice-ground" />
+          </div>
+
+          <div className="voice-caption">
+            <div
+              className={`voice-caption-display ${
+                error
+                  ? 'error'
+                  : isSpeaking
+                  ? 'speaking'
+                  : !isConnected
+                  ? 'muted'
+                  : ''
+              }`}
+            >
+              {displayText}
+            </div>
+            {!error && (
+              <div className="voice-caption-sub">{subLabel}</div>
+            )}
+          </div>
+        </div>
+      </div>
+
+      <div className="voice-dock">
+        <span className="tip">
+          {isConnected
+            ? 'Click the orb to end the call.'
+            : 'Click the orb to begin — microphone required.'}
+        </span>
+        <span>Cartesia Sonic · Deepgram Nova-3</span>
+      </div>
+
+      <div className="voice-accent-line" />
     </div>
   );
 }

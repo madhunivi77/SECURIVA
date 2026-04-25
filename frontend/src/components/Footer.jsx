@@ -37,7 +37,7 @@ export default function Footer({ theme = {} }) {
 
         @media (min-width: 768px) {
           .sec-footer-grid {
-            grid-template-columns: repeat(3, 1fr);
+            grid-template-columns: repeat(4, 1fr);
           }
         }
 
@@ -88,6 +88,18 @@ export default function Footer({ theme = {} }) {
       <div className="sec-footer-inner">
         <div className="sec-footer-grid">
 
+
+          {/* Features */}
+          <div className="sec-footer-col">
+            <Link to={"/features"}><h2>Features</h2></Link>
+            <ul>
+              <li><HashLink smooth scroll={scrollWithOffset} to='/features/#virtual-agent'>Virtual Agent</HashLink></li>
+              <li><HashLink smooth scroll={scrollWithOffset} to='/features/#cybersecurity'>Cybersecurity</HashLink></li>
+              <li><HashLink smooth scroll={scrollWithOffset} to='/features/#text-agent'>Text Agent</HashLink></li>
+              <li><HashLink smooth scroll={scrollWithOffset} to='/features/#vpn'>VPN Secure Access</HashLink></li>
+            </ul>
+          </div>
+
           {/* Industries */}
           <div className="sec-footer-col">
             <Link to={"/industries"}><h2>Industries</h2></Link>
@@ -109,10 +121,8 @@ export default function Footer({ theme = {} }) {
             <ul>
               <li><a href="#">Blog</a></li>
               <li><a href="#">eBooks &amp; Whitepapers</a></li>
-              <li><a href="#">Affiliates</a></li>
               <li><a href="#">Partnerships</a></li>
               <li><a href="#">Media Kit</a></li>
-              <li><a href="#">Webinars</a></li>
               <li><a href="#">API Documentation</a></li>
             </ul>
           </div>
@@ -121,11 +131,12 @@ export default function Footer({ theme = {} }) {
           <div className="sec-footer-col">
             <h2>Legal</h2>
             <ul>
-              <li><a href="#">Privacy Policy</a></li>
-              <li><a href="#">Terms of Service</a></li>
-              <li><a href="#">Data Protection Policy</a></li>
-              <li><a href="#">Cookie Preferences</a></li>
-              <li><a href="#">Accessibility Statement</a></li>
+              <Link to={"/privacy-policy"}><li>Privacy Policy</li></Link>
+              <Link to={"/terms-of-service"}><li>Terms of Service</li></Link>
+              <Link to={"/data-processing-agreement"}><li>Data Processing Agreement (DPA)</li></Link>
+              <Link to={"/cookie-policy"}><li>Cookie Policy</li></Link>
+              <Link to={"/security-policy"}><li>Security Policy</li></Link>
+              <Link to={"/compliance-overview"}><li>Compliance Overview</li></Link>
             </ul>
           </div>
 

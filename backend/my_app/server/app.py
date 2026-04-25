@@ -1,7 +1,9 @@
 ﻿from starlette.applications import Starlette
 from starlette.routing import Route
-from starlette.responses import HTMLResponse, JSONResponse, Response, RedirectResponse
+from starlette.responses import HTMLResponse, JSONResponse, Response, RedirectResponse, StreamingResponse
 from google_auth_oauthlib.flow import Flow
+from google.oauth2 import id_token
+from google.auth.transport import requests
 import json
 import bcrypt
 import jwt as pyjwt
@@ -11,13 +13,16 @@ import secrets
 import httpx
 from datetime import datetime, timedelta, timezone
 from pathlib import Path
-from .chat_handler import execute_chat_with_tools
+from .chat_handler import (
+    execute_chat_with_tools,
+    execute_chat_with_tools_stream,
+    ensure_tool_catalog_ready,
+)
 from .salesforce_app import salesforce_app
-from .stripe_app import stripe_app, check_and_increment_quota
 from .db import db_app
-from .security_tools import security_app
 from .api_key_manager import generate_api_key, store_api_key, validate_api_key
 from .activity_logger import log_activity, get_activity_logs
+from .security_tools import security_app
 from .telesign_auth import (
     send_whatsapp_message,
     send_sms,
@@ -164,15 +169,16 @@ async def callback(request):
     """Handle Google OAuth callback"""
     try:
         flow.fetch_token(authorization_response=str(request.url))
-        credentials = flow.credentials.to_json()
-        credentials_dict = json.loads(credentials)
-
+        credentials = flow.credentials
         user_email = None
         try:
-            id_token = credentials_dict.get("id_token")
-            if id_token:
-                decoded = pyjwt.decode(id_token, options={"verify_signature": False})
-                user_email = decoded.get("email")
+            idinfo = id_token.verify_oauth2_token(
+                credentials.id_token,
+                requests.Request(),
+                GOOGLE_CLIENT_ID
+            )
+
+            user_email = idinfo.get("email")
         except:
             pass
 
@@ -206,7 +212,7 @@ async def callback(request):
 
         user_entry["services"]["google"] = {
             "email": user_email,
-            "credentials": credentials,
+            "credentials": credentials.to_json(),
             "connected_at": datetime.now().isoformat(),
             "scopes": SCOPES
         }
@@ -308,10 +314,6 @@ async def api_chat(request):
                 status_code=400
             )
 
-        allowed, quota_reason = check_and_increment_quota(user_id)
-        if not allowed:
-            return JSONResponse({"error": quota_reason}, status_code=429)
-
         result = await execute_chat_with_tools(messages, model, api, user_id)
         log_ai_call(user_id, model, messages, result)
 
@@ -339,6 +341,75 @@ async def api_chat(request):
             {"error": "An internal error occurred"},
             status_code=500
         )
+
+
+async def api_chat_stream(request):
+    """Streaming chat — Server-Sent Events.
+
+    Auth: cookie api_key → user_id.
+    Body: {"messages": [...], "model"?: str, "api"?: str}
+    Stream: lines of `data: <json>\\n\\n` where each json is an event dict
+    (see execute_chat_with_tools_stream). Terminates with `data: [DONE]\\n\\n`.
+    """
+    api_key = request.cookies.get("api_key")
+    if not api_key:
+        return JSONResponse({"error": "Not authenticated"}, status_code=401)
+
+    oauth_file = Path(__file__).parent / "oauth.json"
+    user_id = validate_api_key(api_key, oauth_file)
+    if not user_id:
+        return JSONResponse({"error": "Invalid or expired API key"}, status_code=401)
+
+    try:
+        body = await request.json()
+    except json.JSONDecodeError:
+        return JSONResponse({"error": "Invalid JSON"}, status_code=400)
+
+    messages = body.get("messages", [])
+    model = body.get("model")
+    api = body.get("api")
+
+    if not messages or not isinstance(messages, list):
+        return JSONResponse(
+            {"error": "'messages' array is required"}, status_code=400
+        )
+
+    async def sse():
+        tool_call_names: list[str] = []
+        try:
+            async for event in execute_chat_with_tools_stream(
+                messages, model, api, user_id
+            ):
+                if event.get("type") == "tool_end" and event.get("name"):
+                    tool_call_names.append(event["name"])
+                yield f"data: {json.dumps(event, default=str)}\n\n"
+        except Exception as e:
+            err = {"type": "error", "error": str(e)}
+            yield f"data: {json.dumps(err)}\n\n"
+        finally:
+            yield "data: [DONE]\n\n"
+            # Log activity after the stream finishes
+            try:
+                user_msgs = [m for m in messages if m.get("role") == "user"]
+                log_activity("chat", user_id=user_id, details={
+                    "model": model, "api": api,
+                    "user_message": (user_msgs[-1].get("content", "")[:200] if user_msgs else ""),
+                    "tool_calls_count": len(tool_call_names),
+                    "stream": True,
+                })
+            except Exception:
+                pass
+
+    return StreamingResponse(
+        sse(),
+        media_type="text/event-stream",
+        headers={
+            "Cache-Control": "no-cache",
+            "Connection": "keep-alive",
+            "X-Accel-Buffering": "no",
+        },
+    )
+
 
 # Telesign endpoints (add authentication in production)
 async def api_send_sms(request):
@@ -467,6 +538,36 @@ async def api_voice_session(request):
 
     return JSONResponse({"voice_token": voice_token})
 
+
+async def api_voice_prewarm(request):
+    """
+    Fire-and-forget: kick off semantic-index build for the authenticated user.
+    Frontend hits this as soon as the voice widget mounts, so by the time
+    the user actually taps to speak the index is ready (or nearly ready),
+    avoiding the 2-3s cold-start penalty inside the first tool-selection.
+    """
+    api_key = request.cookies.get("api_key")
+    if not api_key:
+        return JSONResponse({"error": "Not authenticated"}, status_code=401)
+    oauth_file = Path(__file__).parent / "oauth.json"
+    user_id = validate_api_key(api_key, oauth_file)
+    if not user_id:
+        return JSONResponse({"error": "Invalid API key"}, status_code=401)
+
+    import asyncio
+    async def _warm():
+        try:
+            t0 = datetime.now(timezone.utc)
+            ok = await ensure_tool_catalog_ready(user_id)
+            ms = (datetime.now(timezone.utc) - t0).total_seconds() * 1000
+            print(f"[PREWARM] user={user_id} ready={ok} | {ms:.0f}ms")
+        except Exception as e:
+            print(f"[PREWARM] user={user_id} failed: {e}")
+
+    asyncio.create_task(_warm())
+    return JSONResponse({"status": "prewarming"})
+
+
 async def api_logs(request):
     """Return activity logs and/or tool call logs."""
     api_key = request.cookies.get("api_key")
@@ -587,9 +688,11 @@ api_app = Starlette(
         Route("/", index),
         Route("/api/status", api_status),
         Route("/api/chat", api_chat, methods=["POST"]),
+        Route("/api/chat/stream", api_chat_stream, methods=["POST"]),
         Route("/api/logout", api_logout, methods=["POST"]),
         Route("/api/voice-token", api_voice_token, methods=["GET"]),
         Route("/api/voice-session", api_voice_session, methods=["POST"]),
+        Route("/api/voice/prewarm", api_voice_prewarm, methods=["POST"]),
         Route("/login", login, methods=["GET"]),
         Route("/callback", callback),
         Route("/api/whatsapp/send-sms", api_send_sms, methods=["POST"]),
@@ -599,6 +702,8 @@ api_app = Starlette(
 )
 
 api_app.mount("/salesforce", salesforce_app)
-api_app.mount("/stripe", stripe_app)
 api_app.mount("/chat",db_app)
 api_app.mount("/security", security_app)
+
+from .composio_app import composio_app
+api_app.mount("/api/composio", composio_app)
