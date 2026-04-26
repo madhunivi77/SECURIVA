@@ -6,6 +6,7 @@ const PAGE_META = {
   "/dashboard/chat": { scope: "All Chats", title: "Chat" },
   "/dashboard/voice": { scope: "All Chats", title: "Voice" },
   "/dashboard/logs": { scope: "All Chats", title: "Activity" },
+  "/dashboard/handbook": { scope: "All Chats", title: "AI Handbook" },
   "/dashboard/integrations": { scope: "All Chats", title: "Integrations" },
 };
 
