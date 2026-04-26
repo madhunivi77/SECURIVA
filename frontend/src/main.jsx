@@ -16,7 +16,6 @@ import LoginForm from './pages/LoginForm.jsx';
 import SignupForm from './pages/SignupForm.jsx';
 import VoiceTest from './pages/VoiceTest.jsx';
 import Pricing from "./pages/Pricing";
-import AutomationGrid from './components/AutomationGrid.jsx';
 import ProtectedRoute from './components/ProtectedRoute.jsx';
 import Industry from './pages/Industry.jsx';
 import Support from "./pages/Support.jsx";
@@ -35,6 +34,8 @@ import Logs from './pages/Logs.jsx';
 import UsersPage from "./pages/admin_pages/UsersPage";
 import UserProfile from "./pages/admin_pages/UserProfile";
 import AdminDashboard from './pages/admin_pages/AdminDashboard.jsx';
+import AdminLayout from './pages/admin_pages/AdminLayout.jsx';
+import AdminHandbook from './pages/admin_pages/AdminHandbook.jsx';
 import AdminPayments from './pages/admin_pages/AdminPayments';
 import AdminSecurity from './pages/admin_pages/AdminSecurity';
 import AdminAnalytics from './pages/admin_pages/AdminAnalytics';
@@ -51,6 +52,9 @@ import DataProcessingAgreement from './pages/DataProcessingAgreement.jsx';
 import CookiePolicy from './pages/CookiePolicy.jsx';
 import SecurityPolicy from './pages/SecurityPolicy.jsx';
 import ComplianceOverview from './pages/ComplianceOverview.jsx';
+import AIHandbook from './pages/AIHandbook.jsx';
+import Billing from './pages/Billing.jsx';
+import BillingManagement from './pages/BillingManagement.jsx';
 
 const router = createBrowserRouter([
   {
@@ -74,53 +78,12 @@ const router = createBrowserRouter([
         element: <Features />
       },
       {
-        path: '/admin',
-        element: <AdminDashboard />
-      },
-      {
-        path: "/admin/users",
-        element: <UsersPage />,
-      },
-      {
-        path: "/admin/users/:userId",
-        element: <UserProfile />,
-      },
-      {
-        path:"/admin/security",
-        element:<AdminSecurity/>,
-      },
-      {
-        path:"/admin/settings",
-        element:<AdminSettings/>,
-      },
-      {
-        path:"/admin/notifications",
-        element:<AdminNotifications/>,
-      },
-
-      {
-        path:"/admin/activity",
-        element:<AdminActivity/>,
-      },
-      {
-        path:"/admin/integrations",
-        element:<AdminIntegrations/>,
-      },
-      {
-        path:"/admin/payments",
-        element: <AdminPayments/>,
-      },
-      {
-        path:"/admin/content",
-        element:<AdminContent/>,
-      },
-      {
-        path:"/admin/analytics",
-        element:<AdminAnalytics/>,
-      },
-      {
         path: "/pricing",
         element: <Pricing />,
+      },
+      {
+        path: "/billing",
+        element: <Billing />,
       },
       {
         path: "/support",
@@ -189,16 +152,70 @@ const router = createBrowserRouter([
     ]
   },
   {
-    path: '/provider', // select a login provider
+    path: '/provider',
     element: <ProviderForm />
   },
   {
-    path: '/login', // Local login
+    path: '/login',
     element: <LoginForm />
   },
   {
-    path: '/signup', // create a new account
+    path: '/signup',
     element: <SignupForm />
+  },
+  {
+    path: '/admin',
+    element: <AdminLayout />,
+    children: [
+      {
+        index: true,
+        element: <AdminDashboard />
+      },
+      {
+        path: "users",
+        element: <UsersPage />,
+      },
+      {
+        path: "users/:userId",
+        element: <UserProfile />,
+      },
+      {
+        path: "handbook",
+        element: <AdminHandbook />,
+      },
+      {
+        path: "security",
+        element: <AdminSecurity />,
+      },
+      {
+        path: "settings",
+        element: <AdminSettings />,
+      },
+      {
+        path: "notifications",
+        element: <AdminNotifications />,
+      },
+      {
+        path: "activity",
+        element: <AdminActivity />,
+      },
+      {
+        path: "integrations",
+        element: <AdminIntegrations />,
+      },
+      {
+        path: "payments",
+        element: <AdminPayments />,
+      },
+      {
+        path: "content",
+        element: <AdminContent />,
+      },
+      {
+        path: "analytics",
+        element: <AdminAnalytics />,
+      },
+    ]
   },
   {
     path: '/dashboard',
@@ -222,6 +239,14 @@ const router = createBrowserRouter([
           {
             path: 'logs',
             element: <Logs />,
+          },
+          {
+            path: 'handbook',
+            element: <AIHandbook />,
+          },
+          {
+            path: 'billing',
+            element: <BillingManagement />,
           },
           {
             path: 'integrations',

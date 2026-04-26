@@ -787,6 +787,8 @@ def summarizeRecentEmails(context: Context, num_emails: int = 5) -> str:
             date = headers.get("Date", "Unknown date")
             body = extract_email_body(msg.get("payload", {})) or "(No content)"
             emails_to_summarize.append((from_addr, subject, date, body))
+            body = extract_email_body(msg.get("payload", {})) or "(No content)"
+            emails_to_summarize.append((from_addr, subject, date, body))
 
         # Step 4: Parallel Groq summarization — all emails at once
         groq_client = Groq(api_key=os.getenv("GROQ_API_KEY"))

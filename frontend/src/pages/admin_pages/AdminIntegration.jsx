@@ -1,6 +1,5 @@
 // src/pages/AdminIntegrations.jsx
 
-import AdminSidebar from "../../components/admin/AdminSidebar";
 import {
   Plug,
   Link,
@@ -32,199 +31,192 @@ export default function AdminIntegrations() {
   ];
 
   return (
-    <div className="flex h-screen bg-gray-100 font-sans">
+    <div className="p-6 space-y-6 overflow-y-auto">
 
-      {/* Sidebar */}
-      <AdminSidebar />
+      {/* HEADER */}
+      <div>
+        <h1 className="text-2xl font-semibold tracking-tight text-blue-900">
+          Integrations
+        </h1>
+        <p className="text-gray-500 text-sm">
+          Manage external platform connections and API integrations.
+        </p>
+      </div>
 
-      {/* Content */}
-      <div className="flex-1 p-6 space-y-6 overflow-y-auto">
+      {/* ---------------- KPI CARDS ---------------- */}
+      <div className="grid grid-cols-4 gap-6">
 
-        {/* HEADER */}
-        <div>
-          <h1 className="text-2xl font-semibold tracking-tight text-blue-900">
-            Integrations
-          </h1>
-          <p className="text-gray-500 text-sm">
-            Manage external platform connections and API integrations.
-          </p>
-        </div>
+        <Card
+          title="Active Integrations"
+          value="6"
+          subtitle="Connected APIs"
+          desc="Total number of active external integrations"
+          Icon={Plug}
+          color="blue"
+        />
 
-        {/* ---------------- KPI CARDS ---------------- */}
-        <div className="grid grid-cols-4 gap-6">
+        <Card
+          title="API Keys"
+          value="12"
+          subtitle="Stored securely"
+          desc="Number of API keys configured in the system"
+          Icon={Key}
+          color="green"
+        />
 
-          <Card
-            title="Active Integrations"
-            value="6"
-            subtitle="Connected APIs"
-            desc="Total number of active external integrations"
-            Icon={Plug}
-            color="blue"
-          />
+        <Card
+          title="API Calls"
+          value="8,540"
+          subtitle="Last 24 hours"
+          desc="Total API requests made across integrations"
+          Icon={Activity}
+          color="purple"
+        />
 
-          <Card
-            title="API Keys"
-            value="12"
-            subtitle="Stored securely"
-            desc="Number of API keys configured in the system"
-            Icon={Key}
-            color="green"
-          />
+        <Card
+          title="Failed Calls"
+          value="3"
+          subtitle="Needs attention"
+          desc="Failed API requests requiring investigation"
+          Icon={XCircle}
+          color="red"
+        />
 
-          <Card
-            title="API Calls"
-            value="8,540"
-            subtitle="Last 24 hours"
-            desc="Total API requests made across integrations"
-            Icon={Activity}
-            color="purple"
-          />
+      </div>
 
-          <Card
-            title="Failed Calls"
-            value="3"
-            subtitle="Needs attention"
-            desc="Failed API requests requiring investigation"
-            Icon={XCircle}
-            color="red"
-          />
+      {/* ---------------- AVAILABLE INTEGRATIONS ---------------- */}
+      <div className="bg-white p-5 rounded-xl shadow">
+        <h2 className="text-sm font-semibold text-blue-900 mb-2">
+          Available Integrations
+        </h2>
 
-        </div>
+        <p className="text-xs text-gray-500 mb-4">
+          Connect and manage third-party platforms.
+        </p>
 
-        {/* ---------------- AVAILABLE INTEGRATIONS ---------------- */}
-        <div className="bg-white p-5 rounded-xl shadow">
-          <h2 className="text-sm font-semibold text-blue-900 mb-2">
-            Available Integrations
-          </h2>
+        <div className="grid grid-cols-3 gap-4">
 
-          <p className="text-xs text-gray-500 mb-4">
-            Connect and manage third-party platforms.
-          </p>
+          {integrations.map((int, i) => (
+            <div
+              key={i}
+              className="border rounded-lg p-4 flex justify-between items-center"
+            >
+              <div>
+                <p className="text-sm font-medium text-gray-800">
+                  {int.name}
+                </p>
 
-          <div className="grid grid-cols-3 gap-4">
-
-            {integrations.map((int, i) => (
-              <div
-                key={i}
-                className="border rounded-lg p-4 flex justify-between items-center"
-              >
-                <div>
-                  <p className="text-sm font-medium text-gray-800">
-                    {int.name}
-                  </p>
-
-                  <p
-                    className={`text-xs ${
-                      int.status === "Connected"
-                        ? "text-green-600"
-                        : "text-gray-400"
-                    }`}
-                  >
-                    {int.status}
-                  </p>
-                </div>
-
-                <button
-                  className={`px-3 py-1 text-xs rounded-lg ${
-                    int.status === "Connected"
-                      ? "bg-red-100 text-red-600"
-                      : "bg-blue-100 text-blue-600"
-                  }`}
-                >
-                  {int.status === "Connected" ? "Disconnect" : "Connect"}
-                </button>
-              </div>
-            ))}
-
-          </div>
-        </div>
-
-        {/* ---------------- API KEY MANAGEMENT ---------------- */}
-        <div className="bg-white p-5 rounded-xl shadow">
-          <h2 className="text-sm font-semibold text-blue-900 mb-2">
-            API Key Management
-          </h2>
-
-          <p className="text-xs text-gray-500 mb-4">
-            Securely manage API keys for integrations.
-          </p>
-
-          <div className="flex gap-3">
-            <input
-              type="text"
-              placeholder="Enter API Key..."
-              className="border px-3 py-2 rounded-lg text-sm w-64"
-            />
-
-<button className="flex items-center gap-2 !bg-blue-600 !text-white px-4 py-2 rounded-lg shadow hover:!bg-blue-700">
-              Save Key
-            </button>
-          </div>
-        </div>
-
-        {/* ---------------- API STATUS + LOGS ---------------- */}
-        <div className="grid grid-cols-2 gap-6">
-
-          {/* STATUS */}
-          <div className="bg-white p-5 rounded-xl shadow">
-            <h2 className="text-sm font-semibold text-blue-900 mb-2">
-              Integration Status Monitoring
-            </h2>
-
-            <p className="text-xs text-gray-500 mb-4">
-              Real-time status of connected APIs.
-            </p>
-
-            {integrations.slice(0, 5).map((int, i) => (
-              <div key={i} className="flex justify-between mb-3 text-sm">
-                <span>{int.name}</span>
-
-                {int.status === "Connected" ? (
-                  <span className="text-green-600 flex items-center gap-1">
-                    <CheckCircle size={14} /> Active
-                  </span>
-                ) : (
-                  <span className="text-gray-400 flex items-center gap-1">
-                    <XCircle size={14} /> Inactive
-                  </span>
-                )}
-              </div>
-            ))}
-          </div>
-
-          {/* LOGS */}
-          <div className="bg-white p-5 rounded-xl shadow">
-            <h2 className="text-sm font-semibold text-blue-900 mb-2">
-              API Call Logs
-            </h2>
-
-            <p className="text-xs text-gray-500 mb-4">
-              Logs of recent API activity across integrations.
-            </p>
-
-            {apiLogs.map((log, i) => (
-              <div key={i} className="flex justify-between mb-3 text-sm">
-                <div>
-                  <p className="text-gray-800">{log.api}</p>
-                  <span className="text-xs text-gray-400">{log.action}</span>
-                </div>
-
-                <span
+                <p
                   className={`text-xs ${
-                    log.status === "Success"
+                    int.status === "Connected"
                       ? "text-green-600"
-                      : "text-red-600"
+                      : "text-gray-400"
                   }`}
                 >
-                  {log.status}
-                </span>
+                  {int.status}
+                </p>
               </div>
-            ))}
-          </div>
 
+              <button
+                className={`px-3 py-1 text-xs rounded-lg ${
+                  int.status === "Connected"
+                    ? "bg-red-100 text-red-600"
+                    : "bg-blue-100 text-blue-600"
+                }`}
+              >
+                {int.status === "Connected" ? "Disconnect" : "Connect"}
+              </button>
+            </div>
+          ))}
+
+        </div>
+      </div>
+
+      {/* ---------------- API KEY MANAGEMENT ---------------- */}
+      <div className="bg-white p-5 rounded-xl shadow">
+        <h2 className="text-sm font-semibold text-blue-900 mb-2">
+          API Key Management
+        </h2>
+
+        <p className="text-xs text-gray-500 mb-4">
+          Securely manage API keys for integrations.
+        </p>
+
+        <div className="flex gap-3">
+          <input
+            type="text"
+            placeholder="Enter API Key..."
+            className="border px-3 py-2 rounded-lg text-sm w-64"
+          />
+
+          <button className="flex items-center gap-2 !bg-blue-600 !text-white px-4 py-2 rounded-lg shadow hover:!bg-blue-700">
+            Save Key
+          </button>
+        </div>
+      </div>
+
+      {/* ---------------- API STATUS + LOGS ---------------- */}
+      <div className="grid grid-cols-2 gap-6">
+
+        {/* STATUS */}
+        <div className="bg-white p-5 rounded-xl shadow">
+          <h2 className="text-sm font-semibold text-blue-900 mb-2">
+            Integration Status Monitoring
+          </h2>
+
+          <p className="text-xs text-gray-500 mb-4">
+            Real-time status of connected APIs.
+          </p>
+
+          {integrations.slice(0, 5).map((int, i) => (
+            <div key={i} className="flex justify-between mb-3 text-sm">
+              <span>{int.name}</span>
+
+              {int.status === "Connected" ? (
+                <span className="text-green-600 flex items-center gap-1">
+                  <CheckCircle size={14} /> Active
+                </span>
+              ) : (
+                <span className="text-gray-400 flex items-center gap-1">
+                  <XCircle size={14} /> Inactive
+                </span>
+              )}
+            </div>
+          ))}
+        </div>
+
+        {/* LOGS */}
+        <div className="bg-white p-5 rounded-xl shadow">
+          <h2 className="text-sm font-semibold text-blue-900 mb-2">
+            API Call Logs
+          </h2>
+
+          <p className="text-xs text-gray-500 mb-4">
+            Logs of recent API activity across integrations.
+          </p>
+
+          {apiLogs.map((log, i) => (
+            <div key={i} className="flex justify-between mb-3 text-sm">
+              <div>
+                <p className="text-gray-800">{log.api}</p>
+                <span className="text-xs text-gray-400">{log.action}</span>
+              </div>
+
+              <span
+                className={`text-xs ${
+                  log.status === "Success"
+                    ? "text-green-600"
+                    : "text-red-600"
+                }`}
+              >
+                {log.status}
+              </span>
+            </div>
+          ))}
         </div>
 
       </div>
+
     </div>
   );
 }

@@ -1,7 +1,6 @@
 import { useState } from "react";
 import { Search, ShieldCheck, Lock, Unlock } from "lucide-react";
 import { Link } from "react-router-dom";
-import AdminSidebar from "../../components/admin/AdminSidebar";
 
 const UsersPage = () => {
   const [users, setUsers] = useState([
@@ -33,13 +32,11 @@ const UsersPage = () => {
   );
 
   return (
-    <div className="flex h-screen bg-gray-100 font-sans">
-      <AdminSidebar />
-      <div className="flex-1 p-6 overflow-y-auto">
+    <div className="p-6 space-y-6 overflow-y-auto">
       {/* Header */}
       <div className="flex flex-col md:flex-row md:items-center md:justify-between gap-4">
         <div>
-        <h1 className="text-2xl font-semibold tracking-tight text-blue-900">
+          <h1 className="text-2xl font-semibold tracking-tight text-blue-900">
             User Analytics
           </h1>
           <p className="text-gray-500">
@@ -149,7 +146,6 @@ const UsersPage = () => {
           </div>
         )}
       </div>
-    </div>
     </div>
   );
 };

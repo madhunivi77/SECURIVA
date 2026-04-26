@@ -105,11 +105,10 @@ secure_creds.txt
 *credentials*.json
 *secrets*.json
 
-# Deployment secrets (contain API keys - NEVER commit)
+# Deployment configs with secrets
+backend/apprunner-config.json
 backend/cloudshell-command.txt
 backend/cloudshell-update.txt
-backend/apprunner-config.json
-backend/create-apprunner.sh
 
 # Temporary Files
 *.tmp

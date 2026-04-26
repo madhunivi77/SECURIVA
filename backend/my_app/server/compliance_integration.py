@@ -113,7 +113,7 @@ async def execute_chat_with_tools(messages: list, model: str = None, api: str = 
     graph = create_agent(
         model = llm_client, 
         tools = all_tools,  # Use combined tools instead of just mcp_tools_response
-        middleware = [handle_tool_errors]
+        middleware = [check_tool_confirmation, handle_tool_errors]
     )
     
     # ... rest of existing code ...
@@ -207,6 +207,12 @@ PROCEDURAL TOOL USAGE PATTERNS:
 
 Always confirm understanding before generating documents or reports.
 Always use procedural tools for step-by-step guidance rather than generating steps from memory.
+
+RESPONSE STYLE:
+- Be direct and concise. Answer the question without unnecessary preamble or closing statements.
+- Do NOT end responses with phrases like "If you have any questions..." or "Feel free to ask about..."
+- Do NOT remind the user what topics you can help with unless they explicitly ask.
+- Simply answer what was asked and stop.
 """
 
 

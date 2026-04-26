@@ -14,6 +14,7 @@ import sys
 # Add parent directory to path to import request validator
 sys.path.insert(0, str(Path(__file__).parent.parent.parent))
 from my_app.server.request_validator import should_block_request
+from my_app.server.tool_confirmation_config import requires_confirmation, TOOLS_REQUIRING_CONFIRMATION
 
 # --- Configuration ---
 load_dotenv()
@@ -107,7 +108,13 @@ You have access to compliance tools. Use them to provide accurate, grounded info
 - Decision trees for compliance decisions
 - Real-world examples of compliant vs non-compliant actions
 
-Always cite specific regulation articles and use tools rather than guessing.""",
+Always cite specific regulation articles and use tools rather than guessing.
+
+RESPONSE STYLE:
+- Be direct and concise. Answer the question without unnecessary preamble or closing statements.
+- Do NOT end responses with phrases like "If you have any questions..." or "Feel free to ask about..."
+- Do NOT remind the user what topics you can help with unless they explicitly ask.
+- Simply answer what was asked and stop.""",
                 }
             ]
 
@@ -148,6 +155,33 @@ Always cite specific regulation articles and use tools rather than guessing.""",
                         tool_args = {k: v for k, v in json.loads(tool_call.function.arguments).items() if k not in RESERVED_TOOL_PARAMS}
                         
                         print(f"🤖 {api} wants to call tool '{tool_name}' with args {tool_args}")
+
+                        # Check if this tool requires confirmation
+                        if requires_confirmation(tool_name):
+                            print(f"\n⚠️  CONFIRMATION REQUIRED ⚠️")
+                            print(f"Tool: {tool_name}")
+                            print(f"Arguments: {json.dumps(tool_args, indent=2)}")
+                            
+                            # Get the confirmation rule details
+                            if tool_name in TOOLS_REQUIRING_CONFIRMATION:
+                                rule = TOOLS_REQUIRING_CONFIRMATION[tool_name]
+                                print(f"Risk Level: {rule.risk_level.upper()}")
+                            
+                            confirmation = input("\nDo you want to proceed? (yes/no): ").strip().lower()
+                            
+                            if confirmation not in ["yes", "y"]:
+                                print("❌ Tool execution cancelled by user.")
+                                messages.append(
+                                    {
+                                        "tool_call_id": tool_call.id,
+                                        "role": "tool",
+                                        "name": tool_name,
+                                        "content": "Error: Tool execution was cancelled - user did not provide confirmation.",
+                                    }
+                                )
+                                continue
+                            else:
+                                print("✅ User confirmed. Proceeding with tool execution...\n")
 
                         # Use the MCP session to call the actual tool on your server
                         tool_result = await session.call_tool(tool_name, arguments=(tool_args if tool_args else {"_": None}))

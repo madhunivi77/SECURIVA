@@ -5,6 +5,7 @@ import {
   Mic,
   Plug,
   ScrollText,
+  BookOpen,
   Settings,
   LogOut,
   Search,
@@ -12,6 +13,7 @@ import {
   Gauge,
   Sparkles,
   Hammer,
+  CreditCard,
 } from "lucide-react";
 import { NavLink, useNavigate } from "react-router-dom";
 import { useAuth } from "../context/AuthContext";
@@ -21,8 +23,10 @@ const PRIMARY_NAV = [
   { to: "/dashboard/chat", label: "Chat", icon: MessageSquare },
   { to: "/dashboard/voice", label: "Voice", icon: Mic },
   { to: "/dashboard/logs", label: "Activity", icon: ScrollText },
+  { to: "/dashboard/handbook", label: "AI Handbook", icon: BookOpen },
   { to: "/dashboard/integrations", label: "Integrations", icon: Plug },
-  { to: "/dashboard/tools", label: "Cybersecurity Track", icon: Hammer}
+  { to: "/dashboard/tools", label: "Cybersecurity Track", icon: Hammer},
+  { to: "/dashboard/billing", label: "Billing", icon: CreditCard },
 ];
 
 const SECONDARY_NAV = [

@@ -37,8 +37,79 @@ load_dotenv()
 # Load credentials from environment
 CUSTOMER_ID = os.getenv("TELESIGN_CUSTOMER_ID")
 API_KEY = os.getenv("TELESIGN_API_KEY")
-SENDER_ID = os.getenv("TELESIGN_SENDER_ID", "")
+# Prefer TELESIGN_SENDER_ID, but fall back to legacy SENDER_ID for compatibility.
+SENDER_ID = os.getenv("TELESIGN_SENDER_ID") or os.getenv("SENDER_ID", "")
 ACCOUNT_TYPE = "self-service"  # Set to "self-service" for standard accounts
+
+
+# Reusable SMS templates for common customer contact and OTP use cases.
+SMS_TEMPLATES: dict[str, dict[str, Any]] = {
+    "otp_login": {
+        "message_type": "OTP",
+        "required_fields": ["app_name", "code", "ttl_minutes"],
+        "template": "{app_name}: Your verification code is {code}. It expires in {ttl_minutes} minutes.",
+    },
+    "otp_password_reset": {
+        "message_type": "OTP",
+        "required_fields": ["app_name", "code", "ttl_minutes"],
+        "template": "{app_name}: Use code {code} to reset your password. Expires in {ttl_minutes} minutes.",
+    },
+    "customer_appointment_reminder": {
+        "message_type": "ARN",
+        "required_fields": ["brand", "date", "time", "location"],
+        "template": "{brand}: Reminder - your appointment is on {date} at {time} ({location}). Reply STOP to opt out.",
+    },
+    "customer_order_update": {
+        "message_type": "ARN",
+        "required_fields": ["brand", "order_id", "status"],
+        "template": "{brand}: Order {order_id} update - {status}. Reply STOP to opt out.",
+    },
+    "customer_support_followup": {
+        "message_type": "ARN",
+        "required_fields": ["brand", "ticket_id", "summary"],
+        "template": "{brand}: Ticket {ticket_id} update - {summary}. Reply STOP to opt out.",
+    },
+    "customer_marketing_offer": {
+        "message_type": "MKT",
+        "required_fields": ["brand", "offer", "url"],
+        "template": "{brand}: {offer}. Learn more: {url}. Reply STOP to opt out.",
+    },
+}
+
+
+def get_sms_templates() -> dict[str, dict[str, Any]]:
+    """Return available reusable SMS templates and required fields."""
+    return SMS_TEMPLATES
+
+
+def render_sms_template(template_name: str, **values) -> dict:
+    """
+    Render an SMS template into a concrete message payload.
+
+    Returns:
+        dict with message_type and rendered message text.
+    """
+    template_config = SMS_TEMPLATES.get(template_name)
+    if not template_config:
+        raise ValueError(f"Unknown SMS template: {template_name}")
+
+    required_fields = template_config.get("required_fields", [])
+    missing_fields = [field for field in required_fields if values.get(field) in (None, "")]
+    if missing_fields:
+        raise ValueError(f"Missing required template fields: {', '.join(missing_fields)}")
+
+    rendered_message = template_config["template"].format(**values)
+    return {
+        "template_name": template_name,
+        "message_type": template_config["message_type"],
+        "message": rendered_message,
+    }
+
+
+def send_sms_from_template(phone_number: str, template_name: str, **values) -> dict:
+    """Render a template and send it through TeleSign."""
+    payload = render_sms_template(template_name, **values)
+    return send_sms(phone_number, payload["message"], payload["message_type"])
 
 
 def get_messaging_client() -> MessagingClient:
@@ -96,15 +167,24 @@ def send_sms(phone_number: str, message: str, message_type: str = "OTP") -> dict
     log_tool_call(
         tool_name="send_sms",
         input_data={"phone_number": phone_number, "message_type": message_type, "message_length": len(message)},
-        metadata={"account_type": ACCOUNT_TYPE}
+        metadata={
+            "account_type": ACCOUNT_TYPE,
+            "sender_id_configured": bool(SENDER_ID),
+            "sender_id": SENDER_ID or None,
+        }
     )
     
     try:
         # Get messaging client
         messaging = get_messaging_client()
         
+        # Explicitly pass sender_id when configured so routing uses the approved origin.
+        message_kwargs = {}
+        if SENDER_ID:
+            message_kwargs["sender_id"] = SENDER_ID
+
         # Make the request
-        response = messaging.message(phone_number, message, message_type)
+        response = messaging.message(phone_number, message, message_type, **message_kwargs)
         
         # Parse response
         try:
@@ -121,7 +201,8 @@ def send_sms(phone_number: str, message: str, message_type: str = "OTP") -> dict
             "reference_id": response_data.get("reference_id"),
             "status": response_data.get("status", {}),
             "errors": response_data.get("errors", []),
-            "success": response.status_code in [200, 201, 202, 203, 290, 291, 295]
+            "success": response.status_code in [200, 201, 202, 203, 290, 291, 295],
+            "sender_id_used": SENDER_ID or None,
         }
         
         log_tool_call(

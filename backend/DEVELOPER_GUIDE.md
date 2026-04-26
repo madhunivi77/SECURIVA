@@ -40,6 +40,7 @@ This guide explains how to extend SECURIVA with new Google Workspace tools, Sale
 │  - getSalesforceCreds() → Fetch Salesforce tokens       │
 │  - @mcp.tool() listEmails() → Gmail tool                │
 │  - @mcp.tool() listAccounts() → Salesforce tool         │
+|  ...                                                    |
 └─────────────────────────────────────────────────────────┘
 ```
 
