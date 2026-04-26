@@ -256,225 +256,221 @@ Response style:
         <div className="p-6 h-full overflow-auto">
             {/* Page Header */}
             <div className="mb-6">
-                    <div className="flex items-center gap-3">
-                        <BookOpen className="w-8 h-8 text-blue-600 dark:text-blue-400" />
-                        <div>
-                            <h1 className="text-3xl font-bold text-gray-900 dark:text-white">AI Handbook</h1>
-                            <p className="text-gray-600 dark:text-gray-400">Your compliance and security knowledge base</p>
-                        </div>
+                <div className="flex items-center gap-3">
+                    <BookOpen className="w-8 h-8 text-blue-600 dark:text-blue-400" />
+                    <div>
+                        <h1 className="text-3xl font-bold text-gray-900 dark:text-white">AI Handbook</h1>
+                        <p className="text-gray-600 dark:text-gray-400">Your compliance and security knowledge base</p>
                     </div>
                 </div>
             </div>
 
-            <div className="max-w-7xl mx-auto px-4 py-8">
-                <div className="grid grid-cols-1 lg:grid-cols-3 gap-6">
+            <div className="grid grid-cols-1 lg:grid-cols-3 gap-6">
+                {/* Left Panel - Knowledge Base */}
+                <div className="lg:col-span-2 space-y-6">
 
-                    {/* Left Panel - Knowledge Base */}
-                    <div className="lg:col-span-2 space-y-6">
-
-                        {/* Search & Filters */}
-                        <div className="bg-white dark:bg-gray-800 rounded-lg shadow-lg p-6">
-                            <div className="space-y-4">
-                                {/* Search Bar */}
-                                <div className="relative">
-                                    <Search className="absolute left-3 top-1/2 transform -translate-y-1/2 text-gray-400 w-5 h-5" />
-                                    <input
-                                        type="text"
-                                        placeholder="Search compliance standards, topics, or requirements..."
-                                        value={searchTerm}
-                                        onChange={(e) => setSearchTerm(e.target.value)}
-                                        className="w-full pl-10 pr-4 py-3 border border-gray-300 dark:border-gray-600 rounded-lg 
+                    {/* Search & Filters */}
+                    <div className="bg-white dark:bg-gray-800 rounded-lg shadow-lg p-6">
+                        <div className="space-y-4">
+                            {/* Search Bar */}
+                            <div className="relative">
+                                <Search className="absolute left-3 top-1/2 transform -translate-y-1/2 text-gray-400 w-5 h-5" />
+                                <input
+                                    type="text"
+                                    placeholder="Search compliance standards, topics, or requirements..."
+                                    value={searchTerm}
+                                    onChange={(e) => setSearchTerm(e.target.value)}
+                                    className="w-full pl-10 pr-4 py-3 border border-gray-300 dark:border-gray-600 rounded-lg 
                              bg-white dark:bg-gray-700 text-gray-900 dark:text-white
                              focus:ring-2 focus:ring-blue-500 focus:border-transparent"
-                                    />
-                                </div>
-
-                                {/* Category Filters */}
-                                <div className="flex flex-wrap gap-2">
-                                    {categories.map(cat => (
-                                        <button
-                                            key={cat}
-                                            onClick={() => setSelectedCategory(cat)}
-                                            className={`px-4 py-2 rounded-lg font-medium transition-all ${selectedCategory === cat
-                                                    ? "bg-blue-600 text-white"
-                                                    : "bg-gray-100 dark:bg-gray-700 text-gray-700 dark:text-gray-300 hover:bg-gray-200 dark:hover:bg-gray-600"
-                                                }`}
-                                        >
-                                            {cat}
-                                        </button>
-                                    ))}
-                                </div>
+                                />
                             </div>
-                        </div>
 
-                        {/* Compliance Standards Grid */}
-                        <div className="grid grid-cols-1 md:grid-cols-2 gap-4">
-                            {filteredStandards.map(standard => {
-                                const Icon = standard.icon;
-                                return (
-                                    <div
-                                        key={standard.id}
-                                        onClick={() => handleStandardClick(standard)}
-                                        className={`p-6 rounded-lg border-2 cursor-pointer transition-all hover:shadow-lg ${colorVariants[standard.color]}`}
-                                    >
-                                        <div className="flex items-start gap-4">
-                                            <Icon className="w-8 h-8 flex-shrink-0" />
-                                            <div className="flex-1">
-                                                <div className="flex items-center justify-between mb-2">
-                                                    <h3 className="text-xl font-bold">{standard.name}</h3>
-                                                    <span className="text-xs font-semibold px-2 py-1 rounded bg-white/50 dark:bg-black/20">
-                                                        {standard.region}
-                                                    </span>
-                                                </div>
-                                                <p className="text-sm font-medium mb-2">{standard.fullName}</p>
-                                                <p className="text-sm opacity-90">{standard.description}</p>
-                                                <div className="mt-3">
-                                                    <span className="text-xs font-semibold px-2 py-1 rounded bg-white/50 dark:bg-black/20">
-                                                        {standard.category}
-                                                    </span>
-                                                </div>
-                                            </div>
-                                        </div>
-                                    </div>
-                                );
-                            })}
-                        </div>
-
-                        {/* Common Topics */}
-                        <div className="bg-white dark:bg-gray-800 rounded-lg shadow-lg p-6">
-                            <h2 className="text-xl font-bold text-gray-900 dark:text-white mb-4">Common Topics</h2>
+                            {/* Category Filters */}
                             <div className="flex flex-wrap gap-2">
-                                {topics.map(topic => (
+                                {categories.map(cat => (
                                     <button
-                                        key={topic}
-                                        onClick={() => handleTopicClick(topic)}
-                                        className="px-4 py-2 rounded-lg bg-gray-100 dark:bg-gray-700 text-gray-700 dark:text-gray-300 
-                             hover:bg-blue-100 dark:hover:bg-blue-900 hover:text-blue-700 dark:hover:text-blue-300
-                             transition-all font-medium text-sm"
+                                        key={cat}
+                                        onClick={() => setSelectedCategory(cat)}
+                                        className={`px-4 py-2 rounded-lg font-medium transition-all ${selectedCategory === cat
+                                                ? "bg-blue-600 text-white"
+                                                : "bg-gray-100 dark:bg-gray-700 text-gray-700 dark:text-gray-300 hover:bg-gray-200 dark:hover:bg-gray-600"
+                                            }`}
                                     >
-                                        {topic}
+                                        {cat}
                                     </button>
                                 ))}
                             </div>
                         </div>
                     </div>
 
-                    {/* Right Panel - AI Chat */}
-                    <div className="lg:col-span-1">
-                    <div className="bg-white dark:bg-gray-800 rounded-lg shadow-lg flex flex-col" style={{ height: 'calc(100vh - 12rem)' }}>
-                            {/* Chat Header */}
-                            <div className="p-4 border-b border-gray-200 dark:border-gray-700">
-                                <div className="flex items-center justify-between">
-                                    <div>
-                                        <h2 className="text-xl font-bold text-gray-900 dark:text-white flex items-center gap-2">
-                                            <Shield className="w-5 h-5 text-blue-600 dark:text-blue-400" />
-                                            Ask AI Assistant
-                                        </h2>
-                                        <p className="text-sm text-gray-600 dark:text-gray-400 mt-1">
-                                            Get instant answers about compliance
-                                        </p>
+                    {/* Compliance Standards Grid */}
+                    <div className="grid grid-cols-1 md:grid-cols-2 gap-4">
+                        {filteredStandards.map(standard => {
+                            const Icon = standard.icon;
+                            return (
+                                <div
+                                    key={standard.id}
+                                    onClick={() => handleStandardClick(standard)}
+                                    className={`p-6 rounded-lg border-2 cursor-pointer transition-all hover:shadow-lg ${colorVariants[standard.color]}`}
+                                >
+                                    <div className="flex items-start gap-4">
+                                        <Icon className="w-8 h-8 flex-shrink-0" />
+                                        <div className="flex-1">
+                                            <div className="flex items-center justify-between mb-2">
+                                                <h3 className="text-xl font-bold">{standard.name}</h3>
+                                                <span className="text-xs font-semibold px-2 py-1 rounded bg-white/50 dark:bg-black/20">
+                                                    {standard.region}
+                                                </span>
+                                            </div>
+                                            <p className="text-sm font-medium mb-2">{standard.fullName}</p>
+                                            <p className="text-sm opacity-90">{standard.description}</p>
+                                            <div className="mt-3">
+                                                <span className="text-xs font-semibold px-2 py-1 rounded bg-white/50 dark:bg-black/20">
+                                                    {standard.category}
+                                                </span>
+                                            </div>
+                                        </div>
                                     </div>
-                                    <button
-                                        onClick={handleClearChat}
-                                        className="px-3 py-1.5 text-sm font-medium text-gray-700 dark:text-gray-300 
+                                </div>
+                            );
+                        })}
+                    </div>
+
+                    {/* Common Topics */}
+                    <div className="bg-white dark:bg-gray-800 rounded-lg shadow-lg p-6">
+                        <h2 className="text-xl font-bold text-gray-900 dark:text-white mb-4">Common Topics</h2>
+                        <div className="flex flex-wrap gap-2">
+                            {topics.map(topic => (
+                                <button
+                                    key={topic}
+                                    onClick={() => handleTopicClick(topic)}
+                                    className="px-4 py-2 rounded-lg bg-gray-100 dark:bg-gray-700 text-gray-700 dark:text-gray-300 
+                             hover:bg-blue-100 dark:hover:bg-blue-900 hover:text-blue-700 dark:hover:text-blue-300
+                             transition-all font-medium text-sm"
+                                >
+                                    {topic}
+                                </button>
+                            ))}
+                        </div>
+                    </div>
+                </div>
+
+                {/* Right Panel - AI Chat */}
+                <div className="lg:col-span-1">
+                <div className="bg-white dark:bg-gray-800 rounded-lg shadow-lg flex flex-col" style={{ height: 'calc(100vh - 12rem)' }}>
+                        {/* Chat Header */}
+                        <div className="p-4 border-b border-gray-200 dark:border-gray-700">
+                            <div className="flex items-center justify-between">
+                                <div>
+                                    <h2 className="text-xl font-bold text-gray-900 dark:text-white flex items-center gap-2">
+                                        <Shield className="w-5 h-5 text-blue-600 dark:text-blue-400" />
+                                        Ask AI Assistant
+                                    </h2>
+                                    <p className="text-sm text-gray-600 dark:text-gray-400 mt-1">
+                                        Get instant answers about compliance
+                                    </p>
+                                </div>
+                                <button
+                                    onClick={handleClearChat}
+                                    className="px-3 py-1.5 text-sm font-medium text-gray-700 dark:text-gray-300 
                              hover:text-blue-600 dark:hover:text-blue-400 
                              border border-gray-300 dark:border-gray-600 rounded-lg
                              hover:border-blue-500 transition-all"
-                                        title="Clear conversation"
-                                    >
-                                        Clear
-                                    </button>
-                                </div>
+                                    title="Clear conversation"
+                                >
+                                    Clear
+                                </button>
                             </div>
+                        </div>
 
-                            {/* Messages */}
-                            <div ref={messagesContainerRef} className="flex-1 overflow-y-auto p-4 space-y-4">
-                                {messages.filter(msg => msg.role !== "system").length === 0 && !isTyping ? (
-                                    <div className="text-center text-gray-500 dark:text-gray-400 mt-8">
-                                        <BookOpen className="w-12 h-12 mx-auto mb-3 opacity-50" />
-                                        <p className="font-medium">Ask me anything about compliance!</p>
-                                        <p className="text-sm mt-2">Try clicking a standard or topic to get started</p>
-                                    </div>
-                                ) : (
-                                    <>
-                                        {messages
-                                            .filter(msg => msg.role !== "system")
-                                            .map((msg, idx) => (
+                        {/* Messages */}
+                        <div ref={messagesContainerRef} className="flex-1 overflow-y-auto p-4 space-y-4">
+                            {messages.filter(msg => msg.role !== "system").length === 0 && !isTyping ? (
+                                <div className="text-center text-gray-500 dark:text-gray-400 mt-8">
+                                    <BookOpen className="w-12 h-12 mx-auto mb-3 opacity-50" />
+                                    <p className="font-medium">Ask me anything about compliance!</p>
+                                    <p className="text-sm mt-2">Try clicking a standard or topic to get started</p>
+                                </div>
+                            ) : (
+                                <>
+                                    {messages
+                                        .filter(msg => msg.role !== "system")
+                                        .map((msg, idx) => (
+                                            <div
+                                                key={idx}
+                                                className={`flex ${msg.role === "user" ? "justify-end" : "justify-start"}`}
+                                            >
                                                 <div
-                                                    key={idx}
-                                                    className={`flex ${msg.role === "user" ? "justify-end" : "justify-start"}`}
+                                                    className={`max-w-[85%] rounded-lg p-3 ${msg.role === "user"
+                                                            ? "bg-blue-600 text-white"
+                                                            : "bg-gray-100 dark:bg-gray-700 text-gray-900 dark:text-white"
+                                                        }`}
                                                 >
-                                                    <div
-                                                        className={`max-w-[85%] rounded-lg p-3 ${msg.role === "user"
-                                                                ? "bg-blue-600 text-white"
-                                                                : "bg-gray-100 dark:bg-gray-700 text-gray-900 dark:text-white"
-                                                            }`}
-                                                    >
-                                                        {msg.role === "assistant" ? (
-                                                            <div className="prose prose-sm dark:prose-invert max-w-none">
-                                                                <ReactMarkdown rehypePlugins={[rehypeHighlight]}>
-                                                                    {msg.content}
-                                                                </ReactMarkdown>
-                                                            </div>
-                                                        ) : (
-                                                            <p className="text-sm">{msg.content}</p>
-                                                        )}
-                                                    </div>
-                                                </div>
-                                            ))}
-                                        {isTyping && typingMessage && (
-                                            <div className="flex justify-start">
-                                                <div className="max-w-[85%] rounded-lg p-3 bg-gray-100 dark:bg-gray-700 text-gray-900 dark:text-white">
-                                                    <div className="prose prose-sm dark:prose-invert max-w-none">
-                                                        <ReactMarkdown rehypePlugins={[rehypeHighlight]}>
-                                                            {typingMessage}
-                                                        </ReactMarkdown>
-                                                    </div>
+                                                    {msg.role === "assistant" ? (
+                                                        <div className="prose prose-sm dark:prose-invert max-w-none">
+                                                            <ReactMarkdown rehypePlugins={[rehypeHighlight]}>
+                                                                {msg.content}
+                                                            </ReactMarkdown>
+                                                        </div>
+                                                    ) : (
+                                                        <p className="text-sm">{msg.content}</p>
+                                                    )}
                                                 </div>
                                             </div>
-                                        )}
-                                    </>
-                                )}
-                                {isLoading && (
-                                    <div className="flex justify-start">
-                                        <div className="bg-gray-100 dark:bg-gray-700 rounded-lg p-3">
-                                            <Loader2 className="w-5 h-5 animate-spin text-blue-600 dark:text-blue-400" />
+                                        ))}
+                                    {isTyping && typingMessage && (
+                                        <div className="flex justify-start">
+                                            <div className="max-w-[85%] rounded-lg p-3 bg-gray-100 dark:bg-gray-700 text-gray-900 dark:text-white">
+                                                <div className="prose prose-sm dark:prose-invert max-w-none">
+                                                    <ReactMarkdown rehypePlugins={[rehypeHighlight]}>
+                                                        {typingMessage}
+                                                    </ReactMarkdown>
+                                                </div>
+                                            </div>
                                         </div>
+                                    )}
+                                </>
+                            )}
+                            {isLoading && (
+                                <div className="flex justify-start">
+                                    <div className="bg-gray-100 dark:bg-gray-700 rounded-lg p-3">
+                                        <Loader2 className="w-5 h-5 animate-spin text-blue-600 dark:text-blue-400" />
                                     </div>
-                                )}
-                                <div ref={messagesEndRef} />
-                            </div>
+                                </div>
+                            )}
+                            <div ref={messagesEndRef} />
+                        </div>
 
-                            {/* Input */}
-                            <div className="p-4 border-t border-gray-200 dark:border-gray-700">
-                                <form onSubmit={handleSendMessage} className="flex gap-2">
-                                    <input
-                                        type="text"
-                                        value={input}
-                                        onChange={(e) => setInput(e.target.value)}
-                                        onKeyPress={(e) => {
-                                            if (e.key === "Enter") {
-                                                e.preventDefault();
-                                                handleSendMessage(e);
-                                            }
-                                        }}
-                                        placeholder="Ask about compliance..."
-                                        disabled={isLoading || isTyping}
-                                        className="flex-1 px-3 py-2 border border-gray-300 dark:border-gray-600 rounded-lg
+                        {/* Input */}
+                        <div className="p-4 border-t border-gray-200 dark:border-gray-700">
+                            <form onSubmit={handleSendMessage} className="flex gap-2">
+                                <input
+                                    type="text"
+                                    value={input}
+                                    onChange={(e) => setInput(e.target.value)}
+                                    onKeyPress={(e) => {
+                                        if (e.key === "Enter") {
+                                            e.preventDefault();
+                                            handleSendMessage(e);
+                                        }
+                                    }}
+                                    placeholder="Ask about compliance..."
+                                    disabled={isLoading || isTyping}
+                                    className="flex-1 px-3 py-2 border border-gray-300 dark:border-gray-600 rounded-lg
                              bg-white dark:bg-gray-700 text-gray-900 dark:text-white
                              focus:ring-2 focus:ring-blue-500 focus:border-transparent
                              disabled:opacity-50"
-                                    />
-                                    <button
-                                        type="submit"
-                                        disabled={isLoading || isTyping || !input.trim()}
-                                        className="px-4 py-2 bg-blue-600 text-white rounded-lg hover:bg-blue-700 
+                                />
+                                <button
+                                    type="submit"
+                                    disabled={isLoading || isTyping || !input.trim()}
+                                    className="px-4 py-2 bg-blue-600 text-white rounded-lg hover:bg-blue-700 
                              disabled:opacity-50 disabled:cursor-not-allowed transition-all"
-                                    >
-                                        <Send className="w-5 h-5" />
-                                    </button>
-                                </form>
-                            </div>
+                                >
+                                    <Send className="w-5 h-5" />
+                                </button>
+                            </form>
                         </div>
                     </div>
                 </div>

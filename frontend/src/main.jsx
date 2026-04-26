@@ -54,8 +54,6 @@ import SecurityPolicy from './pages/SecurityPolicy.jsx';
 import ComplianceOverview from './pages/ComplianceOverview.jsx';
 import AIHandbook from './pages/AIHandbook.jsx';
 import Billing from './pages/Billing.jsx';
-import AIHandbook from './pages/AIHandbook.jsx';
-import Billing from './pages/Billing.jsx';
 import BillingManagement from './pages/BillingManagement.jsx';
 
 const router = createBrowserRouter([
