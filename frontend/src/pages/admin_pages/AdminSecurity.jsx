@@ -1,5 +1,6 @@
 // src/pages/AdminSecurity.jsx
 
+import AdminSidebar from "../../components/admin/AdminSidebar";
 import {
   AlertTriangle,
   Activity,
@@ -29,169 +30,176 @@ export default function AdminSecurity() {
   ];
 
   return (
-    <div className="p-6 space-y-6 overflow-y-auto">
+    <div className="flex h-screen bg-gray-100 font-sans">
 
-      {/* HEADER */}
-      <div>
-        <h1 className="text-2xl font-semibold tracking-tight text-blue-900">
-          Security Panel
-        </h1>
-        <p className="text-gray-500 text-sm">
-          Monitor threats, user access, encryption, and compliance status.
-        </p>
-      </div>
+      {/* Sidebar */}
+      <AdminSidebar />
 
-      {/* ---------------- KPI CARDS ---------------- */}
-      <div className="grid grid-cols-4 gap-6">
+      {/* Content */}
+      <div className="flex-1 p-6 space-y-6 overflow-y-auto">
 
-        <Card
-          title="Threat Alerts"
-          value="12"
-          subtitle="3 high severity"
-          desc="Detected potential threats and security incidents"
-          Icon={AlertTriangle}
-          color="red"
-        />
-
-        <Card
-          title="Active Sessions"
-          value="84"
-          subtitle="Stable activity"
-          desc="Currently active user sessions across the system"
-          Icon={Activity}
-          color="blue"
-        />
-
-        <Card
-          title="Encryption Status"
-          value="Enabled"
-          subtitle="AES-256"
-          desc="All sensitive data is securely encrypted"
-          Icon={Lock}
-          color="green"
-        />
-
-        <Card
-          title="Compliance"
-          value="2 / 3"
-          subtitle="1 pending"
-          desc="Regulatory compliance across security standards"
-          Icon={ShieldCheck}
-          color="purple"
-        />
-
-      </div>
-
-      {/* ---------------- ALERTS + LOGIN ---------------- */}
-      <div className="grid grid-cols-2 gap-6">
-
-        {/* ALERTS */}
-        <div className="bg-white p-5 rounded-xl shadow">
-          <h2 className="text-sm font-semibold text-blue-900 mb-2">
-            Real-time Threat Alerts
-          </h2>
-
-          <p className="text-xs text-gray-500 mb-3">
-            Live monitoring of suspicious activity and potential risks.
+        {/* HEADER */}
+        <div>
+          <h1 className="text-2xl font-semibold tracking-tight text-blue-900">
+            Security Panel
+          </h1>
+          <p className="text-gray-500 text-sm">
+            Monitor threats, user access, encryption, and compliance status.
           </p>
+        </div>
 
-          {alerts.map((a, i) => (
-            <div key={i} className="flex justify-between mb-3 text-sm">
-              <div>
-                <p className="font-medium text-gray-800">{a.msg}</p>
-                <span className="text-xs text-gray-400">{a.level}</span>
+        {/* ---------------- KPI CARDS ---------------- */}
+        <div className="grid grid-cols-4 gap-6">
+
+          <Card
+            title="Threat Alerts"
+            value="12"
+            subtitle="3 high severity"
+            desc="Detected potential threats and security incidents"
+            Icon={AlertTriangle}
+            color="red"
+          />
+
+          <Card
+            title="Active Sessions"
+            value="84"
+            subtitle="Stable activity"
+            desc="Currently active user sessions across the system"
+            Icon={Activity}
+            color="blue"
+          />
+
+          <Card
+            title="Encryption Status"
+            value="Enabled"
+            subtitle="AES-256"
+            desc="All sensitive data is securely encrypted"
+            Icon={Lock}
+            color="green"
+          />
+
+          <Card
+            title="Compliance"
+            value="2 / 3"
+            subtitle="1 pending"
+            desc="Regulatory compliance across security standards"
+            Icon={ShieldCheck}
+            color="purple"
+          />
+
+        </div>
+
+        {/* ---------------- ALERTS + LOGIN ---------------- */}
+        <div className="grid grid-cols-2 gap-6">
+
+          {/* ALERTS */}
+          <div className="bg-white p-5 rounded-xl shadow">
+            <h2 className="text-sm font-semibold text-blue-900 mb-2">
+              Real-time Threat Alerts
+            </h2>
+
+            <p className="text-xs text-gray-500 mb-3">
+              Live monitoring of suspicious activity and potential risks.
+            </p>
+
+            {alerts.map((a, i) => (
+              <div key={i} className="flex justify-between mb-3 text-sm">
+                <div>
+                  <p className="font-medium text-gray-800">{a.msg}</p>
+                  <span className="text-xs text-gray-400">{a.level}</span>
+                </div>
+                <span className="text-xs text-gray-400">{a.time}</span>
               </div>
-              <span className="text-xs text-gray-400">{a.time}</span>
-            </div>
-          ))}
+            ))}
 
-          <p className="text-xs text-gray-400 mt-2">
-            Helps quickly identify and respond to security threats.
-          </p>
+            <p className="text-xs text-gray-400 mt-2">
+              Helps quickly identify and respond to security threats.
+            </p>
+          </div>
+
+          {/* LOGIN DETECTION */}
+          <div className="bg-white p-5 rounded-xl shadow">
+            <h2 className="text-sm font-semibold text-blue-900 mb-2">
+              Suspicious Login Detection
+            </h2>
+
+            <p className="text-xs text-gray-500 mb-3">
+              Detects unusual login behavior across devices and locations.
+            </p>
+
+            <p className="text-green-600 text-sm">
+              No suspicious activity detected
+            </p>
+
+            <p className="text-xs text-gray-400 mt-2">
+              Ensures account safety and prevents unauthorized access.
+            </p>
+          </div>
+
         </div>
 
-        {/* LOGIN DETECTION */}
-        <div className="bg-white p-5 rounded-xl shadow">
-          <h2 className="text-sm font-semibold text-blue-900 mb-2">
-            Suspicious Login Detection
-          </h2>
+        {/* ---------------- LOGS + COMPLIANCE ---------------- */}
+        <div className="grid grid-cols-2 gap-6">
 
-          <p className="text-xs text-gray-500 mb-3">
-            Detects unusual login behavior across devices and locations.
-          </p>
+          {/* ACCESS LOGS */}
+          <div className="bg-white p-5 rounded-xl shadow">
+            <h2 className="text-sm font-semibold text-blue-900 mb-2">
+              User Access Logs
+            </h2>
 
-          <p className="text-green-600 text-sm">
-            No suspicious activity detected
-          </p>
+            <p className="text-xs text-gray-500 mb-3">
+              Records all user actions for auditing and monitoring.
+            </p>
 
-          <p className="text-xs text-gray-400 mt-2">
-            Ensures account safety and prevents unauthorized access.
-          </p>
-        </div>
-
-      </div>
-
-      {/* ---------------- LOGS + COMPLIANCE ---------------- */}
-      <div className="grid grid-cols-2 gap-6">
-
-        {/* ACCESS LOGS */}
-        <div className="bg-white p-5 rounded-xl shadow">
-          <h2 className="text-sm font-semibold text-blue-900 mb-2">
-            User Access Logs
-          </h2>
-
-          <p className="text-xs text-gray-500 mb-3">
-            Records all user actions for auditing and monitoring.
-          </p>
-
-          {logs.map((log, i) => (
-            <div key={i} className="flex justify-between mb-3 text-sm">
-              <div>
-                <p className="text-gray-800">{log.user}</p>
-                <span className="text-xs text-gray-400">{log.action}</span>
+            {logs.map((log, i) => (
+              <div key={i} className="flex justify-between mb-3 text-sm">
+                <div>
+                  <p className="text-gray-800">{log.user}</p>
+                  <span className="text-xs text-gray-400">{log.action}</span>
+                </div>
+                <span className="text-xs text-gray-400">{log.time}</span>
               </div>
-              <span className="text-xs text-gray-400">{log.time}</span>
-            </div>
-          ))}
+            ))}
 
-          <p className="text-xs text-gray-400 mt-2">
-            Useful for tracking activity and investigating incidents.
-          </p>
-        </div>
+            <p className="text-xs text-gray-400 mt-2">
+              Useful for tracking activity and investigating incidents.
+            </p>
+          </div>
 
-        {/* COMPLIANCE */}
-        <div className="bg-white p-5 rounded-xl shadow">
-          <h2 className="text-sm font-semibold text-blue-900 mb-2">
-            Compliance Tracking
-          </h2>
+          {/* COMPLIANCE */}
+          <div className="bg-white p-5 rounded-xl shadow">
+            <h2 className="text-sm font-semibold text-blue-900 mb-2">
+              Compliance Tracking
+            </h2>
 
-          <p className="text-xs text-gray-500 mb-3">
-            Monitors adherence to industry security standards.
-          </p>
+            <p className="text-xs text-gray-500 mb-3">
+              Monitors adherence to industry security standards.
+            </p>
 
-          {compliance.map((c, i) => (
-            <div key={i} className="flex justify-between mb-3 text-sm">
-              <span className="text-gray-800">{c.name}</span>
+            {compliance.map((c, i) => (
+              <div key={i} className="flex justify-between mb-3 text-sm">
+                <span className="text-gray-800">{c.name}</span>
 
-              <span
-                className={`px-2 py-1 rounded-full text-xs ${
-                  c.status === "Compliant"
-                    ? "bg-green-100 text-green-600"
-                    : "bg-yellow-100 text-yellow-600"
-                }`}
-              >
-                {c.status}
-              </span>
-            </div>
-          ))}
+                <span
+                  className={`px-2 py-1 rounded-full text-xs ${
+                    c.status === "Compliant"
+                      ? "bg-green-100 text-green-600"
+                      : "bg-yellow-100 text-yellow-600"
+                  }`}
+                >
+                  {c.status}
+                </span>
+              </div>
+            ))}
 
-          <p className="text-xs text-gray-400 mt-2">
-            Ensures compliance with GDPR, HIPAA, and PCI-DSS standards.
-          </p>
+            <p className="text-xs text-gray-400 mt-2">
+              Ensures compliance with GDPR, HIPAA, and PCI-DSS standards.
+            </p>
+          </div>
+
         </div>
 
       </div>
-
     </div>
   );
 }

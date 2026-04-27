@@ -5,7 +5,7 @@
 - start the server
 `python run.py (or uv run run.py)`
 - start the agent
-` uv run --active my_app/client/agent.py `
+`uv run --active my_app/client/agent.py`
 
 Compliance report DynamoDB testing: see [docs/COMPLIANCE_REPORTS_DYNAMODB_TESTING.md](docs/COMPLIANCE_REPORTS_DYNAMODB_TESTING.md).
 Compliance feature/module improvements: see [docs/COMPLIANCE_IMPROVEMENT_GUIDE.md](docs/COMPLIANCE_IMPROVEMENT_GUIDE.md).
@@ -269,9 +269,7 @@ Custom LLM endpoint that VAPI calls for AI responses.
   ],
   "stream": true,
   "call": {
-      "assistant": {
-         "metadata": {"voiceToken": "short-lived-voice-jwt"}
-      }
+    "metadata": {"apiKey": "user-api-key"}
   }
 }
 ```
@@ -294,11 +292,11 @@ Custom LLM endpoint that VAPI calls for AI responses.
 
 **Features:**
 - Supports streaming responses (SSE) for faster voice output
-- Extracts `voiceToken` from call metadata (`call.assistant.metadata.voiceToken`)
+- Extracts API key from call metadata or `[AUTH:xxx]` tag in system message
 - Falls back to direct OpenAI if not authenticated
 - Dev mode allows tool access without authentication
 
-#### `POST /api/vapi/events`
+#### `POST /api/vapi/webhook`
 Handles VAPI webhook events (tool calls, status updates, etc.).
 
 **Supported Message Types:**

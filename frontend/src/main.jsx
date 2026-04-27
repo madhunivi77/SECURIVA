@@ -16,6 +16,7 @@ import LoginForm from './pages/LoginForm.jsx';
 import SignupForm from './pages/SignupForm.jsx';
 import VoiceTest from './pages/VoiceTest.jsx';
 import Pricing from "./pages/Pricing";
+import AutomationGrid from './components/AutomationGrid.jsx';
 import ProtectedRoute from './components/ProtectedRoute.jsx';
 import Industry from './pages/Industry.jsx';
 import Support from "./pages/Support.jsx";
@@ -76,6 +77,51 @@ const router = createBrowserRouter([
       {
         path: '/features',
         element: <Features />
+      },
+      {
+        path: '/admin',
+        element: <AdminDashboard />
+      },
+      {
+        path: "/admin/users",
+        element: <UsersPage />,
+      },
+      {
+        path: "/admin/users/:userId",
+        element: <UserProfile />,
+      },
+      {
+        path:"/admin/security",
+        element:<AdminSecurity/>,
+      },
+      {
+        path:"/admin/settings",
+        element:<AdminSettings/>,
+      },
+      {
+        path:"/admin/notifications",
+        element:<AdminNotifications/>,
+      },
+
+      {
+        path:"/admin/activity",
+        element:<AdminActivity/>,
+      },
+      {
+        path:"/admin/integrations",
+        element:<AdminIntegrations/>,
+      },
+      {
+        path:"/admin/payments",
+        element: <AdminPayments/>,
+      },
+      {
+        path:"/admin/content",
+        element:<AdminContent/>,
+      },
+      {
+        path:"/admin/analytics",
+        element:<AdminAnalytics/>,
       },
       {
         path: "/pricing",
@@ -152,15 +198,15 @@ const router = createBrowserRouter([
     ]
   },
   {
-    path: '/provider',
+    path: '/provider', // select a login provider
     element: <ProviderForm />
   },
   {
-    path: '/login',
+    path: '/login', // Local login
     element: <LoginForm />
   },
   {
-    path: '/signup',
+    path: '/signup', // create a new account
     element: <SignupForm />
   },
   {

@@ -1,4 +1,5 @@
 import { useState } from "react";
+import AdminSidebar from "../../components/admin/AdminSidebar";
 import { Calendar, Download } from "lucide-react";
 
 import {
@@ -72,7 +73,6 @@ export default function AdminPayments() {
 
     return matchesSearch && matchesStatus && matchesPlan;
   });
-  
   const Card = ({ title, value, change, changeColor, Icon, color }) => {
     const colors = {
       blue: "bg-blue-100 text-blue-600",
@@ -103,7 +103,6 @@ export default function AdminPayments() {
       </div>
     );
   };
-  
   // ---------------- CHART DATA ----------------
   const revenueData = [
     { name: "Nov 23", value: 5000 },
@@ -128,254 +127,265 @@ export default function AdminPayments() {
   ];
 
   return (
-    <div className="p-6 space-y-6 overflow-y-auto">
+    <div className="flex h-screen bg-gray-100 font-sans">
 
-      {/* Header */}
-      <div className="flex justify-between items-center">
-        <div>
+    
+        <AdminSidebar />
+   
+
+      {/* Content */}
+      <div className="flex-1 overflow-y-auto p-6 space-y-6">
+
+        {/* Header */}
+        <div className="flex justify-between items-center">
+          <div>
           <h1 className="text-2xl font-semibold tracking-tight text-blue-900">Payments</h1>
-          <p className="text-gray-500">
-            View and manage all subscription payments and transactions.
-          </p>
-        </div>
-
-        <div className="flex gap-3">
-          <div className="flex items-center gap-2 bg-white px-4 py-2 rounded-lg shadow">
-            <Calendar size={16} />
-            Nov 23 - Dec 23
+            <p className="text-gray-500">
+              View and manage all subscription payments and transactions.
+            </p>
           </div>
-
-          <button className="flex items-center gap-2 !bg-blue-600 !text-white px-4 py-2 rounded-lg shadow hover:!bg-blue-700">
-            <Download size={16} />
-            Export Report
-          </button>
-        </div>
-      </div>
-
-      {/* Cards */}
-      <div className="grid grid-cols-4 gap-6">
-        <Card
-          title="Total Revenue"
-          value="$24,580.50"
-          change="+18.6%"
-          changeColor="text-green-600"
-          Icon={DollarSign}
-          color="blue"
-        />
-
-        <Card
-          title="Total Transactions"
-          value="256"
-          change="+12.4%"
-          changeColor="text-green-600"
-          Icon={BarChart3}
-          color="green"
-        />
-
-        <Card
-          title="Active Subscriptions"
-          value="128"
-          change="+8.7%"
-          changeColor="text-green-600"
-          Icon={Key}
-          color="purple"
-        />
-
-        <Card
-          title="Refunds"
-          value="$1,230.00"
-          change="-4.2%"
-          changeColor="text-red-500"
-          Icon={ShieldAlert}
-          color="orange"
-        />
-      </div>
-
-      {/* Transactions */}
-      <div className="bg-white rounded-xl shadow p-6">
-
-        {/* Filters */}
-        <div className="flex justify-between items-center mb-4">
-          <h2 className="text-lg font-semibold">Transactions</h2>
 
           <div className="flex gap-3">
+            <div className="flex items-center gap-2 bg-white px-4 py-2 rounded-lg shadow">
+              <Calendar size={16} />
+              Nov 23 - Dec 23
+            </div>
 
-            <select
-              value={statusFilter}
-              onChange={(e) => setStatusFilter(e.target.value)}
-              className="px-3 py-2 border rounded-lg text-sm"
-            >
-              <option value="All">All Status</option>
-              <option value="Paid">Paid</option>
-              <option value="Failed">Failed</option>
-            </select>
-
-            <select
-              value={planFilter}
-              onChange={(e) => setPlanFilter(e.target.value)}
-              className="px-3 py-2 border rounded-lg text-sm"
-            >
-              <option value="All">All Plans</option>
-              <option value="Premium Plan">Premium Plan</option>
-              <option value="Base Plan">Base Plan</option>
-            </select>
-
-            <input
-              type="text"
-              value={search}
-              onChange={(e) => setSearch(e.target.value)}
-              placeholder="Search user or email..."
-              className="px-3 py-2 border rounded-lg text-sm"
-            />
+            <button className="flex items-center gap-2 !bg-blue-600 !text-white px-4 py-2 rounded-lg shadow hover:!bg-blue-700">
+                <Download size={16} />
+                Export Report
+                </button>
           </div>
         </div>
 
-        {/* Table */}
-        <table className="w-full text-left">
-          <thead className="text-gray-500 text-sm border-b">
-            <tr>
-              <th className="py-3">Transaction ID</th>
-              <th>User</th>
-              <th>Plan</th>
-              <th>Amount</th>
-              <th>Status</th>
-              <th>Method</th>
-              <th>Date</th>
-              <th>Action</th>
-            </tr>
-          </thead>
+        {/* Cards */}
+        <div className="grid grid-cols-4 gap-6">
 
-          <tbody>
-            {filteredPayments.length > 0 ? (
-              filteredPayments.map((p) => (
-                <tr key={p.id} className="border-b">
-                  <td className="py-4 text-blue-600">{p.id}</td>
+  <Card
+    title="Total Revenue"
+    value="$24,580.50"
+    change="+18.6%"
+    changeColor="text-green-600"
+    Icon={DollarSign}
+    color="blue"
+  />
 
-                  <td>
-                    <div>{p.user}</div>
-                    <div className="text-sm text-gray-400">{p.email}</div>
-                  </td>
+  <Card
+    title="Total Transactions"
+    value="256"
+    change="+12.4%"
+    changeColor="text-green-600"
+    Icon={BarChart3}
+    color="green"
+  />
 
-                  <td>{p.plan}</td>
-                  <td>{p.amount}</td>
+  <Card
+    title="Active Subscriptions"
+    value="128"
+    change="+8.7%"
+    changeColor="text-green-600"
+    Icon={Key}
+    color="purple"
+  />
 
-                  <td>
-                    <span
-                      className={`px-3 py-1 rounded-full text-sm ${
-                        p.status === "Paid"
-                          ? "bg-green-100 text-green-600"
-                          : "bg-red-100 text-red-600"
-                      }`}
-                    >
-                      {p.status}
-                    </span>
-                  </td>
+  <Card
+    title="Refunds"
+    value="$1,230.00"
+    change="-4.2%"
+    changeColor="text-red-500"
+    Icon={ShieldAlert}
+    color="orange"
+  />
 
-                  <td>{p.method}</td>
-                  <td>{p.date}</td>
+</div>
 
-                  <td className="text-blue-600 cursor-pointer">
-                    {p.status === "Failed" ? "Retry" : "View"}
+        {/* Transactions */}
+        <div className="bg-white rounded-xl shadow p-6">
+
+          {/* Filters */}
+          <div className="flex justify-between items-center mb-4">
+            <h2 className="text-lg font-semibold">Transactions</h2>
+
+            <div className="flex gap-3">
+
+              <select
+                value={statusFilter}
+                onChange={(e) => setStatusFilter(e.target.value)}
+                className="px-3 py-2 border rounded-lg text-sm"
+              >
+                <option value="All">All Status</option>
+                <option value="Paid">Paid</option>
+                <option value="Failed">Failed</option>
+              </select>
+
+              <select
+                value={planFilter}
+                onChange={(e) => setPlanFilter(e.target.value)}
+                className="px-3 py-2 border rounded-lg text-sm"
+              >
+                <option value="All">All Plans</option>
+                <option value="Premium Plan">Premium Plan</option>
+                <option value="Base Plan">Base Plan</option>
+              </select>
+
+              <input
+                type="text"
+                value={search}
+                onChange={(e) => setSearch(e.target.value)}
+                placeholder="Search user or email..."
+                className="px-3 py-2 border rounded-lg text-sm"
+              />
+            </div>
+          </div>
+
+          {/* Table */}
+          <table className="w-full text-left">
+            <thead className="text-gray-500 text-sm border-b">
+              <tr>
+                <th className="py-3">Transaction ID</th>
+                <th>User</th>
+                <th>Plan</th>
+                <th>Amount</th>
+                <th>Status</th>
+                <th>Method</th>
+                <th>Date</th>
+                <th>Action</th>
+              </tr>
+            </thead>
+
+            <tbody>
+              {filteredPayments.length > 0 ? (
+                filteredPayments.map((p) => (
+                  <tr key={p.id} className="border-b">
+                    <td className="py-4 text-blue-600">{p.id}</td>
+
+                    <td>
+                      <div>{p.user}</div>
+                      <div className="text-sm text-gray-400">{p.email}</div>
+                    </td>
+
+                    <td>{p.plan}</td>
+                    <td>{p.amount}</td>
+
+                    <td>
+                      <span
+                        className={`px-3 py-1 rounded-full text-sm ${
+                          p.status === "Paid"
+                            ? "bg-green-100 text-green-600"
+                            : "bg-red-100 text-red-600"
+                        }`}
+                      >
+                        {p.status}
+                      </span>
+                    </td>
+
+                    <td>{p.method}</td>
+                    <td>{p.date}</td>
+
+                    <td className="text-blue-600 cursor-pointer">
+                      {p.status === "Failed" ? "Retry" : "View"}
+                    </td>
+                  </tr>
+                ))
+              ) : (
+                <tr>
+                  <td colSpan="8" className="text-center py-6 text-gray-400">
+                    No transactions found
                   </td>
                 </tr>
-              ))
-            ) : (
-              <tr>
-                <td colSpan="8" className="text-center py-6 text-gray-400">
-                  No transactions found
-                </td>
-              </tr>
-            )}
-          </tbody>
-        </table>
-      </div>
-
-      {/* Bottom Section */}
-      <div className="grid grid-cols-3 gap-6">
-
-        {/* Revenue Chart */}
-        <div className="bg-white p-5 rounded-xl shadow">
-          <h3 className="font-semibold mb-2">Revenue Overview</h3>
-          <p className="text-xl font-semibold">$24,580.50</p>
-          <p className="text-green-600 text-sm mb-2">+18.6%</p>
-
-          <ResponsiveContainer width="100%" height={200}>
-            <LineChart data={revenueData}>
-              <XAxis dataKey="name" />
-              <Tooltip />
-              <Line dataKey="value" stroke="#2563eb" strokeWidth={3} />
-            </LineChart>
-          </ResponsiveContainer>
+              )}
+            </tbody>
+          </table>
         </div>
 
-        {/* Pie */}
-        <div className="bg-white p-5 rounded-xl shadow">
-          <h3 className="font-semibold mb-4 text-blue-900">
-            Subscription by Plan
-          </h3>
+        {/* Bottom Section */}
+        <div className="grid grid-cols-3 gap-6">
 
-          <div className="flex items-center gap-6">
+          {/* Revenue Chart */}
+          <div className="bg-white p-5 rounded-xl shadow">
+            <h3 className="font-semibold mb-2">Revenue Overview</h3>
+            <p className="text-xl font-semibold">$24,580.50</p>
+            <p className="text-green-600 text-sm mb-2">+18.6%</p>
 
-            {/* DONUT CHART */}
-            <PieChart width={180} height={180}>
-              <Pie
-                data={planData}
-                dataKey="value"
-                innerRadius={50}
-                outerRadius={70}
-                paddingAngle={2}
-              >
-                {planData.map((_, i) => (
-                  <Cell key={i} fill={COLORS[i]} />
-                ))}
-              </Pie>
-            </PieChart>
+            <ResponsiveContainer width="100%" height={200}>
+              <LineChart data={revenueData}>
+                <XAxis dataKey="name" />
+                <Tooltip />
+                <Line dataKey="value" stroke="#2563eb" strokeWidth={3} />
+              </LineChart>
+            </ResponsiveContainer>
+          </div>
 
-            {/* LEGEND (RIGHT SIDE) */}
-            <div className="space-y-3 text-sm">
+          {/* Pie */}
+          <div className="bg-white p-5 rounded-xl shadow">
+  <h3 className="font-semibold mb-4 text-blue-900">
+    Subscription by Plan
+  </h3>
 
-              {planData.map((p, i) => {
-                const total = planData.reduce((sum, x) => sum + x.value, 0);
-                const percent = ((p.value / total) * 100).toFixed(1);
+  <div className="flex items-center gap-6">
 
-                return (
-                  <div key={i} className="flex items-center gap-3">
+    {/* DONUT CHART */}
+    <PieChart width={180} height={180}>
+      <Pie
+        data={planData}
+        dataKey="value"
+        innerRadius={50}   // makes it donut
+        outerRadius={70}
+        paddingAngle={2}
+      >
+        {planData.map((_, i) => (
+          <Cell key={i} fill={COLORS[i]} />
+        ))}
+      </Pie>
+    </PieChart>
 
-                    {/* COLOR DOT */}
-                    <div
-                      className="w-3 h-3 rounded-full"
-                      style={{ backgroundColor: COLORS[i] }}
-                    />
+    {/* LEGEND (RIGHT SIDE) */}
+    <div className="space-y-3 text-sm">
 
-                    {/* LABEL */}
-                    <span className="text-gray-700 w-24">
-                      {p.name}
-                    </span>
+      {planData.map((p, i) => {
+        const total = planData.reduce((sum, x) => sum + x.value, 0);
+        const percent = ((p.value / total) * 100).toFixed(1);
 
-                    {/* VALUE */}
-                    <span className="text-gray-500">
-                      {p.value} ({percent}%)
-                    </span>
+        return (
+          <div key={i} className="flex items-center gap-3">
 
-                  </div>
-                );
-              })}
+            {/* COLOR DOT */}
+            <div
+              className="w-3 h-3 rounded-full"
+              style={{ backgroundColor: COLORS[i] }}
+            />
 
-            </div>
+            {/* LABEL */}
+            <span className="text-gray-700 w-24">
+              {p.name}
+            </span>
+
+            {/* VALUE */}
+            <span className="text-gray-500">
+              {p.value} ({percent}%)
+            </span>
 
           </div>
-        </div>
+        );
+      })}
 
-        {/* Refunds */}
-        <div className="bg-white p-5 rounded-xl shadow">
-          <h3 className="font-semibold mb-4">Recent Refunds</h3>
+    </div>
 
-          {refunds.map((r, i) => (
-            <div key={i} className="flex justify-between text-sm mb-2">
-              <span>{r.name}</span>
-              <span className="text-red-500">{r.amount}</span>
-            </div>
-          ))}
+  </div>
+</div>
+
+          {/* Refunds */}
+          <div className="bg-white p-5 rounded-xl shadow">
+            <h3 className="font-semibold mb-4">Recent Refunds</h3>
+
+            {refunds.map((r, i) => (
+              <div key={i} className="flex justify-between text-sm mb-2">
+                <span>{r.name}</span>
+                <span className="text-red-500">{r.amount}</span>
+              </div>
+            ))}
+          </div>
+
         </div>
 
       </div>

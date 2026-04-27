@@ -1,7 +1,8 @@
 import { HashLink } from 'react-router-hash-link';
 import { Link } from 'react-router-dom';
+import Copyright from './Copyright';
 
-export default function Footer({ theme = {} }) {
+export default function Footer() {
   const textColor = "#ffffff";
 
   return (
@@ -16,7 +17,7 @@ export default function Footer({ theme = {} }) {
     >
       <div className="flex justify-center pt-10">
         <img
-          src="/LOGO_FOOTER_0000.png"
+          src="/LOGO_SECURIVA_FINAL.png"
           alt="Footer Logo"
           className="h-20 object-contain"
         />
@@ -109,7 +110,7 @@ export default function Footer({ theme = {} }) {
               <li><HashLink smooth scroll={scrollWithOffset} to='/industries/#ecommerce'>E-commerce</HashLink></li>
               <li><HashLink smooth scroll={scrollWithOffset} to='/industries/#smb'>SMBs</HashLink></li>
               <li><HashLink smooth scroll={scrollWithOffset} to='/industries/#agriculture'>Agriculture</HashLink></li>
-              <li><HashLink smooth scroll={scrollWithOffset} to='/industries/#technology'>Technology</HashLink></li>
+              <li><HashLink smooth scroll={scrollWithOffset} to='/industries/#education'>Education</HashLink></li>
               <li><HashLink smooth scroll={scrollWithOffset} to='/industries/#nonprofit'>Non Profit</HashLink></li>
               <li><HashLink smooth scroll={scrollWithOffset} to='/industries/#government'>Government</HashLink></li>
             </ul>
@@ -162,7 +163,7 @@ export default function Footer({ theme = {} }) {
 
 // function passed to hash-link scroll prop to offset navbar
 export const scrollWithOffset = (el) => {
-  const yOffset = -167.5;
+  const yOffset = -200;
   const y =
     el.getBoundingClientRect().top +
     window.pageYOffset +
