@@ -31,6 +31,30 @@ export default function Features() {
         </div>
       </section>
 
+      <section className="relative overflow-hidden">
+        <div className="relative w-full h-[460px] overflow-hidden bg-black">
+          <video
+            autoPlay
+            loop
+            muted
+            playsInline
+            className="absolute top-0 left-0 w-full h-full object-cover opacity-45"
+          >
+            <source src="/Video_4.mp4" type="video/mp4" />
+            Your browser does not support the video tag.
+          </video>
+
+          <div className="absolute top-0 left-0 w-full h-64 bg-gradient-to-b from-[#0a0f1f] via-[#0a0f1f]/60 to-transparent pointer-events-none"></div>
+          <div className="absolute bottom-0 left-0 w-full h-56 bg-gradient-to-t from-gray-100 via-gray-100/60 to-transparent dark:from-gray-900 dark:via-gray-900/70 pointer-events-none"></div>
+
+          <div className="relative max-w-6xl mx-auto h-full flex items-center justify-center px-6">
+            <p className="text-center backdrop-blur bg-gray-900/35 shadow-lg card p-8 md:p-10 text-xl md:text-2xl max-w-4xl text-white">
+              Every SecuriVA capability is designed to automate work, harden security, and keep teams operating with confidence.
+            </p>
+          </div>
+        </div>
+      </section>
+
       {/* AI Assistant */}
       <section id="virtual-agent" class="relative overflow-hidden px-8 py-12">
 
