@@ -2,6 +2,8 @@ import {Zap} from "lucide-react";
 import Checklist from "./Checklist";
 
 export default function SolutionCard({ number, icon: Icon, label, description, content, points, footer, examples, isFuture, imageLink, altText }) {
+    const imageSrc = imageLink && !imageLink.startsWith("/") ? `/${imageLink}` : imageLink;
+
     return (
         <div className="flex gap-6 rounded-2xl border border-gray-100 bg-white p-6 hover:border-gray-200 transition-colors dark:border-gray-800 dark:bg-inherit dark:hover:border-gray-700">
 
@@ -43,7 +45,7 @@ export default function SolutionCard({ number, icon: Icon, label, description, c
                     (
                         <figure>
                             <img
-                                src={imageLink}
+                                src={imageSrc}
                                 alt={altText}
                                 className="w-50" />
                         </figure>
