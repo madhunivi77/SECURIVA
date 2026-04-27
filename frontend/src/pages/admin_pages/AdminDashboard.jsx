@@ -1,5 +1,6 @@
 // src/pages/AdminDashboard.jsx
 import { useState } from "react";
+import AdminSidebar from "../../components/admin/AdminSidebar";
 import AnalyticsCards from "../../components/admin/AnalyticsCards";
 import UsersTable from "../../components/admin/AdminUsertable";
 import SystemStatus from "../../components/admin/SystemStatus";
@@ -28,37 +29,44 @@ const AdminDashboard = () => {
   };
 
   return (
-    <div className="p-6">
-      {/* Header */}
-      <div className="flex justify-between items-center mb-6">
-        <div>
-          <h1 className="text-2xl font-semibold tracking-tight text-blue-900">Welcome John</h1>
-          <p className="text-gray-500">Admin Dashboard</p>
-        </div>
+    <div className="flex h-screen bg-gray-100 font-sans">
+      <AdminSidebar />
 
-        <div className="flex items-center gap-3">
-          <div className="flex items-center gap-2 bg-white px-4 py-2 rounded-lg shadow">
-            <Calendar size={16} />
-            <span className="text-sm">Nov 23, 2024 - Dec 23, 2024</span>
+      <div className="flex-1 p-6 overflow-y-auto">
+        {/* Header */}
+        <div className="flex justify-between items-center mb-6">
+          <div>
+          <h1 className="text-2xl font-semibold tracking-tight text-blue-900">Welcome John </h1>
+         
+            <p className="text-gray-500">
+              Admin Dashboard
+            </p>
           </div>
-          <button className="flex items-center gap-2 !bg-blue-600 !text-white px-4 py-2 rounded-lg shadow hover:!bg-blue-700">
-            <Download size={16} />
-            Export Report
-          </button>
-        </div>
-      </div>
 
-      {/* Analytics Cards */}
-      <AnalyticsCards />
-
-      {/* Main Content */}
-      <div className="grid grid-cols-1 lg:grid-cols-3 gap-6 mt-6">
-        <div className="lg:col-span-2">
-          <UsersTable users={users} onToggleStatus={toggleUserStatus} />
+          <div className="flex items-center gap-3">
+            <div className="flex items-center gap-2 bg-white px-4 py-2 rounded-lg shadow">
+              <Calendar size={16} />
+              <span className="text-sm">Nov 23, 2024 - Dec 23, 2024</span>
+            </div>
+            <button className="flex items-center gap-2 !bg-blue-600 !text-white px-4 py-2 rounded-lg shadow hover:!bg-blue-700">
+                <Download size={16} />
+                Export Report
+                </button>
+          </div>
         </div>
-        <div className="space-y-6">
-          <SystemStatus />
-          <SecurityAlerts />
+
+        {/* Analytics Cards */}
+        <AnalyticsCards />
+
+        {/* Main Content */}
+        <div className="grid grid-cols-1 lg:grid-cols-3 gap-6 mt-6">
+          <div className="lg:col-span-2">
+            <UsersTable users={users} onToggleStatus={toggleUserStatus} />
+          </div>
+          <div className="space-y-6">
+            <SystemStatus />
+            <SecurityAlerts />
+          </div>
         </div>
       </div>
     </div>
