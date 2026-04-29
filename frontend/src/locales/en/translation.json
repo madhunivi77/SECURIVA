@@ -1295,9 +1295,10 @@
       "items": {
         "privacy": "Privacy Policy",
         "terms": "Terms of Service",
-        "dataProtection": "Data Protection Policy",
-        "cookies": "Cookie Preferences",
-        "accessibility": "Accessibility Statement"
+        "dataProtection": "Data Protection Agreement",
+        "cookies": "Cookie Policy",
+        "securityPolicy": "Security Policy",
+        "complianceOverview": "Compliance Overview"
       }
     }
   },

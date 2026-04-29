@@ -214,7 +214,7 @@ export default function Navbar() {
 
             <NavOption label={t("navbar.lower.loggedIn.nav.about")} target={"about"} theme={theme.text} />
 
-            <NavOption label={t("navbar.lower.loggedIn.nav.features")} target={"security"} theme={theme.text} />
+            <NavOption label={t("navbar.lower.loggedIn.nav.features")} target={"features"} theme={theme.text} />
 
             <NavOption label={t("navbar.lower.loggedIn.nav.support")} target={"support"} theme={theme.text} />
 

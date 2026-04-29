@@ -64,8 +64,8 @@ export default function Features() {
         </div>
       </section>
 
-      {/* ---------- AI AGENT ---------- */}
-      <section className="relative overflow-hidden px-8 py-12">
+      {/* AI Assistant */}
+      <section id="virtual-agent" class="relative overflow-hidden px-8 py-12">
 
         <h2 className="text-4xl font-normal text-center text-gray-900 mb-2 dark:text-white">
           {t("features.sections.aiAgent.title")}
@@ -122,9 +122,8 @@ export default function Features() {
         </div>
       </section>
 
-      {/* ---------- CYBERSECURITY ---------- */}
-      <section className="relative overflow-hidden px-8 py-12">
-
+        {/* Cybersecurity */}
+      <section id="cybersecurity" className="relative overflow-hidden px-8 py-12">
         <h2 className="text-4xl font-normal text-center text-gray-900 mb-2 dark:text-white">
           {t("features.sections.cybersecurity.title")}
         </h2>
@@ -171,9 +170,8 @@ export default function Features() {
         />
       </section>
 
-      {/* ---------- TEXT AGENT ---------- */}
-      <section className="relative overflow-hidden px-8 py-12">
-
+      {/* Text AI Agent */}
+      <section id="text-agent" className="relative overflow-hidden px-8 py-12">
         <h2 className="text-4xl font-normal text-center text-gray-900 mb-2 dark:text-white">
           {t("features.sections.textAgent.title")}
         </h2>
@@ -220,9 +218,8 @@ export default function Features() {
         />
       </section>
 
-      {/* ---------- VPN ---------- */}
-      <section className="relative overflow-hidden px-8 py-12">
-
+      {/* VPN */}
+      <section id="vpn" className="relative overflow-hidden px-8 py-12">
         <h2 className="text-4xl font-normal text-center text-gray-900 mb-2 dark:text-white">
           {t("features.sections.vpn.title")}
         </h2>

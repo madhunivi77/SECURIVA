@@ -11,7 +11,7 @@ export default function Footer() {
     <div>
       <footer
         style={{
-          background: "#052050",
+          background: "#052050", // BLUE main footer
           color: textColor,
           width: "100%",
           flexShrink: 0,
@@ -24,6 +24,7 @@ export default function Footer() {
             className="h-20 object-contain"
           />
         </div>
+
 
         <style>{`
           .sec-footer-inner {
@@ -40,7 +41,7 @@ export default function Footer() {
 
           @media (min-width: 768px) {
             .sec-footer-grid {
-              grid-template-columns: repeat(3, 1fr);
+              grid-template-columns: repeat(4, 1fr);
             }
           }
 
@@ -73,6 +74,17 @@ export default function Footer() {
         {/* Main footer */}
         <div className="sec-footer-inner">
           <div className="sec-footer-grid">
+
+            {/* Features */}
+            <div className="sec-footer-col">
+              <Link to={"/features"}><h2>Features</h2></Link>
+              <ul>
+                <li><HashLink smooth scroll={scrollWithOffset} to='/features/#virtual-agent'>Virtual Agent</HashLink></li>
+                <li><HashLink smooth scroll={scrollWithOffset} to='/features/#cybersecurity'>Cybersecurity</HashLink></li>
+                <li><HashLink smooth scroll={scrollWithOffset} to='/features/#text-agent'>Text Agent</HashLink></li>
+                <li><HashLink smooth scroll={scrollWithOffset} to='/features/#vpn'>VPN Secure Access</HashLink></li>
+              </ul>
+            </div>
 
             {/* Industries */}
             <div className="sec-footer-col">
@@ -148,14 +160,14 @@ export default function Footer() {
 
             {/* Legal */}
             <div className="sec-footer-col">
-              <h2>{t("footer.legal.title")}</h2>
-
+              <h2>Legal</h2>
               <ul>
-                <li><a href="#">{t("footer.legal.items.privacy")}</a></li>
-                <li><a href="#">{t("footer.legal.items.terms")}</a></li>
-                <li><a href="#">{t("footer.legal.items.dataProtection")}</a></li>
-                <li><a href="#">{t("footer.legal.items.cookies")}</a></li>
-                <li><a href="#">{t("footer.legal.items.accessibility")}</a></li>
+                <Link to={"/privacy-policy"}><li>{t("footer.legal.items.privacy")}</li></Link>
+                <Link to={"/terms-of-service"}><li>{t("footer.legal.items.terms")}</li></Link>
+                <Link to={"/data-processing-agreement"}><li>{t("footer.legal.items.dataProtection")}</li></Link>
+                <Link to={"/cookie-policy"}><li>{t("footer.legal.items.cookies")}</li></Link>
+                <Link to={"/security-policy"}><li>{t("footer.legal.items.securityPolicy")}</li></Link>
+                <Link to={"/compliance-overview"}><li>{t("footer.legal.items.complianceOverview")}</li></Link>
               </ul>
             </div>
 

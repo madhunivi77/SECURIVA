@@ -1297,7 +1297,8 @@
         "terms": "Conditions d'utilisation",
         "dataProtection": "Politique de protection des données",
         "cookies": "Préférences des cookies",
-        "accessibility": "Déclaration d'accessibilité"
+        "securityPolicy": "Politique de sécurité",
+        "complianceOverview": "Aperçu de la conformité"
       }
     }
   },
