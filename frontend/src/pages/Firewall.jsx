@@ -47,7 +47,7 @@ function Alerts() {
         try {
 
             const res = await fetch(
-                `http://localhost:8000/security/firewall`,
+                `/security/firewall`,
                 { credentials: "include" }
             );
             if (res.ok) {

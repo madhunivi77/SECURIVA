@@ -258,7 +258,7 @@ export default function VapiVoiceWidget() {
   // The raw API key never leaves browser↔backend; only this JWT goes to VAPI
   const fetchVoiceSession = async () => {
     try {
-      const res = await fetch('http://localhost:8000/api/voice-session', {
+      const res = await fetch('/api/voice-session', {
         method: 'POST',
         credentials: 'include',
       });

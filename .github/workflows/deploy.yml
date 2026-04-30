@@ -1,0 +1,40 @@
+name: deploy
+# Builds the combined frontend+backend image, pushes to ECR, and triggers
+# an AWS App Runner deployment. Mirrors what scripts/deploy.sh does locally.
+
+on:
+  push:
+    branches:
+      - main
+      - composio-admin-firewall
+      - deployment
+  workflow_dispatch: {}
+
+concurrency:
+  group: deploy-${{ github.ref }}
+  cancel-in-progress: false
+
+env:
+  AWS_REGION: us-east-2
+  AWS_ACCOUNT_ID: "281505305629"
+  ECR_REPO: securiva-backend
+  SERVICE_ARN: arn:aws:apprunner:us-east-2:281505305629:service/securiva-backend/27d257db40ec46d1a43adf3d29b1c74d
+
+jobs:
+  deploy:
+    runs-on: ubuntu-latest
+    steps:
+      - uses: actions/checkout@v4
+
+      - uses: aws-actions/configure-aws-credentials@v4
+        with:
+          aws-access-key-id: ${{ secrets.AWS_ACCESS_KEY_ID }}
+          aws-secret-access-key: ${{ secrets.AWS_SECRET_ACCESS_KEY }}
+          aws-region: ${{ env.AWS_REGION }}
+
+      - uses: aws-actions/amazon-ecr-login@v2
+
+      - uses: docker/setup-buildx-action@v3
+
+      - name: Run deploy script
+        run: bash scripts/deploy.sh

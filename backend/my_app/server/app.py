@@ -119,7 +119,10 @@ csrf_tokens = {}
 # ==================== ROUTES ====================
 
 async def index(request):
-    """Root endpoint"""
+    """Root endpoint — falls back to SPA shell when bundled frontend is present."""
+    spa_index = Path(__file__).parent / "static_dist" / "index.html"
+    if spa_index.exists():
+        return HTMLResponse(spa_index.read_text(encoding="utf-8"))
     return HTMLResponse("<h1>Hello from your Starlette App!</h1><p>Visit /api/status to see a JSON response.</p>")
 
 async def api_status(request):
@@ -707,3 +710,24 @@ api_app.mount("/security", security_app)
 
 from .composio_app import composio_app
 api_app.mount("/api/composio", composio_app)
+
+# Serve bundled SPA (built by frontend stage of combined Dockerfile) as
+# a catch-all so client-side routes like /dashboard resolve to index.html.
+# Mount must be LAST so explicit API routes/mounts above take precedence.
+from starlette.staticfiles import StaticFiles
+from starlette.exceptions import HTTPException as StarletteHTTPException
+
+class SpaStaticFiles(StaticFiles):
+    """StaticFiles that falls back to index.html for unknown paths so
+    client-side React Router routes (e.g. /dashboard) work on hard reload."""
+    async def get_response(self, path, scope):
+        try:
+            return await super().get_response(path, scope)
+        except StarletteHTTPException as exc:
+            if exc.status_code == 404:
+                return await super().get_response("index.html", scope)
+            raise
+
+_static_dist = Path(__file__).parent / "static_dist"
+if _static_dist.exists():
+    api_app.mount("/", SpaStaticFiles(directory=str(_static_dist), html=True))
