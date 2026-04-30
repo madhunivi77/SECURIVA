@@ -140,15 +140,15 @@ const SecurityEventModal = ({ event, onClose }) => {
 
     return (
         <div className="fixed inset-0 bg-black/50 flex items-center justify-center p-4 z-50">
-            <div className="bg-white dark:bg-zinc-900 border border-zinc-200 dark:border-zinc-700 rounded-xl w-full max-w-lg max-h-[85vh] overflow-y-auto flex flex-col">
+            <div className="bg-zinc-900 border border-zinc-700 rounded-xl w-full max-w-lg max-h-[85vh] overflow-y-auto flex flex-col">
 
                 {/* Header */}
-                <div className="sticky top-0 bg-white dark:bg-zinc-900 border-b border-zinc-200 dark:border-zinc-700 px-5 py-4 flex items-start justify-between gap-3 z-10">
+                <div className="sticky top-0 bg-zinc-900 border-b border-zinc-700 px-5 py-4 flex items-start justify-between gap-3 z-10">
                     <div className="flex items-start gap-3">
                         <div className={`w-2 h-2 rounded-full mt-1.5 shrink-0 ${severityDot[event.severity]}`} />
                         <div className="flex flex-col gap-0.5">
-                            <p className="text-sm font-medium text-zinc-900 dark:text-zinc-100 leading-snug">{event.summary}</p>
-                            <p className="text-xs text-zinc-500 dark:text-zinc-400">
+                            <p className="text-sm font-medium text-zinc-100 leading-snug">{event.summary}</p>
+                            <p className="text-xs text-zinc-400">
                                 {formatTimestamp(event.timestamp)} · {event.event_id}
                             </p>
                         </div>
@@ -157,7 +157,7 @@ const SecurityEventModal = ({ event, onClose }) => {
                         {getSeverityBadge(event.severity)}
                         <button
                             onClick={onClose}
-                            className="text-zinc-400 hover:text-zinc-600 dark:hover:text-zinc-200 text-lg leading-none"
+                            className="text-zinc-400 hover:text-zinc-200 text-lg leading-none"
                         >
                             ✕
                         </button>
@@ -169,15 +169,15 @@ const SecurityEventModal = ({ event, onClose }) => {
 
                     {/* Source / Destination */}
                     <div className="flex gap-2">
-                        <div className="flex-1 bg-zinc-50 dark:bg-zinc-800 rounded-lg px-3 py-2.5 flex flex-col gap-0.5">
+                        <div className="flex-1 bg-zinc-800 rounded-lg px-3 py-2.5 flex flex-col gap-0.5">
                             <p className="text-xs text-zinc-400 uppercase tracking-wide">Source</p>
-                            <p className="text-sm font-medium text-zinc-900 dark:text-zinc-100 font-mono">{event.src_ip}</p>
-                            <p className="text-xs text-zinc-500 dark:text-zinc-400">port {event.src_port}</p>
+                            <p className="text-sm font-medium text-zinc-100 font-mono">{event.src_ip}</p>
+                            <p className="text-xs text-zinc-400">port {event.src_port}</p>
                         </div>
-                        <div className="flex-1 bg-zinc-50 dark:bg-zinc-800 rounded-lg px-3 py-2.5 flex flex-col gap-0.5">
+                        <div className="flex-1 bg-zinc-800 rounded-lg px-3 py-2.5 flex flex-col gap-0.5">
                             <p className="text-xs text-zinc-400 uppercase tracking-wide">Destination</p>
-                            <p className="text-sm font-medium text-zinc-900 dark:text-zinc-100 font-mono">{event.dest_ip}</p>
-                            <p className="text-xs text-zinc-500 dark:text-zinc-400">port {event.dest_port}</p>
+                            <p className="text-sm font-medium text-zinc-100 font-mono">{event.dest_ip}</p>
+                            <p className="text-xs text-zinc-400">port {event.dest_port}</p>
                         </div>
                     </div>
 
@@ -188,27 +188,27 @@ const SecurityEventModal = ({ event, onClose }) => {
                             { label: "Sensor", value: event.sensor_id },
                             { label: "Type", value: event.event_type },
                         ].map(({ label, value }) => (
-                            <div key={label} className="flex-1 bg-zinc-50 dark:bg-zinc-800 rounded-lg px-3 py-2.5 flex flex-col gap-0.5">
+                            <div key={label} className="flex-1 bg-zinc-800 rounded-lg px-3 py-2.5 flex flex-col gap-0.5">
                                 <p className="text-xs text-zinc-400 uppercase tracking-wide">{label}</p>
-                                <p className="text-sm font-medium text-zinc-900 dark:text-zinc-100">{value}</p>
+                                <p className="text-sm font-medium text-zinc-100">{value}</p>
                             </div>
                         ))}
                     </div>
 
                     {/* Category */}
-                    <div className="border border-zinc-200 dark:border-zinc-700 rounded-lg px-3 py-2.5 flex flex-col gap-1">
+                    <div className="border border-zinc-700 rounded-lg px-3 py-2.5 flex flex-col gap-1">
                         <p className="text-xs text-zinc-400 uppercase tracking-wide">Category</p>
-                        <p className="text-sm text-zinc-900 dark:text-zinc-100">{event.category}</p>
+                        <p className="text-sm text-zinc-100">{event.category}</p>
                     </div>
 
                     {/* Raw Signature */}
-                    <div className="border border-zinc-200 dark:border-zinc-700 rounded-lg px-3 py-2.5 flex flex-col gap-2">
+                    <div className="border border-zinc-700 rounded-lg px-3 py-2.5 flex flex-col gap-2">
                         <p className="text-xs text-zinc-400 uppercase tracking-wide">Raw signature</p>
                         <div className="flex flex-col gap-1">
                             {Object.entries(event.raw).map(([key, value]) => (
                                 <div key={key} className="flex items-center justify-between">
-                                    <span className="text-xs text-zinc-500 dark:text-zinc-400 capitalize">{key.replace(/_/g, " ")}</span>
-                                    <span className="text-xs font-mono text-zinc-900 dark:text-zinc-100">{value}</span>
+                                    <span className="text-xs text-zinc-400 capitalize">{key.replace(/_/g, " ")}</span>
+                                    <span className="text-xs font-mono text-zinc-100">{value}</span>
 
                                 </div>
                             ))}
@@ -216,9 +216,9 @@ const SecurityEventModal = ({ event, onClose }) => {
                     </div>
 
                     {/* AI Analysis */}
-                    <div className="border border-zinc-200 dark:border-zinc-700 rounded-lg px-3 py-2.5 flex flex-col gap-2">
+                    <div className="border border-zinc-700 rounded-lg px-3 py-2.5 flex flex-col gap-2">
                         <div className="flex items-center gap-2">
-                            <div className="w-4 h-4 rounded-full bg-blue-50 dark:bg-blue-950 flex items-center justify-center flex-shrink-0">
+                            <div className="w-4 h-4 rounded-full bg-blue-950 flex items-center justify-center flex-shrink-0">
                                 <svg width="10" height="10" viewBox="0 0 10 10" fill="none">
                                     <circle cx="5" cy="5" r="4" stroke="#185FA5" strokeWidth="1" />
                                     <path d="M5 4v3M5 3v.5" stroke="#185FA5" strokeWidth="1" strokeLinecap="round" />
@@ -226,7 +226,7 @@ const SecurityEventModal = ({ event, onClose }) => {
                             </div>
                             <p className="text-xs text-zinc-400 uppercase tracking-wide">AI analysis</p>
                         </div>
-                        <p className="text-sm text-zinc-900 dark:text-zinc-100 leading-relaxed">
+                        <p className="text-sm text-zinc-100 leading-relaxed">
                             {event.analysis ?? "No analysis available."}
                         </p>
                     </div>

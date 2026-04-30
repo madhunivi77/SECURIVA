@@ -22,7 +22,7 @@ export default function FAQ() {
     .filter(section => section.items.length > 0);
 
     return (
-        <div className="min-h-screen bg-gray-100 dark:bg-gray-900">
+        <div className="min-h-screen bg-gray-900">
             {/* ---------- FAQ ---------- */}
             <section className="px-20 pb-20">
                 <h2 className="text-4xl font-mono text-center mb-5 pt-10">

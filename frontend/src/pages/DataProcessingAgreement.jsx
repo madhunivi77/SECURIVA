@@ -15,7 +15,7 @@ import ProseBlock from "../components/ProseBlock.jsx";
 
 export default function DataProcessingAgreement() {
   return (
-    <div className="min-h-screen bg-gray-100 dark:bg-gray-900">
+    <div className="min-h-screen bg-gray-900">
 
       {/* ── HERO ── */}
       <section className="hero py-24 bg-linear-to-br from-blue-900 to-black text-white">
@@ -86,7 +86,7 @@ export default function DataProcessingAgreement() {
           "Cybersecurity threat monitoring and incident response",
           "Data storage, backup, and disaster recovery operations",
         ]} />
-        <p className="mx-[15%] text-lg text-gray-500 dark:text-gray-400 font-light">
+        <p className="mx-[15%] text-lg text-gray-400 font-light">
           SecuriVA will not process data for its own independent purposes without explicit written authorization from the Controller.
         </p>
       </section>
@@ -181,10 +181,10 @@ export default function DataProcessingAgreement() {
 
       {/* ── 4.10 Contact ── */}
       <section className="px-8 py-16 text-center">
-        <h2 className="text-4xl font-normal text-gray-900 mb-3 dark:text-white">
+        <h2 className="text-4xl font-normal mb-3 text-white">
           DPA Inquiries & Sub-Processor Requests
         </h2>
-        <p className="text-[15px] font-light text-gray-500 mb-10 max-w-lg mx-auto dark:text-gray-400">
+        <p className="text-[15px] font-light mb-10 max-w-lg mx-auto text-gray-400">
           For all Data Processing Agreement inquiries and sub-processor requests, please contact our privacy team directly.
         </p>
         <div className="flex flex-wrap justify-center gap-3">
@@ -195,7 +195,7 @@ export default function DataProcessingAgreement() {
             </button>
           </a>
         </div>
-        <p className="mt-6 text-xs text-gray-400 dark:text-gray-600">
+        <p className="mt-6 text-xs text-gray-600">
           SecuriVA — Kimuntu Power Inc., Ontario, Canada
         </p>
       </section>

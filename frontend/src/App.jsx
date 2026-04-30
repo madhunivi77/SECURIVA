@@ -14,8 +14,6 @@ function App() {
 
   const {
     theme,
-    isDarkMode,
-    setIsDarkMode,
   } = useTheme();
 
   const navigate = useNavigate();

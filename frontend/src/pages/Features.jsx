@@ -47,7 +47,7 @@ export default function Features() {
   );
 
   return (
-    <div className="min-h-screen bg-gray-100 dark:bg-gray-900">
+    <div className="min-h-screen bg-gray-900">
 
       {/* ---------- HERO ---------- */}
       <section className="hero py-24 bg-linear-to-br from-blue-900 to-black text-white">
@@ -67,15 +67,15 @@ export default function Features() {
       {/* AI Assistant */}
       <section id="virtual-agent" class="relative overflow-hidden px-8 py-12">
 
-        <h2 className="text-4xl font-normal text-center text-gray-900 mb-2 dark:text-white">
+        <h2 className="text-4xl font-normal text-center mb-2 text-white">
           {t("features.sections.aiAgent.title")}
         </h2>
 
-        <p className="text-xl font-light text-gray-500 mb-8 text-center dark:text-gray-400 mx-[15%]">
+        <p className="text-xl font-light mb-8 text-center text-gray-400 mx-[15%]">
           {t("features.sections.aiAgent.subtitle")}
         </p>
 
-        <div className="border-t border-gray-100 mb-8 dark:border-gray-800" />
+        <div className="border-t mb-8 border-gray-800" />
 
         <div className="mx-[15%] pb-5 text-xl">
           {t("features.sections.aiAgent.description")}
@@ -124,15 +124,15 @@ export default function Features() {
 
         {/* Cybersecurity */}
       <section id="cybersecurity" className="relative overflow-hidden px-8 py-12">
-        <h2 className="text-4xl font-normal text-center text-gray-900 mb-2 dark:text-white">
+        <h2 className="text-4xl font-normal text-center mb-2 text-white">
           {t("features.sections.cybersecurity.title")}
         </h2>
 
-        <p className="text-xl font-light text-gray-500 mb-8 text-center dark:text-gray-400 mx-[15%]">
+        <p className="text-xl font-light mb-8 text-center text-gray-400 mx-[15%]">
           {t("features.sections.cybersecurity.subtitle")}
         </p>
 
-        <div className="border-t border-gray-100 mb-8 dark:border-gray-800" />
+        <div className="border-t mb-8 border-gray-800" />
 
         <div className="mx-[15%] pb-5 text-xl">
           {t("features.sections.cybersecurity.description")}
@@ -172,15 +172,15 @@ export default function Features() {
 
       {/* Text AI Agent */}
       <section id="text-agent" className="relative overflow-hidden px-8 py-12">
-        <h2 className="text-4xl font-normal text-center text-gray-900 mb-2 dark:text-white">
+        <h2 className="text-4xl font-normal text-center mb-2 text-white">
           {t("features.sections.textAgent.title")}
         </h2>
 
-        <p className="text-xl font-light text-gray-500 mb-8 text-center dark:text-gray-400 mx-[15%]">
+        <p className="text-xl font-light mb-8 text-center text-gray-400 mx-[15%]">
           {t("features.sections.textAgent.subtitle")}
         </p>
 
-        <div className="border-t border-gray-100 mb-8 dark:border-gray-800" />
+        <div className="border-t mb-8 border-gray-800" />
 
         <div className="mx-[15%] pb-5 text-xl">
           {t("features.sections.textAgent.description")}
@@ -220,15 +220,15 @@ export default function Features() {
 
       {/* VPN */}
       <section id="vpn" className="relative overflow-hidden px-8 py-12">
-        <h2 className="text-4xl font-normal text-center text-gray-900 mb-2 dark:text-white">
+        <h2 className="text-4xl font-normal text-center mb-2 text-white">
           {t("features.sections.vpn.title")}
         </h2>
 
-        <p className="text-xl font-light text-gray-500 mb-8 text-center dark:text-gray-400 mx-[15%]">
+        <p className="text-xl font-light mb-8 text-center text-gray-400 mx-[15%]">
           {t("features.sections.vpn.subtitle")}
         </p>
 
-        <div className="border-t border-gray-100 mb-8 dark:border-gray-800" />
+        <div className="border-t mb-8 border-gray-800" />
 
         <div className="mx-[15%] pb-5 text-xl">
           {t("features.sections.vpn.description")}
@@ -269,7 +269,7 @@ export default function Features() {
       {/* ---------- RECAP ---------- */}
       <section className="relative overflow-hidden px-8 py-12 mx-[15%]">
 
-        <h2 className="text-4xl font-normal text-center text-gray-900 mb-2 dark:text-white">
+        <h2 className="text-4xl font-normal text-center mb-2 text-white">
           {t("features.sections.recap.title")}
         </h2>
 
@@ -301,11 +301,11 @@ export default function Features() {
       {/* ---------- CTA ---------- */}
       <section className="px-8 py-16 text-center">
 
-        <h2 className="text-4xl font-normal text-gray-900 mb-3 dark:text-white">
+        <h2 className="text-4xl font-normal mb-3 text-white">
           {t("features.sections.cta.title")}
         </h2>
 
-        <p className="text-[15px] font-light text-gray-500 mb-10 max-w-lg mx-auto dark:text-gray-400">
+        <p className="text-[15px] font-light mb-10 max-w-lg mx-auto text-gray-400">
           {t("features.sections.cta.description")}
         </p>
 

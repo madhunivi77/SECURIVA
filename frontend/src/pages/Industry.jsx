@@ -10,7 +10,7 @@ export default function Industry() {
     const { t } = useTranslation();
 
     return (
-        <div className="min-h-screen bg-gray-100 dark:bg-gray-900">
+        <div className="min-h-screen bg-gray-900">
 
             {/* ---------- HERO ---------- */}
             <section className="hero py-24 bg-linear-to-br bg-[#0a0f1f] text-white">
@@ -178,33 +178,33 @@ export default function Industry() {
             <section>
                 <h2 className="subheading">{t("industry.otherIndustries.title")}</h2>
 
-                <div className="rounded-2xl border border-gray-100 bg-gray-50 p-6 dark:border-gray-800 dark:bg-gray-900 mx-[15%]">
+                <div className="rounded-2xl border p-6 border-gray-800 bg-gray-900 mx-[15%]">
 
-                    <p className="text-xl font-medium text-gray-900 dark:text-white mb-4">
+                    <p className="text-xl font-medium text-white mb-4">
                         {t("industry.otherIndustries.subtitle")}
                     </p>
 
                     <div className="flex flex-wrap gap-2 mb-5">
                         {t("industry.otherIndustries.industries", { returnObjects: true }).map((industry) => (
                             <span
-                                className="rounded-lg border border-gray-200 bg-white px-3 py-1 text-lg text-gray-600 dark:border-gray-700 dark:bg-gray-800 dark:text-gray-300"
+                                className="rounded-lg border px-3 py-1 text-lg border-gray-700 bg-gray-800 text-gray-300"
                             >
                                 {industry}
                             </span>
                         ))}
                     </div>
 
-                    <div className="border-t border-gray-200 dark:border-gray-700 pt-4">
-                        <p className="xl font-medium uppercase tracking-widest text-gray-400 dark:text-gray-600 mb-3">
+                    <div className="border-t border-gray-700 pt-4">
+                        <p className="xl font-medium uppercase tracking-widest text-gray-600 mb-3">
                             {t("industry.otherIndustries.foundationTitle")}
                         </p>
 
                         <div className="flex flex-wrap gap-2">
                             {t("industry.otherIndustries.features", { returnObjects: true }).map((feature) => (
                                 <span
-                                    className="inline-flex items-center gap-1.5 rounded-lg bg-blue-50 border border-blue-100 px-3 py-1 text-lg text-blue-700 dark:bg-blue-950 dark:border-blue-900 dark:text-blue-300"
+                                    className="inline-flex items-center gap-1.5 rounded-lg border px-3 py-1 text-lg bg-blue-950 border-blue-900 text-blue-300"
                                 >
-                                    <CheckCircle2 className="h-3 w-3 stroke-blue-500 dark:stroke-blue-400" strokeWidth={2} />
+                                    <CheckCircle2 className="h-3 w-3 stroke-blue-400" strokeWidth={2} />
                                     {feature}
                                 </span>
                             ))}

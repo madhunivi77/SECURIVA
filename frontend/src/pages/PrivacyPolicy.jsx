@@ -16,7 +16,7 @@ import ComplianceBadge from "../components/ComplianceBadge";
 
 function RightsTable({ rights }) {
   return (
-    <div className="mx-[15%] mb-6 overflow-x-auto rounded-xl border border-gray-200 dark:border-gray-700">
+    <div className="mx-[15%] mb-6 overflow-x-auto rounded-xl border border-gray-700">
       <table className="w-full text-lg">
         <thead>
           <tr className="bg-blue-900 text-white">
@@ -34,8 +34,8 @@ function RightsTable({ rights }) {
                   : "bg-gray-850"
               }
             >
-              <td className="px-5 py-3 font-medium text-gray-900 dark:text-white">{right}</td>
-              <td className="px-5 py-3 text-gray-600 dark:text-gray-400">{description}</td>
+              <td className="px-5 py-3 font-medium text-white">{right}</td>
+              <td className="px-5 py-3 text-gray-400">{description}</td>
             </tr>
           ))}
         </tbody>
@@ -58,7 +58,7 @@ export default function PrivacyPolicy() {
   ];
 
   return (
-    <div className="min-h-screen bg-gray-100 dark:bg-gray-900">
+    <div className="min-h-screen bg-gray-900">
 
       {/* ── HERO ── */}
       <section className="hero py-24 bg-linear-to-br from-blue-900 to-black text-white">
@@ -81,7 +81,7 @@ export default function PrivacyPolicy() {
           subtitle="We collect only what's necessary to deliver a secure, high-quality experience."
         />
         <SectionDivider />
-        <div className="mx-[15%] pb-5 text-xl text-gray-800 dark:text-gray-200">
+        <div className="mx-[15%] pb-5 text-xl text-gray-200">
           SecuriVA collects three categories of information to power and secure the platform:
         </div>
         <InfoCards cards={[
@@ -129,7 +129,7 @@ export default function PrivacyPolicy() {
           subtitle="A comprehensive, multi-layered security architecture protecting every layer of your data."
         />
         <SectionDivider />
-        <div className="mx-[15%] pb-5 text-xl text-gray-800 dark:text-gray-200">
+        <div className="mx-[15%] pb-5 text-xl text-gray-200">
           SecuriVA implements industry-leading safeguards at every level:
         </div>
         <InfoCards cards={[
@@ -164,7 +164,7 @@ export default function PrivacyPolicy() {
             description: "Regular penetration testing and vulnerability assessments by independent security firms.",
           },
         ]} />
-        <p className="mx-[15%] mt-2 text-sm text-gray-500 dark:text-gray-400 italic">
+        <p className="mx-[15%] mt-2 text-sm text-gray-400 italic">
           Important: While SecuriVA employs industry-leading security safeguards, no system can guarantee absolute security. Users are responsible for maintaining secure credentials and access practices on their end.
         </p>
       </section>
@@ -176,7 +176,7 @@ export default function PrivacyPolicy() {
           subtitle="SecuriVA does not sell, rent, or trade your personal data — ever."
         />
         <SectionDivider />
-        <div className="mx-[15%] pb-5 text-xl text-gray-800 dark:text-gray-200">
+        <div className="mx-[15%] pb-5 text-xl text-gray-200">
           Data may be shared only under strictly limited conditions:
         </div>
         <BulletList items={[
@@ -210,9 +210,9 @@ export default function PrivacyPolicy() {
         />
         <SectionDivider />
         <RightsTable rights={rights} />
-        <p className="mx-[15%] mt-4 text-sm text-gray-500 dark:text-gray-400">
+        <p className="mx-[15%] mt-4 text-sm text-gray-400">
           To exercise any of these rights, contact:{" "}
-          <a href="mailto:privacy@securiva.io" className="text-blue-700 dark:text-blue-400 hover:underline">
+          <a href="mailto:privacy@securiva.io" className="text-blue-400 hover:underline">
             privacy@securiva.io
           </a>
         </p>
@@ -268,17 +268,17 @@ export default function PrivacyPolicy() {
             description: "Remember your settings and personalization choices.",
           },
         ]} />
-        <p className="mx-[15%] text-sm text-gray-500 dark:text-gray-400">
+        <p className="mx-[15%] text-sm text-gray-400">
           You may manage cookie preferences through your browser settings. Disabling functional cookies may limit certain platform features.
         </p>
       </section>
 
       {/* ── Contact ── */}
       <section className="px-8 py-16 text-center">
-        <h2 className="text-4xl font-normal text-gray-900 mb-3 dark:text-white">
+        <h2 className="text-4xl font-normal mb-3 text-white">
           Questions About Your Privacy?
         </h2>
-        <p className="text-[15px] font-light text-gray-500 mb-10 max-w-lg mx-auto dark:text-gray-400">
+        <p className="text-[15px] font-light mb-10 max-w-lg mx-auto text-gray-400">
           Our Data Protection Officer is available to address any concerns about how your data is collected, used, or stored.
         </p>
         <div className="flex flex-wrap justify-center gap-3">
@@ -289,13 +289,13 @@ export default function PrivacyPolicy() {
             </button>
           </a>
           <a href="mailto:contact@securiva.io">
-            <button className="flex items-center gap-2 rounded-xl border border-gray-200 bg-white px-6 py-3 text-[14px] font-medium text-gray-800 transition-colors hover:border-gray-300 hover:bg-gray-50 dark:border-gray-700 dark:bg-gray-900 dark:text-white dark:hover:border-gray-600 dark:hover:bg-gray-800">
-              <Mail className="h-4 w-4 stroke-gray-500 dark:stroke-gray-400" strokeWidth={1.5} />
+            <button className="flex items-center gap-2 rounded-xl border px-6 py-3 text-[14px] font-medium transition-colors border-gray-700 bg-gray-900 text-white hover:border-gray-600 hover:bg-gray-800">
+              <Mail className="h-4 w-4 stroke-gray-400" strokeWidth={1.5} />
               General Inquiries — contact@securiva.io
             </button>
           </a>
         </div>
-        <p className="mt-6 text-xs text-gray-400 dark:text-gray-600">
+        <p className="mt-6 text-xs text-gray-600">
           SecuriVA Headquarters — Kimuntu Power Inc., Ontario, Canada
         </p>
       </section>

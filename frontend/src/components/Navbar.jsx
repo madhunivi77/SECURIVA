@@ -27,8 +27,6 @@ export default function Navbar() {
 
   const {
     theme,
-    isDarkMode,
-    setIsDarkMode,
   } = useTheme();
 
   const handleReconnect = () => fetchStatus();

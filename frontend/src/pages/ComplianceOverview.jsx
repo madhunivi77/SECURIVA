@@ -14,7 +14,7 @@ import BulletList from "../components/BulletList.jsx";
 
 export default function ComplianceOverview() {
   return (
-    <div className="min-h-screen bg-gray-100 dark:bg-gray-900">
+    <div className="min-h-screen bg-gray-900">
 
       {/* ── HERO ── */}
       <section className="hero py-24 bg-linear-to-br from-blue-900 to-black text-white">
@@ -110,10 +110,10 @@ export default function ComplianceOverview() {
 
       {/* ── Contact ── */}
       <section className="px-8 py-16 text-center">
-        <h2 className="text-4xl font-normal text-gray-900 mb-3 dark:text-white">
+        <h2 className="text-4xl font-normal mb-3 text-white">
           Compliance Inquiries
         </h2>
-        <p className="text-[15px] font-light text-gray-500 mb-10 max-w-lg mx-auto dark:text-gray-400">
+        <p className="text-[15px] font-light mb-10 max-w-lg mx-auto text-gray-400">
           For questions about SecuriVA's compliance posture or to request documentation, reach out to our privacy team.
         </p>
         <div className="flex flex-wrap justify-center gap-3">
@@ -124,13 +124,13 @@ export default function ComplianceOverview() {
             </button>
           </a>
           <a href="mailto:contact@securiva.io">
-            <button className="flex items-center gap-2 rounded-xl border border-gray-200 bg-white px-6 py-3 text-[14px] font-medium text-gray-800 transition-colors hover:border-gray-300 hover:bg-gray-50 dark:border-gray-700 dark:bg-gray-900 dark:text-white dark:hover:border-gray-600 dark:hover:bg-gray-800">
-              <Mail className="h-4 w-4 stroke-gray-500 dark:stroke-gray-400" strokeWidth={1.5} />
+            <button className="flex items-center gap-2 rounded-xl border px-6 py-3 text-[14px] font-medium transition-colors border-gray-700 bg-gray-900 text-white hover:border-gray-600 hover:bg-gray-800">
+              <Mail className="h-4 w-4 stroke-gray-400" strokeWidth={1.5} />
               General — contact@securiva.io
             </button>
           </a>
         </div>
-        <p className="mt-6 text-xs text-gray-400 dark:text-gray-600">
+        <p className="mt-6 text-xs text-gray-600">
           SecuriVA — Kimuntu Power Inc., Ontario, Canada
         </p>
       </section>
