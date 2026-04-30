@@ -38,7 +38,7 @@ export default function Homepage() {
       {/* ---------- HERO ---------- */}
       <header className="hero">
 
-        <div className="pl-20 pr-20 pt-30 pb-30 flex justify-between">
+        <div className="pl-20 pr-20 pt-10 pb-30 flex justify-between">
           <div className="pb-5">
             <h1 className="text-xl text-left pt-0 text-white font-mono">{t("homepage.hero.title")}</h1>
             <p className="text-[28px] text-left pt-7.5 pb-10 text-blue-600 font-mono">

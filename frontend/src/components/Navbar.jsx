@@ -42,7 +42,7 @@ export default function Navbar() {
     <nav className="fixed w-full z-10">
       {/* UPPER NAV BAR */}
       <div
-        className="shrink-0 py-3 pb-5 pl-16 px-5 flex justify-between items-center w-full flex-wrap gap-2.5 box-border bg-black"
+        className="shrink-0 pt-3 pl-16 pr-5 flex justify-between items-center w-full flex-wrap gap-2.5 box-border bg-black"
         style={{
           fontSize: 18
         }}
@@ -54,7 +54,7 @@ export default function Navbar() {
             alt="SECURIVA Logo"
             style={{
               height: "auto",
-              width: "250px",
+              width: "190px",
               objectFit: "cover",
             }}
             onClick={() => navigate("/")}
