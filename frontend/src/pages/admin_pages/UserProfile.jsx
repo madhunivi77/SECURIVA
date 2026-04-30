@@ -46,7 +46,7 @@ const UserProfile = () => {
 
   return (
     <div className="flex h-screen bg-gray-100 font-sans">
-      <AdminSidebar />
+
       <div className="flex-1 p-6 overflow-y-auto">
       {/* Breadcrumb */}
       <div className="text-sm text-gray-500">

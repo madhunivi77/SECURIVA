@@ -32,8 +32,7 @@ export default function AdminSecurity() {
   return (
     <div className="flex h-screen bg-gray-100 font-sans">
 
-      {/* Sidebar */}
-      <AdminSidebar />
+     
 
       {/* Content */}
       <div className="flex-1 p-6 space-y-6 overflow-y-auto">

@@ -56,6 +56,7 @@ import ComplianceOverview from './pages/ComplianceOverview.jsx';
 import AIHandbook from './pages/AIHandbook.jsx';
 import Billing from './pages/Billing.jsx';
 import BillingManagement from './pages/BillingManagement.jsx';
+import AdminLogin from './pages/admin_pages/AdminLogin';
 
 const router = createBrowserRouter([
   {
@@ -77,51 +78,6 @@ const router = createBrowserRouter([
       {
         path: '/features',
         element: <Features />
-      },
-      {
-        path: '/admin',
-        element: <AdminDashboard />
-      },
-      {
-        path: "/admin/users",
-        element: <UsersPage />,
-      },
-      {
-        path: "/admin/users/:userId",
-        element: <UserProfile />,
-      },
-      {
-        path:"/admin/security",
-        element:<AdminSecurity/>,
-      },
-      {
-        path:"/admin/settings",
-        element:<AdminSettings/>,
-      },
-      {
-        path:"/admin/notifications",
-        element:<AdminNotifications/>,
-      },
-
-      {
-        path:"/admin/activity",
-        element:<AdminActivity/>,
-      },
-      {
-        path:"/admin/integrations",
-        element:<AdminIntegrations/>,
-      },
-      {
-        path:"/admin/payments",
-        element: <AdminPayments/>,
-      },
-      {
-        path:"/admin/content",
-        element:<AdminContent/>,
-      },
-      {
-        path:"/admin/analytics",
-        element:<AdminAnalytics/>,
       },
       {
         path: "/pricing",
@@ -208,6 +164,10 @@ const router = createBrowserRouter([
   {
     path: '/signup', // create a new account
     element: <SignupForm />
+  },
+  {
+    path: '/admin/login', // create a new account
+    element: <AdminLogin />
   },
   {
     path: '/admin',

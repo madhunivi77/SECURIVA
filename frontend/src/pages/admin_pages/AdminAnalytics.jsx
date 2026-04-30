@@ -1,6 +1,6 @@
 // src/pages/AdminAnalytics.jsx
 
-import AdminSidebar from "../../components/admin/AdminSidebar";
+
 import {
   Users,
   UserPlus,
@@ -41,10 +41,6 @@ export default function AdminAnalytics() {
 
   return (
     <div className="flex h-screen bg-gray-100 font-sans">
-
-      {/* Sidebar */}
-      <AdminSidebar />
-
       {/* Content */}
       <div className="flex-1 p-6 space-y-6 overflow-y-auto">
 

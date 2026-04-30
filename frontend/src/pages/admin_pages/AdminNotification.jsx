@@ -54,8 +54,7 @@ export default function AdminNotifications() {
   return (
     <div className="flex h-screen bg-gray-100 font-sans">
 
-      {/* Sidebar */}
-      <AdminSidebar />
+    
 
       {/* CONTENT */}
       <div className="flex-1 p-6 space-y-6 overflow-y-auto">

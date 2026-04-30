@@ -125,6 +125,9 @@ export default function Footer() {
               <li><a href="#">Partnerships</a></li>
               <li><a href="#">Media Kit</a></li>
               <li><a href="#">API Documentation</a></li>
+              <li>
+                <Link to="/admin/login">Admin Login</Link>
+              </li>
             </ul>
           </div>
 

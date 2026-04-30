@@ -34,7 +34,7 @@ const UsersPage = () => {
 
   return (
     <div className="flex h-screen bg-gray-100 font-sans">
-      <AdminSidebar />
+   
       <div className="flex-1 p-6 overflow-y-auto">
       {/* Header */}
       <div className="flex flex-col md:flex-row md:items-center md:justify-between gap-4">

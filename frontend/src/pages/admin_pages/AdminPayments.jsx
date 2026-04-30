@@ -129,9 +129,7 @@ export default function AdminPayments() {
   return (
     <div className="flex h-screen bg-gray-100 font-sans">
 
-    
-        <AdminSidebar />
-   
+  
 
       {/* Content */}
       <div className="flex-1 overflow-y-auto p-6 space-y-6">

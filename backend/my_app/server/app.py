@@ -24,6 +24,7 @@ from .db import db_app
 from .api_key_manager import generate_api_key, store_api_key, validate_api_key
 from .activity_logger import log_activity, get_activity_logs
 from .security_tools import security_app
+from starlette.exceptions import HTTPException
 from .telesign_auth import (
     send_whatsapp_message,
     send_sms,
@@ -42,6 +43,9 @@ ENVIRONMENT = os.getenv("ENVIRONMENT", "development")
 COOKIE_SAMESITE = os.getenv("COOKIE_SAMESITE", "lax")
 GOOGLE_CLIENT_ID = os.getenv("GOOGLE_CLIENT_ID")
 GOOGLE_CLIENT_SECRET = os.getenv("GOOGLE_CLIENT_SECRET")
+ADMIN_EMAIL = os.getenv("ADMIN_EMAIL")
+ADMIN_PASSWORD = os.getenv("ADMIN_PASSWORD")
+ADMIN_SECRET_KEY = os.getenv("ADMIN_SECRET_KEY")
 
 # Enable insecure transport for development
 if ENVIRONMENT == "development":
@@ -122,7 +126,50 @@ csrf_tokens = {}
 async def index(request):
     """Root endpoint"""
     return HTMLResponse("<h1>Hello from your Starlette App!</h1><p>Visit /api/status to see a JSON response.</p>")
+async def admin_login(request):
+    try:
+        data = await request.json()
+        email = data.get("email")
+        password = data.get("password")
 
+        if email == ADMIN_EMAIL and password == ADMIN_PASSWORD:
+            token = pyjwt.encode(
+                {
+                    "sub": email,
+                    "role": "admin",
+                    "exp": datetime.utcnow() + timedelta(hours=2)
+                },
+                ADMIN_SECRET_KEY,
+                algorithm="HS256"
+            )
+
+            return JSONResponse({
+                "access_token": token,
+                "role": "admin"
+            })
+
+        return JSONResponse({"error": "Invalid credentials"}, status_code=401)
+
+    except Exception as e:
+        return JSONResponse({"error": str(e)}, status_code=500)
+def require_admin(request):
+    auth_header = request.headers.get("Authorization")
+
+    if not auth_header or not auth_header.startswith("Bearer "):
+        raise HTTPException(status_code=401, detail="Missing token")
+
+    token = auth_header.split(" ")[1]
+
+    try:
+        payload = pyjwt.decode(token, ADMIN_SECRET_KEY, algorithms=["HS256"])
+
+        if payload.get("role") != "admin":
+            raise HTTPException(status_code=403, detail="Not admin")
+
+        return payload
+
+    except Exception:
+        raise HTTPException(status_code=401, detail="Invalid or expired token")
 async def api_status(request):
     """API status endpoint"""
     api_key = request.cookies.get("api_key")
@@ -699,6 +746,7 @@ api_app = Starlette(
         Route("/api/whatsapp/send-sms", api_send_sms, methods=["POST"]),
         Route("/api/dashboard/refresh", dashboard_refresh, methods=["GET"]),
         Route("/api/logs", api_logs, methods=["GET"]),
+        Route("/admin/login", admin_login, methods=["POST"]),
     ]
 )
 
