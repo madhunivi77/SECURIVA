@@ -105,7 +105,7 @@ export default function VPN() {
 
             {/* ---------- INTRO ---------- */}
             <section className="relative overflow-hidden">
-                <div className="relative w-full h-[600px] overflow-hidden bg-black mx-auto">
+                <div className="relative w-full lg:h-[600px] overflow-hidden bg-black mx-auto">
                     <video
                         autoPlay
                         loop
@@ -132,7 +132,7 @@ export default function VPN() {
             </section>
 
             {/* ---------- INTEGRATION ---------- */}
-            <section className="relative overflow-hidden px-8 pb-6 -mt-20">
+            <section className="relative overflow-hidden px-8 pb-6 lg:-mt-20">
                 <h2 className="subheading">
                     {t("vpn.integration.title")}
                 </h2>

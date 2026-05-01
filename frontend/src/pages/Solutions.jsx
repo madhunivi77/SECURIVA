@@ -150,7 +150,7 @@ export default function Solutions() {
       </section>
 
       {/* SOLUTIONS */}
-      <section className="flex flex-col gap-6 mx-[15%] my-10">
+      <section className="flex flex-col gap-6 px-5 lg:mx-[15%] my-10">
         {solutions.map((solution) => (
           <SolutionCard key={solution.number} {...solution} />
         ))}

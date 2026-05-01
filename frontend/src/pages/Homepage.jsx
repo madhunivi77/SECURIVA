@@ -38,24 +38,24 @@ export default function Homepage() {
       {/* ---------- HERO ---------- */}
       <header className="hero">
 
-        <div className="pl-20 pr-20 pt-10 pb-30 flex justify-between">
-          <div className="pb-5">
-            <h1 className="text-xl text-left pt-0 text-white font-mono">{t("homepage.hero.title")}</h1>
-            <p className="text-[28px] text-left pt-7.5 pb-10 text-blue-600 font-mono">
+        <div className="lg:px-20 pt-10 pb-30 flex lg:flex-row flex-col justify-center lg:justify-between items-center lg:items-start">
+          <div className="pb-5 flex flex-col items-center lg:items-start px-5 lg:px-0">
+            <h1 className="text-xl text-center lg:text-left pt-0 text-white font-mono">{t("homepage.hero.title")}</h1>
+            <p className="text-[28px] text-center lg:text-left pt-7.5 pb-10 text-blue-600 font-mono">
               <span className="text-white text-bold">{t("homepage.hero.brand")}</span> {t("homepage.hero.unifies")} <span className="text-white text-bold">{t("homepage.hero.aiAutomation")}</span>, <span className="text-white text-bold">{t("homepage.hero.cybersecurity")}</span>, <span className="text-white text-bold">{t("homepage.hero.secureCommunication")} </span>
               {t("homepage.hero.into")} <span className="text-white text-bold">{t("homepage.hero.platform")}</span> {t("homepage.hero.tail")}
             </p>
             <Link to="/login">
               <button
-                className="text-xl w-60 h-17.5 bg-red-500 text-white"
+                className="text-xl w-60 h-17.5 bg-red-500 text-white "
               >
                 {t("homepage.hero.cta")}
               </button>
             </Link>
           </div>
 
-          <div>
-            <div className="overflow-hidden rounded-2xl w-150 mt-7.5 ml-7.5">
+          <div className="flex justify-center">
+            <div className="overflow-hidden rounded-2xl w-[90%] lg:w-150 mt-7.5 lg:ml-7.5">
               <video
                 autoPlay
                 loop
@@ -88,12 +88,12 @@ export default function Homepage() {
       <div className="absolute bottom-0 left-0 w-full h-64 bg-gradient-to-t from-black via-black/60 to-transparent pointer-events-none"></div>
 
       <div id="feature-cards-wrapper" className="relative section-min-height text-center text-black">
-        <div className="mx-40 mt-20 bg-[#000020]/90 px-8 py-6 rounded-2xl text-white">
+        <div className="mx-5 lg:mx-40 mt-20 bg-[#000020]/90 px-8 py-6 rounded-2xl text-white">
           <h2 className="text-[35px] text-center text-white font-mono">{t("homepage.overview.title")}</h2>
           <p className="text-center pt-5 text-2xl text-white font-mono" >{t("homepage.overview.description")}</p>
         </div>
         <div
-          id="feature-cards" className="flex flex-wrap justify-center gap-12.5 px-20 pb-20 pt-9 mx-0"
+          id="feature-cards" className="flex flex-wrap justify-center gap-12.5 px-5 lg:px-20 pb-20 pt-9 mx-0"
         >
           <Card className={"w-auto sm:w-[25%]"} image={"landing_page/AI_Virtual_assistant.png"} title={t("homepage.cards.aiAgent.title")} text={t("homepage.cards.aiAgent.description")}/>
           <Card className={"w-auto sm:w-[25%]"} image={"landing_page/Cybersecurity_Protection.png"} title={t("homepage.cards.cybersecurity.title")} text={t("homepage.cards.cybersecurity.description")}/>
@@ -110,13 +110,13 @@ export default function Homepage() {
       
       
       {/* Why Choose SECURIVA */}
-      <div className="flex flex-col justify-center section-min-height px-20 pb-10 bg-black text-white">
+      <div className="flex flex-col justify-center items-center lg:items-stretch section-min-height lg:px-20 pb-10 bg-black text-white">
         <h2 className="text-[40px] pt-7.5 text-center font-mono">{t("homepage.why.title")}</h2>
-        <p className="text-center px-20 pt-5 pb-9 text-2xl font-mono">{t("homepage.why.description")}</p>
+        <p className="text-center px-20 lg:px-20 pt-5 pb-9 text-2xl font-mono">{t("homepage.why.description")}</p>
 
         <div className="px-20 flex flex-col text-black">
           <div id="why-cards-wrapper" className="flex flex-1 flex-col justify-center">
-            <div id="why-cards" className="flex flex-row gap-5 ">
+            <div id="why-cards" className="flex flex-col lg:flex-row gap-5 ">
 
               <div className="card bg-white shadow-sm why-card">
                 <h2 className="text-center text-xl font-medium">{t("homepage.why.cards.allInOne.title")}</h2>
@@ -189,7 +189,7 @@ export default function Homepage() {
         </div>
       </div>
       {/* Text */}
-      <div id="demo" className="bg-black text-center text-white pb-10">
+      <div id="demo" className="bg-black text-center text-white pb-10 px-5 lg:px-0">
           <h2 className="text-3xl">{t("homepage.demo.title")}</h2>
           <p className="text-xl/12 pb-5">{t("homepage.demo.description")}</p>
           <button className="text-sm w-50 h-12 bg-red-500 text-white">{t("homepage.demo.button")}</button>
@@ -208,7 +208,7 @@ export default function Homepage() {
           Your browser does not support the video tag.
       </video>
 
-      <div className="relative mx-40 mt-90 bg-black/50 px-8 py-6 rounded-2xl text-white">
+      <div className="relative mx-5 lg:mx-40 mt-90 bg-black/50 px-8 py-6 rounded-2xl text-white">
         <h2 className="text-[35px] text-center text-white font-mono">{t("homepage.video.bannerText")}</h2>
       </div>
     </div>
@@ -297,7 +297,7 @@ export default function Homepage() {
                 onChange={handleChange}
                 type="email"
                 placeholder="Email Address"
-                className="input input-bordered w-150"
+                className="input input-bordered w-[95%] lg:w-150"
                 required
               />
 

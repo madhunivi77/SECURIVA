@@ -21,7 +21,7 @@ export default function AgentVoice({ }) {
             </section>
 
             <section className="relative overflow-hidden">
-                <div className="relative w-full h-[500px] overflow-hidden bg-black mx-auto">
+                <div className="relative w-full lg:h-[500px] overflow-hidden bg-black mx-auto">
                     <video
                         autoPlay
                         loop

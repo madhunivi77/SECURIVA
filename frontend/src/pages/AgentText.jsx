@@ -53,7 +53,7 @@ export default function AgentText({ }) {
             </section>
 
             <section className="relative overflow-hidden">
-                <div className="relative w-full h-[450px] overflow-hidden bg-black mx-auto">
+                <div className="relative w-full lg:h-[450px] overflow-hidden bg-black mx-auto">
                     <video
                         autoPlay
                         loop
@@ -76,7 +76,7 @@ export default function AgentText({ }) {
                 </div>
             </section>
 
-            <section className="flex flex-col gap-5 mb-5 -mt-15 mx-[15%]">
+            <section className="flex flex-col gap-5 mb-5 lg:-mt-15 mx-[15%]">
                 <h2 className="z-5 subheading">{t("agentText.capabilities.title")}</h2>
                 <CapabilityCard icon={Mail} label={t("agentText.capabilities.items.email.label")} description={t("agentText.capabilities.items.email.description")} />
                 <CapabilityCard icon={MessageCircle} label={t("agentText.capabilities.items.chat.label")} description={t("agentText.capabilities.items.chat.description")} />

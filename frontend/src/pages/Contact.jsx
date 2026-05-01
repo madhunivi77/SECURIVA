@@ -71,7 +71,7 @@ export default function Contact() {
               {t("contact.services.title")}
             </h2>
 
-            <div className="grid md:grid-cols-3 gap-8">
+            <div className="grid md:grid-cols-3 gap-8 px-5">
 
               {/* SALES */}
               <div className="card backdrop-blur bg-gray-800/90 shadow-lg">

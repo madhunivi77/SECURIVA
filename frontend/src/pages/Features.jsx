@@ -35,7 +35,7 @@ export default function Features() {
   const { t } = useTranslation();
 
   const CapabilityCards = ({ cards }) => (
-    <div className="flex flex-wrap gap-3 mb-6 mx-[15%]">
+    <div className="flex flex-wrap gap-3 mb-6 lg:mx-[15%]">
       {cards.map((card) => (
         <CapabilityCard
           className="sm:min-w-[35%] min-w-[70%]"
@@ -65,19 +65,19 @@ export default function Features() {
       </section>
 
       {/* AI Assistant */}
-      <section id="virtual-agent" class="relative overflow-hidden px-8 py-12">
+      <section id="virtual-agent" className="relative overflow-hidden px-8 py-12">
 
         <h2 className="text-4xl font-normal text-center mb-2 text-white">
           {t("features.sections.aiAgent.title")}
         </h2>
 
-        <p className="text-xl font-light mb-8 text-center text-gray-400 mx-[15%]">
+        <p className="text-xl font-light mb-8 text-center text-gray-400 lg:mx-[15%]">
           {t("features.sections.aiAgent.subtitle")}
         </p>
 
         <div className="border-t mb-8 border-gray-800" />
 
-        <div className="mx-[15%] pb-5 text-xl">
+        <div className="lg:mx-[15%] pb-5 text-xl">
           {t("features.sections.aiAgent.description")}
         </div>
 
@@ -107,7 +107,7 @@ export default function Features() {
         />
 
         <SymmetricalChecklist
-          className="mx-[15%]"
+          className="lg:mx-[15%]"
           heading={t("features.sections.aiAgent.advantages.title")}
           items={t("features.sections.aiAgent.advantages.items", { returnObjects: true })}
         />
@@ -128,13 +128,13 @@ export default function Features() {
           {t("features.sections.cybersecurity.title")}
         </h2>
 
-        <p className="text-xl font-light mb-8 text-center text-gray-400 mx-[15%]">
+        <p className="text-xl font-light mb-8 text-center text-gray-400 lg:mx-[15%]">
           {t("features.sections.cybersecurity.subtitle")}
         </p>
 
         <div className="border-t mb-8 border-gray-800" />
 
-        <div className="mx-[15%] pb-5 text-xl">
+        <div className="lg:mx-[15%] pb-5 text-xl">
           {t("features.sections.cybersecurity.description")}
         </div>
 
@@ -164,7 +164,7 @@ export default function Features() {
         />
 
         <SymmetricalChecklist
-          className="mx-[15%]"
+          className="lg:mx-[15%]"
           heading={t("features.sections.cybersecurity.advantages.title")}
           items={t("features.sections.cybersecurity.advantages.items", { returnObjects: true })}
         />
@@ -176,13 +176,13 @@ export default function Features() {
           {t("features.sections.textAgent.title")}
         </h2>
 
-        <p className="text-xl font-light mb-8 text-center text-gray-400 mx-[15%]">
+        <p className="text-xl font-light mb-8 text-center text-gray-400 lg:mx-[15%]">
           {t("features.sections.textAgent.subtitle")}
         </p>
 
         <div className="border-t mb-8 border-gray-800" />
 
-        <div className="mx-[15%] pb-5 text-xl">
+        <div className="lg:mx-[15%] pb-5 text-xl">
           {t("features.sections.textAgent.description")}
         </div>
 
@@ -212,7 +212,7 @@ export default function Features() {
         />
 
         <SymmetricalChecklist
-          className="mx-[15%]"
+          className="lg:mx-[15%]"
           heading={t("features.sections.textAgent.advantages.title")}
           items={t("features.sections.textAgent.advantages.items", { returnObjects: true })}
         />
@@ -224,13 +224,13 @@ export default function Features() {
           {t("features.sections.vpn.title")}
         </h2>
 
-        <p className="text-xl font-light mb-8 text-center text-gray-400 mx-[15%]">
+        <p className="text-xl font-light mb-8 text-center text-gray-400 lg:mx-[15%]">
           {t("features.sections.vpn.subtitle")}
         </p>
 
         <div className="border-t mb-8 border-gray-800" />
 
-        <div className="mx-[15%] pb-5 text-xl">
+        <div className="lg:mx-[15%] pb-5 text-xl">
           {t("features.sections.vpn.description")}
         </div>
 
@@ -260,14 +260,14 @@ export default function Features() {
         />
 
         <SymmetricalChecklist
-          className="mx-[15%]"
+          className="lg:mx-[15%]"
           heading={t("features.sections.vpn.advantages.title")}
           items={t("features.sections.vpn.advantages.items", { returnObjects: true })}
         />
       </section>
 
       {/* ---------- RECAP ---------- */}
-      <section className="relative overflow-hidden px-8 py-12 mx-[15%]">
+      <section className="relative overflow-hidden px-8 py-12 lg:mx-[15%]">
 
         <h2 className="text-4xl font-normal text-center mb-2 text-white">
           {t("features.sections.recap.title")}
@@ -292,7 +292,7 @@ export default function Features() {
               }[key]}
               label={t(`features.sections.recap.cards.${key}.label`)}
               description={t(`features.sections.recap.cards.${key}.description`)}
-              className="sm:min-w-[35%] min-w-[70%] max-w-[50%]"
+              className="lg:min-w-[35%] lg:max-w-[50%]"
             />
           ))}
         </div>

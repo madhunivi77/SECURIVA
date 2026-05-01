@@ -74,7 +74,7 @@ export default function Cybersecurity() {
 
       {/* ---------- VIDEO ---------- */}
       <section className="relative overflow-hidden">
-        <div className="relative w-full h-[400px] overflow-hidden bg-black mx-auto">
+        <div className="relative w-full lg:h-[400px] overflow-hidden bg-black mx-auto">
           <video
             autoPlay
             loop
@@ -101,7 +101,7 @@ export default function Cybersecurity() {
       </section>
 
       {/* ---------- FUNDAMENTALS ---------- */}
-      <section className="flex flex-col gap-5 mb-5 -mt-20 mx-[15%]">
+      <section className="flex flex-col gap-5 mb-5 lg:-mt-20 mx-[15%]">
         <h2 className="subheading pt-10 mb-12 text-center">
           {t("cybersecurity.fundamentals.title")}
         </h2>

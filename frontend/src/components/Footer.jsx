@@ -37,11 +37,25 @@ export default function Footer() {
             display: grid;
             grid-template-columns: 1fr;
             gap: 32px;
+            justify-items: start;
+            justify-content: center;
+            width: fit-content;
+            margin: 0 auto; /* centers the whole block */
           }
 
           @media (min-width: 768px) {
             .sec-footer-grid {
+              grid-template-columns: repeat(2, 2fr);
+              justify-items: center;
+              width: auto;
+            }
+          }
+
+          @media (min-width: 1024px) {
+            .sec-footer-grid {
               grid-template-columns: repeat(4, 1fr);
+              justify-items: center;
+              width: auto;
             }
           }
 

@@ -132,7 +132,7 @@ export default function Platform() {
             </section>
 
             <section className="relative overflow-hidden">
-                <div className="relative w-full h-[500px] overflow-hidden bg-black mx-auto">
+                <div className="relative w-full lg:h-[500px] overflow-hidden bg-black mx-auto">
                     <video
                         autoPlay
                         loop
@@ -162,7 +162,7 @@ export default function Platform() {
                 </div>
             </section>
 
-            <section className="px-8 pb-16 mx-[15%]">
+            <section className="px-8 pb-16 lg:mx-[15%] pt-10 lg:pt-0">
 
                 <h2 className="text-center text-3xl font-normal mb-3 text-white">
                     {t("platform.components.title")}
