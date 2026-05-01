@@ -51,6 +51,7 @@ import DataProcessingAgreement from './pages/DataProcessingAgreement.jsx';
 import CookiePolicy from './pages/CookiePolicy.jsx';
 import SecurityPolicy from './pages/SecurityPolicy.jsx';
 import ComplianceOverview from './pages/ComplianceOverview.jsx';
+import ComingSoon from './pages/ComingSoon.jsx';
 
 const router = createBrowserRouter([
   {
@@ -185,6 +186,10 @@ const router = createBrowserRouter([
       {
         path: "/compliance-overview",
         element: <ComplianceOverview/>
+      },
+      {
+        path: "/comingsoon",
+        element: <ComingSoon/>
       }
     ]
   },
