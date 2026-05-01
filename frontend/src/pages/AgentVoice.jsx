@@ -6,7 +6,7 @@ import { useTranslation } from "react-i18next";
 export default function AgentVoice({ }) {
     const { t } = useTranslation();
     return (
-        <div className="min-h-screen bg-gray-100 dark:bg-gray-900">
+        <div className="min-h-screen bg-gray-900">
 
             {/* ---------- HERO ---------- */}
             <section className="hero pt-24 bg-linear-to-br bg-[#0a0f1f] text-white">
@@ -21,7 +21,7 @@ export default function AgentVoice({ }) {
             </section>
 
             <section className="relative overflow-hidden">
-                <div className="relative w-full h-[500px] overflow-hidden bg-black mx-auto">
+                <div className="relative w-full lg:h-[500px] overflow-hidden bg-black mx-auto">
                     <video
                         autoPlay
                         loop
@@ -167,7 +167,7 @@ export default function AgentVoice({ }) {
                             {t("agentVoice.capabilities.commands.items", { returnObjects: true }).map((item, index) => (
                                 <span
                                     key={item}
-                                    className="inline-flex items-center gap-1.5 rounded-lg bg-blue-50 border border-blue-100 px-3 py-1 text-lg text-blue-700 dark:bg-blue-950 dark:border-blue-900 dark:text-blue-300"
+                                    className="inline-flex items-center gap-1.5 rounded-lg border px-3 py-1 text-lg bg-blue-950 border-blue-900 text-blue-300"
                                 >
                                     <p className="text-lg">
                                         {index + 1}. {item}

@@ -3,9 +3,14 @@ MCP Client Connection Pool.
 
 Manages persistent per-user MCP connections with tool caching
 to eliminate per-request connection overhead (~100-300ms savings).
+
+Each user has one connection to the internal MCP server and, if
+COMPOSIO_API_KEY is set, a second connection to Composio's tool
+router. Tools from both are merged into a single catalog.
 """
 
 import asyncio
+import os
 import time
 from dataclasses import dataclass, field
 from mcp import ClientSession
@@ -15,6 +20,50 @@ from .chat_handler import get_mcp_auth_token
 
 from ..config.settings import settings
 MCP_SERVER_URL = settings.MCP_SERVER_URL
+
+COMPOSIO_ENABLED = bool(os.getenv("COMPOSIO_API_KEY"))
+_composio_client = None
+if COMPOSIO_ENABLED:
+    try:
+        from composio import Composio
+        _composio_client = Composio()
+    except Exception as e:
+        print(f"[MCP_POOL] Composio import failed, disabling: {e}")
+        COMPOSIO_ENABLED = False
+
+# Tool filters for A/B testing internal vs Composio coverage
+_GMAIL_TOOL_NAMES = {
+    "listEmails",
+    "createGmailDraft",
+    "listGmailDrafts",
+    "editGmailDraft",
+    "getEmailBodies",
+    "summarizeEmail",
+    "summarizeRecentEmails",
+}
+_DISABLED_TOOL_NAMES: set[str] = set()
+if os.getenv("DISABLE_INTERNAL_GMAIL", "").lower() in ("1", "true", "yes"):
+    _DISABLED_TOOL_NAMES |= _GMAIL_TOOL_NAMES
+# Free-form comma list (for future overrides)
+for name in filter(None, (s.strip() for s in os.getenv("DISABLED_TOOLS", "").split(","))):
+    _DISABLED_TOOL_NAMES.add(name)
+
+# Hard kill switch: drop all tools from the internal MCP server (Composio-only mode)
+_DISABLE_ALL_INTERNAL = os.getenv("DISABLE_ALL_INTERNAL_TOOLS", "").lower() in ("1", "true", "yes")
+
+
+def _filter_disabled(tools):
+    if _DISABLE_ALL_INTERNAL:
+        if tools:
+            print(f"[MCP_POOL] Dropping all {len(tools)} internal tools (DISABLE_ALL_INTERNAL_TOOLS=true)")
+        return []
+    if not _DISABLED_TOOL_NAMES:
+        return tools
+    kept = [t for t in tools if getattr(t, "name", None) not in _DISABLED_TOOL_NAMES]
+    dropped = len(tools) - len(kept)
+    if dropped:
+        print(f"[MCP_POOL] Filtered {dropped} disabled tools")
+    return kept
 
 # How long before we refresh cached tools (seconds)
 TOOL_CACHE_TTL = 300  # 5 minutes
@@ -38,6 +87,9 @@ class MCPConnection:
     _context_stack: object = None  # AsyncExitStack — kept for ref, but NOT safe to aclose() cross-task
     _read_stream: object = None   # anyio memory stream (safe to close from any task)
     _write_stream: object = None  # anyio memory stream (safe to close from any task)
+    _composio_session: ClientSession | None = None
+    _composio_read_stream: object = None
+    _composio_write_stream: object = None
 
     def touch(self):
         self.last_used = time.monotonic()
@@ -108,7 +160,13 @@ class MCPClientPool:
 
                     # Refresh tools if cache expired
                     if conn.tools_expired:
-                        conn.tools = await load_mcp_tools(conn.session)
+                        refreshed = _filter_disabled(await load_mcp_tools(conn.session))
+                        if conn._composio_session is not None:
+                            try:
+                                refreshed = refreshed + await load_mcp_tools(conn._composio_session)
+                            except Exception as e:
+                                print(f"[MCP_POOL] Composio tool refresh failed for user={user_id}: {e}")
+                        conn.tools = refreshed
                         conn.tools_loaded_at = time.monotonic()
                         print(f"[MCP_POOL] Refreshed tools for user={user_id} ({len(conn.tools)} tools)")
 
@@ -145,8 +203,32 @@ class MCPClientPool:
             session = await stack.enter_async_context(ClientSession(read, write))
             await session.initialize()
 
-            # Load tools
-            tools = await load_mcp_tools(session)
+            # Load internal tools
+            tools = _filter_disabled(await load_mcp_tools(session))
+
+            # Optionally connect to Composio as a second MCP server
+            composio_session = None
+            composio_read = None
+            composio_write = None
+            composio_tool_count = 0
+            if COMPOSIO_ENABLED and _composio_client is not None:
+                try:
+                    composio_session_info = _composio_client.create(user_id=user_id)
+                    c_read, c_write, _ = await stack.enter_async_context(
+                        streamablehttp_client(
+                            composio_session_info.mcp.url,
+                            headers=composio_session_info.mcp.headers,
+                        )
+                    )
+                    composio_session = await stack.enter_async_context(ClientSession(c_read, c_write))
+                    await composio_session.initialize()
+                    composio_tools = await load_mcp_tools(composio_session)
+                    tools = tools + composio_tools
+                    composio_read = c_read
+                    composio_write = c_write
+                    composio_tool_count = len(composio_tools)
+                except Exception as e:
+                    print(f"[MCP_POOL] Composio connection failed for user={user_id} (continuing without): {e}")
 
             now = time.monotonic()
             conn = MCPConnection(
@@ -159,12 +241,18 @@ class MCPClientPool:
                 _context_stack=stack,
                 _read_stream=read,
                 _write_stream=write,
+                _composio_session=composio_session,
+                _composio_read_stream=composio_read,
+                _composio_write_stream=composio_write,
             )
 
             self._connections[user_id] = conn
 
             elapsed = (time.perf_counter() - t0) * 1000
-            print(f"[MCP_POOL] New connection for user={user_id} | {len(tools)} tools | {elapsed:.0f}ms")
+            print(
+                f"[MCP_POOL] New connection for user={user_id} | "
+                f"{len(tools)} tools total ({composio_tool_count} composio) | {elapsed:.0f}ms"
+            )
             return conn
 
         except Exception:
@@ -189,7 +277,13 @@ class MCPClientPool:
         """
         conn = self._connections.pop(user_id, None)
         if conn:
-            for stream in (conn._read_stream, conn._write_stream):
+            streams = (
+                conn._read_stream,
+                conn._write_stream,
+                conn._composio_read_stream,
+                conn._composio_write_stream,
+            )
+            for stream in streams:
                 if stream:
                     try:
                         await stream.aclose()

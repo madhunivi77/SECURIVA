@@ -11,7 +11,7 @@ export default function Footer() {
     <div>
       <footer
         style={{
-          background: "#052050",
+          background: "#052050", // BLUE main footer
           color: textColor,
           width: "100%",
           flexShrink: 0,
@@ -25,6 +25,7 @@ export default function Footer() {
           />
         </div>
 
+
         <style>{`
           .sec-footer-inner {
             max-width: 1200px;
@@ -36,11 +37,25 @@ export default function Footer() {
             display: grid;
             grid-template-columns: 1fr;
             gap: 32px;
+            justify-items: start;
+            justify-content: center;
+            width: fit-content;
+            margin: 0 auto; /* centers the whole block */
           }
 
           @media (min-width: 768px) {
             .sec-footer-grid {
-              grid-template-columns: repeat(3, 1fr);
+              grid-template-columns: repeat(2, 2fr);
+              justify-items: center;
+              width: auto;
+            }
+          }
+
+          @media (min-width: 1024px) {
+            .sec-footer-grid {
+              grid-template-columns: repeat(4, 1fr);
+              justify-items: center;
+              width: auto;
             }
           }
 
@@ -73,6 +88,17 @@ export default function Footer() {
         {/* Main footer */}
         <div className="sec-footer-inner">
           <div className="sec-footer-grid">
+
+            {/* Features */}
+            <div className="sec-footer-col">
+              <Link to={"/features"}><h2>{t("footer.features.title")}</h2></Link>
+              <ul>
+                <li><Link to='/agent-voice'>{t("footer.features.items.virtualagent")}</Link></li>
+                <li><Link to='/cybersecurity'>{t("footer.features.items.cybersecurity")}</Link></li>
+                <li><Link to='/agent-text'>{t("footer.features.items.textagent")}</Link></li>
+                <li><Link to='/vpn'>{t("footer.features.items.vpn")}</Link></li>
+              </ul>
+            </div>
 
             {/* Industries */}
             <div className="sec-footer-col">
@@ -136,26 +162,26 @@ export default function Footer() {
               <h2>{t("footer.resources.title")}</h2>
 
               <ul>
-                <li><a href="#">{t("footer.resources.items.blog")}</a></li>
-                <li><a href="#">{t("footer.resources.items.ebooks")}</a></li>
-                <li><a href="#">{t("footer.resources.items.affiliates")}</a></li>
-                <li><a href="#">{t("footer.resources.items.partnerships")}</a></li>
-                <li><a href="#">{t("footer.resources.items.mediaKit")}</a></li>
-                <li><a href="#">{t("footer.resources.items.webinars")}</a></li>
-                <li><a href="#">{t("footer.resources.items.apiDocs")}</a></li>
+                <li><Link to={"/comingsoon"}>{t("footer.resources.items.blog")}</Link></li>
+                <li><Link to={"/comingsoon"}>{t("footer.resources.items.ebooks")}</Link></li>
+                <li><Link to={"/comingsoon"}>{t("footer.resources.items.affiliates")}</Link></li>
+                <li><Link to={"/contact"}>{t("footer.resources.items.partnerships")}</Link></li>
+                <li><Link to={"/comingsoon"}>{t("footer.resources.items.mediaKit")}</Link></li>
+                <li><Link to={"/comingsoon"}>{t("footer.resources.items.webinars")}</Link></li>
+                <li><Link to={"/comingsoon"}>{t("footer.resources.items.apiDocs")}</Link></li>
               </ul>
             </div>
 
             {/* Legal */}
             <div className="sec-footer-col">
-              <h2>{t("footer.legal.title")}</h2>
-
+              <h2>Legal</h2>
               <ul>
-                <li><a href="#">{t("footer.legal.items.privacy")}</a></li>
-                <li><a href="#">{t("footer.legal.items.terms")}</a></li>
-                <li><a href="#">{t("footer.legal.items.dataProtection")}</a></li>
-                <li><a href="#">{t("footer.legal.items.cookies")}</a></li>
-                <li><a href="#">{t("footer.legal.items.accessibility")}</a></li>
+                <Link to={"/privacy-policy"}><li>{t("footer.legal.items.privacy")}</li></Link>
+                <Link to={"/terms-of-service"}><li>{t("footer.legal.items.terms")}</li></Link>
+                <Link to={"/data-processing-agreement"}><li>{t("footer.legal.items.dataProtection")}</li></Link>
+                <Link to={"/cookie-policy"}><li>{t("footer.legal.items.cookies")}</li></Link>
+                <Link to={"/security-policy"}><li>{t("footer.legal.items.securityPolicy")}</li></Link>
+                <Link to={"/compliance-overview"}><li>{t("footer.legal.items.complianceOverview")}</li></Link>
               </ul>
             </div>
 

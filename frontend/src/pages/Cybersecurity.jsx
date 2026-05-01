@@ -56,7 +56,7 @@ export default function Cybersecurity() {
   ];
 
   return (
-    <div className="min-h-screen bg-gray-100 dark:bg-gray-900">
+    <div className="min-h-screen bg-gray-900">
 
       {/* ---------- HERO ---------- */}
       <section className="hero py-24 bg-linear-to-br bg-[#0a0f1f] text-white">
@@ -74,7 +74,7 @@ export default function Cybersecurity() {
 
       {/* ---------- VIDEO ---------- */}
       <section className="relative overflow-hidden">
-        <div className="relative w-full h-[400px] overflow-hidden bg-black mx-auto">
+        <div className="relative w-full lg:h-[400px] overflow-hidden bg-black mx-auto">
           <video
             autoPlay
             loop
@@ -101,7 +101,7 @@ export default function Cybersecurity() {
       </section>
 
       {/* ---------- FUNDAMENTALS ---------- */}
-      <section className="flex flex-col gap-5 mb-5 -mt-20 mx-[15%]">
+      <section className="flex flex-col gap-5 mb-5 lg:-mt-20 mx-[15%]">
         <h2 className="subheading pt-10 mb-12 text-center">
           {t("cybersecurity.fundamentals.title")}
         </h2>
@@ -156,7 +156,7 @@ export default function Cybersecurity() {
           label={t("cybersecurity.core.title")}
           content={
             <div>
-              <h3 className="text-lg text-gray-500 my-3 dark:text-gray-400">
+              <h3 className="text-lg my-3 text-gray-400">
                 {t("cybersecurity.core.framework.title")}
               </h3>
 
@@ -165,7 +165,7 @@ export default function Cybersecurity() {
                 size="3.5"
               />
 
-              <h3 className="text-lg text-gray-500 my-3 dark:text-gray-400">
+              <h3 className="text-lg my-3 text-gray-400">
                 {t("cybersecurity.core.monitoring.title")}
               </h3>
 
@@ -225,11 +225,11 @@ export default function Cybersecurity() {
 
       {/* ---------- CTA ---------- */}
       <section className="px-8 py-16 text-center">
-        <h2 className="text-4xl font-normal text-gray-900 mb-3 dark:text-white">
+        <h2 className="text-4xl font-normal mb-3 text-white">
           {t("cybersecurity.cta.title")}
         </h2>
 
-        <p className="text-2xl font-light text-gray-500 mb-10 max-w-xl mx-auto dark:text-gray-400">
+        <p className="text-2xl font-light mb-10 max-w-xl mx-auto text-gray-400">
           {t("cybersecurity.cta.description")}
         </p>
 

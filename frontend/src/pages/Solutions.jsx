@@ -150,7 +150,7 @@ export default function Solutions() {
       </section>
 
       {/* SOLUTIONS */}
-      <section className="flex flex-col gap-6 mx-[15%] my-10">
+      <section className="flex flex-col gap-6 px-5 lg:mx-[15%] my-10">
         {solutions.map((solution) => (
           <SolutionCard key={solution.number} {...solution} />
         ))}
@@ -160,10 +160,10 @@ export default function Solutions() {
       <section className="px-8 py-16 max-w-6xl mx-auto">
 
         <div className="text-center mb-10">
-          <h2 className="text-4xl font-normal text-gray-900 mb-3 dark:text-white">
+          <h2 className="text-4xl font-normal mb-3 text-white">
             {t("solutions.reasonsTitle")}
           </h2>
-          <p className="text-[15px] font-light text-gray-500 max-w-xl mx-auto leading-relaxed dark:text-gray-400">
+          <p className="text-[15px] font-light max-w-xl mx-auto leading-relaxed text-gray-400">
             {t("solutions.reasonsSubtitle")}
           </p>
         </div>
@@ -174,8 +174,8 @@ export default function Solutions() {
           ))}
         </div>
 
-        <div className="rounded-2xl border border-blue-100 bg-blue-50 px-8 py-6 text-center dark:border-blue-900 dark:bg-blue-950">
-          <p className="text-[15px] font-light italic text-blue-700 dark:text-blue-300">
+        <div className="rounded-2xl border px-8 py-6 text-center border-blue-900 bg-blue-950">
+          <p className="text-[15px] font-light italic text-blue-300">
             {t("solutions.quote")}
           </p>
         </div>
