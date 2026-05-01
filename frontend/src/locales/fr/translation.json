@@ -1,4 +1,8 @@
 {
+  "comingsoon": {
+    "title": "À venir",
+    "subtext": "Cette page est actuellement en cours de développement, mais revenez plus tard pour découvrir davantage de contenu."
+  },
   "about": {
     "hero": {
       "title": "À propos",
@@ -1265,6 +1269,15 @@
     }
   },
   "footer": {
+    "features": {
+      "title": "Caractéristiques",
+      "items": {
+        "virtualagent": "Agent virtuel",
+        "cybersecurity": "Cybersécurité",
+        "textagent": "Agent de messagerie texte",
+        "vpn": "VPN"
+      }
+    },
     "industries": {
       "title": "Secteurs",
       "items": {

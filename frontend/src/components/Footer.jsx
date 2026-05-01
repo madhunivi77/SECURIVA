@@ -91,12 +91,12 @@ export default function Footer() {
 
             {/* Features */}
             <div className="sec-footer-col">
-              <Link to={"/features"}><h2>Features</h2></Link>
+              <Link to={"/features"}><h2>{t("footer.features.title")}</h2></Link>
               <ul>
-                <li><HashLink smooth scroll={scrollWithOffset} to='/features/#virtual-agent'>Virtual Agent</HashLink></li>
-                <li><HashLink smooth scroll={scrollWithOffset} to='/features/#cybersecurity'>Cybersecurity</HashLink></li>
-                <li><HashLink smooth scroll={scrollWithOffset} to='/features/#text-agent'>Text Agent</HashLink></li>
-                <li><HashLink smooth scroll={scrollWithOffset} to='/features/#vpn'>VPN Secure Access</HashLink></li>
+                <li><Link to='/agent-voice'>{t("footer.features.items.virtualagent")}</Link></li>
+                <li><Link to='/cybersecurity'>{t("footer.features.items.cybersecurity")}</Link></li>
+                <li><Link to='/agent-text'>{t("footer.features.items.textagent")}</Link></li>
+                <li><Link to='/vpn'>{t("footer.features.items.vpn")}</Link></li>
               </ul>
             </div>
 
@@ -162,13 +162,13 @@ export default function Footer() {
               <h2>{t("footer.resources.title")}</h2>
 
               <ul>
-                <li><a href="#">{t("footer.resources.items.blog")}</a></li>
-                <li><a href="#">{t("footer.resources.items.ebooks")}</a></li>
-                <li><a href="#">{t("footer.resources.items.affiliates")}</a></li>
-                <li><a href="#">{t("footer.resources.items.partnerships")}</a></li>
-                <li><a href="#">{t("footer.resources.items.mediaKit")}</a></li>
-                <li><a href="#">{t("footer.resources.items.webinars")}</a></li>
-                <li><a href="#">{t("footer.resources.items.apiDocs")}</a></li>
+                <li><Link to={"/comingsoon"}>{t("footer.resources.items.blog")}</Link></li>
+                <li><Link to={"/comingsoon"}>{t("footer.resources.items.ebooks")}</Link></li>
+                <li><Link to={"/comingsoon"}>{t("footer.resources.items.affiliates")}</Link></li>
+                <li><Link to={"/contact"}>{t("footer.resources.items.partnerships")}</Link></li>
+                <li><Link to={"/comingsoon"}>{t("footer.resources.items.mediaKit")}</Link></li>
+                <li><Link to={"/comingsoon"}>{t("footer.resources.items.webinars")}</Link></li>
+                <li><Link to={"/comingsoon"}>{t("footer.resources.items.apiDocs")}</Link></li>
               </ul>
             </div>
 
