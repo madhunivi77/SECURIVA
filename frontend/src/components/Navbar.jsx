@@ -53,7 +53,7 @@ export default function Navbar() {
           />
 
           {/* Desktop: language switcher + CTA */}
-          <div className="hidden md:flex justify-end p-4 gap-4">
+          <div className="hidden desktop:flex justify-end p-4 gap-4">
             <LanguageSwitcher />
             <Link to={"/contact"}>
               <button className="w-60 h-13.5 bg-red-500 text-white">
@@ -64,7 +64,7 @@ export default function Navbar() {
 
           {/* Hamburger button (mobile only) */}
           <button
-            className="md:hidden flex flex-col justify-center items-center gap-1.5 bg-transparent border-none cursor-pointer p-2 ml-auto"
+            className="desktop:hidden flex flex-col justify-center items-center gap-1.5 bg-transparent border-none cursor-pointer p-2 ml-auto"
             onClick={() => setMenuOpen((prev) => !prev)}
             aria-label="Toggle menu"
           >
@@ -113,7 +113,7 @@ export default function Navbar() {
       )}
 
       {/* LOWER NAV BAR (desktop only) */}
-      <div className="hidden md:flex shrink-0 py-3 px-5 justify-between w-full flex-wrap box-border bg-black">
+      <div className="hidden desktop:flex shrink-0 py-3 px-5 justify-between w-full flex-wrap box-border bg-black">
         {!isAuthenticated ? (
           <div className="flex justify-between flex-1 pl-14">
             <div className="flex gap-2.5">
@@ -152,7 +152,7 @@ export default function Navbar() {
 
       {/* MOBILE MENU */}
       {menuOpen && (
-        <div className="md:hidden flex flex-col w-full bg-black border-t border-[#222] px-6 pt-4 pb-6 gap-2 h-screen">
+        <div className="desktop:hidden flex flex-col w-full bg-black border-t border-[#222] px-6 pt-4 pb-6 gap-2 h-screen">
           {/* Language + CTA */}
           <div className="flex flex-col gap-3 pb-4 border-b border-[#222]">
             <LanguageSwitcher />

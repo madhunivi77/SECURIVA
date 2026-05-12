@@ -162,7 +162,7 @@ export default function Footer() {
               <h2>{t("footer.resources.title")}</h2>
 
               <ul>
-                <li><Link to={"/comingsoon"}>{t("footer.resources.items.blog")}</Link></li>
+                <li><Link to={"/blog"}>{t("footer.resources.items.blog")}</Link></li>
                 <li><Link to={"/comingsoon"}>{t("footer.resources.items.ebooks")}</Link></li>
                 <li><Link to={"/comingsoon"}>{t("footer.resources.items.affiliates")}</Link></li>
                 <li><Link to={"/contact"}>{t("footer.resources.items.partnerships")}</Link></li>

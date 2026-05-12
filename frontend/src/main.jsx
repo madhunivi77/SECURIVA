@@ -52,6 +52,8 @@ import CookiePolicy from './pages/CookiePolicy.jsx';
 import SecurityPolicy from './pages/SecurityPolicy.jsx';
 import ComplianceOverview from './pages/ComplianceOverview.jsx';
 import ComingSoon from './pages/ComingSoon.jsx';
+import Blog from './pages/Blog.jsx';
+import ShowcasePost from './pages/blog_posts/ShowcasePost.jsx';
 
 const router = createBrowserRouter([
   {
@@ -87,37 +89,37 @@ const router = createBrowserRouter([
         element: <UserProfile />,
       },
       {
-        path:"/admin/security",
-        element:<AdminSecurity/>,
+        path: "/admin/security",
+        element: <AdminSecurity />,
       },
       {
-        path:"/admin/settings",
-        element:<AdminSettings/>,
+        path: "/admin/settings",
+        element: <AdminSettings />,
       },
       {
-        path:"/admin/notifications",
-        element:<AdminNotifications/>,
+        path: "/admin/notifications",
+        element: <AdminNotifications />,
       },
 
       {
-        path:"/admin/activity",
-        element:<AdminActivity/>,
+        path: "/admin/activity",
+        element: <AdminActivity />,
       },
       {
-        path:"/admin/integrations",
-        element:<AdminIntegrations/>,
+        path: "/admin/integrations",
+        element: <AdminIntegrations />,
       },
       {
-        path:"/admin/payments",
-        element: <AdminPayments/>,
+        path: "/admin/payments",
+        element: <AdminPayments />,
       },
       {
-        path:"/admin/content",
-        element:<AdminContent/>,
+        path: "/admin/content",
+        element: <AdminContent />,
       },
       {
-        path:"/admin/analytics",
-        element:<AdminAnalytics/>,
+        path: "/admin/analytics",
+        element: <AdminAnalytics />,
       },
       {
         path: "/pricing",
@@ -162,34 +164,47 @@ const router = createBrowserRouter([
       {
         path: "/vpn",
         element: <VPN />
-      }, 
+      },
       {
         path: "/privacy-policy",
-        element: <PrivacyPolicy/>
+        element: <PrivacyPolicy />
       },
       {
         path: "/terms-of-service",
-        element: <TermsOfService/>
+        element: <TermsOfService />
       },
       {
         path: "/data-processing-agreement",
-        element: <DataProcessingAgreement/>
+        element: <DataProcessingAgreement />
       },
       {
         path: "/cookie-policy",
-        element: <CookiePolicy/>
+        element: <CookiePolicy />
       },
       {
         path: "/security-policy",
-        element: <SecurityPolicy/>
+        element: <SecurityPolicy />
       },
       {
         path: "/compliance-overview",
-        element: <ComplianceOverview/>
+        element: <ComplianceOverview />
       },
       {
         path: "/comingsoon",
-        element: <ComingSoon/>
+        element: <ComingSoon />
+      },
+      {
+        path: "/blog",
+        children: [
+          {
+            index: true,
+            element: <Blog />
+          },
+          {
+            path: "showcase",
+            element: <ShowcasePost />
+          }
+        ]
       }
     ]
   },
