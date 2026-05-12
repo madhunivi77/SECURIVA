@@ -61,8 +61,8 @@ function App() {
           width: "100%",
           overflowY: "hidden",
           overflowX: "hidden",
-          paddingTop: "167.5px", // navbar offset
         }}
+        className="pt-[80px] desktop:pt-[167.5px]" // offset navbar
       >
         {/* Pass any context used by App.jsx subpages. If used across other routes, elevate to an AuthContext wrapper in main.jsx */}
         <Outlet context={{}}/>

@@ -25,6 +25,11 @@
   }
 }
 
+@theme {
+  /* Creating a new extra-small breakpoint */
+  --breakpoint-desktop: 1250px;
+}
+
 .glass-button{
   @apply
     relative

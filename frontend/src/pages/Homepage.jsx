@@ -38,10 +38,10 @@ export default function Homepage() {
       {/* ---------- HERO ---------- */}
       <header className="hero">
 
-        <div className="lg:px-20 pt-10 pb-30 flex lg:flex-row flex-col justify-center lg:justify-between items-center lg:items-start">
-          <div className="pb-5 flex flex-col items-center lg:items-start px-5 lg:px-0">
-            <h1 className="text-xl text-center lg:text-left pt-0 text-white font-mono">{t("homepage.hero.title")}</h1>
-            <p className="text-[28px] text-center lg:text-left pt-7.5 pb-10 text-blue-600 font-mono">
+        <div className="desktop:px-20 pt-10 pb-30 flex desktop:flex-row flex-col justify-center desktop:justify-between items-center desktop:items-start">
+          <div className="pb-5 flex flex-col items-center desktop:items-start px-5 desktop:px-0">
+            <h1 className="text-xl text-center desktop:text-left pt-0 text-white font-mono">{t("homepage.hero.title")}</h1>
+            <p className="text-[28px] text-center desktop:text-left pt-7.5 pb-10 text-blue-600 font-mono">
               <span className="text-white text-bold">{t("homepage.hero.brand")}</span> {t("homepage.hero.unifies")} <span className="text-white text-bold">{t("homepage.hero.aiAutomation")}</span>, <span className="text-white text-bold">{t("homepage.hero.cybersecurity")}</span>, <span className="text-white text-bold">{t("homepage.hero.secureCommunication")} </span>
               {t("homepage.hero.into")} <span className="text-white text-bold">{t("homepage.hero.platform")}</span> {t("homepage.hero.tail")}
             </p>
@@ -88,7 +88,7 @@ export default function Homepage() {
         <div className="absolute bottom-0 left-0 w-full h-64 bg-gradient-to-t from-black via-black/60 to-transparent pointer-events-none"></div>
 
         <div id="feature-cards-wrapper" className="relative section-min-height text-center text-black">
-          <div className="mx-5 lg:mx-40 mt-20 bg-[#000020]/90 px-8 py-6 rounded-2xl text-white">
+          <div className="mx-5 lg:mx-40 mt-20 bg-[#000020]/90 px-2 lg:px-8 py-6 rounded-2xl text-white">
             <h2 className="text-[35px] text-center text-white font-mono">{t("homepage.overview.title")}</h2>
             <p className="text-center pt-5 text-2xl text-white font-mono" >{t("homepage.overview.description")}</p>
           </div>
@@ -112,9 +112,9 @@ export default function Homepage() {
       {/* Why Choose SECURIVA */}
       <div className="flex flex-col justify-center items-center lg:items-stretch section-min-height lg:px-20 pb-10 bg-black text-white">
         <h2 className="text-[40px] pt-7.5 text-center font-mono">{t("homepage.why.title")}</h2>
-        <p className="text-center px-20 lg:px-20 pt-5 pb-9 text-2xl font-mono">{t("homepage.why.description")}</p>
+        <p className="text-center px-5 lg:px-20 pt-5 pb-9 text-2xl font-mono">{t("homepage.why.description")}</p>
 
-        <div className="px-20 flex flex-col text-black">
+        <div className="px-5 lg:px-20 flex flex-col text-black">
           <div id="why-cards-wrapper" className="flex flex-1 flex-col justify-center">
             <div id="why-cards" className="flex flex-col lg:flex-row gap-5 ">
 
@@ -224,7 +224,7 @@ export default function Homepage() {
 
       <Sponsors className="bg-white pt-5 text-center text-black text-3xl" />
       {/* ---------- FAQ ---------- */}
-      <section className="px-20 pb-20 pt-10">
+      <section className="px-5 lg:px-20 pb-20 pt-10">
         <h2 className="text-4xl font-mono text-center mb-12">
           {t("homepage.faq.title")}
         </h2>
@@ -287,7 +287,7 @@ export default function Homepage() {
       </section>
 
       {/* ---------- NEWSLETTER SUBSCRIPTION ---------- */}
-      <section className="py-20 px-10 bg-gray-800">
+      <section className="py-20 px-5 lg:px-10 bg-gray-800">
         <div className="max-w-4xl mx-auto">
 
           <h2 className="text-3xl font-bold text-center">

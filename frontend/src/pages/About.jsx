@@ -41,7 +41,7 @@ export default function About() {
           <div className="absolute bottom-0 left-0 w-full h-64 bg-gradient-to-t from-black via-black/60 to-transparent pointer-events-none"></div>
 
           <div className="relative z-5 flex flex-col md:flex-row items-center justify-center gap-8 px-6 py-20">
-            <div className="card shadow-xl backdrop-blur bg-gray-800/90 max-h-200 max-w-200">
+            <div className="card shadow-xl backdrop-blur bg-gray-800/90 max-w-200">
               <div className="card-body  text-xl">
                 <h3 className="card-title text-3xl font-bold text-white mb-6">
                   {t("about.story.title")}
@@ -61,7 +61,7 @@ export default function About() {
               </div>
             </div>
 
-            <div className="card shadow-xl backdrop-blur bg-gray-800/90 min-h-110 max-h-200 max-w-200">
+            <div className="card shadow-xl backdrop-blur bg-gray-800/90 min-h-110 max-w-200">
               <div className="card-body">
                 <h3 className="card-title">{t("about.enterprise.title")}</h3>
                 <ul className="space-y-3 text-gray-300 text-xl">
@@ -83,7 +83,7 @@ export default function About() {
       <section className="bg-black">
         <div className="max-w-6xl mx-auto">
 
-          <h2 className="text-5xl font-bold text-center text-white mb-12">
+          <h2 className="text-5xl font-bold text-center text-white mb-12 px-2">
             {t("about.principles.title")}
           </h2>
 
@@ -134,7 +134,7 @@ export default function About() {
 
           <div
             id="feature-cards"
-            className="flex flex-wrap justify-center gap-12.5 pb-20 pt-9 mx-0"
+            className="flex flex-wrap justify-center gap-12.5 pb-20 pt-9 px-2 lg:px-0"
           >
 
             <Card
