@@ -43,7 +43,7 @@ export default function Support() {
       </section>
 
       {/* SUPPORT AREAS */}
-      <section className="px-20 pt-12 pb-20">
+      <section className="px-5 lg:px-20 pt-12 pb-20">
         <h2 className="text-4xl font-mono text-center mb-12">
           {t("support.sections.supportAreasTitle")}
         </h2>
@@ -147,7 +147,7 @@ export default function Support() {
       </section>
 
       {/* FAQ */}
-      <section className="px-20 pb-20">
+      <section className="px-5 lg:px-20 pb-20">
         <h2 className="text-4xl font-mono text-center mb-12">
           {t("support.sections.faqTitle")}
         </h2>
@@ -170,7 +170,7 @@ export default function Support() {
       </section>
 
       {/* FORM */}
-      <section className="px-20 pb-20">
+      <section className="px-5 lg:px-20 pb-20">
         <div className="max-w-3xl mx-auto bg-[#111633] p-10 rounded-2xl shadow-xl">
 
           <h2 className="text-3xl font-mono mb-6 text-center">
@@ -226,7 +226,7 @@ export default function Support() {
       </section>
 
       {/* COMMITMENT */}
-      <section className="px-20 pb-24 text-center">
+      <section className="px-5 lg:px-20 pb-24 text-center">
         <h2 className="text-3xl font-mono mb-4">
           {t("support.sections.commitmentTitle")}
         </h2>

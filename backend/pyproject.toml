@@ -24,6 +24,10 @@ dependencies = [
     "telesignenterprise>=3.0.0",
     "setuptools>=80.9.0",
     "boto3>=1.42.55",
+    "watchtower>=3.3.0",
+    "composio>=0.11.5",
+    "composio-openai>=0.11.5",
+    "numpy>=2.2.6",
 ]
 
 [tool.setuptools]

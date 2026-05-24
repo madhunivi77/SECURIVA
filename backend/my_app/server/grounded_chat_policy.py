@@ -1,4 +1,5 @@
 import re
+from datetime import datetime
 
 
 GUIDANCE_REQUEST_PATTERN = re.compile(
@@ -6,6 +7,25 @@ GUIDANCE_REQUEST_PATTERN = re.compile(
     r"can i|should i|is it ok|is it okay|explain|why|reasoning|walk me through)\b",
     re.IGNORECASE,
 )
+
+BASE_SYSTEM_PROMPT = """You are SECURIVA, a productivity and compliance assistant.
+
+Tools are how you gather real context. Concrete app tools are provided directly (e.g. GMAIL_FETCH_EMAILS, GOOGLECALENDAR_EVENTS_LIST, GOOGLEDRIVE_LIST_FILES). They're already scoped to apps the user has connected in /integrations. Your job is to USE them liberally — the tool result is your source of truth.
+
+Rules — follow every time:
+1. ACT, DON'T ANNOUNCE. If a tool could help, invoke it immediately this turn. No "Let me fetch that" — just call.
+2. PREFER TRYING A TOOL OVER REFUSING. If the user asks for anything that could plausibly live in their connected apps — emails, files, docs, events, messages, records — pick the most relevant available tool and call it. Don't require an exact name match against the user's wording; tools like GOOGLEDRIVE_LIST_FILES cover vague requests like "get my docs" or "check drive". If the result is useful, use it. If the result is empty or off-topic, just answer naturally without inventing.
+3. NEVER FABRICATE external data. Don't invent email subjects, senders, dates, events, file names, message bodies, or any other app-scoped facts. If you didn't get it from a tool call, don't claim it.
+4. If a tool returns an explicit auth / not-connected error, tell the user briefly to reconnect that specific app. Don't preemptively refuse before trying.
+5. Parameters: pass the minimum needed. For list/fetch tools, reasonable defaults (e.g. max_results=5 unless the user asked for more).
+
+Native capabilities — no tool needed:
+- Summarize, translate, classify, reason, compose, answer math or general-knowledge questions directly.
+- "Summarize my emails" = one fetch tool call, then write the summary yourself.
+
+Be concise. One to three sentences for conversational replies.
+""".strip()
+
 
 GROUNDING_SYSTEM_PROMPT = """You are a cybersecurity and compliance assistant operating in grounded mode.
 
@@ -42,8 +62,35 @@ def should_use_grounded_guidance(messages: list) -> bool:
     return False
 
 
+def _current_time_block() -> str:
+    """
+    Inject the current date/time into every turn. Without this, the LLM
+    defaults to its training-data date when users say 'today', 'yesterday',
+    'this week', etc., which causes calendar/email date-range queries to
+    hit empty 2023/2024 windows and falsely report no results.
+    """
+    now = datetime.now().astimezone()
+    tz_name = now.tzname() or "local"
+    iso_date = now.strftime("%Y-%m-%d")
+    iso_dt = now.strftime("%Y-%m-%dT%H:%M:%S%z")
+    day_name = now.strftime("%A, %B %-d, %Y")
+    return (
+        "Current context (refreshed every turn — use this, not your training "
+        "cutoff, when resolving relative times):\n"
+        f"- Today: {day_name}\n"
+        f"- ISO date: {iso_date}\n"
+        f"- ISO timestamp: {iso_dt}\n"
+        f"- Timezone: {tz_name}\n"
+        "When users say 'today', 'yesterday', 'this week', 'last week', "
+        "'in an hour', etc., compute time_min / time_max / start / end "
+        "parameters relative to the above timestamp. Never use dates from "
+        "before this turn unless the user explicitly asks for a historical "
+        "range."
+    )
+
+
 def prepare_messages_for_agent(messages: list) -> list:
-    """Add a grounding system prompt without mutating the caller's message list."""
+    """Always prepend the base system prompt; add grounding guidance on top for how-to questions."""
     prepared_messages = []
     for message in messages:
         if isinstance(message, dict):
@@ -51,11 +98,14 @@ def prepare_messages_for_agent(messages: list) -> list:
         else:
             prepared_messages.append(message)
 
-    if not should_use_grounded_guidance(prepared_messages):
-        return prepared_messages
+    system_content = f"{BASE_SYSTEM_PROMPT}\n\n{_current_time_block()}"
+    if should_use_grounded_guidance(prepared_messages):
+        system_content = f"{system_content}\n\n{GROUNDING_SYSTEM_PROMPT}"
 
+    # Merge into existing system message, or prepend a new one
     if prepared_messages and isinstance(prepared_messages[0], dict) and prepared_messages[0].get("role") == "system":
-        prepared_messages[0]["content"] = f"{prepared_messages[0].get('content', '').strip()}\n\n{GROUNDING_SYSTEM_PROMPT}".strip()
+        existing = prepared_messages[0].get("content", "").strip()
+        prepared_messages[0]["content"] = f"{existing}\n\n{system_content}".strip() if existing else system_content
         return prepared_messages
 
-    return [{"role": "system", "content": GROUNDING_SYSTEM_PROMPT}, *prepared_messages]
+    return [{"role": "system", "content": system_content}, *prepared_messages]

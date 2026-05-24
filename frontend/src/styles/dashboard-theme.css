@@ -1,0 +1,176 @@
+/* ──────────────────────────────────────────────────────────────
+   Securiva dashboard theme — Mono-Tech Dark
+   Matches the public site: dark navy surfaces · Geist Mono type
+   · red CTAs · electric-blue secondary accent
+   Scoped to .sv-theme so it doesn't leak to the public routes.
+   ────────────────────────────────────────────────────────────── */
+
+.sv-theme {
+  /* Accents */
+  --securiva-red: #ef4444;
+  --securiva-red-hover: #dc2626;
+  --securiva-red-dim: rgba(239, 68, 68, 0.12);
+  --securiva-blue: #2563eb;
+  --securiva-blue-hover: #60a5fa;
+
+  /* Dark navy surface scale (matches public site) */
+  --bg-deep: #05091a;
+  --bg: #0a0f1f;
+  --bg-elev: #111633;
+  --bg-elev-2: #161d3f;
+  --bg-hover: rgba(255, 255, 255, 0.04);
+
+  /* Hairlines */
+  --border: #1c2a44;
+  --border-soft: rgba(28, 42, 68, 0.6);
+
+  /* Ink */
+  --ink: #f5f7ff;
+  --ink-muted: #9fb0d5;
+  --ink-soft: #6b7ca5;
+  --ink-dim: #4a567d;
+
+  /* Legacy aliases — so existing references keep working */
+  --ivory: var(--bg);
+  --ivory-2: var(--bg-elev);
+  --ivory-3: var(--border);
+
+  /* Type */
+  --font-mono: "Geist Mono", ui-monospace, SFMono-Regular, "SF Mono", Menlo,
+    monospace;
+  --font-sans: "Geist Mono", ui-monospace, SFMono-Regular, "SF Mono", Menlo,
+    monospace;
+  --mono: var(--font-mono);
+  --serif: var(--font-mono); /* legacy alias — no serif in this theme */
+}
+
+/* ── Reusable red CTA ─────────────────────────────────────── */
+.sv-cta {
+  display: inline-flex;
+  align-items: center;
+  gap: 6px;
+  background: var(--securiva-red);
+  color: #fff;
+  font-family: var(--font-mono);
+  font-size: 12.5px;
+  font-weight: 500;
+  padding: 0 14px;
+  height: 32px;
+  border-radius: 6px;
+  letter-spacing: 0.01em;
+  transition: background 150ms ease, transform 150ms ease,
+    box-shadow 150ms ease;
+  border: none;
+  cursor: pointer;
+  box-shadow: 0 0 0 1px rgba(239, 68, 68, 0.3),
+    0 6px 20px -8px rgba(239, 68, 68, 0.5);
+}
+.sv-cta:hover {
+  background: var(--securiva-red-hover);
+  box-shadow: 0 0 0 1px rgba(239, 68, 68, 0.5),
+    0 10px 28px -8px rgba(239, 68, 68, 0.7);
+}
+.sv-cta:active {
+  transform: translateY(0.5px);
+}
+.sv-cta:disabled {
+  opacity: 0.5;
+  cursor: not-allowed;
+  box-shadow: none;
+}
+
+/* ── Ghost button (secondary) ─────────────────────────────── */
+.sv-ghost {
+  display: inline-flex;
+  align-items: center;
+  gap: 6px;
+  background: transparent;
+  color: var(--ink-muted);
+  font-family: var(--font-mono);
+  font-size: 12.5px;
+  padding: 0 12px;
+  height: 32px;
+  border-radius: 6px;
+  border: 1px solid var(--border);
+  transition: border-color 150ms ease, color 150ms ease, background 150ms ease;
+  cursor: pointer;
+}
+.sv-ghost:hover {
+  border-color: var(--ink-muted);
+  color: var(--ink);
+  background: var(--bg-hover);
+}
+
+/* ── Red hairline accent ──────────────────────────────────── */
+.sv-hairline {
+  height: 1px;
+  width: 100%;
+  background: linear-gradient(
+    to right,
+    transparent,
+    rgba(239, 68, 68, 0) 15%,
+    rgba(239, 68, 68, 0.55) 50%,
+    rgba(239, 68, 68, 0) 85%,
+    transparent
+  );
+}
+
+/* ── Mono display — uppercase with tracking for hero moments */
+.sv-eyebrow {
+  font-family: var(--font-mono);
+  font-size: 10.5px;
+  text-transform: uppercase;
+  letter-spacing: 0.2em;
+  color: var(--ink-soft);
+  font-weight: 500;
+}
+
+.sv-display {
+  font-family: var(--font-mono);
+  font-weight: 500;
+  letter-spacing: -0.01em;
+  color: var(--ink);
+}
+
+/* Ambient scan-line — very faint, adds depth to dark surfaces */
+.sv-theme::before {
+  content: "";
+  position: fixed;
+  inset: 0;
+  background-image: linear-gradient(
+    to bottom,
+    transparent 0%,
+    transparent 50%,
+    rgba(255, 255, 255, 0.012) 50%,
+    rgba(255, 255, 255, 0.012) 100%
+  );
+  background-size: 100% 3px;
+  pointer-events: none;
+  z-index: 0;
+  mix-blend-mode: screen;
+}
+
+/* Selection — red */
+.sv-theme ::selection {
+  background: rgba(239, 68, 68, 0.45);
+  color: #fff;
+}
+
+/* Scrollbars on dark surface */
+.sv-theme *::-webkit-scrollbar {
+  width: 10px;
+  height: 10px;
+}
+.sv-theme *::-webkit-scrollbar-track {
+  background: transparent;
+}
+.sv-theme *::-webkit-scrollbar-thumb {
+  background: var(--border);
+  border: 2px solid transparent;
+  background-clip: padding-box;
+  border-radius: 999px;
+}
+.sv-theme *::-webkit-scrollbar-thumb:hover {
+  background: var(--ink-dim);
+  background-clip: padding-box;
+}

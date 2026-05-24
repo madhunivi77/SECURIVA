@@ -87,7 +87,7 @@ export default function VPN() {
     
 
     return (
-        <div className="min-h-screen bg-gray-100 dark:bg-gray-900">
+        <div className="min-h-screen bg-gray-900">
 
             {/* ---------- HERO ---------- */}
             <section className="hero pt-24 bg-linear-to-br bg-[#0a0f1f] text-white">
@@ -105,7 +105,7 @@ export default function VPN() {
 
             {/* ---------- INTRO ---------- */}
             <section className="relative overflow-hidden">
-                <div className="relative w-full h-[600px] overflow-hidden bg-black mx-auto">
+                <div className="relative w-full lg:h-[600px] overflow-hidden bg-black mx-auto">
                     <video
                         autoPlay
                         loop
@@ -132,12 +132,12 @@ export default function VPN() {
             </section>
 
             {/* ---------- INTEGRATION ---------- */}
-            <section className="relative overflow-hidden px-8 pb-6 -mt-20">
+            <section className="relative overflow-hidden px-8 pb-6 lg:-mt-20">
                 <h2 className="subheading">
                     {t("vpn.integration.title")}
                 </h2>
 
-                <p className="text-xl font-light text-gray-500 mb-8 text-center dark:text-gray-400 mx-[15%]">
+                <p className="text-xl font-light mb-8 text-center text-gray-400 mx-[15%]">
                     {t("vpn.integration.subtitle")}
                 </p>
 
@@ -153,7 +153,7 @@ export default function VPN() {
                     ))}
                 </div>
 
-                <p className="text-xl font-light text-gray-500 text-center dark:text-gray-400 mx-[15%]">
+                <p className="text-xl font-light text-center text-gray-400 mx-[15%]">
                     {t("vpn.integration.footer")}
                 </p>
             </section>
@@ -196,13 +196,13 @@ export default function VPN() {
                                 <div>
                                     <ul className="flex flex-col gap-1.5 pb-2">
                                         {item.badItems.map((bad) => (
-                                            <li key={bad} className="flex items-start gap-2 text-lg text-gray-700 dark:text-gray-300">
-                                                <X className="mt-2 h-3.5 w-3.5 shrink-0 stroke-red-500 dark:stroke-blue-400" />
+                                            <li key={bad} className="flex items-start gap-2 text-lg text-gray-300">
+                                                <X className="mt-2 h-3.5 w-3.5 shrink-0 stroke-blue-400" />
                                                 {bad}
                                             </li>
                                         ))}
                                     </ul>
-                                    <p className="text-lg text-gray-500 mb-3 leading-relaxed dark:text-gray-400">
+                                    <p className="text-lg mb-3 leading-relaxed text-gray-400">
                                         {item.closing}
                                     </p>
                                     <Checklist

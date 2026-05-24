@@ -26,7 +26,8 @@ async def salesforce_logout(request):
     api_key = request.cookies.get("api_key")
 
     # Validate API key and get user_id mapping
-    user_id = validate_api_key(api_key)
+    oauth_file = Path(__file__).parent / "oauth.json"
+    user_id = validate_api_key(api_key, oauth_file)
 
     oauth_data = load_oauth_data()
     users = oauth_data.get("users", [])
@@ -71,7 +72,8 @@ async def salesforce_login(request):
         )
 
     # Validate API key
-    user_id = validate_api_key(api_key)
+    oauth_file = Path(__file__).parent / "oauth.json"
+    user_id = validate_api_key(api_key, oauth_file)
 
     if not user_id:
         return JSONResponse(

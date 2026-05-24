@@ -9,7 +9,7 @@ from typing import Any, Dict, Optional
 class ToolCallLogger:
     """
     Logger for MCP tool calls with both JSON and human-readable output.
-    Logs are stored in backend/logs/ directory.
+    Logs are stored in backend/logs/ directory and optionally sent to CloudWatch.
     """
 
     def __init__(self, enabled: bool = True, log_dir: str = None):
@@ -17,12 +17,9 @@ class ToolCallLogger:
 
         # Set up log directory
         if log_dir is None:
-            if os.getenv("ENVIRONMENT") == "production":
-                log_dir = Path("/tmp/logs")
-            else:
-                # Default to backend/logs/
-                backend_dir = Path(__file__).parent.parent.parent
-                log_dir = backend_dir / "logs"
+            # Default to backend/logs/
+            backend_dir = Path(__file__).parent.parent.parent
+            log_dir = backend_dir / "logs"
         else:
             log_dir = Path(log_dir)
 
@@ -56,6 +53,29 @@ class ToolCallLogger:
         )
         console_handler.setFormatter(console_formatter)
         self.logger.addHandler(console_handler)
+
+        # CloudWatch handler (when running on AWS)
+        self._setup_cloudwatch()
+
+    def _setup_cloudwatch(self):
+        """Add CloudWatch logging handler if ENABLE_CLOUDWATCH_LOGS is set."""
+        if os.getenv("ENABLE_CLOUDWATCH_LOGS", "false").lower() != "true":
+            return
+
+        try:
+            import watchtower
+            import boto3
+
+            cw_handler = watchtower.CloudWatchLogHandler(
+                log_group_name="/securiva/tool-calls",
+                log_stream_name=f"apprunner-{datetime.utcnow().strftime('%Y-%m-%d')}",
+                boto3_client=boto3.client("logs", region_name="us-east-2"),
+            )
+            cw_handler.setLevel(logging.INFO)
+            self.logger.addHandler(cw_handler)
+            self.logger.info("CloudWatch logging enabled")
+        except Exception as e:
+            self.logger.warning(f"CloudWatch logging unavailable: {e}")
 
     def log_tool_call(
         self,
@@ -113,13 +133,13 @@ class ToolCallLogger:
         # Write to JSON log (one JSON object per line for easy parsing)
         try:
             with open(self.json_log_path, "a") as f:
-                f.write(json.dumps(log_entry, default=str) + "\n")
+                f.write(json.dumps(log_entry) + "\n")
         except Exception as e:
             self.logger.error(f"Failed to write JSON log: {e}")
 
         # Write human-readable log
         duration_str = f"{duration_ms:.2f}ms" if duration_ms else "N/A"
-        args_str = json.dumps(arguments, indent=2, default=str) if arguments else "{}"
+        args_str = json.dumps(arguments, indent=2) if arguments else "{}"
 
         if error:
             self.logger.error(

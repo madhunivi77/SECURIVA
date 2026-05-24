@@ -3,8 +3,10 @@ import AutomationCard from "./AutomationCard";
 import { useOutletContext } from "react-router-dom";
 
 const AutomationGrid = () => {
-  const {handleRefresh, cards:[cards]} = useOutletContext();
+  const {handleRefresh, cards:[cards], setHeading, setSubtext} = useOutletContext();
   console.log(cards);
+  setHeading("Automation");
+  setSubtext("Manage your automation rules");
 
   // refresh on initialization
   useEffect(() => {

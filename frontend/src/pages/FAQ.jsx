@@ -22,14 +22,14 @@ export default function FAQ() {
     .filter(section => section.items.length > 0);
 
     return (
-        <div className="min-h-screen bg-gray-100 dark:bg-gray-900">
+        <div className="min-h-screen bg-gray-900">
             {/* ---------- FAQ ---------- */}
-            <section className="px-20 pb-20">
+            <section className="px-5 lg:px-20 pb-20">
                 <h2 className="text-4xl font-mono text-center mb-5 pt-10">
                     {t("faq.hero.title")}
                 </h2>
                 {/* Search bar */}
-                <div className="flex gap-2 border border-b-white rounded-2xl mx-auto w-125 p-2 mb-12">
+                <div className="flex gap-2 border border-b-white rounded-2xl mx-auto w-[90%] lg:w-125 p-2 mb-12">
                     <Search/>
                     <input type="text" id="search-input" placeholder={t("faq.hero.search")} className="focus:outline-none focus:ring-0 flex-1" value={query}
                         onChange={(e) => setQuery(e.target.value)}/>

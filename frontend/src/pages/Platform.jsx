@@ -49,24 +49,24 @@ const PlatformCard = ({ number, icon: Icon, label, tagline, description, capabil
     const { t } = useTranslation();
     return (
         <Link to={link}>
-            <div className={`rounded-2xl border border-gray-100 ${theme.bg} p-6 hover:border-gray-200 transition-colors dark:border-gray-800 dark:hover:border-gray-700`}>
+            <div className={`rounded-2xl border border-gray-100 ${theme.bg} p-6 transition-colors border-gray-800 hover:border-gray-700`}>
 
                 {/* Card Header */}
                 <div className="flex gap-4 mb-5">
                     <div className="flex flex-col items-center gap-2 pt-1">
-                        <div className="flex h-10 w-10 shrink-0 items-center justify-center rounded-xl bg-blue-50 dark:bg-blue-950">
-                            <Icon className="h-5 w-5 stroke-blue-600 dark:stroke-blue-400" strokeWidth={1.5} />
+                        <div className="flex h-10 w-10 shrink-0 items-center justify-center rounded-xl bg-blue-950">
+                            <Icon className="h-5 w-5 stroke-blue-400" strokeWidth={1.5} />
                         </div>
-                        <span className="text-xl font-medium tabular-nums text-gray-300 dark:text-gray-700">{number}</span>
+                        <span className="text-xl font-medium tabular-nums text-gray-700">{number}</span>
                     </div>
                     <div>
-                        <h3 className="text-xl font-medium text-gray-900 dark:text-white mb-0.5">{label}</h3>
-                        <p className="text-[19px] italic text-blue-600 dark:text-blue-400 mb-2">{tagline}</p>
-                        <p className="text-lg text-gray-500 leading-relaxed dark:text-gray-400">{description}</p>
+                        <h3 className="text-xl font-medium text-white mb-0.5">{label}</h3>
+                        <p className="text-[19px] italic text-blue-400 mb-2">{tagline}</p>
+                        <p className="text-lg leading-relaxed text-gray-400">{description}</p>
                     </div>
                 </div>
 
-                <div className="border-t border-gray-100 dark:border-gray-800 mb-5" />
+                <div className="border-t border-gray-800 mb-5" />
 
                 {/* Three Columns */}
                 <div className="flex flex-wrap gap-6">
@@ -82,8 +82,8 @@ const PlatformCard = ({ number, icon: Icon, label, tagline, description, capabil
                         <p className="text-xl font-medium uppercase tracking-widest text-gray-400 mb-3">{t("platform.idealFor")}</p>
                         <ul className="flex flex-col gap-1.5">
                             {idealFor.map((item) => (
-                                <li key={item} className="flex items-start gap-2 text-lg text-gray-700 dark:text-gray-300">
-                                    <Users className="mt-0.5 h-3.5 w-3.5 shrink-0 stroke-gray-400 dark:stroke-gray-600" strokeWidth={2} />
+                                <li key={item} className="flex items-start gap-2 text-lg text-gray-300">
+                                    <Users className="mt-0.5 h-3.5 w-3.5 shrink-0 stroke-gray-600" strokeWidth={2} />
                                     {item}
                                 </li>
                             ))}
@@ -95,8 +95,8 @@ const PlatformCard = ({ number, icon: Icon, label, tagline, description, capabil
                         <p className="text-xl font-medium uppercase tracking-widest text-gray-400 mb-3">{t("platform.value")}</p>
                         <ul className="flex flex-col gap-1.5">
                             {value.map((item) => (
-                                <li key={item} className="flex items-start gap-2 text-lg text-gray-700 dark:text-gray-300">
-                                    <Zap className="mt-0.5 h-3.5 w-3.5 shrink-0 stroke-amber-500 dark:stroke-amber-400" strokeWidth={2} />
+                                <li key={item} className="flex items-start gap-2 text-lg text-gray-300">
+                                    <Zap className="mt-0.5 h-3.5 w-3.5 shrink-0 stroke-amber-400" strokeWidth={2} />
                                     {item}
                                 </li>
                             ))}
@@ -115,7 +115,7 @@ export default function Platform() {
     const translatedCards = t("platform.cards", { returnObjects: true });
 
     return (
-        <div className="min-h-screen bg-gray-100 dark:bg-gray-900">
+        <div className="min-h-screen bg-gray-900">
 
             {/* ---------- HERO ---------- */}
             <section className="hero pt-24 bg-linear-to-br bg-[#0a0f1f] text-white">
@@ -132,7 +132,7 @@ export default function Platform() {
             </section>
 
             <section className="relative overflow-hidden">
-                <div className="relative w-full h-[500px] overflow-hidden bg-black mx-auto">
+                <div className="relative w-full lg:h-[500px] overflow-hidden bg-black mx-auto">
                     <video
                         autoPlay
                         loop
@@ -162,9 +162,9 @@ export default function Platform() {
                 </div>
             </section>
 
-            <section className="px-8 pb-16 mx-[15%]">
+            <section className="px-8 pb-16 lg:mx-[15%] pt-10 lg:pt-0">
 
-                <h2 className="text-center text-3xl font-normal text-gray-900 mb-3 dark:text-white">
+                <h2 className="text-center text-3xl font-normal mb-3 text-white">
                     {t("platform.components.title")}
                 </h2>
                 {/* Platform Cards */}
@@ -189,17 +189,17 @@ export default function Platform() {
                 </div>
 
                 {/* Unified Architecture Note */}
-                <div className="rounded-2xl border border-gray-100 bg-gray-50 p-6 mb-4 dark:border-gray-800 dark:bg-gray-900">
+                <div className="rounded-2xl border p-6 mb-4 border-gray-800 bg-gray-900">
                     <div className="flex gap-3 mb-4">
-                        <div className="flex h-9 w-9 shrink-0 items-center justify-center rounded-xl bg-blue-50 dark:bg-blue-950">
-                            <LayoutDashboard className="h-4 w-4 stroke-blue-600 dark:stroke-blue-400" strokeWidth={1.5} />
+                        <div className="flex h-9 w-9 shrink-0 items-center justify-center rounded-xl bg-blue-950">
+                            <LayoutDashboard className="h-4 w-4 stroke-blue-400" strokeWidth={1.5} />
                         </div>
                         <div>
-                            <h3 className="text-xl font-medium text-gray-900 dark:text-white mb-0.5">
+                            <h3 className="text-xl font-medium text-white mb-0.5">
                                 {t("platform.unifiedArchitecture.title")}
                             </h3>
 
-                            <p className="text-[19px] text-gray-500 dark:text-gray-400 leading-relaxed">
+                            <p className="text-[19px] text-gray-400 leading-relaxed">
                                 {t("platform.unifiedArchitecture.description")}
                             </p>
                         </div>
@@ -212,12 +212,12 @@ export default function Platform() {
                 </div>
 
                 {/* Why Organizations Choose Securiva */}
-                <div className="rounded-2xl border border-blue-100 bg-blue-50 p-6 dark:border-blue-900 dark:bg-blue-950">
-                    <h3 className="text-xl font-medium text-gray-900 dark:text-white mb-1">
+                <div className="rounded-2xl border p-6 border-blue-900 bg-blue-950">
+                    <h3 className="text-xl font-medium text-white mb-1">
                         {t("platform.whyChoose.title")}
                     </h3>
 
-                    <p className="text-[19px] text-gray-500 dark:text-blue-300 mb-4">
+                    <p className="text-[19px] text-blue-300 mb-4">
                         {t("platform.whyChoose.subtitle")}
                     </p>
 
@@ -231,11 +231,11 @@ export default function Platform() {
 
             {/* Call to Action */}
             <section className="px-8 py-16 text-center">
-                <h2 className="text-4xl font-normal text-gray-900 mb-3 dark:text-white">
+                <h2 className="text-4xl font-normal mb-3 text-white">
                     {t("platform.cta.title")}
                 </h2>
 
-                <p className="text-2xl font-light text-gray-500 mb-10 max-w-xl mx-auto dark:text-gray-400">
+                <p className="text-2xl font-light mb-10 max-w-xl mx-auto text-gray-400">
                     {t("platform.cta.subtitle")}
                 </p>
                 <div className="flex flex-wrap justify-center gap-3">
@@ -246,14 +246,14 @@ export default function Platform() {
                         </button>
                     </Link>
                     <Link to={"/contact"}>
-                        <button className="flex items-center gap-2 rounded-xl border border-gray-200 bg-white px-6 py-3 text-[14px] font-medium text-gray-800 transition-colors hover:border-gray-300 hover:bg-gray-50 dark:border-gray-700 dark:bg-gray-900 dark:text-white dark:hover:border-gray-600 dark:hover:bg-gray-800">
-                            <Phone className="h-4 w-4 stroke-gray-500 dark:stroke-gray-400" strokeWidth={1.5} />
+                        <button className="flex items-center gap-2 rounded-xl border px-6 py-3 text-[14px] font-medium transition-colors border-gray-700 bg-gray-900 text-white hover:border-gray-600 hover:bg-gray-800">
+                            <Phone className="h-4 w-4 stroke-gray-400" strokeWidth={1.5} />
                             {t("platform.cta.contactSales")}
                         </button>
                     </Link>
                     <Link to={"/pricing"}>
-                        <button className="flex items-center gap-2 rounded-xl border border-gray-200 bg-white px-6 py-3 text-[14px] font-medium text-gray-800 transition-colors hover:border-gray-300 hover:bg-gray-50 dark:border-gray-700 dark:bg-gray-900 dark:text-white dark:hover:border-gray-600 dark:hover:bg-gray-800">
-                            <CircleDollarSign className="h-4 w-4 stroke-gray-500 dark:stroke-gray-400" strokeWidth={1.5} />
+                        <button className="flex items-center gap-2 rounded-xl border px-6 py-3 text-[14px] font-medium transition-colors border-gray-700 bg-gray-900 text-white hover:border-gray-600 hover:bg-gray-800">
+                            <CircleDollarSign className="h-4 w-4 stroke-gray-400" strokeWidth={1.5} />
                             {t("platform.cta.pricing")}
                         </button>
                     </Link>
