@@ -1,4 +1,8 @@
 {
+  "comingsoon": {
+    "title": "Coming Soon",
+    "subtext": "This page is currently under development but check back later for more content."
+  },
   "about": {
     "hero": {
       "title": "About",
@@ -1265,6 +1269,15 @@
     }
   },
   "footer": {
+    "features": {
+      "title": "Features",
+      "items": {
+        "virtualagent": "Virtual Agent",
+        "cybersecurity": "Cybersecurity",
+        "textagent": "Text Agent",
+        "vpn": "VPN"
+      }
+    },
     "industries": {
       "title": "Industries",
       "items": {
@@ -1295,9 +1308,10 @@
       "items": {
         "privacy": "Privacy Policy",
         "terms": "Terms of Service",
-        "dataProtection": "Data Protection Policy",
-        "cookies": "Cookie Preferences",
-        "accessibility": "Accessibility Statement"
+        "dataProtection": "Data Protection Agreement",
+        "cookies": "Cookie Policy",
+        "securityPolicy": "Security Policy",
+        "complianceOverview": "Compliance Overview"
       }
     }
   },

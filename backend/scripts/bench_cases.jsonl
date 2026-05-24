@@ -1,0 +1,12 @@
+{"id":"smalltalk-1","prompt":"hello, one short sentence please","expect_tool_any_of":[],"tags":["smalltalk"]}
+{"id":"smalltalk-2","prompt":"what can you help me with?","expect_tool_any_of":[],"tags":["smalltalk"]}
+{"id":"gmail-1","prompt":"Show me my 3 most recent emails","expect_tool_any_of":["gmail","mail","list_messages","list_email"],"tags":["gmail"]}
+{"id":"gmail-2","prompt":"Draft an email to alice@example.com saying I will be 10 minutes late","expect_tool_any_of":["gmail","draft","create_draft","send_email"],"tags":["gmail"]}
+{"id":"cal-1","prompt":"What's on my calendar for tomorrow?","expect_tool_any_of":["calendar","event","list_events"],"tags":["calendar"]}
+{"id":"cal-2","prompt":"Schedule a 30 minute meeting with the team tomorrow at 2pm","expect_tool_any_of":["calendar","create_event","schedule"],"tags":["calendar"]}
+{"id":"sf-1","prompt":"List my top 5 Salesforce opportunities","expect_tool_any_of":["salesforce","sf_","opportunity","list_opport"],"tags":["salesforce"]}
+{"id":"sf-2","prompt":"Create a new Salesforce contact named Bob Smith at Acme Corp","expect_tool_any_of":["salesforce","contact","create_contact","sf_create"],"tags":["salesforce"]}
+{"id":"tele-1","prompt":"Send an SMS to +15555551234 saying 'running late'","expect_tool_any_of":["telesign","sms","send_sms","message"],"tags":["telesign"]}
+{"id":"tele-2","prompt":"Check if phone number +14155551212 is risky","expect_tool_any_of":["telesign","risk","phoneid","verify"],"tags":["telesign"]}
+{"id":"ambig-1","prompt":"Send Alice a note saying I'll be late","expect_tool_any_of":["gmail","send_email","draft","sms","send_sms"],"tags":["ambiguous"]}
+{"id":"chain-1","prompt":"Find Alice's email in my inbox, then text her that I got her message","expect_tool_any_of":["gmail","mail","telesign","sms"],"tags":["multi-step"]}

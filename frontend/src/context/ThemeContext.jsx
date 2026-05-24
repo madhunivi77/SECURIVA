@@ -3,19 +3,9 @@ import { createContext, useContext, useState, useEffect } from "react";
 const ThemeContext = createContext();
 
 export function ThemeProvider({ children }) {
-  const [isDarkMode, setIsDarkMode] = useState(
-    window.matchMedia("(prefers-color-scheme: dark)").matches
-  );
 
-  useEffect(() => {
-    const mq = window.matchMedia("(prefers-color-scheme: dark)");
-    const handler = (e) => setIsDarkMode(e.matches);
-    mq.addEventListener("change", handler);
-    return () => mq.removeEventListener("change", handler);
-  }, []);
-
-  const theme = isDarkMode
-    ? {
+  const theme =
+    {
       bg: "#0a0f1f",
       surface: "#ddeeff",
       border: "#1c2a44",
@@ -25,20 +15,9 @@ export function ThemeProvider({ children }) {
       buttonText: "white",
       navbutton: "#212854",
     }
-    : {
-      bg: "#e7f1ff",
-      surface: "#ffffff",
-      border: "#b3cff5",
-      text: "#0d2b66",
-      subtext: "#3d5fa8",
-      buttonBg: "#d8e7ff",
-      buttonText: "#0a3aa8",
-      navbutton: "#061d42",
-
-    };
 
   return (
-    <ThemeContext.Provider value={{ isDarkMode, setIsDarkMode, theme }}>
+    <ThemeContext.Provider value={{ theme }}>
       {children}
     </ThemeContext.Provider>
   );

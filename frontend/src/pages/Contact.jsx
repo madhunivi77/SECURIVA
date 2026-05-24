@@ -32,7 +32,7 @@ export default function Contact() {
   };
 
   return (
-    <div className="min-h-screen bg-gray-100 dark:bg-gray-900">
+    <div className="min-h-screen bg-gray-900">
 
       {/* ---------- HERO ---------- */}
       <section className="hero pt-24 pb-40 bg-[#0a0f1f] text-white">
@@ -67,14 +67,14 @@ export default function Contact() {
 
           <div className="relative max-w-6xl mx-auto pt-50">
 
-            <h2 className="text-3xl font-bold text-center text-gray-900 dark:text-white mb-12">
+            <h2 className="text-3xl font-bold text-center text-white mb-12">
               {t("contact.services.title")}
             </h2>
 
-            <div className="grid md:grid-cols-3 gap-8">
+            <div className="grid md:grid-cols-3 gap-8 px-5">
 
               {/* SALES */}
-              <div className="card bg-white/90 backdrop-blur dark:bg-gray-800/90 shadow-lg">
+              <div className="card backdrop-blur bg-gray-800/90 shadow-lg">
                 <div className="card-body">
                   <h3 className="card-title">
                     {t("contact.services.sales.title")}
@@ -93,7 +93,7 @@ export default function Contact() {
               </div>
 
               {/* SUPPORT */}
-              <div className="card bg-white/90 backdrop-blur dark:bg-gray-800/90 shadow-lg">
+              <div className="card backdrop-blur bg-gray-800/90 shadow-lg">
                 <div className="card-body">
                   <h3 className="card-title">
                     {t("contact.services.support.title")}
@@ -112,7 +112,7 @@ export default function Contact() {
               </div>
 
               {/* PARTNERSHIP */}
-              <div className="card bg-white/90 backdrop-blur dark:bg-gray-800/90 shadow-lg">
+              <div className="card backdrop-blur bg-gray-800/90 shadow-lg">
                 <div className="card-body">
                   <h3 className="card-title">
                     {t("contact.services.partnership.title")}
@@ -136,7 +136,7 @@ export default function Contact() {
       </section>
 
       {/* ---------- FORM ---------- */}
-      <section className="py-20 px-10 bg-white dark:bg-black">
+      <section className="py-20 px-10 bg-black">
         <div className="max-w-4xl mx-auto">
 
           <h2 className="text-3xl font-bold text-center mb-4">
@@ -223,14 +223,14 @@ export default function Contact() {
       <section className="py-20 px-10">
         <div className="max-w-6xl mx-auto">
 
-          <h2 className="text-3xl font-bold text-center text-gray-900 dark:text-white mb-12">
+          <h2 className="text-3xl font-bold text-center text-white mb-12">
             {t("contact.policy.title")}
           </h2>
 
           <div className="grid md:grid-cols-3 gap-8 text-center">
 
             {["responseTime", "availability", "global"].map((key) => (
-              <div key={key} className="card bg-white dark:bg-gray-800 shadow-md">
+              <div key={key} className="card bg-gray-800 shadow-md">
                 <div className="card-body">
                   <h3 className="font-bold text-lg">
                     {t(`contact.policy.${key}.title`)}
@@ -250,7 +250,7 @@ export default function Contact() {
       </section>
 
       {/* ---------- COMPANY ---------- */}
-      <section className="py-20 px-10 bg-white dark:bg-gray-800">
+      <section className="py-20 px-10 bg-gray-800">
         <div className="max-w-5xl mx-auto text-center">
 
           <h2 className="text-3xl font-bold mb-8">

@@ -14,8 +14,6 @@ function App() {
 
   const {
     theme,
-    isDarkMode,
-    setIsDarkMode,
   } = useTheme();
 
   const navigate = useNavigate();
@@ -61,9 +59,10 @@ function App() {
       <main
         style={{
           width: "100%",
-          overflowY: "auto",
-          paddingTop: "167.5px",
+          overflowY: "hidden",
+          overflowX: "hidden",
         }}
+        className="pt-[80px] desktop:pt-[167.5px]" // offset navbar
       >
         {/* Pass any context used by App.jsx subpages. If used across other routes, elevate to an AuthContext wrapper in main.jsx */}
         <Outlet context={{}}/>

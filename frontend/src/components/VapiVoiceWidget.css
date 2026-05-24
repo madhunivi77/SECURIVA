@@ -1,67 +1,315 @@
-/* Voice Widget - Orb Only */
+/* ──────────────────────────────────────────────────────────────
+   Voice — Mono-Tech Dark (matches public site identity)
+   Deep navy · mono display · red arterial accent on speech
+   ────────────────────────────────────────────────────────────── */
 
 .voice-widget {
-  position: absolute;
-  top: 0;
-  left: 0;
-  right: 0;
-  bottom: 0;
+  position: relative;
   width: 100%;
+  min-height: 100%;
   height: 100%;
-  display: flex;
-  flex-direction: column;
-  align-items: center;
-  justify-content: center;
-  background: #0a0a0b;
+  display: grid;
+  grid-template-rows: 1fr auto;
   overflow: hidden;
+  background:
+    radial-gradient(
+      ellipse 90% 70% at 50% 45%,
+      #0d1330 0%,
+      #0a0f1f 55%,
+      #05091a 100%
+    );
+  color: #f5f7ff;
+  font-family: "Geist Mono", ui-monospace, SFMono-Regular, Menlo, monospace;
 }
 
-/* Orb Section */
-.voice-orb-section {
+/* Hairline grid — engineering-paper feel on the dark field */
+.voice-widget::before {
+  content: "";
+  position: absolute;
+  inset: 0;
+  background-image:
+    linear-gradient(rgba(255, 255, 255, 0.025) 1px, transparent 1px),
+    linear-gradient(90deg, rgba(255, 255, 255, 0.025) 1px, transparent 1px);
+  background-size: 32px 32px;
+  mask-image: radial-gradient(ellipse 80% 70% at 50% 50%, black 40%, transparent 100%);
+  pointer-events: none;
+  z-index: 1;
+}
+
+/* Top-left status chip */
+.voice-top-mark {
+  position: absolute;
+  top: 20px;
+  left: 24px;
+  z-index: 4;
+  display: flex;
+  align-items: center;
+  gap: 8px;
+  font-size: 10.5px;
+  letter-spacing: 0.22em;
+  text-transform: uppercase;
+  color: #9fb0d5;
+}
+
+.voice-top-mark .dot {
+  width: 6px;
+  height: 6px;
+  border-radius: 999px;
+  background: #6b7ca5;
+  box-shadow: 0 0 0 3px rgba(107, 124, 165, 0.2);
+  transition: background 300ms ease, box-shadow 300ms ease;
+}
+
+.voice-top-mark .dot.live {
+  background: #ef4444;
+  box-shadow: 0 0 0 3px rgba(239, 68, 68, 0.3),
+    0 0 8px -1px rgba(239, 68, 68, 0.7);
+  animation: pulse-dot 1.6s ease-in-out infinite;
+}
+
+.voice-top-mark .dot.error {
+  background: #ef4444;
+  box-shadow: 0 0 0 3px rgba(239, 68, 68, 0.35);
+}
+
+@keyframes pulse-dot {
+  0%,
+  100% {
+    opacity: 1;
+    transform: scale(1);
+  }
+  50% {
+    opacity: 0.55;
+    transform: scale(0.88);
+  }
+}
+
+.voice-timer {
+  position: absolute;
+  top: 20px;
+  right: 24px;
+  z-index: 4;
+  font-size: 10.5px;
+  letter-spacing: 0.22em;
+  color: #9fb0d5;
+  font-variant-numeric: tabular-nums;
+}
+
+.voice-chamber {
+  position: relative;
+  z-index: 2;
   display: flex;
   flex-direction: column;
   align-items: center;
   justify-content: center;
+  padding-bottom: 64px;
 }
 
-/* 3D Canvas Container */
+.voice-orb-section {
+  position: relative;
+  display: flex;
+  flex-direction: column;
+  align-items: center;
+}
+
 .voice-canvas-container {
   position: relative;
-  width: 400px;
-  height: 400px;
+  width: 380px;
+  height: 380px;
   cursor: pointer;
+  opacity: 0;
+  transform: scale(0.92);
+  animation: orb-in 900ms cubic-bezier(0.16, 1, 0.3, 1) 120ms forwards;
 }
 
-/* Overlay hint */
-.voice-hint {
+@keyframes orb-in {
+  to {
+    opacity: 1;
+    transform: scale(1);
+  }
+}
+
+/* Halo — state-driven red/blue glow */
+.voice-halo {
   position: absolute;
   top: 50%;
   left: 50%;
-  transform: translate(-50%, -50%);
-  color: rgba(255, 255, 255, 0.5);
+  width: 620px;
+  height: 620px;
+  transform: translate(-50%, -50%) scale(var(--halo-scale, 1));
   pointer-events: none;
-  z-index: 10;
+  z-index: 0;
+  filter: blur(6px);
+  transition: transform 350ms ease-out, opacity 300ms ease-out,
+    background 450ms ease;
+  opacity: var(--halo-opacity, 0.5);
+  background: radial-gradient(
+    circle at center,
+    var(--halo-color-a, rgba(37, 99, 235, 0.45)) 0%,
+    var(--halo-color-b, rgba(37, 99, 235, 0.15)) 25%,
+    transparent 60%
+  );
+  animation: breathe 5.5s ease-in-out infinite;
 }
 
-/* Status text */
-.voice-status {
-  margin-top: 1.5rem;
-  font-size: 0.85rem;
+@keyframes breathe {
+  0%,
+  100% {
+    transform: translate(-50%, -50%) scale(calc(var(--halo-scale, 1) * 0.98));
+  }
+  50% {
+    transform: translate(-50%, -50%) scale(calc(var(--halo-scale, 1) * 1.02));
+  }
+}
+
+/* Ground — cool shadow on dark field */
+.voice-ground {
+  position: absolute;
+  bottom: -10px;
+  left: 50%;
+  transform: translateX(-50%);
+  width: 240px;
+  height: 26px;
+  background: radial-gradient(
+    ellipse at center,
+    rgba(0, 0, 0, 0.55) 0%,
+    transparent 70%
+  );
+  filter: blur(4px);
+  pointer-events: none;
+  z-index: 0;
+}
+
+/* Caption */
+.voice-caption {
+  margin-top: 44px;
+  text-align: center;
+  opacity: 0;
+  animation: caption-in 800ms cubic-bezier(0.16, 1, 0.3, 1) 450ms forwards;
+}
+
+@keyframes caption-in {
+  from {
+    opacity: 0;
+    transform: translateY(6px);
+  }
+  to {
+    opacity: 1;
+    transform: translateY(0);
+  }
+}
+
+.voice-caption-display {
+  font-family: "Geist Mono", ui-monospace, SFMono-Regular, Menlo, monospace;
+  font-size: 34px;
   font-weight: 500;
-  letter-spacing: 0.1em;
-  text-transform: uppercase;
-  color: rgba(255, 255, 255, 0.5);
-  transition: color 0.3s ease;
+  line-height: 1.1;
+  color: #f5f7ff;
+  letter-spacing: -0.01em;
+  transition: color 400ms ease;
 }
 
-.voice-status.error {
+.voice-caption-display.muted {
+  color: #9fb0d5;
+  font-weight: 400;
+}
+
+.voice-caption-display.speaking {
   color: #ef4444;
+  text-shadow: 0 0 20px rgba(239, 68, 68, 0.35);
 }
 
-/* Mobile */
-@media (max-width: 480px) {
+.voice-caption-display.error {
+  color: #ef4444;
+  font-size: 18px;
+  font-weight: 500;
+  letter-spacing: 0;
+  max-width: 520px;
+  padding: 0 32px;
+}
+
+.voice-caption-sub {
+  margin-top: 14px;
+  font-size: 10.5px;
+  letter-spacing: 0.24em;
+  text-transform: uppercase;
+  color: #6b7ca5;
+}
+
+/* Bottom dock */
+.voice-dock {
+  position: relative;
+  z-index: 3;
+  padding: 0 24px 22px;
+  display: flex;
+  justify-content: space-between;
+  align-items: center;
+  font-size: 10.5px;
+  letter-spacing: 0.12em;
+  text-transform: uppercase;
+  color: #6b7ca5;
+  opacity: 0;
+  animation: dock-in 700ms ease 900ms forwards;
+}
+
+@keyframes dock-in {
+  to {
+    opacity: 1;
+  }
+}
+
+.voice-dock .tip {
+  letter-spacing: 0.12em;
+}
+
+.voice-dock kbd {
+  font-family: inherit;
+  font-size: 10px;
+  border: 1px solid #1c2a44;
+  background: #05091a;
+  color: #9fb0d5;
+  padding: 2px 5px;
+  border-radius: 4px;
+  letter-spacing: 0;
+  text-transform: none;
+}
+
+/* Red hairline along the bottom — Securiva signature */
+.voice-accent-line {
+  position: absolute;
+  bottom: 0;
+  left: 0;
+  height: 1px;
+  background: linear-gradient(
+    to right,
+    transparent 0%,
+    rgba(239, 68, 68, 0) 20%,
+    rgba(239, 68, 68, 0.7) 50%,
+    rgba(239, 68, 68, 0) 80%,
+    transparent 100%
+  );
+  width: 100%;
+  z-index: 5;
+  opacity: 0;
+  animation: line-in 900ms ease 700ms forwards;
+}
+
+@keyframes line-in {
+  to {
+    opacity: 1;
+  }
+}
+
+@media (max-width: 640px) {
   .voice-canvas-container {
     width: 280px;
     height: 280px;
+  }
+  .voice-halo {
+    width: 460px;
+    height: 460px;
+  }
+  .voice-caption-display {
+    font-size: 26px;
   }
 }

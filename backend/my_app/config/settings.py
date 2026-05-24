@@ -99,12 +99,6 @@ class Settings(BaseSettings):
     DEFAULT_LLM_MODEL: str = Field(default="gpt-3.5-turbo", description="Default LLM model")
 
     # ============================================================================
-    # S3 STORAGE (Production)
-    # ============================================================================
-    OAUTH_S3_BUCKET: str = Field(default="", description="S3 bucket for oauth.json (empty = use local file)")
-    OAUTH_S3_KEY: str = Field(default="data/oauth.json", description="S3 key for oauth.json")
-
-    # ============================================================================
     # SESSION STORAGE
     # ============================================================================
     SESSION_CACHE_TTL: int = Field(default=600, description="Session cache TTL in seconds (default 10 minutes)")
@@ -123,6 +117,8 @@ class Settings(BaseSettings):
     # LOGGING
     # ============================================================================
     LOG_LEVEL: str = Field(default="INFO", description="Logging level: DEBUG, INFO, WARNING, ERROR")
+    ENABLE_CLOUDWATCH_LOGS: bool = Field(default=False, description="Send logs to AWS CloudWatch")
+    USE_DYNAMO_LOGS: bool = Field(default=False, description="Store activity logs in DynamoDB instead of local files")
 
     # ============================================================================
     # PYDANTIC SETTINGS CONFIGURATION
