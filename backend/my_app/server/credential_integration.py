@@ -6,7 +6,7 @@ Drop-in replacements for oauth.json access patterns.
 
 from typing import Optional, Dict, Any
 from pathlib import Path
-from tests.dynamodb_credential_manager import DynamoDBCredentialManager
+from .dynamodb_credential_manager import DynamoDBCredentialManager
 import json
 
 
@@ -74,6 +74,30 @@ def get_google_credentials(user_id: str) -> Optional[Dict[str, Any]]:
         credential_type="oauth"
     )
 
+def store_google_credentials(
+    user_id: str,
+    credential_data: Dict[str, Any],
+    email: str,
+    scopes: list,
+    connected_at: str,
+    org_id_override: Optional[str] = None,
+) -> bool:
+    """Store Google OAuth credentials encrypted in DynamoDB."""
+    manager = get_credential_manager()
+    org_id = org_id_override or get_org_id_for_user(user_id) or user_id
+
+    return manager.store_credentials(
+        org_id=org_id,
+        service_name="google",
+        credential_type="oauth",
+        credential_data=credential_data,
+        created_by=user_id,
+        metadata={
+            "email": email,
+            "scopes": scopes,
+            "connected_at": connected_at,
+        },
+    )
 
 def get_telesign_credentials(org_id: str) -> Optional[Dict[str, Any]]:
     """

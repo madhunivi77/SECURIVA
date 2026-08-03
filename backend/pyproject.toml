@@ -32,3 +32,8 @@ dependencies = [
 
 [tool.setuptools]
 packages = ["my_app"]
+
+[dependency-groups]
+dev = [
+    "pytest>=9.1.1",
+]

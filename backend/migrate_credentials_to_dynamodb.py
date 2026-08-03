@@ -13,7 +13,7 @@ Prerequisites:
     3. AWS credentials configured
 """
 
-from tests.dynamodb_credential_manager import DynamoDBCredentialManager
+from my_app.server.dynamodb_credential_manager import DynamoDBCredentialManager
 import json
 from pathlib import Path
 from datetime import datetime
@@ -72,9 +72,8 @@ def migrate_oauth_to_dynamodb(dry_run=True):
         email = user.get("email", "No email")
         org_id = user.get("org_id", user_id)  # Default org_id to user_id
         
-        print(f"\n[User {idx}] {email}")
-        print(f"  User ID: {user_id}")
-        print(f"  Org ID:  {org_id}")
+        print(f"\n[User {idx}] migration record")
+        print("  User and organization identifiers omitted from console output")
         
         services = user.get("services", {})
         
