@@ -4,6 +4,7 @@ import json
 import os
 import pytest
 
+from my_app.server import credential_integration
 from my_app.server.encryption_service import CredentialEncryptionService
 from pathlib import Path
 from my_app.server.app import log_ai_call
@@ -179,3 +180,55 @@ def test_encryption_service_requires_master_key(monkeypatch) -> None:
         match="MASTER_ENCRYPTION_KEY must be set",
     ):
         CredentialEncryptionService()
+
+def test_google_credentials_use_secure_storage_helper(monkeypatch) -> None:
+    """Google OAuth credentials must be passed to the encrypted credential manager."""
+    stored_calls = []
+
+    class FakeCredentialManager:
+        def store_credentials(self, **kwargs):
+            stored_calls.append(kwargs)
+            return True
+
+    monkeypatch.setattr(
+        credential_integration,
+        "get_credential_manager",
+        lambda: FakeCredentialManager(),
+    )
+
+    fake_credentials = {
+        "token": "FAKE_GOOGLE_TOKEN_TEST_ONLY",
+        "refresh_token": "FAKE_REFRESH_TOKEN_TEST_ONLY",
+    }
+
+    result = credential_integration.store_google_credentials(
+        user_id="security-test-user",
+        credential_data=fake_credentials,
+        email="test@example.com",
+        scopes=["scope-a"],
+        connected_at="2026-08-03T12:00:00",
+    )
+
+    assert result is True
+    assert len(stored_calls) == 1
+
+    stored = stored_calls[0]
+
+    assert stored["service_name"] == "google"
+    assert stored["credential_type"] == "oauth"
+    assert stored["credential_data"] == fake_credentials
+    assert stored["created_by"] == "security-test-user"
+    assert stored["metadata"]["email"] == "test@example.com"
+
+def test_oauth_callback_does_not_persist_plaintext_google_credentials() -> None:
+    """OAuth callback source must not write Google credentials into oauth.json."""
+    app_source = (
+        Path(__file__).parents[1]
+        / "my_app"
+        / "server"
+        / "app.py"
+    ).read_text(encoding="utf-8")
+
+    assert '"credentials": credentials.to_json()' not in app_source
+    assert '"credential_storage": "encrypted_dynamodb"' in app_source
+    assert "store_google_credentials(" in app_source
