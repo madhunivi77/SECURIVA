@@ -682,3 +682,397 @@ Additional approved documentation requirements:
   2. Approved Stage 2 enhancements
   3. Future enterprise features
   4. Long-term roadmap
+
+
+## Remediation Implementation Status
+
+The following approved application-level security remediations have now been implemented and locally verified on the `feature/encryption-framework` branch.
+
+### Implemented
+
+- Replaced normal API-key hash comparison with constant-time comparison using `hmac.compare_digest()`.
+- Removed the predictable default development API-key bypass value.
+- Added production startup validation for:
+  - `MASTER_ENCRYPTION_KEY`
+  - `ENCRYPTION_SALT`
+  - `JWT_SECRET_KEY`
+- Removed complete AI prompt and response content from AI call logging.
+- Replaced chat message content in activity logs with metadata-only message counts.
+- Sanitized OAuth, chat, SMS, and DynamoDB exception logging to avoid exposing exception contents.
+- Redirected Google OAuth credential storage to encrypted DynamoDB storage.
+- Removed plaintext Google OAuth credentials from the local `oauth.json` record.
+- Added a production `DynamoDBCredentialManager` module and removed production dependencies on the `tests` package.
+- Updated the credential migration script to use the production credential manager.
+- Sanitized migration-script console output.
+- Corrected the encryption key-derivation implementation to use `PBKDF2HMAC`.
+
+### Automated Test Evidence
+
+A dedicated test suite was added at:
+
+`backend/tests/test_encryption_framework_security.py`
+
+Current result:
+
+- 10 tests passed
+- 0 test failures
+- 3 unrelated dependency/configuration warnings
+
+The automated tests cover:
+
+- explicit development API-key configuration
+- valid and invalid API-key validation
+- production startup failure when encryption secrets are missing
+- production startup success with explicit test secrets
+- AI logging content redaction
+- encryption and decryption round-trip
+- AES-GCM tamper rejection
+- failure when the master encryption key is missing
+- encrypted Google credential-storage helper behavior
+- regression prevention for plaintext Google OAuth persistence
+
+### Current Limitations
+
+- The changes have been committed locally but have not yet been pushed, reviewed, merged, or deployed.
+- Live AWS DynamoDB and KMS behavior has not yet been validated in a production environment.
+- Existing plaintext OAuth records require a controlled migration and verification process before secure deletion.
+- AWS KMS, regional disaster recovery, two-person authorization, CMK/BYOK, Secrets Manager integration, and advanced cryptographic testing remain Stage 2 target architecture or roadmap items unless separately required.
+- The broader repository test suite has unrelated collection and dependency issues; the dedicated Encryption Framework security suite passes independently.
+
+## Future Architecture & Implementation Roadmap
+
+This roadmap separates the current implementation from approved Stage 2 enhancements, future enterprise features, and long-term architectural goals.
+
+### 1. Current Implementation
+
+The current Encryption Framework includes:
+
+- AES-256-GCM authenticated encryption for sensitive credentials.
+- PBKDF2-HMAC-SHA256 key derivation.
+- Environment-based master encryption key configuration.
+- Encrypted credential storage through DynamoDB.
+- Constant-time API-key hash comparison.
+- Production startup validation for required encryption secrets.
+- Metadata-only AI and activity logging.
+- Sanitized exception and migration-script output.
+- Automated security tests covering encryption, tamper detection, startup validation, API-key security, logging redaction, and OAuth credential handling.
+
+### 2. Approved Stage 2 Enhancements
+
+The following controls are approved for Stage 2 implementation or detailed architecture documentation:
+
+- Encryption requirements for AI Meeting Listening, Recording & Smart Reporting.
+- Encryption of audio recordings, transcripts, AI-generated summaries, and meeting metadata at rest and in transit.
+- Enterprise key lifecycle management covering:
+  - key generation
+  - activation
+  - rotation
+  - archival
+  - revocation
+  - destruction
+  - backup
+  - recovery
+- AWS Secrets Manager or Parameter Store integration for:
+  - API keys
+  - OAuth credentials
+  - JWT secrets
+  - AI-provider credentials
+  - database passwords
+- Data Classification and Encryption Policy covering:
+  - Public
+  - Internal
+  - Confidential
+  - Restricted
+  - Highly Sensitive
+- Key Management Architecture diagram covering:
+  - SecuriVA application services
+  - AWS KMS
+  - AWS Secrets Manager
+  - encrypted databases
+  - backup vaults
+  - disaster-recovery environments
+- Compliance mapping to:
+  - NIST CSF 2.0
+  - NIST SP 800-57
+  - NIST SP 800-38D
+  - ISO/IEC 27001
+  - SOC 2
+  - PCI DSS where applicable
+
+### 3. Future Enterprise Features
+
+The following capabilities remain future enterprise features unless separately prioritized:
+
+- Customer Managed Keys.
+- Bring Your Own Key support.
+- Multi-region AWS KMS architecture.
+- Two-person authorization for sensitive key operations.
+- Automated key-compromise response.
+- Immutable cryptographic audit trails.
+- Enterprise key recovery workflows.
+- Encryption controls for uploaded documents, CRM records, audit logs, AI-generated reports, and future knowledge-base storage.
+
+### 4. Long-Term Roadmap
+
+Long-term roadmap items include:
+
+- Post-Quantum Cryptography readiness.
+- Cryptographic-agility planning.
+- Encryption performance benchmarking.
+- Penetration testing focused on cryptographic controls.
+- Key-compromise simulations.
+- Disaster-recovery validation.
+- Cryptographic compliance verification.
+- Regional failover testing.
+- Full production validation of KMS, backup, restore, and recovery controls.
+
+These items are documented as future architecture or roadmap controls and should not be represented as implemented until they are configured, tested, and supported by evidence.
+
+## Data Classification and Encryption Policy
+
+SecuriVA information must be classified according to sensitivity and protected using encryption controls appropriate to the classification level.
+
+| Classification | Examples | Encryption at Rest | Encryption in Transit | Access Requirements |
+|---|---|---|---|---|
+| Public | Published website content, public documentation, approved marketing material | Optional unless stored with protected data | TLS required for application delivery | Public access permitted after approval |
+| Internal | Internal procedures, non-sensitive project notes, general operational information | Encryption recommended | TLS required | Authorized workforce members only |
+| Confidential | User profiles, business records, internal reports, meeting metadata, CRM information | Encryption required | TLS required | Role-based access and least privilege |
+| Restricted | OAuth credentials, API keys, JWT secrets, database passwords, access tokens, transcripts, recordings, AI-generated reports | Strong encryption required, using approved authenticated encryption and managed secret storage | TLS 1.2 or higher required | Strict role-based access, audit logging, and limited administrative access |
+| Highly Sensitive | Master encryption keys, recovery keys, customer-managed keys, cryptographic material, privileged security records | Hardware-backed or managed key protection required; plaintext storage prohibited | Strong encrypted administrative channels required | Multi-party authorization, enhanced monitoring, immutable audit evidence, and formal recovery controls |
+
+### Policy Requirements
+
+- Sensitive credentials, tokens, passwords, private keys, and cryptographic material must never be stored in plaintext.
+- Restricted and Highly Sensitive information must use approved authenticated encryption at rest.
+- Sensitive information transmitted between users, application services, AI providers, databases, storage systems, and third-party integrations must use encrypted transport.
+- Encryption keys must be stored separately from the information they protect.
+- Logs must exclude or mask secrets, credentials, unnecessary message content, and protected personal information.
+- Backups containing Confidential, Restricted, or Highly Sensitive information must be encrypted and access-controlled.
+- Data retention, archival, secure deletion, and recovery requirements must reflect the information classification.
+- Any exception to these requirements must be documented, risk-assessed, approved, and tracked for remediation.
+
+## AI Meeting Listening, Recording & Smart Reporting Encryption Requirements
+
+SecuriVA AI meeting features must protect audio recordings, transcripts, AI-generated summaries, reports, and meeting metadata throughout their lifecycle.
+
+### Required Controls
+
+- Audio recordings must be encrypted in transit during upload, streaming, and service-to-service transfer.
+- Audio recordings must be encrypted at rest in approved storage.
+- Transcripts and AI-generated summaries must be encrypted at rest and in transit.
+- Meeting metadata, including participant information, timestamps, identifiers, and organization details, must be protected according to its data classification.
+- Temporary processing files must be encrypted where supported and securely deleted after processing when no longer required.
+- AI-provider requests must transmit only the minimum necessary content over encrypted connections.
+- Sensitive meeting content must not be written into application, AI, activity, or debugging logs.
+- Access to recordings, transcripts, summaries, and reports must follow least-privilege and tenant-isolation requirements.
+- Retention and deletion rules must be defined for recordings, transcripts, reports, and temporary processing data.
+- Backups containing meeting content must be encrypted and included in secure recovery procedures.
+- Encryption keys must remain separate from the meeting data they protect.
+- Any future recording or smart-reporting integration must complete an encryption and privacy review before production use.
+
+### Current Status
+
+These controls are documented as Stage 2 requirements. They must not be represented as fully implemented until the relevant storage, processing, retention, access-control, and recovery configurations have been verified through technical evidence and testing.
+
+## Enterprise Key Lifecycle Management
+
+SecuriVA must manage cryptographic keys through a defined lifecycle to reduce the risk of unauthorized access, key loss, misuse, or unrecoverable encrypted data.
+
+### Key Lifecycle Stages
+
+- **Generation:** Keys must be generated using approved cryptographic methods and sufficient entropy.
+- **Activation:** Keys must be approved and assigned to a defined purpose before use.
+- **Storage:** Master keys and other sensitive cryptographic material must be stored separately from encrypted data.
+- **Distribution:** Keys must be transferred only through protected and authenticated channels.
+- **Use:** Keys must be limited to their approved purpose, environment, service, and authorized users.
+- **Rotation:** Rotation periods and emergency rotation triggers must be documented.
+- **Revocation:** Compromised, expired, or unauthorized keys must be revoked promptly.
+- **Archival:** Retired keys needed for historical decryption must be protected and access-controlled.
+- **Destruction:** Keys must be securely destroyed when no longer required and when retention obligations permit.
+- **Backup and Recovery:** Recovery copies must be encrypted, isolated, integrity-checked, and subject to restricted access.
+- **Audit:** Key generation, access, rotation, recovery, revocation, and destruction events must be logged.
+
+### Governance Requirements
+
+- No single administrator should have unrestricted authority over highly sensitive recovery keys.
+- Sensitive key-recovery activities should use multi-party or two-person authorization.
+- Emergency key access must be approved, time-limited, documented, and reviewed.
+- Application administrators should not automatically have access to master encryption keys.
+- Production, staging, development, backup, and recovery environments should use separate keys.
+- Key identifiers and metadata may be logged, but key values must never appear in logs.
+- Suspected key compromise must trigger containment, rotation, impact assessment, and recovery procedures.
+
+### Current Status
+
+The current application uses environment-based encryption configuration and local key derivation. Full managed key lifecycle controls, including AWS KMS, protected key recovery, multi-party authorization, archival, automated rotation, and enterprise audit evidence, remain Stage 2 target architecture unless separately implemented and validated.
+
+## Secrets Management Architecture
+
+SecuriVA should move sensitive application secrets from local files and general environment configuration into an approved managed secrets platform.
+
+### Secrets Covered
+
+The managed secrets platform should protect:
+
+- API keys
+- OAuth client secrets and refresh tokens
+- JWT signing secrets
+- AI-provider credentials
+- database passwords
+- third-party integration credentials
+- encryption-related configuration that is not stored directly in AWS KMS
+
+### Target Architecture
+
+- Use AWS Secrets Manager or AWS Systems Manager Parameter Store for centralized secret storage.
+- Applications should retrieve secrets at runtime using assigned IAM roles rather than embedded AWS access keys.
+- Secrets must not be committed to source control, included in container images, or written into logs.
+- Development, staging, production, backup, and recovery environments should use separate secret records.
+- Secret access must follow least privilege and be restricted by service, environment, and purpose.
+- Secret access, modification, rotation, and deletion events should be auditable.
+- Rotation should be automated where supported and documented where manual.
+- Cached secrets should have limited lifetimes and should not be stored in plaintext files.
+- Failed secret retrieval should cause sensitive operations to fail safely.
+- Recovery procedures must define how required secrets are restored without exposing their values.
+
+### Current Status
+
+The current remediation improves validation and encrypted credential handling, but full AWS Secrets Manager or Parameter Store integration has not been implemented or production-tested. It remains an approved Stage 2 target architecture control.
+
+## Compliance Mapping
+
+The SecuriVA Encryption Framework should be mapped to recognized security and compliance standards so that implemented controls, planned enhancements, and evidence requirements are clearly traceable.
+
+| Standard | Relevant Encryption Framework Areas | Current Treatment |
+|---|---|---|
+| NIST CSF 2.0 | Data protection, identity and access control, logging, incident response, recovery, governance | Partially implemented and documented; enterprise key management and recovery remain Stage 2 |
+| NIST SP 800-57 | Key generation, storage, rotation, revocation, archival, destruction, and recovery | Documented as enterprise key lifecycle requirements; managed lifecycle not yet fully implemented |
+| NIST SP 800-38D | AES-GCM authenticated encryption, nonce handling, integrity protection, tamper detection | Implemented through AES-256-GCM and validated through round-trip and tamper-rejection tests |
+| ISO/IEC 27001 | Cryptographic controls, access control, logging, secure development, backup, recovery, and supplier security | Partially implemented and documented; formal control mapping and audit evidence remain future work |
+| SOC 2 | Security, confidentiality, availability, access logging, change control, and recovery evidence | Application-level controls and tests added; operational and infrastructure evidence still required |
+| PCI DSS | Protection of authentication data, encryption in transit and at rest, secrets management, logging, and key management | Applicable only where payment-card data or payment-related systems are in scope |
+
+### Evidence Requirements
+
+Compliance claims must be supported by evidence such as:
+
+- source-code review records
+- automated security test results
+- secret-scanning results
+- encryption configuration evidence
+- access-control and IAM policies
+- audit-log samples
+- key-rotation and recovery procedures
+- backup and restore test results
+- architecture diagrams
+- change-review and approval records
+
+### Current Status
+
+This mapping is for design and planning purposes. SecuriVA must not claim formal certification or full compliance until the relevant controls are implemented, independently reviewed where required, and supported by sufficient operational evidence.
+
+## Key Management Architecture
+
+The target architecture separates application services, secret storage, encryption keys, encrypted data stores, backups, and disaster-recovery environments.
+
+```mermaid
+flowchart LR
+    U[Users and Administrators] --> A[SecuriVA Application]
+
+    A --> SM[AWS Secrets Manager / Parameter Store]
+    A --> KMS[AWS KMS]
+    A --> DB[Encrypted DynamoDB / Databases]
+    A --> OBJ[Encrypted Object Storage]
+    A --> LOG[Protected Audit Logs]
+
+    SM --> KMS
+    KMS --> DB
+    KMS --> OBJ
+    KMS --> B[Encrypted Backup Vault]
+
+    DB --> B
+    OBJ --> B
+
+    B --> DR[Disaster Recovery Environment]
+    KMS --> DR
+
+    IAM[IAM Roles and Least-Privilege Policies] --> A
+    IAM --> SM
+    IAM --> KMS
+
+    AUDIT[CloudTrail / Security Monitoring] --> KMS
+    AUDIT --> SM
+    AUDIT --> B
+    AUDIT --> DR
+    
+Architecture Principles
+Application services should access secrets through assigned IAM roles.
+Master keys should be managed separately from encrypted data.
+AWS KMS should perform or authorize cryptographic operations without exposing raw key material to application users.
+Secrets Manager or Parameter Store should protect API keys, OAuth secrets, JWT secrets, database credentials, and AI-provider credentials.
+Databases, object storage, logs, reports, and backups should use encryption appropriate to their data classification.
+Backup vaults should be encrypted and logically separated from primary production systems.
+Disaster-recovery environments should have controlled access to required recovery keys and secrets.
+Sensitive recovery actions should require enhanced authorization and protected audit evidence.
+Key, secret, backup, and recovery events should be monitored through CloudTrail or equivalent security monitoring.
+Production, development, staging, backup, and disaster-recovery environments should use separate keys and secrets.
+Current Status
+
+This diagram represents the approved Stage 2 target architecture. The current application uses local environment configuration and encrypted DynamoDB credential handling. AWS KMS, Secrets Manager, protected backup vaults, regional recovery, and multi-party recovery authorization have not yet been fully implemented or validated.
+
+## Security Testing and Validation Roadmap
+
+The Encryption Framework testing program should expand beyond unit and regression testing as SecuriVA moves toward enterprise deployment.
+
+### Current Automated Coverage
+
+The current dedicated security suite validates:
+
+- API-key validation and removal of the predictable development bypass
+- production startup secret requirements
+- AI logging content redaction
+- encryption and decryption round-trip behavior
+- AES-GCM tamper rejection
+- failure when the master encryption key is missing
+- encrypted Google credential-storage behavior
+- prevention of plaintext Google OAuth persistence
+
+### Stage 2 Testing
+
+Stage 2 should include:
+
+- encryption performance benchmarking
+- secrets and plaintext-data scanning
+- credential migration validation
+- key-rotation testing
+- backup and recovery tabletop testing
+- verification of encryption for AI reports, uploaded documents, CRM data, audit logs, and future knowledge-base storage
+- review of TLS and encryption-at-rest configuration evidence
+
+### Future Enterprise Testing
+
+Future enterprise validation should include:
+
+- penetration testing focused on cryptographic controls
+- key-compromise simulations
+- disaster-recovery restoration testing
+- regional failover testing
+- cryptographic compliance verification
+- AWS KMS and Secrets Manager access-policy testing
+- Customer Managed Key and BYOK lifecycle testing
+- Post-Quantum Cryptography readiness assessments
+
+### Evidence Requirements
+
+Each test should record:
+
+- scope and environment
+- test method
+- expected result
+- actual result
+- pass or fail status
+- defects and remediation actions
+- reviewer or approver
+- supporting logs, screenshots, or reports
+
+These advanced tests remain Stage 2 or future roadmap activities unless separately scheduled and approved.
