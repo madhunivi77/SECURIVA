@@ -1,5 +1,9 @@
 # Encryption Framework Review
 
+> **Review status:** This document contains both the original pre-remediation security assessment and the subsequent implementation status. Findings in Part 1 describe conditions identified during the baseline review before remediation. Current implementation status and remaining limitations are documented in Part 2.
+
+## Part 1 – Baseline Security Assessment (Pre-Remediation)
+
 ## Sensitive Data Inventory
 
 | Data | Where used or stored | Current protection | Risk or question |
@@ -12,6 +16,7 @@
 | User email and ID | Backend/session storage | To be investigated | Confirm encryption and retention |
 | Gmail and Calendar data | Backend integrations | To be investigated | Confirm storage and logs |
 | Voice transcripts | Voice processing flow | To be investigated | Confirm storage and deletion |
+
 ## Environment and Secret Configuration Review
 
 The backend expects sensitive values to be provided through environment variables rather than hard-coded directly in the application.
@@ -42,6 +47,7 @@ The backend expects sensitive values to be provided through environment variable
 - Production secret storage still needs to be confirmed.
 - Cookie security settings need to be checked in the application code.
 - Tool logging needs review to confirm that tokens or user data are not written to logs.
+
 ## OAuth Credential Storage Review
 
 ### Current design identified
@@ -54,23 +60,17 @@ The backend expects sensitive values to be provided through environment variable
 
 ### Security concern identified
 
-The migration script prints sensitive information to the terminal, including:
-
-- User email
-- User ID
-- Organization ID
-- The first 20 characters of Salesforce access tokens
-- The first 20 characters of Salesforce refresh tokens
-
-OAuth access and refresh tokens should not be displayed in terminal output or application logs, even partially.
+The migration path was reviewed for possible exposure of sensitive values and unnecessary personal or organization identifiers in terminal output. Credential values, access tokens, refresh tokens, secrets, and unnecessary identifiers should not be displayed in migration output or application logs.
 
 ### Initial recommendation
 
-- Remove or redact all token output.
-- Avoid printing personal identifiers unless required.
+- Remove or redact credential and token output.
+- Avoid printing personal or organization identifiers unless required.
 - Confirm whether the DynamoDB migration has been completed in production.
 - Confirm how `MASTER_ENCRYPTION_KEY` is stored and rotated.
-- Confirm that plaintext `oauth.json` is securely deleted after successful migration.## DynamoDB Credential Encryption Review
+- Confirm that plaintext `oauth.json` is securely deleted after successful migration.
+
+## DynamoDB Credential Encryption Review
 
 ### Confirmed behavior
 
@@ -90,7 +90,9 @@ OAuth access and refresh tokens should not be displayed in terminal output or ap
 - Whether every encrypted value uses a unique nonce or initialization vector.
 - Whether encryption includes integrity/authentication protection.
 - Key rotation and recovery procedures.
-- Whether AWS credentials should rely on an IAM role instead of long-lived environment keys.## Encryption Service Review
+- Whether AWS credentials should rely on an IAM role instead of long-lived environment keys.
+
+## Encryption Service Review
 
 ### Confirmed protections
 
@@ -119,6 +121,7 @@ Production should not silently use a predictable default salt.
 - Confirm that production is not using the default salt.
 - Document key rotation, backup, recovery, and emergency revocation procedures.
 - Add automated tests for tampered ciphertext, wrong keys, unique nonces, and key rotation.
+
 ## Authentication Cookie and JWT Review
 
 ### Confirmed protections
@@ -180,6 +183,7 @@ Production should not silently use a predictable default salt.
 - Confirm the production `JWT_SECRET_KEY` is strong and shared consistently between token creation and validation.
 - Confirm the voice token reaches VAPI metadata and the backend webhook correctly.
 - Confirm voice-session events do not log the token value.
+
 ## Activity Logging Review
 
 ### Confirmed behavior
@@ -204,6 +208,7 @@ Production should not silently use a predictable default salt.
 - Define log retention and deletion requirements.
 - Restrict access to activity logs.
 - Add tests confirming sensitive values are never stored.
+
 ## Activity Log Storage and Retention Review
 
 ### Confirmed protections
@@ -228,6 +233,7 @@ Production should not silently use a predictable default salt.
 - Encrypt sensitive local logs or avoid storing sensitive fields.
 - Rotate and delete local logs automatically.
 - Replace direct error printing with sanitized structured logging.
+
 ## Logging Configuration Review
 
 ### Confirmed configuration
@@ -254,6 +260,7 @@ Production should not silently use a predictable default salt.
 - Restrict local log-file permissions.
 - Make the table name, region and retention period configurable.
 - Confirm DynamoDB encryption-at-rest and access-control settings in AWS.
+
 ## AI Request and Response Logging Review
 
 ### Confirmed behavior
@@ -291,6 +298,7 @@ Production should not silently use a predictable default salt.
 - Restrict file permissions for AI logs.
 - Define a time-based retention and secure deletion policy.
 - Add automated tests confirming that prompts, responses and secrets are not written to logs.
+
 ## Chat Endpoint Data-Logging Review
 
 ### Confirmed behavior
@@ -319,6 +327,7 @@ Production should not silently use a predictable default salt.
 - Add a production-safe logging flag that defaults to disabled for message content.
 - Apply centralized secret and personal-data redaction before all logging.
 - Add tests confirming that chat content and tool results are not written to log files.
+
 ## Git Protection Review
 
 ### Confirmed protections
@@ -400,6 +409,7 @@ Production should not silently use a predictable default salt.
 - Use constant-time comparison when validating API keys.
 - Move API-key metadata out of the shared plaintext OAuth file.
 - Store production API-key records in a protected database with least-privilege access.
+
 ## API Key Hashing Review
 
 ### Confirmed behavior
@@ -428,6 +438,7 @@ Production should not silently use a predictable default salt.
 - Never return or store an entire short API key as its prefix.
 - Limit displayed prefixes to a safe number of characters.
 - Use constant-time comparison during API-key validation.
+
 ## API Key Validation Review
 
 ### Confirmed behavior
@@ -456,6 +467,7 @@ Production should not silently use a predictable default salt.
 - Fail safely if a development bypass key is missing.
 - Ensure development bypasses cannot run when `ENVIRONMENT=production`.
 - Replace direct timing prints with sanitized debug logging disabled in production.
+
 ## API Key Generation Review
 
 ### Confirmed protections
@@ -472,6 +484,7 @@ Production should not silently use a predictable default salt.
 - The generation method is strong and appropriate for production API keys.
 - The long random value makes brute-force recovery from a SHA-256 hash impractical.
 - The remaining improvements are constant-time validation, safer prefix handling and removal of the predictable development bypass.
+
 ## Master Encryption Key Initialization Review
 
 ### Confirmed protections
@@ -497,6 +510,7 @@ Production should not silently use a predictable default salt.
 - Remove the hard-coded production salt fallback.
 - Store the master key and salt in an approved managed secret store.
 - Add startup tests confirming production cannot run without required encryption configuration.
+
 ## Encryption Service Initialization Review
 
 ### Confirmed behavior
@@ -520,6 +534,7 @@ Production should not silently use a predictable default salt.
 - Add a startup readiness check for the master key and encryption salt.
 - Do not expose the key values in readiness output or logs.
 - Add automated tests for encryption, decryption, authentication failure and key rotation.
+
 ## Plaintext OAuth File Cleanup Review
 
 ### Confirmed finding
@@ -531,7 +546,7 @@ Production should not silently use a predictable default salt.
 ### Security concern
 
 - Plaintext OAuth credentials may remain on disk after encrypted migration.
-- This conflicts with the policy requirement that OAuth tokens must not be stored in plaintext. :contentReference[oaicite:0]{index=0}
+- This conflicts with the policy requirement that OAuth tokens must not be stored in plaintext.
 
 ### Recommendation
 
@@ -588,19 +603,24 @@ Production should not silently use a predictable default salt.
 
 - Add focused automated security tests before treating the Encryption Framework as validated.
 - Preserve terminal test results as implementation evidence.
+
 ### Encryption test search clarification
 
 - Two calls to `encrypt_credentials()` were found in `backend/tests/dynamodb_credential_manager.py`.
 - These results confirm that the credential manager uses the encryption service.
 - The search results do not yet confirm that dedicated pytest test cases or security assertions exist.
 - Test coverage for encryption round trips, ciphertext tampering, missing keys, production configuration, and key rotation remains to be verified.
+
 ### Final encryption test verification
 
 - A search for `def test_` in `backend/tests/dynamodb_credential_manager.py` returned no results.
 - The file uses the encryption service but does not contain identifiable pytest test functions.
 - Dedicated automated tests for encryption, decryption, ciphertext integrity, key rotation, missing configuration, logging redaction and plaintext credential prevention still need to be created.
 
-## Encryption Framework Requirement Gap Analysis
+## Encryption Framework Requirement Gap Analysis – Baseline Assessment
+
+> The statuses in this table reflect the original baseline assessment before the remediation work documented in Part 2.
+
 
 | Requirement | Current Status | Confirmed Gap | Required Action | Evidence Needed |
 |---|---|---|---|---|
@@ -623,7 +643,10 @@ Production should not silently use a predictable default salt.
 | Secure key restoration | Roadmap / not tested | Encrypted restoration and integrity verification are not confirmed | Use authenticated encrypted channels and verify restored-key integrity | Restoration and integrity test |
 | AWS regional failover | Roadmap / not implemented | No confirmed KMS recovery in a secondary region | Define primary and recovery regions and regional recovery procedure | Failover architecture and tabletop evidence |
 
-## Remediation Priorities
+## Baseline Remediation Priorities
+
+> The priorities below reflect the original assessment. Current completion status is documented in Part 2 under “Remediation Implementation Status.”
+
 ### Critical — address first
 
 1. Stop storing Google OAuth credentials in plaintext `oauth.json`.
@@ -656,6 +679,9 @@ Production should not silently use a predictable default salt.
 5. Create immutable recovery audit logging.
 6. Define secure restoration and automated integrity verification.
 7. Test key restoration against the approved 2-hour RTO.
+
+## Part 2 – Approved Remediation and Current Implementation Status
+
 ## Management Approval and Additional Recommendations
 
 The proposed Encryption Framework remediation plan was reviewed and approved by SecuriVA management.
@@ -684,6 +710,12 @@ Additional approved documentation requirements:
   4. Long-term roadmap
 
 
+
+### Team 1 Governance Alignment
+
+The Encryption Framework is also aligned to the Team 1 Disaster Recovery Governance Framework v2.0 and Incident Response Plan. These documents define the operational handoff for encryption and key-recovery events, including the 2-hour encryption RTO, real-time/continuous key-backup RPO, isolated key vaulting, multi-party recovery authorization, audit logging, encrypted restoration, integrity verification, and the PB-07 key/certificate/secret compromise playbook.
+
+
 ## Remediation Implementation Status
 
 The following approved application-level security remediations have now been implemented and locally verified on the `feature/encryption-framework` branch.
@@ -699,8 +731,8 @@ The following approved application-level security remediations have now been imp
 - Removed complete AI prompt and response content from AI call logging.
 - Replaced chat message content in activity logs with metadata-only message counts.
 - Sanitized OAuth, chat, SMS, and DynamoDB exception logging to avoid exposing exception contents.
-- Redirected Google OAuth credential storage to encrypted DynamoDB storage.
-- Removed plaintext Google OAuth credentials from the local `oauth.json` record.
+- Redirected new Google OAuth credential storage to the encrypted DynamoDB credential path.
+- Removed plaintext Google OAuth credential persistence from the OAuth callback path; new local `oauth.json` records retain non-secret metadata rather than serialized Google credentials.
 - Added a production `DynamoDBCredentialManager` module and removed production dependencies on the `tests` package.
 - Updated the credential migration script to use the production credential manager.
 - Sanitized migration-script console output.
@@ -731,12 +763,16 @@ The automated tests cover:
 - encrypted Google credential-storage helper behavior
 - regression prevention for plaintext Google OAuth persistence
 
-### Current Limitations
+### Current Limitations and Remaining Hardening
 
 - The changes have been committed locally but have not yet been pushed, reviewed, merged, or deployed.
-- Live AWS DynamoDB and KMS behavior has not yet been validated in a production environment.
-- Existing plaintext OAuth records require a controlled migration and verification process before secure deletion.
-- AWS KMS, regional disaster recovery, two-person authorization, CMK/BYOK, Secrets Manager integration, and advanced cryptographic testing remain Stage 2 target architecture or roadmap items unless separately required.
+- The encrypted DynamoDB credential-storage path has not yet been validated end-to-end in a live AWS environment.
+- AWS KMS integration is not currently implemented; it remains Stage 2 target architecture.
+- Existing plaintext OAuth records require a controlled migration, verification, and secure-deletion process.
+- Manual-login JWT expiration and required-claim enforcement remain outstanding application-hardening items.
+- Local activity-log rotation, retention, permissions, and secure-deletion controls remain outstanding.
+- A repository secret/plaintext scan still needs to be completed and preserved as final evidence.
+- Regional disaster recovery, two-person authorization, CMK/BYOK, Secrets Manager integration, and advanced cryptographic testing remain Stage 2 target architecture or roadmap items unless separately required. Incident-response and DR handoff requirements are documented, but production recovery evidence is not yet available.
 - The broader repository test suite has unrelated collection and dependency issues; the dedicated Encryption Framework security suite passes independently.
 
 ## Future Architecture & Implementation Roadmap
@@ -753,7 +789,7 @@ The current Encryption Framework includes:
 - Encrypted credential storage through DynamoDB.
 - Constant-time API-key hash comparison.
 - Production startup validation for required encryption secrets.
-- Metadata-only AI and activity logging.
+- Metadata-only logging for the remediated AI-call and chat activity paths.
 - Sanitized exception and migration-script output.
 - Automated security tests covering encryption, tamper detection, startup validation, API-key security, logging redaction, and OAuth credential handling.
 
@@ -906,6 +942,59 @@ SecuriVA must manage cryptographic keys through a defined lifecycle to reduce th
 
 The current application uses environment-based encryption configuration and local key derivation. Full managed key lifecycle controls, including AWS KMS, protected key recovery, multi-party authorization, archival, automated rotation, and enterprise audit evidence, remain Stage 2 target architecture unless separately implemented and validated.
 
+### Disaster-Recovery Recovery Objectives for Encryption
+
+The SecuriVA Disaster Recovery Governance Framework v2.0 assigns the Encryption Framework the following recovery objectives:
+
+- **Recovery Time Objective (RTO): 2 hours.** Master encryption keys and cryptographic functions must be restored and operational within two hours of a declared incident.
+- **Recovery Point Objective (RPO): Real-time / continuous.** Newly generated encryption keys must be backed up immediately upon creation.
+- Recovery copies of master keys, certificates, and cryptographic assets must be stored in a secure, encrypted, logically isolated KMS or digital vault.
+- Recovery access must use multi-party authorization so that no single administrator can unilaterally extract or delete master keys.
+- All key-vault access, copy, restore, and deletion attempts must be logged to a protected audit trail.
+- Keys must be restored over encrypted channels and verified against cryptographic baselines before use.
+
+## Incident Response Integration for Cryptographic Events
+
+The Encryption Framework integrates with the SecuriVA Incident Response Plan for key, certificate, secret, and cryptographic compromise scenarios.
+
+### Encryption Workstream Responsibilities
+
+During incident response, the Encryption workstream must provide:
+
+- affected secret, key, or certificate scope
+- revocation and rotation status
+- integrity-validation evidence
+- recovery evidence
+- confirmation of whether encrypted or signed data may have been affected
+
+### PB-07 – Key, Certificate, or Secret Compromise
+
+For incidents involving exposed or compromised cryptographic material, the required response is:
+
+1. Revoke or rotate the affected key, certificate, token, or secret.
+2. Isolate affected services where necessary to prevent continued misuse.
+3. Preserve relevant access and audit evidence without copying plaintext secrets into the incident record.
+4. Assess the scope of data encrypted, signed, or otherwise protected by the compromised material.
+5. Recover through the approved KMS or digital-vault process when recovery is required.
+6. Verify restored-key integrity before returning dependent services to operation.
+7. Apply two-person or multi-party authorization for sensitive recovery actions where required by the DR framework.
+8. Record recovery evidence, approvals, and validation results in the incident record.
+
+### Incident Response to Disaster Recovery Handoff
+
+When an encryption or key-recovery incident cannot be safely resolved in the primary environment, the Incident Commander and DR Lead must activate the relevant disaster-recovery procedure.
+
+Before return to service, the Encryption workstream must provide evidence that:
+
+- required keys or cryptographic services were restored within the defined recovery objective where applicable
+- restored keys passed integrity verification
+- access controls and authorization requirements remain equivalent to the approved security baseline
+- required audit evidence was preserved
+- newly restored or rotated cryptographic material has been securely backed up
+- recovery did not weaken encryption, key isolation, or access-control requirements
+
+These controls are governance and recovery requirements. They must not be represented as implemented production capabilities until the supporting KMS/vault, backup, authorization, audit, and recovery mechanisms are technically implemented and validated.
+
 ## Secrets Management Architecture
 
 SecuriVA should move sensitive application secrets from local files and general environment configuration into an approved managed secrets platform.
@@ -1004,21 +1093,24 @@ flowchart LR
     AUDIT --> SM
     AUDIT --> B
     AUDIT --> DR
-    
-Architecture Principles
-Application services should access secrets through assigned IAM roles.
-Master keys should be managed separately from encrypted data.
-AWS KMS should perform or authorize cryptographic operations without exposing raw key material to application users.
-Secrets Manager or Parameter Store should protect API keys, OAuth secrets, JWT secrets, database credentials, and AI-provider credentials.
-Databases, object storage, logs, reports, and backups should use encryption appropriate to their data classification.
-Backup vaults should be encrypted and logically separated from primary production systems.
-Disaster-recovery environments should have controlled access to required recovery keys and secrets.
-Sensitive recovery actions should require enhanced authorization and protected audit evidence.
-Key, secret, backup, and recovery events should be monitored through CloudTrail or equivalent security monitoring.
-Production, development, staging, backup, and disaster-recovery environments should use separate keys and secrets.
-Current Status
+```
 
-This diagram represents the approved Stage 2 target architecture. The current application uses local environment configuration and encrypted DynamoDB credential handling. AWS KMS, Secrets Manager, protected backup vaults, regional recovery, and multi-party recovery authorization have not yet been fully implemented or validated.
+### Architecture Principles
+
+- Application services should access secrets through assigned IAM roles.
+- Master keys should be managed separately from encrypted data.
+- AWS KMS should perform or authorize cryptographic operations without exposing raw key material to application users.
+- Secrets Manager or Parameter Store should protect API keys, OAuth secrets, JWT secrets, database credentials, and AI-provider credentials.
+- Databases, object storage, logs, reports, and backups should use encryption appropriate to their data classification.
+- Backup vaults should be encrypted and logically separated from primary production systems.
+- Disaster-recovery environments should have controlled access to required recovery keys and secrets.
+- Sensitive recovery actions should require enhanced authorization and protected audit evidence.
+- Key, secret, backup, and recovery events should be monitored through CloudTrail or equivalent security monitoring.
+- Production, development, staging, backup, and disaster-recovery environments should use separate keys and secrets.
+
+### Current Status
+
+This diagram represents the approved Stage 2 target architecture. The current application uses local environment configuration and an encrypted DynamoDB credential-storage path. AWS KMS, Secrets Manager, protected backup vaults, regional recovery, and multi-party recovery authorization have not yet been implemented or validated as production controls.
 
 ## Security Testing and Validation Roadmap
 
@@ -1045,7 +1137,10 @@ Stage 2 should include:
 - secrets and plaintext-data scanning
 - credential migration validation
 - key-rotation testing
-- backup and recovery tabletop testing
+- backup and recovery tabletop testing, including key-compromise and IR-to-DR handoff scenarios
+- timed validation of the 2-hour encryption recovery objective where a testable recovery environment exists
+- verification that newly generated or rotated keys are backed up immediately
+- verification of encrypted restoration, integrity checking, authorization, and audit evidence during recovery
 - verification of encryption for AI reports, uploaded documents, CRM data, audit logs, and future knowledge-base storage
 - review of TLS and encryption-at-rest configuration evidence
 
