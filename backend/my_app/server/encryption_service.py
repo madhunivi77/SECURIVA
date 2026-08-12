@@ -5,7 +5,7 @@ import json
 from typing import Dict, Any
 from cryptography.hazmat.primitives.ciphers.aead import AESGCM
 from cryptography.hazmat.primitives import hashes
-from cryptography.hazmat.primitives.kdf.pbkdf2 import PBKDF2
+from cryptography.hazmat.primitives.kdf.pbkdf2 import PBKDF2HMAC
 import base64
 import secrets
 
@@ -29,7 +29,7 @@ class CredentialEncryptionService:
         """Derive 256-bit encryption key from master key"""
         salt = os.getenv("ENCRYPTION_SALT", "securiva-salt-v1").encode()
         
-        kdf = PBKDF2(
+        kdf = PBKDF2HMAC(
             algorithm=hashes.SHA256(),
             length=32,  # 256 bits
             salt=salt,

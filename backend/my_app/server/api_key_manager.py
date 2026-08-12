@@ -15,6 +15,7 @@ import secrets
 import hashlib
 import json
 import time
+import hmac
 from pathlib import Path
 from datetime import datetime
 from typing import Optional, Dict, Any
@@ -77,7 +78,7 @@ def validate_api_key(api_key: str, oauth_file_path: Path) -> Optional[str]:
     """
     if settings.ENVIRONMENT == "development":
         dev_user = os.getenv("DEV_USER_ID")
-        if dev_user and api_key == os.getenv("DEV_API_KEY", "dev-bypass"):
+        if dev_user and api_key == os.getenv("DEV_API_KEY"):
             return dev_user
 
     t0 = time.perf_counter()
@@ -97,7 +98,7 @@ def validate_api_key(api_key: str, oauth_file_path: Path) -> Optional[str]:
     users = data.get("users", [])
     for user in users:
         api_key_data = user.get("api_key")
-        if api_key_data and api_key_data.get("key_hash") == key_hash:
+        if api_key_data and hmac.compare_digest(api_key_data.get("key_hash", ""), key_hash):
             # Update last_used timestamp
             update_last_used(user.get("user_id"), oauth_file_path)
             t3 = time.perf_counter()

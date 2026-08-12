@@ -4,6 +4,7 @@ from starlette.responses import HTMLResponse, JSONResponse, Response, RedirectRe
 from google_auth_oauthlib.flow import Flow
 from google.oauth2 import id_token
 from google.auth.transport import requests
+from .credential_integration import store_google_credentials
 import json
 import bcrypt
 import jwt as pyjwt
@@ -85,15 +86,26 @@ logging.basicConfig(
 )
 
 def log_ai_call(user_id, model, messages, result):
-    """Log AI request/response in a readable format."""
+    """Log AI call metadata without storing sensitive prompt/response content."""
+    message_count = len(messages) if isinstance(messages, list) else 0
+    user_message_count = (
+        sum(1 for message in messages if message.get("role") == "user")
+        if isinstance(messages, list)
+        else 0
+    )
+
+    tool_calls = result.get("tool_calls", []) if isinstance(result, dict) else []
+
     entry = (
         f"\n{'='*80}\n"
         f"User ID: {user_id}\n"
         f"Model: {model}\n"
-        f"Messages:\n{json.dumps(messages, indent=2)}\n\n"
-        f"Response:\n{json.dumps(result, indent=2)}\n"
+        f"Message Count: {message_count}\n"
+        f"User Message Count: {user_message_count}\n"
+        f"Tool Call Count: {len(tool_calls) if tool_calls else 0}\n"
         f"{'='*80}\n"
     )
+
     logging.info(entry)
 
 # Configure Google OAuth flow
@@ -210,11 +222,25 @@ async def callback(request):
             }
             users.append(user_entry)
 
+        connected_at = datetime.now().isoformat()
+        google_credentials = json.loads(credentials.to_json())
+
+        stored = store_google_credentials(
+            user_id=user_id,
+            credential_data=google_credentials,
+            email=user_email,
+            scopes=SCOPES,
+            connected_at=connected_at,
+        )
+
+        if not stored:
+            raise RuntimeError("Failed to store Google credentials securely")
+
         user_entry["services"]["google"] = {
             "email": user_email,
-            "credentials": credentials.to_json(),
-            "connected_at": datetime.now().isoformat(),
-            "scopes": SCOPES
+            "connected_at": connected_at,
+            "scopes": SCOPES,
+            "credential_storage": "encrypted_dynamodb"
         }
 
         data["users"] = users
@@ -225,7 +251,12 @@ async def callback(request):
         api_key = generate_api_key()
         store_api_key(user_id, api_key, oauth_file)
 
-        log_activity("signin", user_email=user_email, user_id=user_id, details={"method": "google_oauth"})
+        log_activity(
+            "signin",
+            user_email=user_email,
+            user_id=user_id,
+            details={"method": "google_oauth"}
+        )
 
         response = RedirectResponse(
             url=f"{FRONTEND_URL}?auth=success&email={user_email}",
@@ -245,10 +276,10 @@ async def callback(request):
         return response
 
     except Exception as e:
-        log_activity("signin", error=str(e), details={"method": "google_oauth"})
-        print(f"OAuth callback error: {e}")
+        log_activity("signin", error=type(e).__name__, details={"method": "google_oauth"})
+        print(f"OAuth callback error: {type(e).__name__}")
         return JSONResponse(
-            {"error": f"Authentication failed: {str(e)}"},
+            {"error": "Authentication failed"},
             status_code=500
         )
 
@@ -323,7 +354,7 @@ async def api_chat(request):
         log_activity("chat", user_id=user_id, details={
             "model": model,
             "api": api,
-            "user_message": user_msgs[-1].get("content", "")[:200] if user_msgs else "",
+            "user_message_count": len(user_msgs),
             "tool_calls_count": len(tool_calls) if tool_calls else 0,
         })
 
@@ -335,8 +366,12 @@ async def api_chat(request):
             status_code=400
         )
     except Exception as e:
-        log_activity("chat", user_id=user_id if 'user_id' in dir() else None, error=str(e))
-        print(f"Internal error: {str(e)}")
+        log_activity(
+    "chat",
+    user_id=user_id if 'user_id' in dir() else None,
+    error=type(e).__name__,
+)
+        print(f"Internal error: {type(e).__name__}")
         return JSONResponse(
             {"error": "An internal error occurred"},
             status_code=500
@@ -393,7 +428,7 @@ async def api_chat_stream(request):
                 user_msgs = [m for m in messages if m.get("role") == "user"]
                 log_activity("chat", user_id=user_id, details={
                     "model": model, "api": api,
-                    "user_message": (user_msgs[-1].get("content", "")[:200] if user_msgs else ""),
+                    "user_message_count": len(user_msgs),
                     "tool_calls_count": len(tool_call_names),
                     "stream": True,
                 })
@@ -430,7 +465,7 @@ async def api_send_sms(request):
         log_activity("sms", details={"phone": phone[:3] + "****"})
         return JSONResponse(result)
     except Exception as e:
-        log_activity("sms", error=str(e))
+        log_activity("sms", error=type(e).__name__)
         return JSONResponse(
             {"error": "Failed to send SMS"},
             status_code=500
